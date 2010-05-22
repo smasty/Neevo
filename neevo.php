@@ -46,6 +46,10 @@ class Neevo{
     if($opts['table_prefix']) $this->table_prefix = $opts['table_prefix'];
   }
 
+  function options(){
+    return get_object_vars($this);
+  }
+
   /**
    * Cnnect to database
    * @param array $opts
@@ -181,13 +185,17 @@ class NeevoMySQLQuery extends Neevo {
   var $q_where = array();
   
 
-  function  __construct($type = '', $table = ''){
+  function  __construct($options, $type = '', $table = ''){
     $this->type($type);
     $this->table($table);
+
+    foreach ($options as $key => $value) {
+      $this->$key = $value;
+    }
   }
 
   function table($table){
-    $this->q_table = "`$table`";
+    $this->q_table = $table;
     return $this;
   }
 
@@ -198,19 +206,23 @@ class NeevoMySQLQuery extends Neevo {
 
   function where($where, $value, $glue = null){
 
-    $statement = explode(' ', $where);
-    $table = $statement[0];
+    $where_condition = explode(' ', $where);
+    $column = $where_condition[0];
 
-    if(self::is_sql_function($table)) $table = self::escape_sql_function($table);
-    else $table = "`$table`";
+    if(self::is_sql_function($column)) $column = self::escape_sql_function($column);
+    else $column = "`$column`";
     
     $value = self::escape_string($value);
 
-    $condition = array($table, $statement[1], $value, strtoupper($glue));
+    $condition = array($column, $where_condition[1], $value, strtoupper($glue));
 
     $this->q_where[] = $condition;
 
     return $this;
+  }
+
+  function go($q){
+    return $this->query($q);
   }
 
 }

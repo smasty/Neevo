@@ -11,12 +11,12 @@ $sql = new Neevo(array(
 ));
 
 $sql->errors(1);
-$sql->prefix('dp_');
 
-$q = new NeevoMySQLQuery('select', 'table_name');
+$q = new NeevoMySQLQuery($sql->options(),'select', 'table_name');
 
 $q->where('SHA1(email) LIKE', '%@gmail.com', 'or')->where('email LIKE', '%@yahoo.com');
 
+print_r($sql);
 print_r($q);
 
 
