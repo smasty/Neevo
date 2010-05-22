@@ -116,6 +116,22 @@ class Neevo{
     return $q ? $q : $this->error("Query failed");
   }
 
+  /** Highlights given MySQL query */
+  protected static function highlight_sql($sql){
+    $colors=array('chars'=>'black','keywords'=>'green','joins'=>'grey','functions'=>'green','constants'=>'red');
+    $words=array('keywords'=>array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
+      'joins' => array('JOIN', 'INNER', 'OUTER', 'FULL', 'NATURAL', 'LEFT', 'RIGHT'),
+      'functions' => self::$sql_functions,
+      'chars' => '/([\\.,\\(\\)<>:=`]+)/i',
+      'constants' => '/(\'[^\']*\'|[0-9]+)/i');
+    $sql=str_replace('\\\'','\\&#039;',$sql);
+    foreach($colors as $key=>$color){
+      $regexp=in_array($key,array('constants','chars')) ? $words[$key] : '/\\b('.join("|",$words[$key]).')\\b/i';
+      $sql=preg_replace($regexp,'<span style="color:'.$color."\">$1</span>",$sql);
+    }
+    return "<code style=\"color:00f;background:#f9f9f9\"> $sql </code>";
+  }
+
   /** Replaces placeholders in string with value/s from array/string
    *
    * @param string String with placeholders '%1, etc.'
@@ -161,6 +177,22 @@ class Neevo{
     return str_replace(array('("','")'), array('(\'','\')'), $sql_function);
   }
 
+  /** Checks whether a given string is a MySQL 'AS construction' ([SELECT] cars AS vegetables) */
+  protected static function is_as_construction($string){
+    return is_string($string) ? ( preg_match('/(.*) as \w*/i', $string) ? true : false ) :  false;
+  }
+
+  /** Escapes (quotes column name with ``) given 'AS construction'  */
+  protected static function escape_as_construction($as_construction){
+    $construction=explode(' ', $as_construction);
+    $escape = preg_match('/^\w{1,}$/', $construction[0]) ? true : false;
+    if($escape){
+      $construction[0]="`".$construction[0]."`";
+    }
+    $as_construction=join(' ', $construction);
+    return preg_replace('/(.*) (as) (\w*)/i','$1 AS `$3`',$as_construction);
+  }
+
   /**
    * Generates E_USER_WARNING
    * @param string $err_neevo
@@ -176,14 +208,14 @@ class Neevo{
     if($this->errors()) trigger_error($err, E_USER_WARNING);
     return false;
   }
+
 }
 
 class NeevoMySQLQuery extends Neevo {
 
-  var $q_table;
-  var $q_type;
-  var $q_where = array();
-  
+  private $q_table, $q_type, $q_limit, $q_offset;
+  private $q_where, $q_order, $q_columns = array();
+
 
   function  __construct($options, $type = '', $table = ''){
     $this->type($type);
@@ -200,7 +232,23 @@ class NeevoMySQLQuery extends Neevo {
   }
 
   function type($type){
-    $this->q_type = strtoupper($type);
+    $this->q_type = $type;
+    return $this;
+  }
+
+  function columns($columns){
+    if(!is_array($columns)) $columns = explode(',', $columns);
+    $cols = array();
+    foreach ($columns as $col) {
+      $col = trim($col);
+      if($col!='*'){
+        if($this->is_as_construction($col)) $col = $this->escape_as_construction($col);
+        elseif($this->is_sql_function($col)) $col = $this->escape_sql_function($col);
+        else $col = "`$col`";
+      }
+      $cols[] = $col;
+    }
+    $this->q_columns = $cols;
     return $this;
   }
 
@@ -211,7 +259,7 @@ class NeevoMySQLQuery extends Neevo {
 
     if(self::is_sql_function($column)) $column = self::escape_sql_function($column);
     else $column = "`$column`";
-    
+
     $value = self::escape_string($value);
 
     $condition = array($column, $where_condition[1], $value, strtoupper($glue));
@@ -221,8 +269,60 @@ class NeevoMySQLQuery extends Neevo {
     return $this;
   }
 
-  function go($q){
-    return $this->query($q);
+  function order($args){
+    $rules = array();
+    $arguments = func_get_args();
+    foreach ($arguments as $argument) {
+      $order_rule = explode(' ', $argument);
+      $order_rule[0] = "`".$order_rule[0]."`";
+      $rules[] = $order_rule;
+    }
+    $this->q_order = $rules;
+
+    return $this;
+  }
+
+  function limit($limit, $offset = null){
+    $this->q_limit = $limit;
+    if(isset($offset)) $this->q_offset = $offset;
+    return $this;
+  }
+
+  function dump($color = true){
+    echo $color ? self::highlight_sql($this->build()) : $this->build();
+  }
+
+  function run(){
+    return $this->query($this->build());
+  }
+
+  function build(){
+
+    // @todo: ak nezadal glue, pouzit AND.
+    $wheres = array();
+    foreach ($this->q_where as $in_where) {
+      $wheres[] = implode(' ', $in_where);
+    }
+    $where = " WHERE ".implode(' ', $wheres);
+
+    $orders = array();
+    foreach($this->q_order as $in_order) {
+      $orders[] = implode(' ', $in_order);
+    }
+    $order = " ORDER BY ".implode(', ', $orders);
+
+    if($this->q_limit) $limit = " LIMIT ".$this->q_limit;
+    if($this->q_offset) $limit .= " OFFSET ".$this->q_offset;
+
+    if($this->q_type=='select'){
+      $q .= 'SELECT ';
+      $q .= implode(', ', $this->q_columns);
+      $q .= ' FROM `'.$this->q_table.'`';
+      $q .= $where . $order . $limit;
+    }
+
+    return $q;
+
   }
 
 }
