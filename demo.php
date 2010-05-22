@@ -1,4 +1,4 @@
-<?php
+<pre><?php
 
 include('neevo.php');
 
@@ -10,7 +10,14 @@ $sql = new Neevo(array(
   'encoding' => 'utf8'
 ));
 
-$sql->error_reporting(1);
+$sql->errors(1);
 $sql->prefix('dp_');
+
+$q = new NeevoMySQLQuery('select', 'table_name');
+
+$q->where('SHA1(email) LIKE', '%@gmail.com', 'or')->where('email LIKE', '%@yahoo.com');
+
+print_r($q);
+
 
 ?>
