@@ -226,17 +226,17 @@ class NeevoMySQLQuery extends Neevo {
     }
   }
 
-  function table($table){
+  public function table($table){
     $this->q_table = $table;
     return $this;
   }
 
-  function type($type){
+  public function type($type){
     $this->q_type = $type;
     return $this;
   }
 
-  function columns($columns){
+  public function columns($columns){
     if(!is_array($columns)) $columns = explode(',', $columns);
     $cols = array();
     foreach ($columns as $col) {
@@ -252,9 +252,10 @@ class NeevoMySQLQuery extends Neevo {
     return $this;
   }
 
-  function where($where, $value, $glue = null){
+  public function where($where, $value, $glue = null){
 
     $where_condition = explode(' ', $where);
+    if(!isset($where_condition[1])) $where_condition[1] = '=';
     $column = $where_condition[0];
 
     if(self::is_sql_function($column)) $column = self::escape_sql_function($column);
@@ -269,7 +270,7 @@ class NeevoMySQLQuery extends Neevo {
     return $this;
   }
 
-  function order($args){
+  public function order($args){
     $rules = array();
     $arguments = func_get_args();
     foreach ($arguments as $argument) {
@@ -282,38 +283,52 @@ class NeevoMySQLQuery extends Neevo {
     return $this;
   }
 
-  function limit($limit, $offset = null){
+  public function limit($limit, $offset = null){
     $this->q_limit = $limit;
     if(isset($offset)) $this->q_offset = $offset;
     return $this;
   }
 
-  function dump($color = true){
+  public function dump($color = true){
     echo $color ? self::highlight_sql($this->build()) : $this->build();
   }
 
-  function run(){
+  public function run(){
     return $this->query($this->build());
   }
 
-  function build(){
+  public function build(){
 
-    // @todo: ak nezadal glue, pouzit AND.
+    // WHERE statements
     $wheres = array();
+    $wheres2 = array();
     foreach ($this->q_where as $in_where) {
-      $wheres[] = implode(' ', $in_where);
+      if($in_where[3]=='') $in_where[3] = 'AND';
+      $wheres[] = $in_where;
     }
-    $where = " WHERE ".implode(' ', $wheres);
 
+    unset($wheres[count($wheres)-1][3]);
+
+    foreach ($wheres as $in_where2) {
+      $wheres2[] = implode(' ', $in_where2);
+    }
+
+    $where = " WHERE ".implode(' ', $wheres2);
+
+
+    // ORDER BY statements
     $orders = array();
     foreach($this->q_order as $in_order) {
       $orders[] = implode(' ', $in_order);
     }
     $order = " ORDER BY ".implode(', ', $orders);
 
+    // LIMIT & OFFSET
     if($this->q_limit) $limit = " LIMIT ".$this->q_limit;
     if($this->q_offset) $limit .= " OFFSET ".$this->q_offset;
 
+
+    // SELECT query
     if($this->q_type=='select'){
       $q .= 'SELECT ';
       $q .= implode(', ', $this->q_columns);
