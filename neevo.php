@@ -216,8 +216,13 @@ class NeevoMySQLQuery extends Neevo {
   private $q_table, $q_type, $q_limit, $q_offset;
   private $q_where, $q_order, $q_columns = array();
 
-
-  function  __construct($options, $type = '', $table = ''){
+  /**
+   * Constructor
+   * @param array $options
+   * @param string $type Query type (select|insert|update|delete)
+   * @param <type> $table Table to interact with
+   */
+  function  __construct(array $options, $type = '', $table = ''){
     $this->type($type);
     $this->table($table);
 
@@ -226,17 +231,32 @@ class NeevoMySQLQuery extends Neevo {
     }
   }
 
+  /**
+   * Sets table to interact
+   * @param string $table
+   * @return NeevoMySQLQuery
+   */
   public function table($table){
     $this->q_table = $table;
     return $this;
   }
 
+  /**
+   * Sets query type (selsect|insert|update|delete)
+   * @param string $type
+   * @return NeevoMySQLQuery
+   */
   public function type($type){
     $this->q_type = $type;
     return $this;
   }
 
-  public function columns($columns){
+  /**
+   * Sets columns to retrive in SELECT queries
+   * @param mixed $columns
+   * @return NeevoMySQLQuery
+   */
+  public function cols($columns){
     if(!is_array($columns)) $columns = explode(',', $columns);
     $cols = array();
     foreach ($columns as $col) {
@@ -252,6 +272,13 @@ class NeevoMySQLQuery extends Neevo {
     return $this;
   }
 
+  /**
+   * Sets WHERE condition for Query
+   * @param string $where Column to use and optionaly operator: "email LIKE" or "email !="
+   * @param string $value Value to search for: "%&#64;example.%" or "spam&#64;example.com"
+   * @param string $glue Operator (AND, OR, etc.) to use betweet this and next WHERE condition
+   * @return NeevoMySQLQuery
+   */
   public function where($where, $value, $glue = null){
 
     $where_condition = explode(' ', $where);
@@ -270,6 +297,11 @@ class NeevoMySQLQuery extends Neevo {
     return $this;
   }
 
+  /**
+   * Sets ORDER BY rule for Query
+   * @param string $args [Infinite arguments] Order rules: "col_name ASC", "col_name" or "col_name DESC", etc...
+   * @return NeevoMySQLQuery
+   */
   public function order($args){
     $rules = array();
     $arguments = func_get_args();
@@ -283,45 +315,67 @@ class NeevoMySQLQuery extends Neevo {
     return $this;
   }
 
+  /**
+   * Sets limit (and offset) for Query
+   * @param int $limit Limit
+   * @param int $offset Offset
+   * @return NeevoMySQLQuery
+   */
   public function limit($limit, $offset = null){
     $this->q_limit = $limit;
     if(isset($offset)) $this->q_offset = $offset;
     return $this;
   }
-
+  
+  /**
+   * Prints consequential Query (highlighted by default)
+   * @param bool $color Highlight query or not
+   */
   public function dump($color = true){
     echo $color ? self::highlight_sql($this->build()) : $this->build();
   }
 
+  /**
+   * Performs Query
+   * @return resource
+   */
   public function run(){
     return $this->query($this->build());
   }
 
+  /**
+   * Builds Query from NeevoMySQLQuery instance
+   * @return string Query
+   */
   public function build(){
 
     // WHERE statements
-    $wheres = array();
-    $wheres2 = array();
-    foreach ($this->q_where as $in_where) {
-      if($in_where[3]=='') $in_where[3] = 'AND';
-      $wheres[] = $in_where;
+    if($this->q_where){
+      $wheres = array();
+      $wheres2 = array();
+      foreach ($this->q_where as $in_where) {
+        if($in_where[3]=='') $in_where[3] = 'AND';
+        $wheres[] = $in_where;
+      }
+
+
+      unset($wheres[count($wheres)-1][3]);
+
+      foreach ($wheres as $in_where2) {
+        $wheres2[] = implode(' ', $in_where2);
+      }
+
+      $where = " WHERE ".implode(' ', $wheres2);
     }
-
-    unset($wheres[count($wheres)-1][3]);
-
-    foreach ($wheres as $in_where2) {
-      $wheres2[] = implode(' ', $in_where2);
-    }
-
-    $where = " WHERE ".implode(' ', $wheres2);
-
 
     // ORDER BY statements
-    $orders = array();
-    foreach($this->q_order as $in_order) {
-      $orders[] = implode(' ', $in_order);
+    if($this->q_order){
+      $orders = array();
+      foreach($this->q_order as $in_order) {
+        $orders[] = implode(' ', $in_order);
+      }
+      $order = " ORDER BY ".implode(', ', $orders);
     }
-    $order = " ORDER BY ".implode(', ', $orders);
 
     // LIMIT & OFFSET
     if($this->q_limit) $limit = " LIMIT ".$this->q_limit;
