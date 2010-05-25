@@ -107,14 +107,39 @@ class Neevo{
    * Performs MySQL query
    * @param string $query Query to perform
    * @param boolean $count Count this query or not?
-   * @return boolean
+   * @return resource
    */
   public final function query($query, $count = true){
-    $q = @mysql_query($query, $this->resource_ID);
     $count ? $this->queries++ : false;
     $this->last=$query;
-    return $q ? $q : $this->error("Query failed");
+    return @mysql_query($query, $this->resource_ID) or $this->error("Query failed");
   }
+
+  public final function select($columns, $table){
+    $q = new NeevoMySQLQuery($this->options(), 'select', $table);
+    $q->cols($columns);
+    return $q;
+  }
+
+  public final function insert($table,array $data){
+    $q = new NeevoMySQLQuery($this->options(), 'insert', $table);
+    $q->data($data);
+    return $q;
+  }
+
+  public final function update($table,array $data){
+    $q = new NeevoMySQLQuery($this->options(), 'update', $table);
+    $q->data($data);
+    return $q;
+  }
+
+  public final function delete($table){
+    return new NeevoMySQLQuery($this->options(), 'delete', $table);
+  }
+
+  /*public function affected($resource_ID){
+    return mysql_affected_rows($resource_ID);
+  }*/
 
   /** Highlights given MySQL query */
   protected static function highlight_sql($sql){
@@ -129,7 +154,7 @@ class Neevo{
       $regexp=in_array($key,array('constants','chars')) ? $words[$key] : '/\\b('.join("|",$words[$key]).')\\b/i';
       $sql=preg_replace($regexp,'<span style="color:'.$color."\">$1</span>",$sql);
     }
-    return "<code style=\"color:00f;background:#f9f9f9\"> $sql </code>";
+    return "<code style=\"color:00f;background:#f9f9f9\"> $sql </code>\n";
   }
 
   /** Replaces placeholders in string with value/s from array/string
@@ -146,19 +171,16 @@ class Neevo{
   /** Escapes whole array for use in MySQL */
   protected static function escape_array(array $array){
     $result=array();
-    if(get_magic_quotes_gpc()==0){
-      foreach($array as $key => $value){
-         $result[$key] = is_numeric($value) ? $value : ( is_string($value) ? self::escape_string($value) : ( is_array($value) ? self::escape_array($value) : $value ) );
-      }
-      return $result;
+    foreach($array as $key => $value){
+       $result[$key] = is_numeric($value) ? $value : ( is_string($value) ? self::escape_string($value) : ( is_array($value) ? self::escape_array($value) : $value ) );
     }
-    else return $array;
+    return $result;
   }
 
   /** Escapes given string for use in MySQL */
   protected static function escape_string($string){
     $string=str_replace('\'', '\\\'' ,$string);
-    return is_string($string) ? ( self::is_sql_function($string) ? escape_sql_function($string) : "'$string'" ) : $string;
+    return is_string($string) ? ( self::is_sql_function($string) ? self::escape_sql_function($string) : "'$string'" ) : $string;
   }
 
   /** Checks whether a given string is a SQL function or not */
@@ -170,6 +192,7 @@ class Neevo{
       return ($is_sql || $is_plmn) ? true : false;
     }
     else return false;
+
   }
 
   /** Escapes given SQL function  */
@@ -211,10 +234,14 @@ class Neevo{
 
 }
 
+
+
+
+
 class NeevoMySQLQuery extends Neevo {
 
   private $q_table, $q_type, $q_limit, $q_offset;
-  private $q_where, $q_order, $q_columns = array();
+  private $q_where, $q_order, $q_columns, $q_data = array();
 
   /**
    * Constructor
@@ -269,6 +296,16 @@ class NeevoMySQLQuery extends Neevo {
       $cols[] = $col;
     }
     $this->q_columns = $cols;
+    return $this;
+  }
+
+  /**
+   * Data for INSERT and UPDATE queries
+   * @param array $data data in format "$column=>$value"
+   * @return NeevoMySQLQuery
+   */
+  public function data(array $data){
+    $this->q_data = $data;
     return $this;
   }
 
@@ -340,7 +377,16 @@ class NeevoMySQLQuery extends Neevo {
    * @return resource
    */
   public function run(){
-    return $this->query($this->build());
+    $this->query($this->build());
+    return $this;
+  }
+
+  /**
+   * Returns affected rows on INSERT, UPDATE and DELETE queries
+   * @return int Affected rows
+   */
+  public function affected(){
+    return mysql_affected_rows();
   }
 
   /**
@@ -348,6 +394,8 @@ class NeevoMySQLQuery extends Neevo {
    * @return string Query
    */
   public function build(){
+
+    $table = $this->prefix().$this->q_table;
 
     // WHERE statements
     if($this->q_where){
@@ -362,19 +410,39 @@ class NeevoMySQLQuery extends Neevo {
       unset($wheres[count($wheres)-1][3]);
 
       foreach ($wheres as $in_where2) {
-        $wheres2[] = implode(' ', $in_where2);
+        $wheres2[] = join(' ', $in_where2);
       }
 
-      $where = " WHERE ".implode(' ', $wheres2);
+      $where = " WHERE ".join(' ', $wheres2);
+    }
+
+    // INSERT data
+    if($this->q_type == 'insert' && $this->q_data){
+      $icols=array();
+      $ivalues=array();
+      foreach(self::escape_array($this->q_data) as $col => $value){
+        $icols[]="`$col`";
+        $ivalues[]=$value;
+      }
+      $insert_data = " (".join(', ',$icols).") VALUES (".join(', ',$ivalues).")";
+    }
+
+    // UPDATE data
+    if($this->q_type == 'update' && $this->q_data){
+      $update=array();
+      foreach(self::escape_array($this->q_data) as $col => $value){
+        $update[]="`$col` = $value";
+      }
+      $update_data = " SET " . join(', ', $update);
     }
 
     // ORDER BY statements
     if($this->q_order){
       $orders = array();
       foreach($this->q_order as $in_order) {
-        $orders[] = implode(' ', $in_order);
+        $orders[] = join(' ', $in_order);
       }
-      $order = " ORDER BY ".implode(', ', $orders);
+      $order = " ORDER BY ".join(', ', $orders);
     }
 
     // LIMIT & OFFSET
@@ -383,10 +451,28 @@ class NeevoMySQLQuery extends Neevo {
 
 
     // SELECT query
-    if($this->q_type=='select'){
+    if($this->q_type == 'select'){
       $q .= 'SELECT ';
-      $q .= implode(', ', $this->q_columns);
-      $q .= ' FROM `'.$this->q_table.'`';
+      $q .= join(', ', $this->q_columns);
+      $q .= ' FROM `'.$table.'`';
+      $q .= $where . $order . $limit;
+    }
+
+    // INSERT query
+    if($this->q_type == 'insert'){
+      $q .= 'INSERT INTO `' . $table . '`';
+      $q .= $insert_data;
+    }
+
+    // UPDATE query
+    if($this->q_type == 'update'){
+      $q .= 'UPDATE `' . $table .'`';
+      $q .= $update_data . $where . $order . $limit;
+    }
+
+    // DELETE query
+    if($this->q_type == 'delete'){
+      $q .= 'DELETE FROM `' . $table . '`';
       $q .= $where . $order . $limit;
     }
 

@@ -13,15 +13,24 @@ $sql = new Neevo(array(
 $sql->errors(1);
 $sql->prefix('dp_');
 
-$q = new NeevoMySQLQuery($sql->options(),'select', 'table_name');
+$data = array(
+  'name'  => 'Smasty',
+  'mail' => 'xmartin@smasty.net',
+  'city' => 'Hlohovec',
+  'friends'  => 23
+);
 
-$q->cols('*')->order('name ASC', 'email DESC')->limit(5, 6);
+//$insert = $sql->insert('client', $data)->run();
+
+//$update = $sql->update('client', $data)->where('name LIKE', '%masty')->run();
+
+
+$delete = $sql->delete('client')->where('id >', 228)->run();
+
+echo $delete->affected();
 
 //print_r($sql);
 print_r($q);
-var_dump($q);
-
-$q->dump();
 
 
 ?></pre>
