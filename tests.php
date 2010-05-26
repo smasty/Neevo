@@ -14,20 +14,17 @@ $sql->errors(1);
 $sql->prefix('dp_');
 
 $data = array(
-  'name'  => 'Smasty',
-  'mail' => 'xmartin@smasty.net',
-  'city' => 'Hlohovec',
+  'name'  => 'Amon Smasty',
+  'mail' => 'smasty@example.com',
+  'city' => 'New York',
+  'about' => 'Lorem ipsum dolorem...',
   'friends'  => 23
 );
 
-//$insert = $sql->insert('client', $data)->run();
+$select = $sql->select('*', 'client')->limit(5)->dump();
 
-//$update = $sql->update('client', $data)->where('name LIKE', '%masty')->run();
+echo "rows: ".$sql->rows($select->run());
 
-
-$delete = $sql->delete('client')->where('id >', 228)->run();
-
-echo $delete->affected();
 
 //print_r($sql);
 print_r($q);

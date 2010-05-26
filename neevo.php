@@ -110,9 +110,11 @@ class Neevo{
    * @return resource
    */
   public final function query($query, $count = true){
+    $q = @mysql_query($query, $this->resource_ID);
     $count ? $this->queries++ : false;
     $this->last=$query;
-    return @mysql_query($query, $this->resource_ID) or $this->error("Query failed");
+    if($q) return $q;
+    else return $this->error('Query failed');
   }
 
   public final function select($columns, $table){
@@ -137,9 +139,9 @@ class Neevo{
     return new NeevoMySQLQuery($this->options(), 'delete', $table);
   }
 
-  /*public function affected($resource_ID){
-    return mysql_affected_rows($resource_ID);
-  }*/
+  public function rows($resource_ID){
+    return mysql_num_rows($resource_ID);
+  }
 
   /** Highlights given MySQL query */
   protected static function highlight_sql($sql){
@@ -247,7 +249,7 @@ class NeevoMySQLQuery extends Neevo {
    * Constructor
    * @param array $options
    * @param string $type Query type (select|insert|update|delete)
-   * @param <type> $table Table to interact with
+   * @param string $table Table to interact with
    */
   function  __construct(array $options, $type = '', $table = ''){
     $this->type($type);
@@ -370,6 +372,7 @@ class NeevoMySQLQuery extends Neevo {
    */
   public function dump($color = true){
     echo $color ? self::highlight_sql($this->build()) : $this->build();
+    return $this;
   }
 
   /**
@@ -377,16 +380,7 @@ class NeevoMySQLQuery extends Neevo {
    * @return resource
    */
   public function run(){
-    $this->query($this->build());
-    return $this;
-  }
-
-  /**
-   * Returns affected rows on INSERT, UPDATE and DELETE queries
-   * @return int Affected rows
-   */
-  public function affected(){
-    return mysql_affected_rows();
+    return $this->query($this->build());
   }
 
   /**
