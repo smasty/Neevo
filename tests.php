@@ -46,12 +46,6 @@ $data = array(
 
 
 
-// SELECT QUERY
-$select = $sql->select('name, mail, city', 'client')->where('name LIKE', '%')->order('name DESC', 'id', 'mail ASC')->limit(10, 5);
-$select->dump();
-
-echo "\n";
-
 // INSERT QUERY
 $insert = $sql->insert('client', $data);
 $insert->dump();
@@ -68,16 +62,22 @@ echo "\n";
 $delete = $sql->delete('client')->where('name', 'John Doe')->limit(1);
 $delete->dump();
 
+echo "\n";
+
+// SELECT QUERY
+$select = $sql->select('id, name, mail, city', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
+$select->dump();
+
 ?></pre>
 
 <h2>SELECT query results</h2>
-<table border=0><tr><th>Name <th>Email <th>City
+<table border=0><tr><th>ID <th>Name <th>Email <th>City
 
 <?php
 $select_result = $sql->fetch($select->run());
 
 foreach ($select_result as $row){
-  echo "<tr><td>". $row['name'] ."<td>". $row['mail'] ."<td>". $row['city'] ."\n";
+  echo "<tr><td>". $row['id'] ."<td>". $row['name'] ."<td>". $row['mail'] ."<td>". $row['city'] ."\n";
 }
 
 ?>
