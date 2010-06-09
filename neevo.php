@@ -9,9 +9,9 @@
  *
  * @copyright  Copyright (c) 2010 Martin Srank (http://smasty.net)
  * @license    http://www.gnu.org/copyleft/lesser.html  GNU LGPL
- * @link       http://labs.smasty.net
+ * @link       http://labs.smasty.net/neevo/
  * @package    neevo
- * @version    0.03dev
+ * @version    0.01dev
  */
 
 
@@ -20,13 +20,31 @@
  */
 class Neevo{
 
+/* ==========  VARIABLES  ========== */
+
   var $resource_ID;
   var $queries = 0;
   var $last = '';
   var $error_reporting = 1;
   var $table_prefix = '';
 
+  static $highlight_colors = array(
+    'columns' => '#0000ff',
+    'chars' => '#000000',
+    'keywords' => '#008000',
+    'joins' => '#555555',
+    'functions' => '#008000',
+    'constants' => '#ff0000'
+    );
+
+/* ==========  CONSTANTS  ========== */
+
+  const ASSOC=1;
+  const NUM=2;
+  const OBJECT=3;
+
   protected static $sql_functions=array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK');
+
 
   /**
    * Constructor
@@ -46,12 +64,9 @@ class Neevo{
     if($opts['table_prefix']) $this->table_prefix = $opts['table_prefix'];
   }
 
-  function options(){
-    return get_object_vars($this);
-  }
 
   /**
-   * Cnnect to database
+   * Connect to database
    * @param array $opts
    * @return boolean
    */
@@ -60,6 +75,7 @@ class Neevo{
     $this->resource_ID = $connection;
     return (bool) $connection or self::error("Connection to host '".$opts['host']."' failed");
   }
+
 
   /**
    * Sets table names/encoding
@@ -73,6 +89,7 @@ class Neevo{
     } else return true;
   }
 
+
   /**
    * Selects database to use
    * @param string $db_name
@@ -82,6 +99,7 @@ class Neevo{
     $select = @mysql_select_db($db_name, $this->resource_ID);
     return (bool) $select or $this->error("Failed selecting database '$db_name'");
   }
+
 
   /**
    * Sets and/or returns table prefix
@@ -93,6 +111,7 @@ class Neevo{
     return $this->table_prefix;
   }
 
+
   /**
    * Sets and/or returns error reporting
    * @param boolan $value
@@ -102,6 +121,7 @@ class Neevo{
     if(isset($value))$this->error_reporting = $value;
     return $this->error_reporting;
   }
+
 
   /**
    * Performs MySQL query
@@ -117,46 +137,125 @@ class Neevo{
     else return $this->error('Query failed');
   }
 
+
+  /**
+   * Creates NeevoMySQLQuery object for SELECT query
+   * @param mixed $columns Array or comma-separated list of columns to select
+   * @param string $table Database table to use for selecting
+   * @return NeevoMySQLQuery
+   */
   public final function select($columns, $table){
-    $q = new NeevoMySQLQuery($this->options(), 'select', $table);
+    $q = new NeevoMySQLQuery($this, 'select', $table);
     $q->cols($columns);
     return $q;
   }
 
+
+  /**
+   * Creates NeevoMySQLQuery object for INSERT query
+   * @param string $table Database table to use for inserting
+   * @param array $data Associative array of values to insert in format column_name=>column_value
+   * @return NeevoMySQLQuery
+   */
   public final function insert($table,array $data){
-    $q = new NeevoMySQLQuery($this->options(), 'insert', $table);
+    $q = new NeevoMySQLQuery($this, 'insert', $table);
     $q->data($data);
     return $q;
   }
 
+
+  /**
+   * Creates NeevoMySQLQuery object for UPDATE query
+   * @param string $table Database table to use for updating
+   * @param array $data Associative array of values for update in format column_name=>column_value
+   * @return NeevoMySQLQuery
+   */
   public final function update($table,array $data){
-    $q = new NeevoMySQLQuery($this->options(), 'update', $table);
+    $q = new NeevoMySQLQuery($this, 'update', $table);
     $q->data($data);
     return $q;
   }
 
+
+  /**
+   * Creates NeevoMySQLQuery object for DELETE query
+   * @param string $table Database table to use for deleting
+   * @return NeevoMySQLQuery
+   */
   public final function delete($table){
-    return new NeevoMySQLQuery($this->options(), 'delete', $table);
+    return new NeevoMySQLQuery($this, 'delete', $table);
+  }
+
+/* ==========  PUBLIC RESULT-FETCHING METHODS  ========== */
+
+  /** 
+   * Fetches data from given MySQL query
+   * @param string $query MySQL (SELECT) query
+   * @param int $type Result data as: Possible values:<pre>
+   *    - Neevo::ASSOC  (1) - fetches an array with associative arrays as table rows
+   *    - Neevo::NUM    (2) - fetches an array with numeric arrays as table rows
+   *    - Neevo::OBJECT (3) - fetches an array with objects as table rows</pre>
+   * @return array Associative array built from query
+   */
+  public static function fetch($query, $type=1){
+    $arr=array();
+    if($type==1){ // Assoc
+      while($tmp_arr=@mysql_fetch_assoc($query)){
+        $arr[]=$tmp_arr;
+      }
+    }
+    if($type==2){ // Numeric
+      while($tmp_arr=@mysql_fetch_row($query)){
+        $arr[]=$tmp_arr;
+      }
+    }
+    if($type==3){ // Object
+      while($tmp_arr=@mysql_fetch_object($query)){
+        $arr[]=$tmp_arr;
+      }
+    }
+    if(count($arr)==1) $arr = $arr[0];
+    return $query ? $arr : self::error("Fetching result data failed");
+    @mysql_free_result($query);
+  }
+
+  /** Returns data from given MySQL query
+   *
+   * {@source}
+   * @param string $query MySQL (SELECT) query
+   * @param int $jump Jump to result row number (starts from 0)
+   * @return string Result data
+   */
+  public static function result($query, $jump=0){
+    return $query ? @mysql_result($query, $jump) : self::error("Return data failed");
+    @mysql_free_result($query);
   }
 
   public function rows($resource_ID){
-    return mysql_num_rows($resource_ID);
+    return @mysql_num_rows($resource_ID);
   }
 
   /** Highlights given MySQL query */
-  protected static function highlight_sql($sql){
-    $colors=array('chars'=>'black','keywords'=>'green','joins'=>'grey','functions'=>'green','constants'=>'red');
-    $words=array('keywords'=>array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
+  public static function highlight_sql($sql){
+    $chcolors = array('chars'=>'black','keywords'=>'green','joins'=>'grey','functions'=>'green','constants'=>'red');
+    $hcolors = self::$highlight_colors;
+    unset($hcolors['columns']);
+
+    $words = array('keywords'=>array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
       'joins' => array('JOIN', 'INNER', 'OUTER', 'FULL', 'NATURAL', 'LEFT', 'RIGHT'),
       'functions' => self::$sql_functions,
       'chars' => '/([\\.,\\(\\)<>:=`]+)/i',
       'constants' => '/(\'[^\']*\'|[0-9]+)/i');
+
     $sql=str_replace('\\\'','\\&#039;',$sql);
-    foreach($colors as $key=>$color){
+
+    foreach($chcolors as $key=>$color){
       $regexp=in_array($key,array('constants','chars')) ? $words[$key] : '/\\b('.join("|",$words[$key]).')\\b/i';
-      $sql=preg_replace($regexp,'<span style="color:'.$color."\">$1</span>",$sql);
+      $sql=preg_replace($regexp, "<span style=\"color:$color\">$1</span>",$sql);
     }
-    return "<code style=\"color:00f;background:#f9f9f9\"> $sql </code>\n";
+
+    $sql = str_replace($chcolors, $hcolors, $sql);
+    return "<code style=\"color:".self::$highlight_colors['columns'].";background:#f9f9f9\"> $sql </code>\n";
   }
 
   /** Replaces placeholders in string with value/s from array/string
@@ -165,13 +264,13 @@ class Neevo{
    * @param mixed Array/string with values to replace
    * @return string Replaced string
    */
-  protected static function printf($string, $values){
+  public static function printf($string, $values){
     preg_match_all("/\%(\d*)/", $string, $replace);
     return str_replace($replace[0], is_array($values) ? self::escape_array($values) : self::escape_string($values), $string);
   }
 
   /** Escapes whole array for use in MySQL */
-  protected static function escape_array(array $array){
+  public static function escape_array(array $array){
     $result=array();
     foreach($array as $key => $value){
        $result[$key] = is_numeric($value) ? $value : ( is_string($value) ? self::escape_string($value) : ( is_array($value) ? self::escape_array($value) : $value ) );
@@ -180,13 +279,13 @@ class Neevo{
   }
 
   /** Escapes given string for use in MySQL */
-  protected static function escape_string($string){
+  public static function escape_string($string){
     $string=str_replace('\'', '\\\'' ,$string);
     return is_string($string) ? ( self::is_sql_function($string) ? self::escape_sql_function($string) : "'$string'" ) : $string;
   }
 
   /** Checks whether a given string is a SQL function or not */
-  protected static function is_sql_function($string){
+  public static function is_sql_function($string){
     if(is_string($string)){
       $is_plmn = preg_match("/^(\w*)(\+|-)(\w*)/", $string);
       $var = is_string($string) ? strtoupper(preg_replace('/[^a-zA-Z0-9_\(\)]/','',$string)) : false;
@@ -198,17 +297,17 @@ class Neevo{
   }
 
   /** Escapes given SQL function  */
-  protected static function escape_sql_function($sql_function){
+  public static function escape_sql_function($sql_function){
     return str_replace(array('("','")'), array('(\'','\')'), $sql_function);
   }
 
   /** Checks whether a given string is a MySQL 'AS construction' ([SELECT] cars AS vegetables) */
-  protected static function is_as_construction($string){
+  public static function is_as_construction($string){
     return is_string($string) ? ( preg_match('/(.*) as \w*/i', $string) ? true : false ) :  false;
   }
 
   /** Escapes (quotes column name with ``) given 'AS construction'  */
-  protected static function escape_as_construction($as_construction){
+  public static function escape_as_construction($as_construction){
     $construction=explode(' ', $as_construction);
     $escape = preg_match('/^\w{1,}$/', $construction[0]) ? true : false;
     if($escape){
@@ -223,7 +322,7 @@ class Neevo{
    * @param string $err_neevo
    * @return false
    */
-  protected function error($err_neevo){
+  public function error($err_neevo){
     $err_string = mysql_error();
     $err_no = mysql_errno();
     $err = "<b>Neevo error</b> ($err_no) - ";
@@ -240,24 +339,22 @@ class Neevo{
 
 
 
-class NeevoMySQLQuery extends Neevo {
+class NeevoMySQLQuery {
 
-  private $q_table, $q_type, $q_limit, $q_offset;
+  private $q_table, $q_type, $q_limit, $q_offset, $neevo;
   private $q_where, $q_order, $q_columns, $q_data = array();
 
   /**
    * Constructor
    * @param array $options
-   * @param string $type Query type (select|insert|update|delete)
+   * @param string $type Query type. Possible values: select, insert, update, delete
    * @param string $table Table to interact with
    */
-  function  __construct(array $options, $type = '', $table = ''){
+  function  __construct(Neevo $object, $type = '', $table = ''){
+    $this->neevo = $object;
+
     $this->type($type);
     $this->table($table);
-
-    foreach ($options as $key => $value) {
-      $this->$key = $value;
-    }
   }
 
   /**
@@ -271,7 +368,7 @@ class NeevoMySQLQuery extends Neevo {
   }
 
   /**
-   * Sets query type (selsect|insert|update|delete)
+   * Sets query type. Possibe values: select, insert, update, delete)
    * @param string $type
    * @return NeevoMySQLQuery
    */
@@ -380,7 +477,7 @@ class NeevoMySQLQuery extends Neevo {
    * @return resource
    */
   public function run(){
-    return $this->query($this->build());
+    return $this->neevo->query($this->build());
   }
 
   /**
@@ -389,7 +486,7 @@ class NeevoMySQLQuery extends Neevo {
    */
   public function build(){
 
-    $table = $this->prefix().$this->q_table;
+    $table = $this->neevo->prefix().$this->q_table;
 
     // WHERE statements
     if($this->q_where){
@@ -425,7 +522,7 @@ class NeevoMySQLQuery extends Neevo {
     if($this->q_type == 'update' && $this->q_data){
       $update=array();
       foreach(Neevo::escape_array($this->q_data) as $col => $value){
-        $update[]="`$col` = $value";
+        $update[]="`$col`=$value";
       }
       $update_data = " SET " . join(', ', $update);
     }
