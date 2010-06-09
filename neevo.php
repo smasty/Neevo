@@ -29,12 +29,13 @@ class Neevo{
   var $table_prefix = '';
 
   static $highlight_colors = array(
-    'columns' => '#0000ff',
-    'chars' => '#000000',
-    'keywords' => '#008000',
-    'joins' => '#555555',
-    'functions' => '#008000',
-    'constants' => '#ff0000'
+    'background' => '#f9f9f9',
+    'columns'    => '#0000ff',
+    'chars'      => '#000000',
+    'keywords'   => '#008000',
+    'joins'      => '#555555',
+    'functions'  => '#008000',
+    'constants'  => '#ff0000'
     );
 
 /* ==========  CONSTANTS  ========== */
@@ -239,12 +240,12 @@ class Neevo{
   public static function highlight_sql($sql){
     $chcolors = array('chars'=>'black','keywords'=>'green','joins'=>'grey','functions'=>'green','constants'=>'red');
     $hcolors = self::$highlight_colors;
-    unset($hcolors['columns']);
+    unset($hcolors['columns']);unset($hcolors['background']);
 
     $words = array('keywords'=>array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
       'joins' => array('JOIN', 'INNER', 'OUTER', 'FULL', 'NATURAL', 'LEFT', 'RIGHT'),
       'functions' => self::$sql_functions,
-      'chars' => '/([\\.,\\(\\)<>:=`]+)/i',
+      'chars' => '/([\\.,;\\(\\)<>:=`]+)/i',
       'constants' => '/(\'[^\']*\'|[0-9]+)/i');
 
     $sql=str_replace('\\\'','\\&#039;',$sql);
@@ -255,7 +256,7 @@ class Neevo{
     }
 
     $sql = str_replace($chcolors, $hcolors, $sql);
-    return "<code style=\"color:".self::$highlight_colors['columns'].";background:#f9f9f9\"> $sql </code>\n";
+    return "<code style=\"color:".self::$highlight_colors['columns'].";background:".self::$highlight_colors['background']."\"> $sql </code>\n";
   }
 
   /** Replaces placeholders in string with value/s from array/string
@@ -572,7 +573,7 @@ class NeevoMySQLQuery {
       $q .= $where . $order . $limit;
     }
 
-    return $q;
+    return "$q;";
 
   }
 
