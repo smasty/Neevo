@@ -492,6 +492,7 @@ class NeevoMySQLQuery {
     if($this->q_where){
       $wheres = array();
       $wheres2 = array();
+      $wheres3 = array();
       foreach ($this->q_where as $in_where) {
         if($in_where[3]=='') $in_where[3] = 'AND';
         $wheres[] = $in_where;
@@ -504,7 +505,11 @@ class NeevoMySQLQuery {
         $wheres2[] = join(' ', $in_where2);
       }
 
-      $where = " WHERE ".join(' ', $wheres2);
+      foreach ($wheres2 as $rplc_where){
+        $wheres3[] = str_replace(array(' = ', ' != '), array('=', '!='), $rplc_where);
+      }
+
+      $where = " WHERE ".join(' ', $wheres3);
     }
 
     // INSERT data
