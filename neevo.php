@@ -291,8 +291,8 @@ class NeevoMySQLQuery extends Neevo {
     foreach ($columns as $col) {
       $col = trim($col);
       if($col!='*'){
-        if($this->is_as_construction($col)) $col = $this->escape_as_construction($col);
-        elseif($this->is_sql_function($col)) $col = $this->escape_sql_function($col);
+        if(Neevo::is_as_construction($col)) $col = Neevo::escape_as_construction($col);
+        elseif(Neevo::is_sql_function($col)) $col = Neevo::escape_sql_function($col);
         else $col = "`$col`";
       }
       $cols[] = $col;
@@ -324,10 +324,10 @@ class NeevoMySQLQuery extends Neevo {
     if(!isset($where_condition[1])) $where_condition[1] = '=';
     $column = $where_condition[0];
 
-    if(self::is_sql_function($column)) $column = self::escape_sql_function($column);
+    if(Neevo::is_sql_function($column)) $column = Neevo::escape_sql_function($column);
     else $column = "`$column`";
 
-    $value = self::escape_string($value);
+    $value = Neevo::escape_string($value);
 
     $condition = array($column, $where_condition[1], $value, strtoupper($glue));
 
@@ -371,7 +371,7 @@ class NeevoMySQLQuery extends Neevo {
    * @param bool $color Highlight query or not
    */
   public function dump($color = true){
-    echo $color ? self::highlight_sql($this->build()) : $this->build();
+    echo $color ? Neevo::highlight_sql($this->build()) : $this->build();
     return $this;
   }
 
@@ -414,7 +414,7 @@ class NeevoMySQLQuery extends Neevo {
     if($this->q_type == 'insert' && $this->q_data){
       $icols=array();
       $ivalues=array();
-      foreach(self::escape_array($this->q_data) as $col => $value){
+      foreach(Neevo::escape_array($this->q_data) as $col => $value){
         $icols[]="`$col`";
         $ivalues[]=$value;
       }
@@ -424,7 +424,7 @@ class NeevoMySQLQuery extends Neevo {
     // UPDATE data
     if($this->q_type == 'update' && $this->q_data){
       $update=array();
-      foreach(self::escape_array($this->q_data) as $col => $value){
+      foreach(Neevo::escape_array($this->q_data) as $col => $value){
         $update[]="`$col` = $value";
       }
       $update_data = " SET " . join(', ', $update);
