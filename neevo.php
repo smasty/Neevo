@@ -12,6 +12,8 @@
  * @link       http://labs.smasty.net/neevo/
  * @package    neevo
  * @version    0.01dev
+ *
+ * @todo mysql_data_seek;
  */
 
 
@@ -43,8 +45,6 @@ class Neevo{
   const ASSOC=1;
   const NUM=2;
   const OBJECT=3;
-
-  protected static $sql_functions=array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK');
 
 
   /**
@@ -119,7 +119,7 @@ class Neevo{
    * @return boolean
    */
   public function errors($value = null){
-    if(isset($value))$this->error_reporting = $value;
+    if(isset($value)) $this->error_reporting = $value;
     return $this->error_reporting;
   }
 
@@ -133,6 +133,7 @@ class Neevo{
   public final function query($query, $count = true){
     $q = @mysql_query($query, $this->resource_ID);
     $count ? $this->queries++ : false;
+    $this->last_resource = $q;
     $this->last=$query;
     if($q) return $q;
     else return $this->error('Query failed');
@@ -198,7 +199,7 @@ class Neevo{
    *    - Neevo::OBJECT (3) - fetches an array with objects as table rows</pre>
    * @return array Associative array built from query
    */
-  public static function fetch($query, $type=1){
+  public function fetch($query, $type=1){
     $arr=array();
     if($type==1){ // Assoc
       while($tmp_arr=@mysql_fetch_assoc($query)){
@@ -227,14 +228,325 @@ class Neevo{
    * @param int $jump Jump to result row number (starts from 0)
    * @return string Result data
    */
-  public static function result($query, $jump=0){
+  public function result($query, $jump=0){
     return $query ? @mysql_result($query, $jump) : self::error("Return data failed");
     @mysql_free_result($query);
   }
 
-  public function rows($resource_ID){
-    return @mysql_num_rows($resource_ID);
+  /**
+   * Generates E_USER_WARNING
+   * @param string $err_neevo
+   * @return false
+   */
+  public function error($err_neevo){
+    $err_string = mysql_error();
+    $err_no = mysql_errno();
+    $err = "<b>Neevo error</b> ($err_no) - ";
+    $err .= $err_neevo;
+    $err_string = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $err_string);
+    $err .= ". $err_string";
+    if($this->errors()) trigger_error($err, E_USER_WARNING);
+    return false;
   }
+
+}
+
+
+
+
+
+class NeevoMySQLQuery {
+
+  private $q_table, $q_type, $q_limit, $q_offset, $neevo, $q_resource, $q_time;
+  private $q_where, $q_order, $q_columns, $q_data = array();
+
+
+  /**
+   * Constructor
+   * @param array $options
+   * @param string $type Query type. Possible values: select, insert, update, delete
+   * @param string $table Table to interact with
+   */
+  function  __construct(Neevo $object, $type = '', $table = ''){
+    $this->neevo = $object;
+
+    $this->type($type);
+    $this->table($table);
+  }
+
+
+  /**
+   * Sets table to interact
+   * @param string $table
+   * @return NeevoMySQLQuery
+   */
+  public function table($table){
+    $this->q_table = $table;
+    return $this;
+  }
+
+
+  /**
+   * Sets query type. Possibe values: select, insert, update, delete)
+   * @param string $type
+   * @return NeevoMySQLQuery
+   */
+  public function type($type){
+    $this->q_type = $type;
+    return $this;
+  }
+
+
+  /**
+   * Sets columns to retrive in SELECT queries
+   * @param mixed $columns
+   * @return NeevoMySQLQuery
+   */
+  public function cols($columns){
+    if(!is_array($columns)) $columns = explode(',', $columns);
+    $cols = array();
+    foreach ($columns as $col) {
+      $col = trim($col);
+      if($col!='*'){
+        if(NeevoStatic::is_as_construction($col)) $col = NeevoStatic::escape_as_construction($col);
+        elseif(NeevoStatic::is_sql_function($col)) $col = NeevoStatic::escape_sql_function($col);
+        else $col = "`$col`";
+      }
+      $cols[] = $col;
+    }
+    $this->q_columns = $cols;
+    return $this;
+  }
+
+
+  /**
+   * Data for INSERT and UPDATE queries
+   * @param array $data data in format "$column=>$value"
+   * @return NeevoMySQLQuery
+   */
+  public function data(array $data){
+    $this->q_data = $data;
+    return $this;
+  }
+
+
+  /**
+   * Sets WHERE condition for Query
+   * @param string $where Column to use and optionaly operator: "email LIKE" or "email !="
+   * @param string $value Value to search for: "%&#64;example.%" or "spam&#64;example.com"
+   * @param string $glue Operator (AND, OR, etc.) to use betweet this and next WHERE condition
+   * @return NeevoMySQLQuery
+   */
+  public function where($where, $value, $glue = null){
+
+    $where_condition = explode(' ', $where);
+    if(!isset($where_condition[1])) $where_condition[1] = '=';
+    $column = $where_condition[0];
+
+    if(NeevoStatic::is_sql_function($column)) $column = NeevoStatic::escape_sql_function($column);
+    else $column = "`$column`";
+
+    $value = NeevoStatic::escape_string($value);
+
+    $condition = array($column, $where_condition[1], $value, strtoupper($glue));
+
+    $this->q_where[] = $condition;
+
+    return $this;
+  }
+
+
+  /**
+   * Sets ORDER BY rule for Query
+   * @param string $args [Infinite arguments] Order rules: "col_name ASC", "col_name" or "col_name DESC", etc...
+   * @return NeevoMySQLQuery
+   */
+  public function order($args){
+    $rules = array();
+    $arguments = func_get_args();
+    foreach ($arguments as $argument) {
+      $order_rule = explode(' ', $argument);
+      $order_rule[0] = "`".$order_rule[0]."`";
+      $rules[] = $order_rule;
+    }
+    $this->q_order = $rules;
+
+    return $this;
+  }
+
+
+  /**
+   * Sets limit (and offset) for Query
+   * @param int $limit Limit
+   * @param int $offset Offset
+   * @return NeevoMySQLQuery
+   */
+  public function limit($limit, $offset = null){
+    $this->q_limit = $limit;
+    if(isset($offset) && $this->q_type=='select') $this->q_offset = $offset;
+    return $this;
+  }
+
+
+  /**
+   * Prints consequential Query (highlighted by default)
+   * @param bool $color Highlight query or not
+   */
+  public function dump($color = true){
+    echo $color ? NeevoStatic::highlight_sql($this->build()) : $this->build();
+    return $this;
+  }
+
+
+  /**
+   * Performs Query
+   * @return resource
+   */
+  public function run(){
+    $start = explode(" ", microtime());
+    $query = $this->neevo->query($this->build());
+    $end = explode(" ", microtime());
+    $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
+    $this->time($time);
+    $this->q_resource = $query;
+    return $query;
+  }
+
+
+  /**
+   * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
+   * @param bool $string Return rows as a string ("Rows: 5", "Affected: 10"). Default: FALSE
+   * @return mixed Number of rows (int) or FALSE if used on invalid query.
+   */
+  public function rows($string = false){
+    $aff_rows = @mysql_affected_rows($this->neevo->resource_ID);
+    $num_rows = @mysql_num_rows($this->q_resource);
+    if($num_rows || $aff_rows){
+      if($string){
+        return $num_rows ? "Rows: $num_rows" : "Affected: $aff_rows";
+      } else return $num_rows ? $num_rows : $aff_rows;
+    } else return false;
+  }
+
+
+  /**
+   * Sets and/or returns Execution time of Query
+   * @param int $time Time value to set.
+   * @return int Query execution time
+   */
+  public function time($time = null) {
+    if(isset($time)) $this->q_time = $time;
+    return $this->q_time;
+  }
+
+
+  /**
+   * Builds Query from NeevoMySQLQuery instance
+   * @return string the Query
+   */
+  public function build(){
+
+    $table = $this->neevo->prefix().$this->q_table;
+
+    // WHERE statements
+    if($this->q_where){
+      $wheres = array();
+      $wheres2 = array();
+      $wheres3 = array();
+
+      // Set ADN glue for queries without glue defined
+      foreach ($this->q_where as $in_where) {
+        if($in_where[3]=='') $in_where[3] = 'AND';
+        $wheres[] = $in_where;
+      }
+
+      // Unset glue for last WHERE clause (defind by former loop)
+      unset($wheres[count($wheres)-1][3]);
+
+      // Join WHERE clause array to one string
+      foreach ($wheres as $in_where2) {
+        $wheres2[] = join(' ', $in_where2);
+      }
+      // Remove some spaces
+      foreach ($wheres2 as $rplc_where){
+        $wheres3[] = str_replace(array(' = ', ' != '), array('=', '!='), $rplc_where);
+      }
+
+      $where = " WHERE ".join(' ', $wheres3);
+    }
+
+    // INSERT data
+    if($this->q_type == 'insert' && $this->q_data){
+      $icols=array();
+      $ivalues=array();
+      foreach(NeevoStatic::escape_array($this->q_data) as $col => $value){
+        $icols[]="`$col`";
+        $ivalues[]=$value;
+      }
+      $insert_data = " (".join(', ',$icols).") VALUES (".join(', ',$ivalues).")";
+    }
+
+    // UPDATE data
+    if($this->q_type == 'update' && $this->q_data){
+      $update=array();
+      foreach(NeevoStatic::escape_array($this->q_data) as $col => $value){
+        $update[]="`$col`=$value";
+      }
+      $update_data = " SET " . join(', ', $update);
+    }
+    
+    // ORDER BY statements
+    if($this->q_order){
+      $orders = array();
+      foreach($this->q_order as $in_order) {
+        $orders[] = join(' ', $in_order);
+      }
+      $order = " ORDER BY ".join(', ', $orders);
+    }
+
+    // LIMIT & OFFSET
+    if($this->q_limit) $limit = " LIMIT ".$this->q_limit;
+    if($this->q_offset) $limit .= " OFFSET ".$this->q_offset;
+
+
+    // SELECT query
+    if($this->q_type == 'select'){
+      $q .= 'SELECT ';
+      $q .= join(', ', $this->q_columns);
+      $q .= ' FROM `'.$table.'`';
+      $q .= $where . $order . $limit;
+    }
+
+    // INSERT query
+    if($this->q_type == 'insert'){
+      $q .= 'INSERT INTO `' . $table . '`';
+      $q .= $insert_data;
+    }
+
+    // UPDATE query
+    if($this->q_type == 'update'){
+      $q .= 'UPDATE `' . $table .'`';
+      $q .= $update_data . $where . $order . $limit;
+    }
+
+    // DELETE query
+    if($this->q_type == 'delete'){
+      $q .= 'DELETE FROM `' . $table . '`';
+      $q .= $where . $order . $limit;
+    }
+
+    return "$q;";
+
+  }
+
+}
+
+
+
+
+class NeevoStatic extends Neevo {
+
+  protected static $sql_functions=array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK');
 
   /** Highlights given MySQL query */
   public static function highlight_sql($sql){
@@ -307,7 +619,7 @@ class Neevo{
     return is_string($string) ? ( preg_match('/(.*) as \w*/i', $string) ? true : false ) :  false;
   }
 
-  /** Escapes (quotes column name with ``) given 'AS construction'  */
+  /** Escapes (quotes column name with ``) given 'AS construction' */
   public static function escape_as_construction($as_construction){
     $construction=explode(' ', $as_construction);
     $escape = preg_match('/^\w{1,}$/', $construction[0]) ? true : false;
@@ -318,263 +630,31 @@ class Neevo{
     return preg_replace('/(.*) (as) (\w*)/i','$1 AS `$3`',$as_construction);
   }
 
-  /**
-   * Generates E_USER_WARNING
-   * @param string $err_neevo
-   * @return false
-   */
-  public function error($err_neevo){
-    $err_string = mysql_error();
-    $err_no = mysql_errno();
-    $err = "<b>Neevo error</b> ($err_no) - ";
-    $err .= $err_neevo;
-    $err_string = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $err_string);
-    $err .= ". $err_string";
-    if($this->errors()) trigger_error($err, E_USER_WARNING);
-    return false;
+  /** Returns content of the file */
+  public static function read_file($filename) {
+    if (!function_exists('file_get_contents')) {
+      $fhandle = fopen($filename, "r");
+      $fcontents = fread($fhandle, filesize($filename));
+      fclose($fhandle);
+    }
+    else $content = file_get_contents($filename);
+
+    return $content;
   }
 
-}
-
-
-
-
-
-class NeevoMySQLQuery {
-
-  private $q_table, $q_type, $q_limit, $q_offset, $neevo;
-  private $q_where, $q_order, $q_columns, $q_data = array();
-
-  /**
-   * Constructor
-   * @param array $options
-   * @param string $type Query type. Possible values: select, insert, update, delete
-   * @param string $table Table to interact with
-   */
-  function  __construct(Neevo $object, $type = '', $table = ''){
-    $this->neevo = $object;
-
-    $this->type($type);
-    $this->table($table);
-  }
-
-  /**
-   * Sets table to interact
-   * @param string $table
-   * @return NeevoMySQLQuery
-   */
-  public function table($table){
-    $this->q_table = $table;
-    return $this;
-  }
-
-  /**
-   * Sets query type. Possibe values: select, insert, update, delete)
-   * @param string $type
-   * @return NeevoMySQLQuery
-   */
-  public function type($type){
-    $this->q_type = $type;
-    return $this;
-  }
-
-  /**
-   * Sets columns to retrive in SELECT queries
-   * @param mixed $columns
-   * @return NeevoMySQLQuery
-   */
-  public function cols($columns){
-    if(!is_array($columns)) $columns = explode(',', $columns);
-    $cols = array();
-    foreach ($columns as $col) {
-      $col = trim($col);
-      if($col!='*'){
-        if(Neevo::is_as_construction($col)) $col = Neevo::escape_as_construction($col);
-        elseif(Neevo::is_sql_function($col)) $col = Neevo::escape_sql_function($col);
-        else $col = "`$col`";
+  /** Puts content to the file */
+  public static function write_file($filename, $data) {
+    if(!function_exists('file_put_contents')){
+      $f = @fopen($filename, 'w');
+      if (!$f) return false;
+      else {
+        $content = fwrite($f, $data);
+        fclose($f);
       }
-      $cols[] = $col;
     }
-    $this->q_columns = $cols;
-    return $this;
-  }
+    else $content = file_put_contents($filename, $data);
 
-  /**
-   * Data for INSERT and UPDATE queries
-   * @param array $data data in format "$column=>$value"
-   * @return NeevoMySQLQuery
-   */
-  public function data(array $data){
-    $this->q_data = $data;
-    return $this;
-  }
-
-  /**
-   * Sets WHERE condition for Query
-   * @param string $where Column to use and optionaly operator: "email LIKE" or "email !="
-   * @param string $value Value to search for: "%&#64;example.%" or "spam&#64;example.com"
-   * @param string $glue Operator (AND, OR, etc.) to use betweet this and next WHERE condition
-   * @return NeevoMySQLQuery
-   */
-  public function where($where, $value, $glue = null){
-
-    $where_condition = explode(' ', $where);
-    if(!isset($where_condition[1])) $where_condition[1] = '=';
-    $column = $where_condition[0];
-
-    if(Neevo::is_sql_function($column)) $column = Neevo::escape_sql_function($column);
-    else $column = "`$column`";
-
-    $value = Neevo::escape_string($value);
-
-    $condition = array($column, $where_condition[1], $value, strtoupper($glue));
-
-    $this->q_where[] = $condition;
-
-    return $this;
-  }
-
-  /**
-   * Sets ORDER BY rule for Query
-   * @param string $args [Infinite arguments] Order rules: "col_name ASC", "col_name" or "col_name DESC", etc...
-   * @return NeevoMySQLQuery
-   */
-  public function order($args){
-    $rules = array();
-    $arguments = func_get_args();
-    foreach ($arguments as $argument) {
-      $order_rule = explode(' ', $argument);
-      $order_rule[0] = "`".$order_rule[0]."`";
-      $rules[] = $order_rule;
-    }
-    $this->q_order = $rules;
-
-    return $this;
-  }
-
-  /**
-   * Sets limit (and offset) for Query
-   * @param int $limit Limit
-   * @param int $offset Offset
-   * @return NeevoMySQLQuery
-   */
-  public function limit($limit, $offset = null){
-    $this->q_limit = $limit;
-    if(isset($offset)) $this->q_offset = $offset;
-    return $this;
-  }
-  
-  /**
-   * Prints consequential Query (highlighted by default)
-   * @param bool $color Highlight query or not
-   */
-  public function dump($color = true){
-    echo $color ? Neevo::highlight_sql($this->build()) : $this->build();
-    return $this;
-  }
-
-  /**
-   * Performs Query
-   * @return resource
-   */
-  public function run(){
-    return $this->neevo->query($this->build());
-  }
-
-  /**
-   * Builds Query from NeevoMySQLQuery instance
-   * @return string Query
-   */
-  public function build(){
-
-    $table = $this->neevo->prefix().$this->q_table;
-
-    // WHERE statements
-    if($this->q_where){
-      $wheres = array();
-      $wheres2 = array();
-      $wheres3 = array();
-      foreach ($this->q_where as $in_where) {
-        if($in_where[3]=='') $in_where[3] = 'AND';
-        $wheres[] = $in_where;
-      }
-
-
-      unset($wheres[count($wheres)-1][3]);
-
-      foreach ($wheres as $in_where2) {
-        $wheres2[] = join(' ', $in_where2);
-      }
-
-      foreach ($wheres2 as $rplc_where){
-        $wheres3[] = str_replace(array(' = ', ' != '), array('=', '!='), $rplc_where);
-      }
-
-      $where = " WHERE ".join(' ', $wheres3);
-    }
-
-    // INSERT data
-    if($this->q_type == 'insert' && $this->q_data){
-      $icols=array();
-      $ivalues=array();
-      foreach(Neevo::escape_array($this->q_data) as $col => $value){
-        $icols[]="`$col`";
-        $ivalues[]=$value;
-      }
-      $insert_data = " (".join(', ',$icols).") VALUES (".join(', ',$ivalues).")";
-    }
-
-    // UPDATE data
-    if($this->q_type == 'update' && $this->q_data){
-      $update=array();
-      foreach(Neevo::escape_array($this->q_data) as $col => $value){
-        $update[]="`$col`=$value";
-      }
-      $update_data = " SET " . join(', ', $update);
-    }
-
-    // ORDER BY statements
-    if($this->q_order){
-      $orders = array();
-      foreach($this->q_order as $in_order) {
-        $orders[] = join(' ', $in_order);
-      }
-      $order = " ORDER BY ".join(', ', $orders);
-    }
-
-    // LIMIT & OFFSET
-    if($this->q_limit) $limit = " LIMIT ".$this->q_limit;
-    if($this->q_offset) $limit .= " OFFSET ".$this->q_offset;
-
-
-    // SELECT query
-    if($this->q_type == 'select'){
-      $q .= 'SELECT ';
-      $q .= join(', ', $this->q_columns);
-      $q .= ' FROM `'.$table.'`';
-      $q .= $where . $order . $limit;
-    }
-
-    // INSERT query
-    if($this->q_type == 'insert'){
-      $q .= 'INSERT INTO `' . $table . '`';
-      $q .= $insert_data;
-    }
-
-    // UPDATE query
-    if($this->q_type == 'update'){
-      $q .= 'UPDATE `' . $table .'`';
-      $q .= $update_data . $where . $order . $limit;
-    }
-
-    // DELETE query
-    if($this->q_type == 'delete'){
-      $q .= 'DELETE FROM `' . $table . '`';
-      $q .= $where . $order . $limit;
-    }
-
-    return "$q;";
-
+    return $content;
   }
 
 }

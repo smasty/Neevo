@@ -35,8 +35,8 @@ $sql->prefix('dp_');
 
 
 
-// Data for Insert/update query demos
-$data = array(
+// Data for Insert query demos
+$insert_data = array(
   'name'  => 'John Doe',
   'mail' => 'john.doe@example.com',
   'city' => 'Springfield',
@@ -44,43 +44,67 @@ $data = array(
   'friends'  => 23
 );
 
+// Data for Update query demos
+$update_data = array(
+  'name'  => 'John Doe',
+  'mail' => 'john@doe.name',
+  'city' => 'Washington DC'
+);
+
 
 
 // INSERT QUERY
-$insert = $sql->insert('client', $data);
+$insert = $sql->insert('client', $insert_data);
 $insert->dump();
+$insert_resource = $insert->run();
 
-echo "\n";
+echo " Affected: ". $insert->rows() ." | Time: ". $insert->time() ."s\n\n";
+
 
 // UPDATE QUERY
-$update = $sql->update('client', $data)->where('name', 'John Doe', 'OR')->where('name LIKE', '%be%')->order('id DESC', 'name', 'mail ASC')->limit(5, 2);
+$update = $sql->update('client', $update_data)->where('name', 'John Doe')->where('id !=', 101)->order('id DESC');
 $update->dump();
+$update_resource = $update->run();
 
-echo "\n";
+echo " Affected: ". $update->rows() ." | Time: ". $update->time() ."s\n\n";
+
 
 // DELETE QUERY
-$delete = $sql->delete('client')->where('name', 'John Doe')->limit(1);
+$delete = $sql->delete('client')->where('mail', 'john@doe.name')->order('id DESC')->limit(1);
 $delete->dump();
+$delete_resource = $delete->run();
 
-echo "\n";
+echo " Affected: ". $delete->rows() ." | Time: ". $delete->time() ."s\n\n";
+
+
+// SELECT ONE VALUE
+$select_one = $sql->select('name', 'client')->where('id', 101);
+$select_one->dump();
+
+echo " Result: ". $sql->result( $select_one->run() ) ."\n\n";
+
 
 // SELECT QUERY
-$select = $sql->select('id, name, mail, city', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
+$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
 $select->dump();
+$select_resource = $select->run();
+$select_result = $sql->fetch($select_resource);
 
-?></pre>
+echo " Rows: ". $select->rows() ." | Time: ". $select->time() ."s\n";
+?>
 
-<h2>SELECT query results</h2>
-<table border=0><tr><th>ID <th>Name <th>Email <th>City
+ Results:</pre>
+<table border=0><tr><th>ID <th>Name <th>Email <th>City <th>E-mail hash
 
 <?php
-$select_result = $sql->fetch($select->run());
+
 
 foreach ($select_result as $row){
-  echo "<tr><td>". $row['id'] ."<td>". $row['name'] ."<td>". $row['mail'] ."<td>". $row['city'] ."\n";
+  echo "<tr><td>". $row['id'] ."<td>". $row['name'] ."<td>". $row['mail'] ."<td>". $row['city'] ."<td><code>". $row['mail_hash'] ."\n";
 }
 
 ?>
 </table>
+
   </body>
 </html>
