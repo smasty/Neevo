@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Neevo MySQL layer DEMO</title>
+    <title>Neevo MySQL layer Demo</title>
     <style>
       table, td, th{border:1px solid #555;border-collapse:collapse}
       td, th{padding:2px 10px;text-align:left}

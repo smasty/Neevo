@@ -14,7 +14,7 @@
  * @version    0.01dev
  *
  * @todo mysql_data_seek;
- * @todo LOG files support;
+ * @todo LOGfiles support;
  */
 
 
