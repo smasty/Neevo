@@ -51,22 +51,19 @@ $update_data = array(
   'city' => 'Washington DC'
 );
 
-
-
 // INSERT QUERY
 $insert = $sql->insert('client', $insert_data);
 $insert->dump();
 $insert_resource = $insert->run();
 
-echo " Affected: ". $insert->rows() ." | Time: ". $insert->time() ."s\n\n";
-
+echo $insert->info(true). "\n\n";
 
 // UPDATE QUERY
 $update = $sql->update('client', $update_data)->where('name', 'John Doe')->where('id !=', 101)->order('id DESC');
 $update->dump();
 $update_resource = $update->run();
 
-echo " Affected: ". $update->rows() ." | Time: ". $update->time() ."s\n\n";
+echo $update->info(true). "\n\n";
 
 
 // DELETE QUERY
@@ -74,7 +71,7 @@ $delete = $sql->delete('client')->where('mail', 'john@doe.name')->order('id DESC
 $delete->dump();
 $delete_resource = $delete->run();
 
-echo " Affected: ". $delete->rows() ." | Time: ". $delete->time() ."s\n\n";
+echo $delete->info(true). "\n\n";
 
 
 // SELECT ONE VALUE
@@ -85,12 +82,12 @@ echo " Result: ". $sql->result( $select_one->run() ) ."\n\n";
 
 
 // SELECT QUERY
-$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
+$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name LIKE', '%')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
 $select->dump();
 $select_resource = $select->run();
 $select_result = $sql->fetch($select_resource);
 
-echo " Rows: ". $select->rows() ." | Time: ". $select->time() ."s\n";
+echo $select->info(true);
 ?>
 
  Results:</pre>
