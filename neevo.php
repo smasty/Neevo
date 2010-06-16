@@ -14,6 +14,7 @@
  * @version    0.01dev
  *
  * @todo mysql_data_seek;
+ * @todo LOG files support;
  */
 
 
@@ -22,14 +23,22 @@
  */
 class Neevo{
 
-/* ==========  VARIABLES  ========== */
+/*  VARIABLES  */
 
+  /** @var resource Resource pointer */
   var $resource_ID;
+  /** @var int Amount of executed queries */
   var $queries = 0;
+  /** @var string Last executed query */
   var $last = '';
+  /** @var int Error-reporting state (0/1) */
   var $error_reporting = 1;
+  /** @var string Table prefix */
   var $table_prefix = '';
+  /** @var array Connect options */
+  private $options = array();
 
+  /** @var array Array of HTML colors for SQL highlighter */
   static $highlight_colors = array(
     'background' => '#f9f9f9',
     'columns'    => '#0000ff',
@@ -40,8 +49,8 @@ class Neevo{
     'constants'  => '#ff0000'
     );
 
-/* ==========  CONSTANTS  ========== */
 
+/*  CONSTANTS  */
   const ASSOC=1;
   const NUM=2;
   const OBJECT=3;
@@ -49,13 +58,14 @@ class Neevo{
 
   /**
    * Constructor
-   * @param array $opts
+   * @param array $opts Array of options in following format:
    * <pre>Array(
-   *   host      =>  mysql_host,
-   *   username  =>  mysql_username,
-   *   password  =>  mysql_password,
-   *   database  =>  mysql_database,
-   *   encoding  =>  mysql_encoding
+   *   host         =>  mysql_host,
+   *   username     =>  mysql_username,
+   *   password     =>  mysql_password,
+   *   database     =>  mysql_database,
+   *   encoding     =>  mysql_encoding,
+   *   table_prefix =>  mysql_table_prefix
    * );</pre>
    */
   function __construct(array $opts){
@@ -74,6 +84,7 @@ class Neevo{
   protected function connect(array $opts){
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
     $this->resource_ID = $connection;
+    $this->options = $opts;
     return (bool) $connection or self::error("Connection to host '".$opts['host']."' failed");
   }
 
@@ -114,7 +125,7 @@ class Neevo{
 
 
   /**
-   * Sets and/or returns error reporting
+   * Sets and/or returns error-reporting
    * @param boolan $value
    * @return boolean
    */
@@ -125,7 +136,7 @@ class Neevo{
 
 
   /**
-   * Performs MySQL query
+   * Performs Query
    * @param string $query Query to perform
    * @param boolean $count Count this query or not?
    * @return resource
@@ -188,10 +199,9 @@ class Neevo{
     return new NeevoMySQLQuery($this, 'delete', $table);
   }
 
-/* ==========  PUBLIC RESULT-FETCHING METHODS  ========== */
 
   /** 
-   * Fetches data from given MySQL query
+   * Fetches data from given Query resource
    * @param string $query MySQL (SELECT) query
    * @param int $type Result data as: Possible values:<pre>
    *    - Neevo::ASSOC  (1) - fetches an array with associative arrays as table rows
@@ -217,9 +227,10 @@ class Neevo{
       }
     }
     if(count($arr)==1) $arr = $arr[0];
-    return $query ? $arr : self::error("Fetching result data failed");
+    return $query ? $arr : $this->error("Fetching result data failed");
     @mysql_free_result($query);
   }
+
 
   /** Returns data from given MySQL query
    *
@@ -229,9 +240,10 @@ class Neevo{
    * @return string Result data
    */
   public function result($query, $jump=0){
-    return $query ? @mysql_result($query, $jump) : self::error("Return data failed");
+    return $query ? @mysql_result($query, $jump) :$this->error("Return data failed");
     @mysql_free_result($query);
   }
+
 
   /**
    * Generates E_USER_WARNING
@@ -249,12 +261,43 @@ class Neevo{
     return false;
   }
 
+  /**
+   * Returns some info about MySQL connection as an array or string
+   * @param boolean $return_string Return as a string or not (default: no)
+   * @param boolean $html Use HTML or not (default: no)
+   * @return mixed
+   */
+  public function info($return_string = false, $html = false){
+    $info = $this->options;
+    unset($info['password']);
+    $info['queries'] = $this->queries;
+    $info['last'] = $this->last;
+    $info['table_prefix'] = $this->prefix();
+    $info['error_reporting'] = $this->errors();
+
+    if(!$return_string) return $info;
+    else{
+      $er = array('off', 'on');
+      
+      $string = "Connected to database '{$info['database']}' on {$info['host']} as {$info['username']} user\n"
+      . "Database encoding: {$info['encoding']}\n"
+      . "Table prefix: {$info['table_prefix']}\n"
+      . "Error-reporting: {$er[$info['error_reporting']]}\n"
+      . "Executed queries: {$info['queries']}\n"
+      . "Last executed query: {$info['last']}\n";
+
+      return $html ? nl2br($string) : $string;
+    }
+  }
+
 }
 
 
 
 
-
+/** Neevo class for MySQL query abstraction
+ * @package neevo
+ */
 class NeevoMySQLQuery {
 
   private $q_table, $q_type, $q_limit, $q_offset, $neevo, $q_resource, $q_time;
@@ -391,10 +434,12 @@ class NeevoMySQLQuery {
   /**
    * Prints consequential Query (highlighted by default)
    * @param bool $color Highlight query or not
+   * @param bool $return_string Return the string or not
    */
-  public function dump($color = true){
-    echo $color ? NeevoStatic::highlight_sql($this->build()) : $this->build();
-    return $this;
+  public function dump($color = true, $return_string = false){
+    $code = $color ? NeevoStatic::highlight_sql($this->build()) : $this->build();
+    if(!$return_string) echo $code;
+    return $return_string ? $code : $this;
   }
 
 
@@ -419,13 +464,16 @@ class NeevoMySQLQuery {
    * @return mixed Number of rows (int) or FALSE if used on invalid query.
    */
   public function rows($string = false){
-    $aff_rows = @mysql_affected_rows($this->neevo->resource_ID);
-    $num_rows = @mysql_num_rows($this->q_resource);
+    if($this->q_type!='select') $aff_rows = $this->time() ? @mysql_affected_rows($this->neevo->resource_ID) : false;
+    else $num_rows = @mysql_num_rows($this->q_resource);
+    
     if($num_rows || $aff_rows){
       if($string){
         return $num_rows ? "Rows: $num_rows" : "Affected: $aff_rows";
-      } else return $num_rows ? $num_rows : $aff_rows;
-    } else return false;
+      }
+      else return $num_rows ? $num_rows : $aff_rows;
+    }
+    else return false;
   }
 
 
@@ -434,9 +482,52 @@ class NeevoMySQLQuery {
    * @param int $time Time value to set.
    * @return int Query execution time
    */
-  public function time($time = null) {
+  public function time($time = null){
     if(isset($time)) $this->q_time = $time;
     return $this->q_time;
+  }
+
+  /**
+   * Returns some info about this Query as an array or string
+   * @param boolean $return_string Return as a string or not (default: no)
+   * @param boolean $html Use HTML or not (default: no)
+   * @return mixed Info about Query
+   */
+  public function info($return_string = false, $html = false){
+    $noexec = 'not yet executed';
+
+    $exec_time = $this->time() ? $this->time() : -1;
+    $rows = $this->time() ? $this->rows() : -1;
+
+    $info = array(
+      'resource' => $this->neevo->resource_ID,
+      'query' => $this->dump($html, true),
+      'exec_time' => $exec_time,
+      'rows' => $rows
+    );
+
+    if(!$return_string) return $info;
+    
+    else{
+      if($info['exec_time']==-1) $info['exec_time'] = $noexec;
+      else $info['exec_time'] .= " seconds";
+
+      if($info['rows']==-1) $info['rows'] = $noexec;
+      $rows_prefix = ($this->q_type != 'select') ? "Affected" : "Fetched";
+
+      if($html){
+        $ot = "<strong>";
+        $ct = "</strong>";
+      }
+
+      $string = "$ot Query-string:$ct {$info['query']}\n"
+      . "$ot Resource:$ct {$info['resource']}\n"
+      . "$ot Execution time:$ct {$info['exec_time']}\n"
+      . "$ot $rows_prefix rows:$ct {$info['rows']}\n";
+
+      return $html ? NeevoStatic::nlbr($string) : $string;
+    }
+
   }
 
 
@@ -543,7 +634,9 @@ class NeevoMySQLQuery {
 
 
 
-
+/** Main Neevo class for some additional static methods
+ * @package neevo
+ */
 class NeevoStatic extends Neevo {
 
   protected static $sql_functions=array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK');
@@ -557,7 +650,7 @@ class NeevoStatic extends Neevo {
     $words = array('keywords'=>array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
       'joins' => array('JOIN', 'INNER', 'OUTER', 'FULL', 'NATURAL', 'LEFT', 'RIGHT'),
       'functions' => self::$sql_functions,
-      'chars' => '/([\\.,;\\(\\)<>:=`]+)/i',
+      'chars' => '/([\\.,;!\\(\\)<>:=`]+)/i',
       'constants' => '/(\'[^\']*\'|[0-9]+)/i');
 
     $sql=str_replace('\\\'','\\&#039;',$sql);
@@ -571,7 +664,7 @@ class NeevoStatic extends Neevo {
     return "<code style=\"color:".self::$highlight_colors['columns'].";background:".self::$highlight_colors['background']."\"> $sql </code>\n";
   }
 
-  /** Replaces placeholders in string with value/s from array/string
+  /** Replaces placeholders in string with value/s from array/string (not used!)
    *
    * @param string String with placeholders '%1, etc.'
    * @param mixed Array/string with values to replace
@@ -628,6 +721,11 @@ class NeevoStatic extends Neevo {
     }
     $as_construction=join(' ', $construction);
     return preg_replace('/(.*) (as) (\w*)/i','$1 AS `$3`',$as_construction);
+  }
+
+  public static function nlbr($string){
+    $string = str_replace("\n\n", "\n", $string);
+    return str_replace("\n","<br>", $string);
   }
 
   /** Returns content of the file */
