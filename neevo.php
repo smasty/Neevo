@@ -14,7 +14,11 @@
  * @version    0.01dev
  *
  * @todo mysql_data_seek;
+<<<<<<< HEAD:neevo.php
  * @todo LOG-files support;
+=======
+ * @todo LOG files support;
+>>>>>>> ae4730d6a938c10f7935fe327d6f6983601c92b0:neevo.php
  */
 
 

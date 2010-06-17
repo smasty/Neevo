@@ -82,7 +82,7 @@ echo " Result: ". $sql->result( $select_one->run() ) ."\n\n";
 
 
 // SELECT QUERY
-$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
+$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name LIKE', '%')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
 $select->dump();
 $select_resource = $select->run();
 $select_result = $sql->fetch($select_resource);
