@@ -25,17 +25,13 @@ class Neevo{
 
 /*  VARIABLES  */
 
-  /** @var resource Resource pointer */
   var $resource_ID;
-  /** @var int Amount of executed queries */
   var $queries = 0;
-  /** @var string Last executed query */
   var $last = '';
-  /** @var int Error-reporting state (0/1) */
   var $error_reporting = 1;
-  /** @var string Table prefix */
+  var $logging = false;
+  var $log_file = '';
   var $table_prefix = '';
-  /** @var array Connect options */
   private $options = array();
 
   /** @var array Array of HTML colors for SQL highlighter */
@@ -96,8 +92,9 @@ class Neevo{
    */
   protected function set_encoding($encoding){
     if($encoding){
-      $query = $this->query("SET NAMES $encoding", false);
-      return (bool) $query;
+      $query = new NeevoMySQLQuery($this);
+      $query->sql("SET NAMES $encoding");
+      return (bool) $query->run();
     } else return true;
   }
 
@@ -290,6 +287,37 @@ class Neevo{
     }
   }
 
+  /**
+   * Set loggng for Neevo
+   * @param bool $state Log queries or not (true/false)
+   * @param string $filename Path to file for logging (directory must be writeable). Default: "neevo.log"
+   * @return bool
+   */
+  public function log($state, $filename = './neevo.log'){
+    if($state==true){
+      $this->logging = true;
+      if($filename){
+        $this->log_file = $filename;
+        return true;
+      }
+      else return $this->error('Log file must be set!');
+    }
+    else{
+      $this->logging = false;
+      return true;
+    }
+  }
+
+  public function add_log($query, $exectime, $affrows){
+    if($this->logging && $this->log_file){
+      $time = strftime("%c");
+      $ip = $_SERVER["REMOTE_ADDR"];
+      $log = "[$time] [client $ip] [$query] [$exectime sec] [$affrows]\n";
+      return NeevoStatic::write_file($this->log_file, $log);
+    }
+    else return false;
+  }
+
 }
 
 
@@ -300,7 +328,7 @@ class Neevo{
  */
 class NeevoMySQLQuery {
 
-  private $q_table, $q_type, $q_limit, $q_offset, $neevo, $q_resource, $q_time;
+  private $q_table, $q_type, $q_limit, $q_offset, $neevo, $q_resource, $q_time, $q_sql;
   private $q_where, $q_order, $q_columns, $q_data = array();
 
 
@@ -336,6 +364,17 @@ class NeevoMySQLQuery {
    */
   public function type($type){
     $this->q_type = $type;
+    return $this;
+  }
+
+
+  /**
+   * Use this method for running direct SQL code.
+   * @param string $sql Direct SQL code
+   * @return NeevoMySQLQuery
+   */
+  public function sql($sql){
+    $this->q_sql = $sql;
     return $this;
   }
 
@@ -454,6 +493,7 @@ class NeevoMySQLQuery {
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
     $this->time($time);
     $this->q_resource = $query;
+    $this->neevo->add_log($this->build(), $time, $this->rows(true));
     return $query;
   }
 
@@ -537,93 +577,99 @@ class NeevoMySQLQuery {
    */
   public function build(){
 
-    $table = $this->neevo->prefix().$this->q_table;
+    if($this->q_sql){
+      $q = $this->q_sql;
+    }
+    else{
 
-    // WHERE statements
-    if($this->q_where){
-      $wheres = array();
-      $wheres2 = array();
-      $wheres3 = array();
+      $table = $this->neevo->prefix().$this->q_table;
 
-      // Set ADN glue for queries without glue defined
-      foreach ($this->q_where as $in_where) {
-        if($in_where[3]=='') $in_where[3] = 'AND';
-        $wheres[] = $in_where;
+      // WHERE statements
+      if($this->q_where){
+        $wheres = array();
+        $wheres2 = array();
+        $wheres3 = array();
+
+        // Set ADN glue for queries without glue defined
+        foreach ($this->q_where as $in_where) {
+          if($in_where[3]=='') $in_where[3] = 'AND';
+          $wheres[] = $in_where;
+        }
+
+        // Unset glue for last WHERE clause (defind by former loop)
+        unset($wheres[count($wheres)-1][3]);
+
+        // Join WHERE clause array to one string
+        foreach ($wheres as $in_where2) {
+          $wheres2[] = join(' ', $in_where2);
+        }
+        // Remove some spaces
+        foreach ($wheres2 as $rplc_where){
+          $wheres3[] = str_replace(array(' = ', ' != '), array('=', '!='), $rplc_where);
+        }
+
+        $where = " WHERE ".join(' ', $wheres3);
       }
 
-      // Unset glue for last WHERE clause (defind by former loop)
-      unset($wheres[count($wheres)-1][3]);
-
-      // Join WHERE clause array to one string
-      foreach ($wheres as $in_where2) {
-        $wheres2[] = join(' ', $in_where2);
+      // INSERT data
+      if($this->q_type == 'insert' && $this->q_data){
+        $icols=array();
+        $ivalues=array();
+        foreach(NeevoStatic::escape_array($this->q_data) as $col => $value){
+          $icols[]="`$col`";
+          $ivalues[]=$value;
+        }
+        $insert_data = " (".join(', ',$icols).") VALUES (".join(', ',$ivalues).")";
       }
-      // Remove some spaces
-      foreach ($wheres2 as $rplc_where){
-        $wheres3[] = str_replace(array(' = ', ' != '), array('=', '!='), $rplc_where);
+
+      // UPDATE data
+      if($this->q_type == 'update' && $this->q_data){
+        $update=array();
+        foreach(NeevoStatic::escape_array($this->q_data) as $col => $value){
+          $update[]="`$col`=$value";
+        }
+        $update_data = " SET " . join(', ', $update);
       }
 
-      $where = " WHERE ".join(' ', $wheres3);
-    }
-
-    // INSERT data
-    if($this->q_type == 'insert' && $this->q_data){
-      $icols=array();
-      $ivalues=array();
-      foreach(NeevoStatic::escape_array($this->q_data) as $col => $value){
-        $icols[]="`$col`";
-        $ivalues[]=$value;
+      // ORDER BY statements
+      if($this->q_order){
+        $orders = array();
+        foreach($this->q_order as $in_order) {
+          $orders[] = join(' ', $in_order);
+        }
+        $order = " ORDER BY ".join(', ', $orders);
       }
-      $insert_data = " (".join(', ',$icols).") VALUES (".join(', ',$ivalues).")";
-    }
 
-    // UPDATE data
-    if($this->q_type == 'update' && $this->q_data){
-      $update=array();
-      foreach(NeevoStatic::escape_array($this->q_data) as $col => $value){
-        $update[]="`$col`=$value";
+      // LIMIT & OFFSET
+      if($this->q_limit) $limit = " LIMIT ".$this->q_limit;
+      if($this->q_offset) $limit .= " OFFSET ".$this->q_offset;
+
+
+      // SELECT query
+      if($this->q_type == 'select'){
+        $q .= 'SELECT ';
+        $q .= join(', ', $this->q_columns);
+        $q .= ' FROM `'.$table.'`';
+        $q .= $where . $order . $limit;
       }
-      $update_data = " SET " . join(', ', $update);
-    }
-    
-    // ORDER BY statements
-    if($this->q_order){
-      $orders = array();
-      foreach($this->q_order as $in_order) {
-        $orders[] = join(' ', $in_order);
+
+      // INSERT query
+      if($this->q_type == 'insert'){
+        $q .= 'INSERT INTO `' . $table . '`';
+        $q .= $insert_data;
       }
-      $order = " ORDER BY ".join(', ', $orders);
-    }
 
-    // LIMIT & OFFSET
-    if($this->q_limit) $limit = " LIMIT ".$this->q_limit;
-    if($this->q_offset) $limit .= " OFFSET ".$this->q_offset;
+      // UPDATE query
+      if($this->q_type == 'update'){
+        $q .= 'UPDATE `' . $table .'`';
+        $q .= $update_data . $where . $order . $limit;
+      }
 
-
-    // SELECT query
-    if($this->q_type == 'select'){
-      $q .= 'SELECT ';
-      $q .= join(', ', $this->q_columns);
-      $q .= ' FROM `'.$table.'`';
-      $q .= $where . $order . $limit;
-    }
-
-    // INSERT query
-    if($this->q_type == 'insert'){
-      $q .= 'INSERT INTO `' . $table . '`';
-      $q .= $insert_data;
-    }
-
-    // UPDATE query
-    if($this->q_type == 'update'){
-      $q .= 'UPDATE `' . $table .'`';
-      $q .= $update_data . $where . $order . $limit;
-    }
-
-    // DELETE query
-    if($this->q_type == 'delete'){
-      $q .= 'DELETE FROM `' . $table . '`';
-      $q .= $where . $order . $limit;
+      // DELETE query
+      if($this->q_type == 'delete'){
+        $q .= 'DELETE FROM `' . $table . '`';
+        $q .= $where . $order . $limit;
+      }
     }
 
     return "$q;";
@@ -742,15 +788,12 @@ class NeevoStatic extends Neevo {
 
   /** Puts content to the file */
   public static function write_file($filename, $data) {
-    if(!function_exists('file_put_contents')){
-      $f = @fopen($filename, 'w');
-      if (!$f) return false;
-      else {
-        $content = fwrite($f, $data);
-        fclose($f);
-      }
+    $f = @fopen($filename, 'a+');
+    if (!$f) return false;
+    else {
+      $content = fwrite($f, $data);
+      fclose($f);
     }
-    else $content = file_put_contents($filename, $data);
 
     return $content;
   }

@@ -7,6 +7,7 @@
       table, td, th{border:1px solid #555;border-collapse:collapse}
       td, th{padding:2px 10px;text-align:left}
       th{background:#ddd}
+      #logfile{height:150px;overflow:auto;3px;border:1px solid #555}
     </style>
   </head>
 
@@ -26,6 +27,8 @@ $sql = new Neevo(array(
   'database' => 'neevo_demo',
   'encoding' => 'utf8'
 ));
+
+$sql->log(true, 'neevo.log');
 
 // Turn Neevo error reporting ON (0 for OFF, default: ON)
 $sql->errors(1);
@@ -102,6 +105,14 @@ foreach ($select_result as $row){
 
 ?>
 </table>
+
+    <pre>
+
+LOG file:
+<div id="logfile">
+<?php echo file_get_contents($sql->log_file); ?>
+</div>
+    </pre>
 
   </body>
 </html>
