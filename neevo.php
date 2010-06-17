@@ -1,6 +1,6 @@
 <?php
 /**
- * Neevo - Tiny open-source MySQL layer
+ * Neevo - Tiny open-source MySQL layer for PHP
  *
  * Copyright (c) 2010 Martin Srank (http://smasty.net)
  *
@@ -14,7 +14,7 @@
  * @version    0.01dev
  *
  * @todo mysql_data_seek;
- * @todo LOGfiles support;
+ * @todo LOG-files support;
  */
 
 
