@@ -7,7 +7,7 @@
       table, td, th{border:1px solid #555;border-collapse:collapse}
       td, th{padding:2px 10px;text-align:left}
       th{background:#ddd}
-      #logfile{height:150px;overflow:auto;3px;border:1px solid #555}
+      #logfile{height:150px;overflow:auto;border:1px solid #555}
     </style>
   </head>
 
@@ -28,6 +28,7 @@ $sql = new Neevo(array(
   'encoding' => 'utf8'
 ));
 
+// Log queries to file
 $sql->log(true, 'neevo.log');
 
 // Turn Neevo error reporting ON (0 for OFF, default: ON)
@@ -56,9 +57,12 @@ $update_data = array(
 
 // INSERT QUERY
 $insert = $sql->insert('client', $insert_data);
-$insert->dump();
-$insert_resource = $insert->run();
 
+// Echo highlighted query
+$insert->dump();
+// Run it
+$insert_resource = $insert->run();
+// Get info about query
 echo $insert->info(true). "\n\n";
 
 // UPDATE QUERY
@@ -68,6 +72,8 @@ $update_resource = $update->run();
 
 echo $update->info(true). "\n\n";
 
+// Do not logto file from here
+$sql->log(false);
 
 // DELETE QUERY
 $delete = $sql->delete('client')->where('mail', 'john@doe.name')->order('id DESC')->limit(1);
@@ -83,6 +89,8 @@ $select_one->dump();
 
 echo " Result: ". $sql->result( $select_one->run() ) ."\n\n";
 
+// Log to file again
+$sql->log(true);
 
 // SELECT QUERY
 $select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name LIKE', '%')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
