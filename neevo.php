@@ -277,23 +277,39 @@ class Neevo{
     $info = $this->options;
     unset($info['password']);
     $info['queries'] = $this->queries;
-    $info['last'] = $this->last;
+    $info['last'] = $html ? NeevoStatic::highlight_sql($this->last) : $this->last;
     $info['table_prefix'] = $this->prefix();
     $info['error_reporting'] = $this->errors();
+    $info['memory_usage'] = $this->memory();
 
     if(!$return_string) return $info;
     else{
       $er = array('off', 'on');
-      
-      $string = "Connected to database '{$info['database']}' on {$info['host']} as {$info['username']} user\n"
-      . "Database encoding: {$info['encoding']}\n"
-      . "Table prefix: {$info['table_prefix']}\n"
-      . "Error-reporting: {$er[$info['error_reporting']]}\n"
-      . "Executed queries: {$info['queries']}\n"
-      . "Last executed query: {$info['last']}\n";
 
-      return $html ? nl2br($string) : $string;
+      if($html){
+        $ot = "<strong>";
+        $ct = "</strong>";
+      }
+      
+      $string = "Connected to database $ot'{$info['database']}'$ct on $ot{$info['host']}$ct as $ot{$info['username']}$ct user\n"
+      . "$ot Database encoding:$ct {$info['encoding']}\n"
+      . "$ot Table prefix:$ct {$info['table_prefix']}\n"
+      . "$ot Error-reporting:$ct {$er[$info['error_reporting']]}\n"
+      . "$ot Executed queries:$ct {$info['queries']}\n"
+      . "$ot Last executed query:$ct {$info['last']}\n"
+      . "$ot Script memory usage:$ct {$info['memory_usage']}\n";
+
+      return $html ? NeevoStatic::nlbr($string) : $string;
     }
+  }
+
+
+  /**
+   * Returns script memory usage
+   * @return string
+   */
+  public function memory(){
+    return NeevoStatic::filesize(memory_get_usage(true));
   }
 
   /**
@@ -481,8 +497,8 @@ class NeevoMySQLQuery {
 
   /**
    * Prints consequential Query (highlighted by default)
-   * @param bool $color Highlight query or not
-   * @param bool $return_string Return the string or not
+   * @param bool $color Highlight query or not (default: yes)
+   * @param bool $return_string Return the string or not (default: no)
    */
   public function dump($color = true, $return_string = false){
     $code = $color ? NeevoStatic::highlight_sql($this->build()) : $this->build();
@@ -893,6 +909,12 @@ class NeevoStatic extends Neevo {
     }
 
     return $content;
+  }
+
+  /** Returns formatted filesize */
+  public static function filesize($bytes){
+    $unit=array('B','kB','MB','GB','TB','PB');
+    return @round($bytes/pow(1024,($i=floor(log($bytes,1024)))),2).' '.$unit[$i];
   }
 
 }

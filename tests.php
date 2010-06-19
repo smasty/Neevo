@@ -122,7 +122,11 @@ foreach ($select_result as $row){
 ?>
 </table>
 
-    <pre>
+<br>
+INFO:<br>
+
+<?php echo $sql->info(true, true);?>
+<pre>
 
 LOG file:
 <div id="logfile">
@@ -133,3 +137,6 @@ LOG file:
 
   </body>
 </html>
+<?php
+echo convert(memory_get_usage(true));
+?>
