@@ -60,6 +60,13 @@ $insert = $sql->insert('client', $insert_data);
 
 // Echo highlighted query
 $insert->dump();
+
+echo "\n Now unset 'city' column:\n\n";
+
+$insert->undo('value', 'city');
+
+$insert->dump();
+
 // Run it
 $insert_resource = $insert->run();
 // Get info about query
@@ -93,9 +100,10 @@ echo " Result: ". $sql->result( $select_one->run() ) ."\n\n";
 $sql->log(true);
 
 // SELECT QUERY
-$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name LIKE', '%')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
+$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
 $select->dump();
 $select_resource = $select->run();
+
 $select_result = $sql->fetch($select_resource);
 
 echo $select->info(true);
@@ -120,6 +128,7 @@ LOG file:
 <div id="logfile">
 <?php echo file_get_contents($sql->log_file); ?>
 </div>
+
     </pre>
 
   </body>

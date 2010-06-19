@@ -13,7 +13,6 @@
  * @package    neevo
  * @version    0.01dev
  *
- * @todo mysql_data_seek;
  */
 
 
@@ -74,7 +73,7 @@ class Neevo{
   /**
    * Connect to database
    * @param array $opts
-   * @return boolean
+   * @return bool
    */
   protected function connect(array $opts){
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
@@ -87,7 +86,7 @@ class Neevo{
   /**
    * Sets table names/encoding
    * @param string $encoding
-   * @return boolean
+   * @return bool
    */
   protected function set_encoding($encoding){
     if($encoding){
@@ -101,7 +100,7 @@ class Neevo{
   /**
    * Selects database to use
    * @param string $db_name
-   * @return boolean
+   * @return bool
    */
   protected function select_db($db_name){
     $select = @mysql_select_db($db_name, $this->resource_ID);
@@ -122,8 +121,8 @@ class Neevo{
 
   /**
    * Sets and/or returns error-reporting
-   * @param boolan $value
-   * @return boolean
+   * @param bool $value
+   * @return bool
    */
   public function errors($value = null){
     if(isset($value)) $this->error_reporting = $value;
@@ -134,13 +133,12 @@ class Neevo{
   /**
    * Performs Query
    * @param string $query Query to perform
-   * @param boolean $count Count this query or not?
+   * @param bool $count Count this query or not?
    * @return resource
    */
   public final function query($query, $count = true){
     $q = @mysql_query($query, $this->resource_ID);
     $count ? $this->queries++ : false;
-    $this->last_resource = $q;
     $this->last=$query;
     if($q) return $q;
     else return $this->error('Query failed');
@@ -242,6 +240,18 @@ class Neevo{
 
 
   /**
+   * Move internal result pointer
+   * @param resource $resource MySQL resource
+   * @param int $row_number Row number of the new result pointer.
+   * @return bool
+   */
+  public function seek($resource, $row_number){
+    $seek = @mysql_data_seek($resource, $row_number);
+    return $seek ? $seek : $this->error("Cannot seek to row $row_number");
+  }
+
+
+  /**
    * Generates E_USER_WARNING
    * @param string $err_neevo
    * @return false
@@ -259,8 +269,8 @@ class Neevo{
 
   /**
    * Returns some info about MySQL connection as an array or string
-   * @param boolean $return_string Return as a string or not (default: no)
-   * @param boolean $html Use HTML or not (default: no)
+   * @param bool $return_string Return as a string or not (default: no)
+   * @param bool $html Use HTML or not (default: no)
    * @return mixed
    */
   public function info($return_string = false, $html = false){
@@ -528,8 +538,8 @@ class NeevoMySQLQuery {
 
   /**
    * Returns some info about this Query as an array or string
-   * @param boolean $return_string Return as a string or not (default: no)
-   * @param boolean $html Use HTML or not (default: no)
+   * @param bool $return_string Return as a string or not (default: no)
+   * @param bool $html Use HTML or not (default: no)
    * @return mixed Info about Query
    */
   public function info($return_string = false, $html = false){
@@ -567,6 +577,94 @@ class NeevoMySQLQuery {
       return $html ? NeevoStatic::nlbr($string) : $string;
     }
 
+  }
+
+
+  /**
+   * Unsets defined parts of Query (WHERE conditions, ORDER BY clauses, affected columns (INSERT, UPDATE), LIMIT, etc.).
+   * @param string $sql_part Part of Query to unset. Possible values are: (string)
+   * <ul>
+     * <li><strong>where</strong> (for WHERE conditions)</li>
+     * <li><strong>order</strong> (for ORDER BY clauses)</li>
+     * <li><strong>column</strong> (for selected columns in SELECT queries)</li>
+     * <li><strong>value</strong> (for values to put/set in INSERT and UPDATE)</li>
+     * <li><strong>limit</strong> (for LIMIT clause)</li>
+     * <li><strong>offset</strong> (for OFFSET clause)</li>
+   * </ul>
+   * @param mixed $position Exact piece of Query part. This can be:
+   * <ul>
+     * <li>(int) <strong>Ordinal number of Query part piece</strong> (WHERE condition, ORDER BY clause, columns in SELECT queries) to unset.</li>
+     * <li>(string) <strong>Column name from defined values</strong> (values to put/set in INSERT and UPDATE queries) to unset.</li>
+     * <li>(array) <strong>Array of options (from pevious two)</strong> if you want to unset more than one piece of Query part (e.g 2nd and 3rd WHERE condition).</li>
+   * </ul>
+   * This argument is not required for LIMIT & OFFSET. Default is (int) 1. See example.
+   * @example <p>To unset 2nd WHERE condition from Query: <code>SELECT * FROM table WHERE id=5 OR name='John Doe' OR ...</code> use following: <code>$select->undo('where', 2);</code></p>
+   * <p>To unset 'name' column from Query: <code>UPDATE table SET name='John Doe', id=4 WHERE ...</code> use following: <code>$update->undo('value', 'name');</code></p>
+   * @return NeevoMySQLQuery
+   */
+  public function undo($sql_part, $position = 1){
+    switch (strtolower($sql_part)) {
+      case 'where':
+        $part = 'where';
+        break;
+
+      case 'order';
+      case 'order-by';
+      case 'order by';
+        $part = 'order';
+        break;
+
+      case 'column';
+      case 'columns';
+      case 'cols';
+      case 'col';
+        $part = 'columns';
+        break;
+
+      case 'data';
+      case 'value';
+      case 'values';
+        $part = 'data';
+        break;
+
+      case 'limit':
+        $part = 'limit';
+        $str = true;
+        break;
+
+      case 'offset':
+        $part = 'offset';
+        $str = true;
+        break;
+
+      default:
+        $this->neevo->error("Undo failed: No such Query part '$sql_part' supported for undo()");
+        break;
+    }
+    
+    $part = "q_$part";
+
+    if($str){
+
+      unset($this->$part);
+    }
+    else{
+      if(isset($this->$part)){
+        $positions = array();
+        if(!is_array($position)) $positions[] = $position;
+        foreach ($positions as $pos) {
+          $pos = is_numeric($pos) ? $pos-1 : $pos;
+          $apart = $this->$part;
+          unset($apart[$pos]);
+          foreach($apart as $key=>$value){
+            $loop[$key] = $value;
+          }
+          $this->$part = $loop;
+        }
+      } else $this->neevo->error("Undo failed: No such Query part '$sql_part' for this kind of Query");
+    }
+
+    return $this;
   }
 
 
