@@ -122,11 +122,11 @@ foreach ($select_result as $row){
 ?>
 </table>
 
-<br>
-INFO:<br>
+<pre>
+INFO:
 
 <?php echo $sql->info(true, true);?>
-<pre>
+
 
 LOG file:
 <div id="logfile">

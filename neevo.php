@@ -291,7 +291,7 @@ class Neevo{
         $ct = "</strong>";
       }
       
-      $string = "Connected to database $ot'{$info['database']}'$ct on $ot{$info['host']}$ct as $ot{$info['username']}$ct user\n"
+      $string = " Connected to database $ot'{$info['database']}'$ct on $ot{$info['host']}$ct as $ot{$info['username']}$ct user\n"
       . "$ot Database encoding:$ct {$info['encoding']}\n"
       . "$ot Table prefix:$ct {$info['table_prefix']}\n"
       . "$ot Error-reporting:$ct {$er[$info['error_reporting']]}\n"
