@@ -197,10 +197,10 @@ class Neevo{
   /** 
    * Fetches data from given Query resource
    * @param string $query MySQL (SELECT) query
-   * @param int $type Result data as: Possible values:<pre>
-   *    - Neevo::ASSOC  (1) - fetches an array with associative arrays as table rows
-   *    - Neevo::NUM    (2) - fetches an array with numeric arrays as table rows
-   *    - Neevo::OBJECT (3) - fetches an array with objects as table rows</pre>
+   * @param int $type Result data as: Possible values:<ul>
+   *  <li>Neevo::ASSOC  (1) - fetches an array with associative arrays as table rows</li>
+   *  <li>Neevo::NUM    (2) - fetches an array with numeric arrays as table rows</li>
+   *  <li>Neevo::OBJECT (3) - fetches an array with objects as table rows</li></ul>
    * @return array Associative array built from query
    */
   public function fetch($query, $type=1){
@@ -220,34 +220,15 @@ class Neevo{
         $arr[]=$tmp_arr;
       }
     }
-    if(count($arr)==1) $arr = $arr[0];
+    if(count($arr)==1){
+      $arr = $arr[0];
+      if(count($arr)==1){
+        $result = array_values($arr);
+        $arr = $result[0];
+      }
+    }
     return $query ? $arr : $this->error("Fetching result data failed");
     @mysql_free_result($query);
-  }
-
-
-  /** Returns data from given MySQL query
-   *
-   * {@source}
-   * @param string $query MySQL (SELECT) query
-   * @param int $jump Jump to result row number (starts from 0)
-   * @return string Result data
-   */
-  public function result($query, $jump=0){
-    return $query ? @mysql_result($query, $jump) :$this->error("Return data failed");
-    @mysql_free_result($query);
-  }
-
-
-  /**
-   * Move internal result pointer
-   * @param resource $resource MySQL resource
-   * @param int $row_number Row number of the new result pointer.
-   * @return bool
-   */
-  public function seek($resource, $row_number){
-    $seek = @mysql_data_seek($resource, $row_number);
-    return $seek ? $seek : $this->error("Cannot seek to row $row_number");
   }
 
 
@@ -524,6 +505,33 @@ class NeevoMySQLQuery {
 
 
   /**
+   * Shorthand for NeevoMySQLQuery->run() and Neevo->fetch()
+   * @param int $type Result data as: Possible values:<ul>
+   *  <li>Neevo::ASSOC  (1) - fetches an array with associative arrays as table rows</li>
+   *  <li>Neevo::NUM    (2) - fetches an array with numeric arrays as table rows</li>
+   *  <li>Neevo::OBJECT (3) - fetches an array with objects as table rows</li></ul>
+   * @return mixed Array or string (if only one value is returned).
+   */
+  public function fetch($type = 1){
+    $resource = is_resource($this->q_resource) ? $this->q_resource : $this->run();
+    return $this->neevo->fetch($resource, $type);
+  }
+
+
+  /**
+   * Move internal result pointer
+   * @param int $row_number Row number of the new result pointer.
+   * @return bool
+   */
+  public function seek($row_number){
+    if(!is_resource($this->q_resource)) $this->run();
+    
+    $seek = @mysql_data_seek($this->q_resource, $row_number);
+    return $seek ? $seek : $this->error("Cannot seek to row $row_number");
+  }
+
+
+  /**
    * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
    * @param bool $string Return rows as a string ("Rows: 5", "Affected: 10"). Default: FALSE
    * @return mixed Number of rows (int) or FALSE if used on invalid query.
@@ -560,6 +568,7 @@ class NeevoMySQLQuery {
    */
   public function info($return_string = false, $html = false){
     $noexec = 'not yet executed';
+    $noselect = 'not SELECT query';
 
     $exec_time = $this->time() ? $this->time() : -1;
     $rows = $this->time() ? $this->rows() : -1;
@@ -571,6 +580,8 @@ class NeevoMySQLQuery {
       'rows' => $rows
     );
 
+    if($this->q_type == 'select') $info['query_resource'] = $this->q_resource;
+
     if(!$return_string) return $info;
     
     else{
@@ -580,6 +591,8 @@ class NeevoMySQLQuery {
       if($info['rows']==-1) $info['rows'] = $noexec;
       $rows_prefix = ($this->q_type != 'select') ? "Affected" : "Fetched";
 
+      $query_resource = ($this->q_type == 'select') ? $info['query_resource'] : $noselect;
+
       if($html){
         $ot = "<strong>";
         $ct = "</strong>";
@@ -587,6 +600,7 @@ class NeevoMySQLQuery {
 
       $string = "$ot Query-string:$ct {$info['query']}\n"
       . "$ot Resource:$ct {$info['resource']}\n"
+      . "$ot Query resource:$ct $query_resource\n"
       . "$ot Execution time:$ct {$info['exec_time']}\n"
       . "$ot $rows_prefix rows:$ct {$info['rows']}\n";
 

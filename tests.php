@@ -61,7 +61,7 @@ $insert = $sql->insert('client', $insert_data);
 // Echo highlighted query
 $insert->dump();
 
-echo "\n Now unset 'city' column:\n\n";
+echo " Now unset 'city' column:\n";
 
 $insert->undo('value', 'city');
 
@@ -69,44 +69,42 @@ $insert->dump();
 
 // Run it
 $insert_resource = $insert->run();
-// Get info about query
-echo $insert->info(true). "\n\n";
+
+echo "\n\n";
 
 // UPDATE QUERY
 $update = $sql->update('client', $update_data)->where('name', 'John Doe')->where('id !=', 101)->order('id DESC');
-$update->dump();
 $update_resource = $update->run();
 
-echo $update->info(true). "\n\n";
+echo $update->info(true, true). "\n\n";
 
 // Do not logto file from here
 $sql->log(false);
 
 // DELETE QUERY
 $delete = $sql->delete('client')->where('mail', 'john@doe.name')->order('id DESC')->limit(1);
-$delete->dump();
 $delete_resource = $delete->run();
 
-echo $delete->info(true). "\n\n";
+echo $delete->info(true, true). "\n\n";
 
 
 // SELECT ONE VALUE
 $select_one = $sql->select('name', 'client')->where('id', 101);
 $select_one->dump();
 
-echo " Result: ". $sql->result( $select_one->run() ) ."\n\n";
+echo " Result: ". $select_one->fetch() ."\n\n";
 
 // Log to file again
 $sql->log(true);
 
 // SELECT QUERY
 $select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
-$select->dump();
-$select_resource = $select->run();
 
-$select_result = $sql->fetch($select_resource);
+$select->seek(2);
 
-echo $select->info(true);
+$select_result = $select->fetch();
+
+echo $select->info(true, true);
 ?>
 
  Results:</pre>
@@ -137,6 +135,3 @@ LOG file:
 
   </body>
 </html>
-<?php
-echo convert(memory_get_usage(true));
-?>
