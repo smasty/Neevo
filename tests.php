@@ -63,11 +63,12 @@ $insert->dump();
 
 echo " Now unset 'city' column:\n";
 
+// Unset 'city' column from values
 $insert->undo('value', 'city');
 
 $insert->dump();
 
-// Run it
+// Run query
 $insert_resource = $insert->run();
 
 echo "\n\n";
@@ -76,9 +77,10 @@ echo "\n\n";
 $update = $sql->update('client', $update_data)->where('name', 'John Doe')->where('id !=', 101)->order('id DESC');
 $update_resource = $update->run();
 
+// Get info about query (1. return as a string, 2. return as HTML)
 echo $update->info(true, true). "\n\n";
 
-// Do not logto file from here
+// Do not log to file from here
 $sql->log(false);
 
 // DELETE QUERY
@@ -100,8 +102,10 @@ $sql->log(true);
 // SELECT QUERY
 $select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
 
+// Seek to 3rd row of resource (counting from zero)
 $select->seek(2);
 
+// Fetch results
 $select_result = $select->fetch();
 
 echo $select->info(true, true);
@@ -112,7 +116,7 @@ echo $select->info(true, true);
 
 <?php
 
-
+// Loop and print results
 foreach ($select_result as $row){
   echo "<tr><td>". $row['id'] ."<td>". $row['name'] ."<td>". $row['mail'] ."<td>". $row['city'] ."<td><code>". $row['mail_hash'] ."\n";
 }
@@ -123,7 +127,9 @@ foreach ($select_result as $row){
 <pre>
 INFO:
 
-<?php echo $sql->info(true, true);?>
+<?php
+// Info about Neevo connections
+echo $sql->info(true, true);?>
 
 
 LOG file:
