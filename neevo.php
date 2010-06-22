@@ -136,9 +136,9 @@ class Neevo{
    * @param bool $count Count this query or not?
    * @return resource
    */
-  public final function query($query, $count = true){
+  public final function query($query){
     $q = @mysql_query($query, $this->resource_ID);
-    $count ? $this->queries++ : false;
+    $this->queries++;
     $this->last=$query;
     if($q) return $q;
     else return $this->error('Query failed');
@@ -316,7 +316,8 @@ class Neevo{
 
   public function add_log($query, $exectime, $affrows){
     if($this->logging && $this->log_file){
-      $time = strftime("%c");
+      setlocale(LC_TIME, "en_US");
+      $time = strftime("%a %d/%b/%Y %H:%M:%S %z");
       $ip = $_SERVER["REMOTE_ADDR"];
       $log = "[$time] [client $ip] [$query] [$exectime sec] [$affrows]\n";
       return NeevoStatic::write_file($this->log_file, $log);
