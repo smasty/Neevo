@@ -10,14 +10,14 @@
  * @copyright  Copyright (c) 2010 Martin Srank (http://smasty.net)
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT license
  * @link       http://labs.smasty.net/neevo/
- * @package    neevo
+ * @package    Neevo
  * @version    0.01dev
  *
  */
 
 
 /** Main Neevo layer class
- * @package neevo
+ * @package Neevo
  */
 class Neevo{
 
@@ -72,6 +72,7 @@ class Neevo{
 
   /**
    * Connect to database
+   * @access private
    * @param array $opts
    * @return bool
    */
@@ -85,6 +86,7 @@ class Neevo{
 
   /**
    * Sets table names/encoding
+   * @access private
    * @param string $encoding
    * @return bool
    */
@@ -99,6 +101,7 @@ class Neevo{
 
   /**
    * Selects database to use
+   * @access private
    * @param string $db_name
    * @return bool
    */
@@ -110,7 +113,7 @@ class Neevo{
 
   /**
    * Sets and/or returns table prefix
-   * @param string $prefix
+   * @param string $prefix Table prefix to set
    * @return mixed
    */
   public function prefix($prefix = null){
@@ -121,7 +124,7 @@ class Neevo{
 
   /**
    * Sets and/or returns error-reporting
-   * @param bool $value
+   * @param bool $value Boolean value of error-reporting
    * @return bool
    */
   public function errors($value = null){
@@ -132,8 +135,8 @@ class Neevo{
 
   /**
    * Performs Query
+   * @access private
    * @param string $query Query to perform
-   * @param bool $count Count this query or not?
    * @return resource
    */
   public final function query($query){
@@ -164,7 +167,7 @@ class Neevo{
    * @param array $data Associative array of values to insert in format column_name=>column_value
    * @return NeevoMySQLQuery
    */
-  public final function insert($table,array $data){
+  public final function insert($table, array $data){
     $q = new NeevoMySQLQuery($this, 'insert', $table);
     $q->data($data);
     return $q;
@@ -177,7 +180,7 @@ class Neevo{
    * @param array $data Associative array of values for update in format column_name=>column_value
    * @return NeevoMySQLQuery
    */
-  public final function update($table,array $data){
+  public final function update($table, array $data){
     $q = new NeevoMySQLQuery($this, 'update', $table);
     $q->data($data);
     return $q;
@@ -220,8 +223,10 @@ class Neevo{
         $arr[]=$tmp_arr;
       }
     }
+    // Only 1 row
     if(count($arr)==1){
       $arr = $arr[0];
+      // Only 1 column
       if(count($arr)==1){
         $result = array_values($arr);
         $arr = $result[0];
@@ -234,6 +239,7 @@ class Neevo{
 
   /**
    * Generates E_USER_WARNING
+   * @access private
    * @param string $err_neevo
    * @return false
    */
@@ -251,7 +257,7 @@ class Neevo{
   /**
    * Returns some info about MySQL connection as an array or string
    * @param bool $return_string Return as a string or not (default: no)
-   * @param bool $html Use HTML or not (default: no)
+   * @param bool $html Use HTML (for highlighting, etc.) or not (default: no)
    * @return mixed
    */
   public function info($return_string = false, $html = false){
@@ -294,9 +300,9 @@ class Neevo{
   }
 
   /**
-   * Set loggng for Neevo
-   * @param bool $state Log queries or not (true/false)
-   * @param string $filename Path to file for logging (directory must be writeable). Default: "neevo.log"
+   * Sets logging to file for Neevo
+   * @param bool $state Log queries to file or not (true/false)
+   * @param string $filename Path to file for logging (directory must be writeable). Default: "./neevo.log"
    * @return bool
    */
   public function log($state, $filename = './neevo.log'){
@@ -314,6 +320,15 @@ class Neevo{
     }
   }
 
+
+  /**
+   * Adds record to log-file.
+   * @access private
+   * @param string $query
+   * @param float $exectime
+   * @param string $affrows
+   * @return bool
+   */
   public function add_log($query, $exectime, $affrows){
     if($this->logging && $this->log_file){
       setlocale(LC_TIME, "en_US");
@@ -331,7 +346,7 @@ class Neevo{
 
 
 /** Neevo class for MySQL query abstraction
- * @package neevo
+ * @package Neevo
  */
 class NeevoMySQLQuery {
 
@@ -340,8 +355,8 @@ class NeevoMySQLQuery {
 
 
   /**
-   * Constructor
-   * @param array $options
+   * Query base constructor
+   * @param array $object Reference to instance of Neevo class which initialized Query.
    * @param string $type Query type. Possible values: select, insert, update, delete
    * @param string $table Table to interact with
    */
@@ -365,7 +380,7 @@ class NeevoMySQLQuery {
 
 
   /**
-   * Sets query type. Possibe values: select, insert, update, delete)
+   * Sets query type. Possibe values: select, insert, update, delete
    * @param string $type
    * @return NeevoMySQLQuery
    */
@@ -376,7 +391,7 @@ class NeevoMySQLQuery {
 
 
   /**
-   * Use this method for running direct SQL code.
+   * Method for running direct SQL code.
    * @param string $sql Direct SQL code
    * @return NeevoMySQLQuery
    */
@@ -388,7 +403,7 @@ class NeevoMySQLQuery {
 
   /**
    * Sets columns to retrive in SELECT queries
-   * @param mixed $columns
+   * @param mixed $columns Array or comma-separated list of columns.
    * @return NeevoMySQLQuery
    */
   public function cols($columns){
@@ -410,7 +425,7 @@ class NeevoMySQLQuery {
 
   /**
    * Data for INSERT and UPDATE queries
-   * @param array $data data in format "$column=>$value"
+   * @param array $data Data in format "$column=>$value"
    * @return NeevoMySQLQuery
    */
   public function data(array $data){
@@ -422,7 +437,7 @@ class NeevoMySQLQuery {
   /**
    * Sets WHERE condition for Query
    * @param string $where Column to use and optionaly operator: "email LIKE" or "email !="
-   * @param string $value Value to search for: "%&#64;example.%" or "spam&#64;example.com"
+   * @param string $value Value to search for: "%@example.%" or "spam@example.com"
    * @param string $glue Operator (AND, OR, etc.) to use betweet this and next WHERE condition
    * @return NeevoMySQLQuery
    */
@@ -613,24 +628,26 @@ class NeevoMySQLQuery {
 
   /**
    * Unsets defined parts of Query (WHERE conditions, ORDER BY clauses, affected columns (INSERT, UPDATE), LIMIT, etc.).
+   *
+   * <p>To unset 2nd WHERE condition from Query: <code>SELECT * FROM table WHERE id=5 OR name='John Doe' OR ...</code> use following: <code>$select->undo('where', 2);</code></p>
+   * <p>To unset 'name' column from Query: <code>UPDATE table SET name='John Doe', id=4 WHERE ...</code> use following: <code>$update->undo('value', 'name');</code></p>
+   *
    * @param string $sql_part Part of Query to unset. Possible values are: (string)
    * <ul>
-     * <li><strong>where</strong> (for WHERE conditions)</li>
-     * <li><strong>order</strong> (for ORDER BY clauses)</li>
-     * <li><strong>column</strong> (for selected columns in SELECT queries)</li>
-     * <li><strong>value</strong> (for values to put/set in INSERT and UPDATE)</li>
-     * <li><strong>limit</strong> (for LIMIT clause)</li>
-     * <li><strong>offset</strong> (for OFFSET clause)</li>
+     * <li>where (for WHERE conditions)</li>
+     * <li>order (for ORDER BY clauses)</li>
+     * <li>column (for selected columns in SELECT queries)</li>
+     * <li>value (for values to put/set in INSERT and UPDATE)</li>
+     * <li>limit (for LIMIT clause)</li>
+     * <li>offset (for OFFSET clause)</li>
    * </ul>
    * @param mixed $position Exact piece of Query part. This can be:
    * <ul>
-     * <li>(int) <strong>Ordinal number of Query part piece</strong> (WHERE condition, ORDER BY clause, columns in SELECT queries) to unset.</li>
-     * <li>(string) <strong>Column name from defined values</strong> (values to put/set in INSERT and UPDATE queries) to unset.</li>
-     * <li>(array) <strong>Array of options (from pevious two)</strong> if you want to unset more than one piece of Query part (e.g 2nd and 3rd WHERE condition).</li>
+     * <li>(int) Ordinal number of Query part piece (WHERE condition, ORDER BY clause, columns in SELECT queries) to unset.</li>
+     * <li>(string) Column name from defined values (values to put/set in INSERT and UPDATE queries) to unset.</li>
+     * <li>(array) Array of options (from pevious two) if you want to unset more than one piece of Query part (e.g 2nd and 3rd WHERE condition).</li>
    * </ul>
    * This argument is not required for LIMIT & OFFSET. Default is (int) 1. See example.
-   * @example <p>To unset 2nd WHERE condition from Query: <code>SELECT * FROM table WHERE id=5 OR name='John Doe' OR ...</code> use following: <code>$select->undo('where', 2);</code></p>
-   * <p>To unset 'name' column from Query: <code>UPDATE table SET name='John Doe', id=4 WHERE ...</code> use following: <code>$update->undo('value', 'name');</code></p>
    * @return NeevoMySQLQuery
    */
   public function undo($sql_part, $position = 1){
@@ -809,7 +826,7 @@ class NeevoMySQLQuery {
 
 
 /** Main Neevo class for some additional static methods
- * @package neevo
+ * @package Neevo
  */
 class NeevoStatic extends Neevo {
 
@@ -836,17 +853,6 @@ class NeevoStatic extends Neevo {
 
     $sql = str_replace($chcolors, $hcolors, $sql);
     return "<code style=\"color:".self::$highlight_colors['columns'].";background:".self::$highlight_colors['background']."\"> $sql </code>\n";
-  }
-
-  /** Replaces placeholders in string with value/s from array/string (not used!)
-   *
-   * @param string String with placeholders '%1, etc.'
-   * @param mixed Array/string with values to replace
-   * @return string Replaced string
-   */
-  public static function printf($string, $values){
-    preg_match_all("/\%(\d*)/", $string, $replace);
-    return str_replace($replace[0], is_array($values) ? self::escape_array($values) : self::escape_string($values), $string);
   }
 
   /** Escapes whole array for use in MySQL */
