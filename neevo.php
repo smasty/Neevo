@@ -136,11 +136,11 @@ class Neevo{
   /**
    * Performs Query
    * @access private
-   * @param string $query Query to perform
+   * @param NeevoMySQLQuery $query Query to perform.
    * @return resource
    */
-  public final function query($query){
-    $q = @mysql_query($query, $this->resource_ID);
+  public final function query(NeevoMySQLQuery $query){
+    $q = @mysql_query($query->build(), $this->resource_ID);
     $this->queries++;
     $this->last=$query;
     if($q) return $q;
@@ -264,7 +264,7 @@ class Neevo{
     $info = $this->options;
     unset($info['password']);
     $info['queries'] = $this->queries;
-    $info['last'] = $html ? NeevoStatic::highlight_sql($this->last) : $this->last;
+    $info['last'] = $html ? NeevoStatic::highlight_sql($this->last->build()) : $this->last;
     $info['table_prefix'] = $this->prefix();
     $info['error_reporting'] = $this->errors();
     $info['memory_usage'] = $this->memory();
@@ -409,16 +409,7 @@ class NeevoMySQLQuery {
   public function cols($columns){
     if(!is_array($columns)) $columns = explode(',', $columns);
     $cols = array();
-    foreach ($columns as $col) {
-      $col = trim($col);
-      if($col!='*'){
-        if(NeevoStatic::is_as_construction($col)) $col = NeevoStatic::escape_as_construction($col);
-        elseif(NeevoStatic::is_sql_function($col)) $col = NeevoStatic::escape_sql_function($col);
-        else $col = "`$col`";
-      }
-      $cols[] = $col;
-    }
-    $this->q_columns = $cols;
+    $this->q_columns = $columns;
     return $this;
   }
 
@@ -447,11 +438,6 @@ class NeevoMySQLQuery {
     if(!isset($where_condition[1])) $where_condition[1] = '=';
     $column = $where_condition[0];
 
-    if(NeevoStatic::is_sql_function($column)) $column = NeevoStatic::escape_sql_function($column);
-    else $column = "`$column`";
-
-    $value = NeevoStatic::escape_string($value);
-
     $condition = array($column, $where_condition[1], $value, strtoupper($glue));
 
     $this->q_where[] = $condition;
@@ -470,7 +456,6 @@ class NeevoMySQLQuery {
     $arguments = func_get_args();
     foreach ($arguments as $argument) {
       $order_rule = explode(' ', $argument);
-      $order_rule[0] = "`".$order_rule[0]."`";
       $rules[] = $order_rule;
     }
     $this->q_order = $rules;
@@ -510,7 +495,7 @@ class NeevoMySQLQuery {
    */
   public function run(){
     $start = explode(" ", microtime());
-    $query = $this->neevo->query($this->build());
+    $query = $this->neevo->query($this);
     $end = explode(" ", microtime());
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
     $this->time($time);
@@ -543,7 +528,17 @@ class NeevoMySQLQuery {
     if(!is_resource($this->q_resource)) $this->run();
     
     $seek = @mysql_data_seek($this->q_resource, $row_number);
-    return $seek ? $seek : $this->error("Cannot seek to row $row_number");
+    return $seek ? $seek : $this->neevo->error("Cannot seek to row $row_number");
+  }
+
+
+  /**
+   * Randomize result order. (Shorthand for NeevoMySQLQuery->order('RAND()');)
+   * @return NeevoMySQLQuery
+   */
+  public function rand(){
+    $this->order('RAND()');
+    return $this;
   }
 
 
@@ -735,18 +730,21 @@ class NeevoMySQLQuery {
         $wheres2 = array();
         $wheres3 = array();
 
-        // Set ADN glue for queries without glue defined
+        // Set AND glue for queries without glue defined
         foreach ($this->q_where as $in_where) {
           if($in_where[3]=='') $in_where[3] = 'AND';
           $wheres[] = $in_where;
         }
+        unset($in_where);
 
         // Unset glue for last WHERE clause (defind by former loop)
         unset($wheres[count($wheres)-1][3]);
 
         // Join WHERE clause array to one string
-        foreach ($wheres as $in_where2) {
-          $wheres2[] = join(' ', $in_where2);
+        foreach ($wheres as $in_where) {
+          $in_where[0] = (NeevoStatic::is_sql_function($in_where[0])) ? NeevoStatic::escape_sql_function($in_where[0]) : "`{$in_where[0]}`";
+          $in_where[2] = NeevoStatic::escape_string($in_where[2]);
+          $wheres2[] = join(' ', $in_where);
         }
         // Remove some spaces
         foreach ($wheres2 as $rplc_where){
@@ -780,6 +778,7 @@ class NeevoMySQLQuery {
       if($this->q_order){
         $orders = array();
         foreach($this->q_order as $in_order) {
+          $in_order[0] = (NeevoStatic::is_sql_function($in_order[0])) ? $in_order[0] : "`".$in_order[0]."`";
           $orders[] = join(' ', $in_order);
         }
         $order = " ORDER BY ".join(', ', $orders);
@@ -792,8 +791,19 @@ class NeevoMySQLQuery {
 
       // SELECT query
       if($this->q_type == 'select'){
+        $cols = array();
+        foreach ($this->q_columns as $col) {
+          $col = trim($col);
+          if($col!='*'){
+            if(NeevoStatic::is_as_construction($col)) $col = NeevoStatic::escape_as_construction($col);
+            elseif(NeevoStatic::is_sql_function($col)) $col = NeevoStatic::escape_sql_function($col);
+            else $col = "`$col`";
+          }
+          $cols[] = $col;
+        }
+
         $q .= 'SELECT ';
-        $q .= join(', ', $this->q_columns);
+        $q .= join(', ', $cols);
         $q .= ' FROM `'.$table.'`';
         $q .= $where . $order . $limit;
       }
@@ -830,7 +840,7 @@ class NeevoMySQLQuery {
  */
 class NeevoStatic extends Neevo {
 
-  protected static $sql_functions=array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK');
+  protected static $sql_functions=array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK', 'RAND');
 
   /** Highlights given MySQL query */
   public static function highlight_sql($sql){

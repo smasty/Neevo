@@ -100,7 +100,7 @@ echo " Result: ". $select_one->fetch() ."\n\n";
 $sql->log(true);
 
 // SELECT QUERY
-$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'mail ASC', 'name')->limit(10);
+$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'name ASC')->limit(10);
 
 // Seek to 3rd row of resource (counting from zero)
 $select->seek(2);
@@ -109,6 +109,7 @@ $select->seek(2);
 $select_result = $select->fetch();
 
 echo $select->info(true, true);
+
 ?>
 
  Results:</pre>
