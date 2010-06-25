@@ -264,7 +264,7 @@ class Neevo{
     $info = $this->options;
     unset($info['password']);
     $info['queries'] = $this->queries;
-    $info['last'] = $html ? NeevoStatic::highlight_sql($this->last->build()) : $this->last;
+    $info['last'] = $html ? NeevoStatic::highlight_sql($this->last->build()) : $this->last->build();
     $info['table_prefix'] = $this->prefix();
     $info['error_reporting'] = $this->errors();
     $info['memory_usage'] = $this->memory();
