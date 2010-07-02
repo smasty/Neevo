@@ -204,7 +204,7 @@ class Neevo{
    *  <li>Neevo::ASSOC  (1) - fetches an array with associative arrays as table rows</li>
    *  <li>Neevo::NUM    (2) - fetches an array with numeric arrays as table rows</li>
    *  <li>Neevo::OBJECT (3) - fetches an array with objects as table rows</li></ul>
-   * @return array Associative array built from query
+   * @return mixed Array or string (if only one value is returned) or 0 (zero; if nothing is returned).
    */
   public function fetch($query, $type=1){
     $arr=array();
@@ -232,6 +232,8 @@ class Neevo{
         $arr = $result[0];
       }
     }
+    if(!count($arr)) $arr = 0;
+
     return $query ? $arr : $this->error("Fetching result data failed");
     @mysql_free_result($query);
   }
@@ -511,7 +513,7 @@ class NeevoMySQLQuery {
    *  <li>Neevo::ASSOC  (1) - fetches an array with associative arrays as table rows</li>
    *  <li>Neevo::NUM    (2) - fetches an array with numeric arrays as table rows</li>
    *  <li>Neevo::OBJECT (3) - fetches an array with objects as table rows</li></ul>
-   * @return mixed Array or string (if only one value is returned).
+   * @return mixed Array or string (if only one value is returned) or 0 (zero; if nothing is returned).
    */
   public function fetch($type = 1){
     $resource = is_resource($this->q_resource) ? $this->q_resource : $this->run();
