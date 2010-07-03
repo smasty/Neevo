@@ -879,7 +879,7 @@ class NeevoStatic extends Neevo {
   /** Escapes given string for use in MySQL */
   public static function escape_string($string){
     $string=str_replace('\'', '\\\'' ,$string);
-    return is_string($string) ? ( self::is_sql_function($string) ? self::escape_sql_function($string) : "'$string'" ) : $string;
+    return is_numeric($string) ? $string : ( is_string($string) ? ( self::is_sql_function($string) ? self::escape_sql_function($string) : "'$string'" ) : $string );
   }
 
   /** Checks whether a given string is a SQL function or not */
