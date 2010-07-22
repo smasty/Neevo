@@ -23,31 +23,17 @@ class Neevo{
 
 /*  VARIABLES  */
 
-  var $resource_ID;
+  var $resource;
   var $queries = 0;
   var $last = '';
   var $error_reporting = 1;
-  var $logging = false;
-  var $log_file = '';
   var $table_prefix = '';
   private $options = array();
-
-  /** @var array Array of HTML colors for SQL highlighter */
-  static $highlight_colors = array(
-    'background' => '#f9f9f9',
-    'columns'    => '#0000ff',
-    'chars'      => '#000000',
-    'keywords'   => '#008000',
-    'joins'      => '#555555',
-    'functions'  => '#008000',
-    'constants'  => '#ff0000'
-    );
 
 
 /*  CONSTANTS  */
   const ASSOC=1;
-  const NUM=2;
-  const OBJECT=3;
+  const OBJECT=2;
 
 
   /**
@@ -78,9 +64,10 @@ class Neevo{
    */
   protected function connect(array $opts){
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
-    $this->resource_ID = $connection;
+    $this->resource = $connection;
     $this->options = $opts;
-    return (bool) $connection or self::error("Connection to host '".$opts['host']."' failed");
+    if(!is_resource($connection)) throw new NeevoException("Connection to host '".$opts['host']."' failed");
+    return (bool) $connection;
   }
 
 
@@ -106,8 +93,9 @@ class Neevo{
    * @return bool
    */
   protected function select_db($db_name){
-    $select = @mysql_select_db($db_name, $this->resource_ID);
-    return (bool) $select or $this->error("Failed selecting database '$db_name'");
+    $select = @mysql_select_db($db_name, $this->resource);
+    if(!$select) throw new NeevoException("Failed selecting database '$db_name'");
+    return $select;
   }
 
 
@@ -127,11 +115,10 @@ class Neevo{
    * @param bool $value Boolean value of error-reporting
    * @return bool
    */
-  public function errors($value = null){
+  public function error_reporting($value = null){
     if(isset($value)) $this->error_reporting = $value;
     return $this->error_reporting;
   }
-
 
   /**
    * Performs Query
@@ -140,7 +127,7 @@ class Neevo{
    * @return resource
    */
   public final function query(NeevoMySQLQuery $query){
-    $q = @mysql_query($query->build(), $this->resource_ID);
+    $q = @mysql_query($query->build(), $this->resource);
     $this->queries++;
     $this->last=$query;
     if($q) return $q;
@@ -197,50 +184,8 @@ class Neevo{
   }
 
 
-  /** 
-   * Fetches data from given Query resource
-   * @param string $query MySQL (SELECT) query
-   * @param int $type Result data as: Possible values:<ul>
-   *  <li>Neevo::ASSOC  (1) - fetches an array with associative arrays as table rows</li>
-   *  <li>Neevo::NUM    (2) - fetches an array with numeric arrays as table rows</li>
-   *  <li>Neevo::OBJECT (3) - fetches an array with objects as table rows</li></ul>
-   * @return mixed Array or string (if only one value is returned) or 0 (zero; if nothing is returned).
-   */
-  public function fetch($query, $type=1){
-    $arr=array();
-    if($type==1){ // Assoc
-      while($tmp_arr=@mysql_fetch_assoc($query)){
-        $arr[]=$tmp_arr;
-      }
-    }
-    if($type==2){ // Numeric
-      while($tmp_arr=@mysql_fetch_row($query)){
-        $arr[]=$tmp_arr;
-      }
-    }
-    if($type==3){ // Object
-      while($tmp_arr=@mysql_fetch_object($query)){
-        $arr[]=$tmp_arr;
-      }
-    }
-    // Only 1 row
-    if(count($arr)==1){
-      $arr = $arr[0];
-      // Only 1 column
-      if(count($arr)==1){
-        $result = array_values($arr);
-        $arr = $result[0];
-      }
-    }
-    if(!count($arr)) $arr = 0;
-
-    return $query ? $arr : $this->error("Fetching result data failed");
-    @mysql_free_result($query);
-  }
-
-
   /**
-   * Generates E_USER_WARNING
+   * If error_reporting is turned on, throws NeevoException available to catch.
    * @access private
    * @param string $err_neevo
    * @return false
@@ -248,48 +193,28 @@ class Neevo{
   public function error($err_neevo){
     $err_string = mysql_error();
     $err_no = mysql_errno();
-    $err = "<b>Neevo error</b> ($err_no) - ";
+    $err = "Neevo error - ";
     $err .= $err_neevo;
     $err_string = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $err_string);
     $err .= ". $err_string";
-    if($this->errors()) trigger_error($err, E_USER_WARNING);
+    if($this->error_reporting()) throw new NeevoException($err);
     return false;
   }
 
   /**
-   * Returns some info about MySQL connection as an array or string
-   * @param bool $return_string Return as a string or not (default: no)
-   * @param bool $html Use HTML (for highlighting, etc.) or not (default: no)
-   * @return mixed
+   * Returns some info about MySQL connection as an array
+   * @return array
    */
-  public function info($return_string = false, $html = false){
+  public function info(){
     $info = $this->options;
     unset($info['password']);
     $info['queries'] = $this->queries;
     $info['last'] = $html ? NeevoStatic::highlight_sql($this->last->build()) : $this->last->build();
     $info['table_prefix'] = $this->prefix();
-    $info['error_reporting'] = $this->errors();
+    $info['error_reporting'] = $this->error_reporting();
     $info['memory_usage'] = $this->memory();
 
-    if(!$return_string) return $info;
-    else{
-      $er = array('off', 'on');
-
-      if($html){
-        $ot = "<strong>";
-        $ct = "</strong>";
-      }
-      
-      $string = " Connected to database $ot'{$info['database']}'$ct on $ot{$info['host']}$ct as $ot{$info['username']}$ct user\n"
-      . "$ot Database encoding:$ct {$info['encoding']}\n"
-      . "$ot Table prefix:$ct {$info['table_prefix']}\n"
-      . "$ot Error-reporting:$ct {$er[$info['error_reporting']]}\n"
-      . "$ot Executed queries:$ct {$info['queries']}\n"
-      . "$ot Last executed query:$ct {$info['last']}\n"
-      . "$ot Script memory usage:$ct {$info['memory_usage']}\n";
-
-      return $html ? NeevoStatic::nlbr($string) : $string;
-    }
+    return $info;
   }
 
 
@@ -299,47 +224,6 @@ class Neevo{
    */
   public function memory(){
     return NeevoStatic::filesize(memory_get_usage(true));
-  }
-
-  /**
-   * Sets logging to file for Neevo
-   * @param bool $state Log queries to file or not (true/false)
-   * @param string $filename Path to file for logging (directory must be writeable). Default: "./neevo.log"
-   * @return bool
-   */
-  public function log($state, $filename = './neevo.log'){
-    if($state==true){
-      $this->logging = true;
-      if($filename){
-        $this->log_file = $filename;
-        return true;
-      }
-      else return $this->error('Log file must be set!');
-    }
-    else{
-      $this->logging = false;
-      return true;
-    }
-  }
-
-
-  /**
-   * Adds record to log-file.
-   * @access private
-   * @param string $query
-   * @param float $exectime
-   * @param string $affrows
-   * @return bool
-   */
-  public function add_log($query, $exectime, $affrows){
-    if($this->logging && $this->log_file){
-      setlocale(LC_TIME, "en_US");
-      $time = strftime("%a %d/%b/%Y %H:%M:%S %z");
-      $ip = $_SERVER["REMOTE_ADDR"];
-      $log = "[$time] [client $ip] [$query] [$exectime sec] [$affrows]\n";
-      return NeevoStatic::write_file($this->log_file, $log);
-    }
-    else return false;
   }
 
 }
@@ -352,8 +236,8 @@ class Neevo{
  */
 class NeevoMySQLQuery {
 
-  private $q_table, $q_type, $q_limit, $q_offset, $neevo, $q_resource, $q_time, $q_sql;
-  private $q_where, $q_order, $q_columns, $q_data = array();
+  private $table, $type, $limit, $offset, $neevo, $resource, $time, $sql;
+  private $where, $order, $columns, $data = array();
 
 
   /**
@@ -376,7 +260,7 @@ class NeevoMySQLQuery {
    * @return NeevoMySQLQuery
    */
   public function table($table){
-    $this->q_table = $table;
+    $this->table = $table;
     return $this;
   }
 
@@ -387,7 +271,7 @@ class NeevoMySQLQuery {
    * @return NeevoMySQLQuery
    */
   public function type($type){
-    $this->q_type = $type;
+    $this->type = $type;
     return $this;
   }
 
@@ -398,7 +282,7 @@ class NeevoMySQLQuery {
    * @return NeevoMySQLQuery
    */
   public function sql($sql){
-    $this->q_sql = $sql;
+    $this->sql = $sql;
     return $this;
   }
 
@@ -411,7 +295,7 @@ class NeevoMySQLQuery {
   public function cols($columns){
     if(!is_array($columns)) $columns = explode(',', $columns);
     $cols = array();
-    $this->q_columns = $columns;
+    $this->columns = $columns;
     return $this;
   }
 
@@ -422,7 +306,7 @@ class NeevoMySQLQuery {
    * @return NeevoMySQLQuery
    */
   public function data(array $data){
-    $this->q_data = $data;
+    $this->data = $data;
     return $this;
   }
 
@@ -442,7 +326,7 @@ class NeevoMySQLQuery {
 
     $condition = array($column, $where_condition[1], $value, strtoupper($glue));
 
-    $this->q_where[] = $condition;
+    $this->where[] = $condition;
 
     return $this;
   }
@@ -460,7 +344,7 @@ class NeevoMySQLQuery {
       $order_rule = explode(' ', $argument);
       $rules[] = $order_rule;
     }
-    $this->q_order = $rules;
+    $this->order = $rules;
 
     return $this;
   }
@@ -473,8 +357,8 @@ class NeevoMySQLQuery {
    * @return NeevoMySQLQuery
    */
   public function limit($limit, $offset = null){
-    $this->q_limit = $limit;
-    if(isset($offset) && $this->q_type=='select') $this->q_offset = $offset;
+    $this->limit = $limit;
+    if(isset($offset) && $this->type=='select') $this->offset = $offset;
     return $this;
   }
 
@@ -501,23 +385,43 @@ class NeevoMySQLQuery {
     $end = explode(" ", microtime());
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
     $this->time($time);
-    $this->q_resource = $query;
-    $this->neevo->add_log($this->build(), $time, $this->rows(true));
+    $this->resource = $query;
     return $query;
   }
 
 
   /**
-   * Shorthand for NeevoMySQLQuery->run() and Neevo->fetch()
-   * @param int $type Result data as: Possible values:<ul>
-   *  <li>Neevo::ASSOC  (1) - fetches an array with associative arrays as table rows</li>
-   *  <li>Neevo::NUM    (2) - fetches an array with numeric arrays as table rows</li>
-   *  <li>Neevo::OBJECT (3) - fetches an array with objects as table rows</li></ul>
-   * @return mixed Array or string (if only one value is returned) or 0 (zero; if nothing is returned).
+   * Fetches data from given Query resource and executes query (if it haven't already been executed);
+   * @param int $type Return data as: (possible values)<ul>
+   *  <li>Neevo::ASSOC  - Array of rows as associative arrays</li>
+   *  <li>Neevo::OBJECT - Array of rows as objects</li></ul>
+   * @return mixed Array or string (if only one value is returned) or FALSE (if nothing is returned).
    */
   public function fetch($type = 1){
-    $resource = is_resource($this->q_resource) ? $this->q_resource : $this->run();
-    return $this->neevo->fetch($resource, $type);
+    $resource = is_resource($this->resource) ? $this->resource : $this->run();
+
+    $rows=array();
+    switch ($type){
+      case Neevo::ASSOC;
+        while($tmp_rows = @mysql_fetch_assoc($resource))
+        $rows[] = $tmp_rows;
+        break;
+      case Neevo::OBJECT;
+        while($tmp_rows = @mysql_fetch_object($resource))
+        $rows[] = $tmp_rows;
+        break;
+      default: $this->error("Fetching result data failed");
+    }
+
+    if(count($rows) == 1){ // Only 1 row
+      $rows = $rows[0];
+      if(count($rows) == 1){ // Only 1 column
+        $result = array_values($rows);
+        $rows = $result[0];
+      }
+    }
+    if(!count($rows)) $rows = FALSE; // Empty
+    return $resource ? $rows : $this->error("Fetching result data failed");
   }
 
 
@@ -527,9 +431,9 @@ class NeevoMySQLQuery {
    * @return bool
    */
   public function seek($row_number){
-    if(!is_resource($this->q_resource)) $this->run();
+    if(!is_resource($this->resource)) $this->run();
     
-    $seek = @mysql_data_seek($this->q_resource, $row_number);
+    $seek = @mysql_data_seek($this->resource, $row_number);
     return $seek ? $seek : $this->neevo->error("Cannot seek to row $row_number");
   }
 
@@ -550,8 +454,8 @@ class NeevoMySQLQuery {
    * @return mixed Number of rows (int) or FALSE if used on invalid query.
    */
   public function rows($string = false){
-    if($this->q_type!='select') $aff_rows = $this->time() ? @mysql_affected_rows($this->neevo->resource_ID) : false;
-    else $num_rows = @mysql_num_rows($this->q_resource);
+    if($this->type!='select') $aff_rows = $this->time() ? @mysql_affected_rows($this->neevo->resource) : false;
+    else $num_rows = @mysql_num_rows($this->resource);
     
     if($num_rows || $aff_rows){
       if($string){
@@ -569,57 +473,27 @@ class NeevoMySQLQuery {
    * @return int Query execution time
    */
   public function time($time = null){
-    if(isset($time)) $this->q_time = $time;
-    return $this->q_time;
+    if(isset($time)) $this->time = $time;
+    return $this->time;
   }
 
   /**
-   * Returns some info about this Query as an array or string
-   * @param bool $return_string Return as a string or not (default: no)
-   * @param bool $html Use HTML or not (default: no)
-   * @return mixed Info about Query
+   * Returns some info about this Query as an array
+   * @return array Info about Query
    */
-  public function info($return_string = false, $html = false){
-    $noexec = 'not yet executed';
-    $noselect = 'not SELECT query';
-
+  public function info(){
     $exec_time = $this->time() ? $this->time() : -1;
     $rows = $this->time() ? $this->rows() : -1;
 
     $info = array(
-      'resource' => $this->neevo->resource_ID,
+      'resource' => $this->neevo->resource,
       'query' => $this->dump($html, true),
       'exec_time' => $exec_time,
       'rows' => $rows
     );
+    if($this->type == 'select') $info['query_resource'] = $this->resource;
 
-    if($this->q_type == 'select') $info['query_resource'] = $this->q_resource;
-
-    if(!$return_string) return $info;
-    
-    else{
-      if($info['exec_time']==-1) $info['exec_time'] = $noexec;
-      else $info['exec_time'] .= " seconds";
-
-      if($info['rows']==-1) $info['rows'] = $noexec;
-      $rows_prefix = ($this->q_type != 'select') ? "Affected" : "Fetched";
-
-      $query_resource = ($this->q_type == 'select') ? $info['query_resource'] : $noselect;
-
-      if($html){
-        $ot = "<strong>";
-        $ct = "</strong>";
-      }
-
-      $string = "$ot Query-string:$ct {$info['query']}\n"
-      . "$ot Resource:$ct {$info['resource']}\n"
-      . "$ot Query resource:$ct $query_resource\n"
-      . "$ot Execution time:$ct {$info['exec_time']}\n"
-      . "$ot $rows_prefix rows:$ct {$info['rows']}\n";
-
-      return $html ? NeevoStatic::nlbr($string) : $string;
-    }
-
+    return $info;
   }
 
 
@@ -644,7 +518,7 @@ class NeevoMySQLQuery {
      * <li>(string) Column name from defined values (values to put/set in INSERT and UPDATE queries) to unset.</li>
      * <li>(array) Array of options (from pevious two) if you want to unset more than one piece of Query part (e.g 2nd and 3rd WHERE condition).</li>
    * </ul>
-   * This argument is not required for LIMIT & OFFSET. Default is (int) 1. See example.
+   * This argument is not required for LIMIT & OFFSET. Default is (int) 1.
    * @return NeevoMySQLQuery
    */
   public function undo($sql_part, $position = 1){
@@ -652,42 +526,34 @@ class NeevoMySQLQuery {
       case 'where':
         $part = 'where';
         break;
-
       case 'order';
       case 'order-by';
       case 'order by';
         $part = 'order';
         break;
-
       case 'column';
       case 'columns';
       case 'cols';
       case 'col';
         $part = 'columns';
         break;
-
       case 'data';
       case 'value';
       case 'values';
         $part = 'data';
         break;
-
       case 'limit':
         $part = 'limit';
         $str = true;
         break;
-
       case 'offset':
         $part = 'offset';
         $str = true;
         break;
-
       default:
         $this->neevo->error("Undo failed: No such Query part '$sql_part' supported for undo()");
         break;
     }
-    
-    $part = "q_$part";
 
     if($str){
 
@@ -719,21 +585,21 @@ class NeevoMySQLQuery {
    */
   public function build(){
 
-    if($this->q_sql){
-      $q = $this->q_sql;
+    if($this->sql){
+      $q = $this->sql;
     }
     else{
 
-      $table = $this->neevo->prefix().$this->q_table;
+      $table = $this->neevo->prefix().$this->table;
 
       // WHERE statements
-      if($this->q_where){
+      if($this->where){
         $wheres = array();
         $wheres2 = array();
         $wheres3 = array();
 
         // Set AND glue for queries without glue defined
-        foreach ($this->q_where as $in_where) {
+        foreach ($this->where as $in_where) {
           if($in_where[3]=='') $in_where[3] = 'AND';
           $wheres[] = $in_where;
         }
@@ -757,10 +623,10 @@ class NeevoMySQLQuery {
       }
 
       // INSERT data
-      if($this->q_type == 'insert' && $this->q_data){
+      if($this->type == 'insert' && $this->data){
         $icols=array();
         $ivalues=array();
-        foreach(NeevoStatic::escape_array($this->q_data) as $col => $value){
+        foreach(NeevoStatic::escape_array($this->data) as $col => $value){
           $icols[]="`$col`";
           $ivalues[]=$value;
         }
@@ -768,18 +634,18 @@ class NeevoMySQLQuery {
       }
 
       // UPDATE data
-      if($this->q_type == 'update' && $this->q_data){
+      if($this->type == 'update' && $this->data){
         $update=array();
-        foreach(NeevoStatic::escape_array($this->q_data) as $col => $value){
+        foreach(NeevoStatic::escape_array($this->data) as $col => $value){
           $update[]="`$col`=$value";
         }
         $update_data = " SET " . join(', ', $update);
       }
 
       // ORDER BY statements
-      if($this->q_order){
+      if($this->order){
         $orders = array();
-        foreach($this->q_order as $in_order) {
+        foreach($this->order as $in_order) {
           $in_order[0] = (NeevoStatic::is_sql_function($in_order[0])) ? $in_order[0] : "`".$in_order[0]."`";
           $orders[] = join(' ', $in_order);
         }
@@ -787,14 +653,14 @@ class NeevoMySQLQuery {
       }
 
       // LIMIT & OFFSET
-      if($this->q_limit) $limit = " LIMIT ".$this->q_limit;
-      if($this->q_offset) $limit .= " OFFSET ".$this->q_offset;
+      if($this->limit) $limit = " LIMIT ".$this->limit;
+      if($this->offset) $limit .= " OFFSET ".$this->offset;
 
 
       // SELECT query
-      if($this->q_type == 'select'){
+      if($this->type == 'select'){
         $cols = array();
-        foreach ($this->q_columns as $col) {
+        foreach ($this->columns as $col) {
           $col = trim($col);
           if($col!='*'){
             if(NeevoStatic::is_as_construction($col)) $col = NeevoStatic::escape_as_construction($col);
@@ -811,19 +677,19 @@ class NeevoMySQLQuery {
       }
 
       // INSERT query
-      if($this->q_type == 'insert'){
+      if($this->type == 'insert'){
         $q .= 'INSERT INTO `' . $table . '`';
         $q .= $insert_data;
       }
 
       // UPDATE query
-      if($this->q_type == 'update'){
+      if($this->type == 'update'){
         $q .= 'UPDATE `' . $table .'`';
         $q .= $update_data . $where . $order . $limit;
       }
 
       // DELETE query
-      if($this->q_type == 'delete'){
+      if($this->type == 'delete'){
         $q .= 'DELETE FROM `' . $table . '`';
         $q .= $where . $order . $limit;
       }
@@ -840,7 +706,17 @@ class NeevoMySQLQuery {
 /** Main Neevo class for some additional static methods
  * @package Neevo
  */
-class NeevoStatic extends Neevo {
+class NeevoStatic {
+  
+  protected static $highlight_colors = array(
+    'background' => '#f9f9f9',
+    'columns'    => '#0000ff',
+    'chars'      => '#000000',
+    'keywords'   => '#008000',
+    'joins'      => '#555555',
+    'functions'  => '#008000',
+    'constants'  => '#ff0000'
+    );
 
   protected static $sql_functions=array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK', 'RAND');
 
@@ -915,35 +791,6 @@ class NeevoStatic extends Neevo {
     return preg_replace('/(.*) (as) (\w*)/i','$1 AS `$3`',$as_construction);
   }
 
-  public static function nlbr($string){
-    $string = str_replace("\n\n", "\n", $string);
-    return str_replace("\n","<br>", $string);
-  }
-
-  /** Returns content of the file */
-  public static function read_file($filename) {
-    if (!function_exists('file_get_contents')) {
-      $fhandle = fopen($filename, "r");
-      $fcontents = fread($fhandle, filesize($filename));
-      fclose($fhandle);
-    }
-    else $content = file_get_contents($filename);
-
-    return $content;
-  }
-
-  /** Puts content to the file */
-  public static function write_file($filename, $data) {
-    $f = @fopen($filename, 'a+');
-    if (!$f) return false;
-    else {
-      $content = fwrite($f, $data);
-      fclose($f);
-    }
-
-    return $content;
-  }
-
   /** Returns formatted filesize */
   public static function filesize($bytes){
     $unit=array('B','kB','MB','GB','TB','PB');
@@ -951,5 +798,7 @@ class NeevoStatic extends Neevo {
   }
 
 }
+
+class NeevoException extends Exception{};
 
 ?>

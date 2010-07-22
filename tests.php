@@ -28,16 +28,11 @@ $sql = new Neevo(array(
   'encoding' => 'utf8'
 ));
 
-// Log queries to file
-$sql->log(true, 'neevo.log');
-
 // Turn Neevo error reporting ON (0 for OFF, default: ON)
-$sql->errors(1);
+$sql->error_reporting(1);
 
 // Set table pefix to "dp_"
 $sql->prefix('dp_');
-
-
 
 // Data for Insert query demos
 $insert_data = array(
@@ -78,16 +73,13 @@ $update = $sql->update('client', $update_data)->where('name', 'John Doe')->where
 $update_resource = $update->run();
 
 // Get info about query (1. return as a string, 2. return as HTML)
-echo $update->info(true, true). "\n\n";
-
-// Do not log to file from here
-$sql->log(false);
+$update->dump();
 
 // DELETE QUERY
 $delete = $sql->delete('client')->where('mail', 'john@doe.name')->order('id DESC')->limit(1);
 $delete_resource = $delete->run();
 
-echo $delete->info(true, true). "\n\n";
+$delete->dump();
 
 
 // SELECT ONE VALUE
@@ -95,9 +87,6 @@ $select_one = $sql->select('name', 'client')->where('id', 101);
 $select_one->dump();
 
 echo " Result: ". $select_one->fetch() ."\n\n";
-
-// Log to file again
-$sql->log(true);
 
 // SELECT QUERY
 $select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'name ASC')->limit(10);
@@ -108,7 +97,7 @@ $select->seek(2);
 // Fetch results
 $select_result = $select->fetch();
 
-echo $select->info(true, true);
+$select->dump();
 
 ?>
 
@@ -130,15 +119,8 @@ INFO:
 
 <?php
 // Info about Neevo connections
-echo $sql->info(true, true);?>
-
-
-LOG file:
-<div id="logfile">
-<?php echo file_get_contents($sql->log_file); ?>
-</div>
-
-    </pre>
+print_r($sql->info()); ?>
+</pre>
 
   </body>
 </html>
