@@ -69,8 +69,10 @@ class Neevo{
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
     if(!is_resource($connection) or !$this->test_connection($connection)) $this->error("Connection to host '".$opts['host']."' failed");
 
-    $db = mysql_select_db($opts['database']);
-    if(!$db) $this->error("Could not select database '{$opts['database']}'");
+    if($opts['database']){
+      $db = mysql_select_db($opts['database']);
+      if(!$db) $this->error("Could not select database '{$opts['database']}'");
+    }
 
     $this->resource = $connection;
     $this->options = $opts;

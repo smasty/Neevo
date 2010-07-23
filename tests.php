@@ -51,11 +51,8 @@ $update_data = array(
   'city' => 'Washington DC'
 );
 
-$test = $sql->select("*", "blabshare.blabs")->limit(1)->dump();
-print_r($test);
-
 // INSERT QUERY
-$insert = $sql->insert('client', $insert_data);
+$insert = $sql->insert('neevo_demo.client', $insert_data);
 
 // Echo highlighted query
 $insert->dump();
