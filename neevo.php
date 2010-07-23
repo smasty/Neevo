@@ -621,6 +621,13 @@ class NeevoMySQLQuery {
   }
 
 
+  protected function build_tablename(){
+    $pieces = explode(".", $this->table);
+    $prefix = $this->neevo->prefix();
+    return $pieces[1] ? "`{$pieces[0]}`.`$prefix{$pieces[1]}`" : "`$prefix{$pieces[0]}`" ;
+  }
+
+
   /**
    * Builds Query from NeevoMySQLQuery instance
    * @return string the Query
@@ -632,7 +639,7 @@ class NeevoMySQLQuery {
     }
     else{
 
-      $table = $this->neevo->prefix().$this->table;
+      $table = $this->build_tablename();
 
       // WHERE statements
       if($this->where){
@@ -714,25 +721,25 @@ class NeevoMySQLQuery {
 
         $q .= 'SELECT ';
         $q .= join(', ', $cols);
-        $q .= ' FROM `'.$table.'`';
+        $q .= ' FROM '.$table;
         $q .= $where . $order . $limit;
       }
 
       // INSERT query
       if($this->type == 'insert'){
-        $q .= 'INSERT INTO `' . $table . '`';
+        $q .= 'INSERT INTO '.$table;
         $q .= $insert_data;
       }
 
       // UPDATE query
       if($this->type == 'update'){
-        $q .= 'UPDATE `' . $table .'`';
+        $q .= 'UPDATE '.$table;
         $q .= $update_data . $where . $order . $limit;
       }
 
       // DELETE query
       if($this->type == 'delete'){
-        $q .= 'DELETE FROM `' . $table . '`';
+        $q .= 'DELETE FROM '.$table;
         $q .= $where . $order . $limit;
       }
     }
