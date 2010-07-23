@@ -29,11 +29,12 @@ $sql = new Neevo(array(
   'encoding' => 'utf8'
 ));
 
-// Turn Neevo error reporting ON (0 for OFF, default: ON)
-$sql->error_reporting(Neevo::E_CATCH);
+// Set Neevo error reporting
+$sql->error_reporting(Neevo::E_STRICT);
 
 // Set table pefix to "dp_"
 $sql->prefix('dp_');
+
 
 // Data for Insert query demos
 $insert_data = array(
@@ -46,9 +47,9 @@ $insert_data = array(
 
 // Data for Update query demos
 $update_data = array(
-  'name'  => 'John Doe',
+  'name'  => 'John Doe\'s',
   'mail' => 'john@doe.name',
-  'city' => 'Washington DC'
+  'city' => "Washington DC"
 );
 
 // INSERT QUERY
