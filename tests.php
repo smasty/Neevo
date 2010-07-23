@@ -26,14 +26,14 @@ $sql = new Neevo(array(
   'username' => 'root',
   'password' => '',
   'database' => 'neevo_demo',
-  'encoding' => 'utfx8'
+  'encoding' => 'utf8'
 ));
 
 // Turn Neevo error reporting ON (0 for OFF, default: ON)
-$sql->error_reporting(Neevo::E_STRICT);
+$sql->error_reporting(Neevo::E_CATCH);
 
 // Set table pefix to "dp_"
-$sql->prefix('dpx_');
+$sql->prefix('dp_');
 
 // Data for Insert query demos
 $insert_data = array(

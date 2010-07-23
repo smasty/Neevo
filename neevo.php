@@ -33,8 +33,9 @@ class Neevo{
   const ASSOC = 1;
   const OBJECT = 2;
   const E_NONE = 30;
-  const E_WARNING = 31;
-  const E_STRICT = 32;
+  const E_CATCH = 31;
+  const E_WARNING = 32;
+  const E_STRICT = 33;
 
 
   /**
@@ -108,6 +109,23 @@ class Neevo{
 
 
   /**
+   * Sets and/or returns last executed query
+   * @param NeevoMySQLQuery $last Last executed query
+   * @return NeevoMySQLQuery
+   */
+  public function last(NeevoMySQLQuery $last = null){
+    if($last instanceof NeevoMySQLQuery) $this->last = $last;
+    return $this->last;
+  }
+
+
+  public function queries($val = null){
+    if(is_numeric($val)) $this->queries += $val;
+    return $this->queries;
+  }
+
+
+  /**
    * Returns resource identifier
    * @return resource
    */
@@ -142,17 +160,14 @@ class Neevo{
    */
   public function fetch($resource, $type = 1){
     $rows = array();
-    switch ($type){
-      case Neevo::ASSOC;
+    if($type == Neevo::ASSOC){
         while($tmp_rows = @mysql_fetch_assoc($resource))
-        $rows[] = $tmp_rows;
-        break;
-      case Neevo::OBJECT;
+          $rows[] = $tmp_rows;
+    } elseif ($type == Neevo::OBJECT){
         while($tmp_rows = @mysql_fetch_object($resource))
-        $rows[] = $tmp_rows;
-        break;
-      default: $this->error("Fetching result data failed");
-    }
+          $rows[] = $tmp_rows;
+    } else $this->error("Fetching result data failed");
+
     if(count($rows) == 1){ // Only 1 row
       $rows = $rows[0];
       if(count($rows) == 1){ // Only 1 column
@@ -174,8 +189,8 @@ class Neevo{
    */
   public final function query(NeevoMySQLQuery $query, $catch_error = false){
     $q = @mysql_query($query->build(), $this->resource);
-    $this->queries++;
-    $this->last=$query;
+    $this->queries(1);
+    $this->last($query);
     if($q) return $q;
     else return $this->error('Query failed', $catch_error);
   }
@@ -243,14 +258,14 @@ class Neevo{
     $err = "$err_neevo. $err_string";
     $e_mode = $this->error_reporting();
     if($e_mode != self::E_NONE){
-      if($e_mode != self::E_STRICT && $catch){
+      if(($e_mode != self::E_STRICT && $catch) || $e_mode == self::E_CATCH ){
         try{
           throw new NeevoException($err);
         } catch (NeevoException $e){
           echo "<b>Catched NeevoException:</b> ".$e->getMessage()."\n";
         }
       }
-      throw new NeevoException($err);
+      else throw new NeevoException($err);
     }
     return false;
   }
@@ -262,8 +277,8 @@ class Neevo{
   public function info(){
     $info = $this->options;
     unset($info['password']);
-    $info['queries'] = $this->queries;
-    $info['last'] = $html ? NeevoStatic::highlight_sql($this->last->build()) : $this->last->build();
+    $info['queries'] = $this->queries();
+    $info['last'] = $this->last();
     $info['table_prefix'] = $this->prefix();
     $info['error_reporting'] = $this->error_reporting();
     $info['memory_usage'] = $this->memory();
@@ -455,7 +470,7 @@ class NeevoMySQLQuery {
   public function fetch($type = 1){
     $resource = is_resource($this->resource) ? $this->resource : $this->run();
     $rows = $this->neevo->fetch($resource, $type);
-    return $resource ? $rows : $this->error("Fetching result data failed");
+    return $resource ? $rows : $this->neevo->error("Fetching result data failed");
   }
 
 
