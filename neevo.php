@@ -24,54 +24,63 @@ class Neevo{
 /*  VARIABLES  */
 
   var $resource;
-  var $error_reporting = 1;
+  var $error_reporting;
   private $last, $table_prefix, $queries;
   private $options = array();
 
 
 /*  CONSTANTS  */
-  const ASSOC=1;
-  const OBJECT=2;
+  const ASSOC = 1;
+  const OBJECT = 2;
+  const E_NONE = 30;
+  const E_WARNING = 31;
+  const E_STRICT = 32;
 
 
   /**
    * Constructor
    * @param array $opts Array of options in following format:
    * <pre>Array(
-   *   host         =>  mysql_host,
-   *   username     =>  mysql_username,
-   *   password     =>  mysql_password,
-   *   database     =>  mysql_database,
-   *   encoding     =>  mysql_encoding,
-   *   table_prefix =>  mysql_table_prefix
+   *   host            =>  mysql_host,
+   *   username        =>  mysql_username,
+   *   password        =>  mysql_password,
+   *   database        =>  mysql_database,
+   *   encoding        =>  mysql_encoding,
+   *   table_prefix    =>  mysql_table_prefix
+   *   error_reporting =>  error_reporting_level; See error_reporting() for possible values.
    * );</pre>
+   * @see Neevo::error_reporting(), Neevo::prefix()
    */
   public function __construct(array $opts){
     $this->connect($opts);
+    if($opts['error_reporting']) $this->error_reporting = $opts['error_reporting'];
     if($opts['table_prefix']) $this->table_prefix = $opts['table_prefix'];
   }
 
 
   /**
-   * Connects to database, selects database and sets encoding (if defined)
+   * Connects to database server, selects database and sets encoding (if defined)
    * @access private
    * @param array $opts
    * @return bool
    */
   protected function connect(array $opts){
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
-    if(!is_resource($connection)) $this->error("Connection to host '".$opts['host']."' failed");
-    
-    $select_db = $this->select_db($opts['database']) ? true : $this->error("Failed selecting database '{$opts['database']}'");
-    
-    if($opts['encoding']){
-      $encoding = new NeevoMySQLQuery($this);
-      $encoding->sql("SET NAMES ".$opts['encoding']);
-      $encoding->run();
-    }
+    if(!is_resource($connection) or !$this->test_connection($connection)) $this->error("Connection to host '".$opts['host']."' failed");
+
+    $db = mysql_select_db($opts['database']);
+    if(!$db) $this->error("Could not select database '{$opts['database']}'");
 
     $this->resource = $connection;
     $this->options = $opts;
+
+    if($opts['encoding']){
+      try{
+        $e = mysql_query("SET NAMES ".$opts['encoding']);
+      }
+      catch (NeevoException $e){}
+    }
+
     return (bool) $connection;
   }
 
@@ -89,26 +98,86 @@ class Neevo{
 
   /**
    * Sets and/or returns error-reporting
-   * @param bool $value Boolean value of error-reporting
-   * @return bool
+   * @param int $value Value of error-reporting
+   * @return int
    */
   public function error_reporting($value = null){
     if(isset($value)) $this->error_reporting = $value;
     return $this->error_reporting;
   }
 
+
+  /**
+   * Returns resource identifier
+   * @return resource
+   */
+  public function resource(){
+    return $this->resource;
+  }
+
+
+  /**
+   * Tests if connection is usable (wrong username without password)
+   * @access private
+   * @param resource $resource
+   * @return bool
+   */
+  private function test_connection($resource){
+    try{
+      $q = mysql_query("SHOW DATABASES", $resource);
+      $r = $this->fetch($q);
+      if(!$r || $r == "information_schema") throw new NeevoException("Error!");
+    }
+    catch (NeevoException $e){return false;}
+    return true;
+  }
+
+
+  /**
+   * Fetches data
+   * @param resource $resource
+   * @param int $type
+   * @return mixed
+   * @see NeevoMySQLQuery::fetch()
+   */
+  public function fetch($resource, $type = 1){
+    $rows = array();
+    switch ($type){
+      case Neevo::ASSOC;
+        while($tmp_rows = @mysql_fetch_assoc($resource))
+        $rows[] = $tmp_rows;
+        break;
+      case Neevo::OBJECT;
+        while($tmp_rows = @mysql_fetch_object($resource))
+        $rows[] = $tmp_rows;
+        break;
+      default: $this->error("Fetching result data failed");
+    }
+    if(count($rows) == 1){ // Only 1 row
+      $rows = $rows[0];
+      if(count($rows) == 1){ // Only 1 column
+        $result = array_values($rows);
+        $rows = $result[0];
+      }
+    }
+    if(!count($rows)) $rows = false; // Empty
+    return $rows;
+  }
+
+
   /**
    * Performs Query
    * @access private
    * @param NeevoMySQLQuery $query Query to perform.
+   * @param bool $catch_error Catch exception by default if mode is not E_STRICT
    * @return resource
    */
-  public final function query(NeevoMySQLQuery $query){
+  public final function query(NeevoMySQLQuery $query, $catch_error = false){
     $q = @mysql_query($query->build(), $this->resource);
     $this->queries++;
     $this->last=$query;
     if($q) return $q;
-    else return $this->error('Query failed');
+    else return $this->error('Query failed', $catch_error);
   }
 
 
@@ -167,14 +236,22 @@ class Neevo{
    * @param string $err_neevo
    * @return false
    */
-  public function error($err_neevo){
+  public function error($err_neevo, $catch = false){
     $err_string = mysql_error();
     $err_no = mysql_errno();
-    $err = "Neevo error - ";
-    $err .= $err_neevo;
     $err_string = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $err_string);
-    $err .= ". $err_string";
-    if($this->error_reporting()) throw new NeevoException($err);
+    $err = "$err_neevo. $err_string";
+    $e_mode = $this->error_reporting();
+    if($e_mode != self::E_NONE){
+      if($e_mode != self::E_STRICT && $catch){
+        try{
+          throw new NeevoException($err);
+        } catch (NeevoException $e){
+          echo "<b>Catched NeevoException:</b> ".$e->getMessage()."\n";
+        }
+      }
+      throw new NeevoException($err);
+    }
     return false;
   }
 
@@ -354,11 +431,12 @@ class NeevoMySQLQuery {
 
   /**
    * Performs Query
+   * @param bool $catch_error Catch exception by default if mode is not E_STRICT
    * @return resource
    */
-  public function run(){
+  public function run($catch_error = false){
     $start = explode(" ", microtime());
-    $query = $this->neevo->query($this);
+    $query = $this->neevo->query($this, $catch_error);
     $end = explode(" ", microtime());
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
     $this->time($time);
@@ -376,28 +454,7 @@ class NeevoMySQLQuery {
    */
   public function fetch($type = 1){
     $resource = is_resource($this->resource) ? $this->resource : $this->run();
-
-    $rows=array();
-    switch ($type){
-      case Neevo::ASSOC;
-        while($tmp_rows = @mysql_fetch_assoc($resource))
-        $rows[] = $tmp_rows;
-        break;
-      case Neevo::OBJECT;
-        while($tmp_rows = @mysql_fetch_object($resource))
-        $rows[] = $tmp_rows;
-        break;
-      default: $this->error("Fetching result data failed");
-    }
-
-    if(count($rows) == 1){ // Only 1 row
-      $rows = $rows[0];
-      if(count($rows) == 1){ // Only 1 column
-        $result = array_values($rows);
-        $rows = $result[0];
-      }
-    }
-    if(!count($rows)) $rows = FALSE; // Empty
+    $rows = $this->neevo->fetch($resource, $type);
     return $resource ? $rows : $this->error("Fetching result data failed");
   }
 
@@ -409,7 +466,7 @@ class NeevoMySQLQuery {
    */
   public function seek($row_number){
     if(!is_resource($this->resource)) $this->run();
-    
+
     $seek = @mysql_data_seek($this->resource, $row_number);
     return $seek ? $seek : $this->neevo->error("Cannot seek to row $row_number");
   }
@@ -431,9 +488,9 @@ class NeevoMySQLQuery {
    * @return mixed Number of rows (int) or FALSE if used on invalid query.
    */
   public function rows($string = false){
-    if($this->type!='select') $aff_rows = $this->time() ? @mysql_affected_rows($this->neevo->resource) : false;
+    if($this->type!='select') $aff_rows = $this->time() ? @mysql_affected_rows($this->neevo->resource()) : false;
     else $num_rows = @mysql_num_rows($this->resource);
-    
+
     if($num_rows || $aff_rows){
       if($string){
         return $num_rows ? "Rows: $num_rows" : "Affected: $aff_rows";
@@ -463,7 +520,7 @@ class NeevoMySQLQuery {
     $rows = $this->time() ? $this->rows() : -1;
 
     $info = array(
-      'resource' => $this->neevo->resource,
+      'resource' => $this->neevo->resource(),
       'query' => $this->dump($html, true),
       'exec_time' => $exec_time,
       'rows' => $rows
@@ -521,7 +578,7 @@ class NeevoMySQLQuery {
         $str = true;
         break;
       default:
-        $this->neevo->error("Undo failed: No such Query part '$sql_part' supported for undo()");
+        $this->neevo->error("Undo failed: No such Query part '$sql_part' supported for undo()", true);
         break;
     }
 
@@ -542,7 +599,7 @@ class NeevoMySQLQuery {
           }
           $this->$part = $loop;
         }
-      } else $this->neevo->error("Undo failed: No such Query part '$sql_part' for this kind of Query");
+      } else $this->neevo->error("Undo failed: No such Query part '$sql_part' for this kind of Query", true);
     }
 
     return $this;
@@ -677,7 +734,7 @@ class NeevoMySQLQuery {
  * @package Neevo
  */
 class NeevoStatic {
-  
+
   protected static $highlight_colors = array(
     'background' => '#f9f9f9',
     'columns'    => '#0000ff',

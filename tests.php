@@ -17,6 +17,7 @@
 
 <pre><?php
 
+
 include('neevo.php');
 
 // Connect to MySQL database
@@ -25,14 +26,14 @@ $sql = new Neevo(array(
   'username' => 'root',
   'password' => '',
   'database' => 'neevo_demo',
-  'encoding' => 'utf8'
+  'encoding' => 'utfx8'
 ));
 
 // Turn Neevo error reporting ON (0 for OFF, default: ON)
-$sql->error_reporting(1);
+$sql->error_reporting(Neevo::E_STRICT);
 
 // Set table pefix to "dp_"
-$sql->prefix('dp_');
+$sql->prefix('dpx_');
 
 // Data for Insert query demos
 $insert_data = array(
