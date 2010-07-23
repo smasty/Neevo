@@ -24,10 +24,8 @@ class Neevo{
 /*  VARIABLES  */
 
   var $resource;
-  var $queries = 0;
-  var $last = '';
   var $error_reporting = 1;
-  var $table_prefix = '';
+  private $last, $table_prefix, $queries;
   private $options = array();
 
 
@@ -48,54 +46,33 @@ class Neevo{
    *   table_prefix =>  mysql_table_prefix
    * );</pre>
    */
-  function __construct(array $opts){
-    $connect = $this->connect($opts);
-    $encoding = $this->set_encoding($opts['encoding']);
-    $select_db = $this->select_db($opts['database']);
+  public function __construct(array $opts){
+    $this->connect($opts);
     if($opts['table_prefix']) $this->table_prefix = $opts['table_prefix'];
   }
 
 
   /**
-   * Connect to database
+   * Connects to database, selects database and sets encoding (if defined)
    * @access private
    * @param array $opts
    * @return bool
    */
   protected function connect(array $opts){
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
+    if(!is_resource($connection)) $this->error("Connection to host '".$opts['host']."' failed");
+    
+    $select_db = $this->select_db($opts['database']) ? true : $this->error("Failed selecting database '{$opts['database']}'");
+    
+    if($opts['encoding']){
+      $encoding = new NeevoMySQLQuery($this);
+      $encoding->sql("SET NAMES ".$opts['encoding']);
+      $encoding->run();
+    }
+
     $this->resource = $connection;
     $this->options = $opts;
-    if(!is_resource($connection)) throw new NeevoException("Connection to host '".$opts['host']."' failed");
     return (bool) $connection;
-  }
-
-
-  /**
-   * Sets table names/encoding
-   * @access private
-   * @param string $encoding
-   * @return bool
-   */
-  protected function set_encoding($encoding){
-    if($encoding){
-      $query = new NeevoMySQLQuery($this);
-      $query->sql("SET NAMES $encoding");
-      return (bool) $query->run();
-    } else return true;
-  }
-
-
-  /**
-   * Selects database to use
-   * @access private
-   * @param string $db_name
-   * @return bool
-   */
-  protected function select_db($db_name){
-    $select = @mysql_select_db($db_name, $this->resource);
-    if(!$select) throw new NeevoException("Failed selecting database '$db_name'");
-    return $select;
   }
 
 
@@ -527,19 +504,12 @@ class NeevoMySQLQuery {
         $part = 'where';
         break;
       case 'order';
-      case 'order-by';
-      case 'order by';
         $part = 'order';
         break;
       case 'column';
-      case 'columns';
-      case 'cols';
-      case 'col';
         $part = 'columns';
         break;
-      case 'data';
       case 'value';
-      case 'values';
         $part = 'data';
         break;
       case 'limit':
