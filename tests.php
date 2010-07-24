@@ -8,6 +8,8 @@
       td, th{padding:2px 10px;text-align:left}
       th{background:#ddd}
       #logfile{height:150px;overflow:auto;border:1px solid #555}
+      code{display:block;margin-bottom:1em}
+      table code{display:inline;margin:0}
     </style>
   </head>
 
@@ -36,6 +38,10 @@ $sql->error_reporting(Neevo::E_STRICT);
 $sql->prefix('dp_');
 
 
+// Using  "WHERE col IN (val1, val2, ...)" construction
+$s = $sql->select("*", 'neevo_demo.client')->where("name IN", "John Doe, Giacomo Doyle, Justin Hicks")->limit(5)->dump();
+
+
 // Data for Insert query demos
 $insert_data = array(
   'name'  => 'John Doe',
@@ -47,9 +53,9 @@ $insert_data = array(
 
 // Data for Update query demos
 $update_data = array(
-  'name'  => 'John Doe\'s',
+  'name'  => 'John Doe',
   'mail' => 'john@doe.name',
-  'city' => "Washington DC"
+  'city' => "Washington's DC"
 );
 
 // INSERT QUERY
@@ -68,7 +74,6 @@ $insert->dump();
 // Run query
 $insert_resource = $insert->run();
 
-echo "\n\n";
 
 // UPDATE QUERY
 $update = $sql->update('client', $update_data)->where('name', 'John Doe')->where('id !=', 101)->order('id DESC');
