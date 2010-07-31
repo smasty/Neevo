@@ -69,7 +69,7 @@ class Neevo{
     mysql_close($this->resource);
   }
 
-
+  
   /**
    * Connects to database server, selects database and sets encoding (if defined)
    * @access private
@@ -185,12 +185,8 @@ class Neevo{
         }
     } else $this->error("Fetching result data failed");
 
-    if(count($rows) == 1){ // Only 1 row
+    if(count($rows) == 1){
       $rows = $rows[0];
-      if(count($rows) == 1){ // Only 1 column
-        $result = array_values($rows);
-        $rows = $result[0];
-      }
     }
     if(!count($rows)) $rows = false; // Empty
     mysql_free_result($resource);
