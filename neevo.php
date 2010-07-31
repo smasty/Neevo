@@ -185,10 +185,11 @@ class Neevo{
         }
     } else $this->error("Fetching result data failed");
 
-    if(count($rows) == 1){
+    if(count($rows) == 1)
       $rows = $rows[0];
-    }
-    if(!count($rows)) $rows = false; // Empty
+
+    if(!count($rows) && is_array($rows)) return false; // Empty
+
     mysql_free_result($resource);
     return $rows;
   }
