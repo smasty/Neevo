@@ -10,6 +10,12 @@
       #logfile{height:150px;overflow:auto;border:1px solid #555}
       code{display:block;margin-bottom:1em}
       table code{display:inline;margin:0}
+
+      .sql-col{color:#00f}
+      .sql-char{color:#000}
+      .sql-kword, .sql-func{color:#008000}
+      .sql-join{color:#555}
+      .sql-const{color:#f00}
     </style>
   </head>
 
@@ -18,7 +24,6 @@
     <h1>Neevo MySQL layer Demo</h1>
 
 <pre><?php
-
 
 include('neevo.php');
 
@@ -39,8 +44,8 @@ $sql->prefix('dp_');
 
 
 // Using  "WHERE col IN (val1, val2, ...)" construction
-$s = $sql->select("*", 'neevo_demo.client')->where("name IN", "John Doe, Giacomo Doyle, Justin Hicks")->limit(5)->dump();
-
+$s = $sql->select("id", 'neevo_demo.client')->where("id", null, "or")->where("name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))->limit(5)->dump()->fetch(Neevo::OBJECT);
+print_r($s);
 
 // Data for Insert query demos
 $insert_data = array(

@@ -42,7 +42,7 @@ class Neevo{
 
 
   /**
-   * Constructor
+   * Neevo main class.
    * @param array $opts Array of options in following format:
    * <pre>Array(
    *   host            =>  mysql_host,
@@ -59,6 +59,14 @@ class Neevo{
     $this->connect($opts);
     if($opts['error_reporting']) $this->error_reporting = $opts['error_reporting'];
     if($opts['table_prefix']) $this->table_prefix = $opts['table_prefix'];
+  }
+
+
+  /**
+   * Closes connection to MySQL server.
+   */
+  public function  __destruct(){
+    mysql_close($this->resource);
   }
 
 
@@ -169,10 +177,12 @@ class Neevo{
     $rows = array();
     if($type == Neevo::ASSOC){
         while($tmp_rows = @mysql_fetch_assoc($resource))
-          $rows[] = $tmp_rows;
+          $rows[] = (count($tmp_rows) == 1) ? $tmp_rows[max(array_keys($tmp_rows))] : $tmp_rows;
     } elseif ($type == Neevo::OBJECT){
-        while($tmp_rows = @mysql_fetch_object($resource))
-          $rows[] = $tmp_rows;
+        while($tmp_rows = @mysql_fetch_object($resource)){
+          $obj_vars = get_object_vars($tmp_rows);
+          $rows[] = (count($obj_vars) == 1) ? $obj_vars[max(array_keys($obj_vars))] : $tmp_rows;
+        }
     } else $this->error("Fetching result data failed");
 
     if(count($rows) == 1){ // Only 1 row
@@ -393,11 +403,16 @@ class NeevoMySQLQuery {
    *
    * @param string $where Column to use and optionaly operator/function: "email !=", "email LIKE" or "email IN".
    * @param mixed $value Value to search for: "spam@foo.com", "%@foo.com" or array('john@foo.com', 'doe@foo.com', 'john.doe@foo.com')
-   * @param string $glue Operator (AND, OR, etc.) to use betweet this and next WHERE condition
+   * @param string $glue Glue (AND, OR, etc.) to use betweet this and next WHERE condition. If not set, AND will be used.
    * @return NeevoMySQLQuery
    */
   public function where($where, $value, $glue = null){
     $where_condition = explode(' ', $where);
+    if(is_null($value)){
+      $where_condition[1] = "IS";
+      $value = "NULL";
+    }
+    if(is_array($value)) $where_condition[1] = "IN";
     if(!isset($where_condition[1])) $where_condition[1] = '=';
     $column = $where_condition[0];
     $condition = array($column, $where_condition[1], $value, strtoupper($glue));
@@ -440,6 +455,7 @@ class NeevoMySQLQuery {
    * Prints consequential Query (highlighted by default)
    * @param bool $color Highlight query or not (default: yes)
    * @param bool $return_string Return the string or not (default: no)
+   * @return NeevoMySQLQuery
    */
   public function dump($color = true, $return_string = false){
     $code = $color ? NeevoStatic::highlight_sql($this->build()) : $this->build();
@@ -465,11 +481,12 @@ class NeevoMySQLQuery {
 
 
   /**
-   * Fetches data from given Query resource and executes query (if it haven't already been executed);
-   * @param int $type Return data as: (possible values)<ul>
-   *  <li>Neevo::ASSOC  - Array of rows as associative arrays</li>
-   *  <li>Neevo::OBJECT - Array of rows as objects</li></ul>
-   *  (default: Neevo::ASSOC)
+   * Fetches data from given Query resource and executes query (if it haven't already been executed)
+   * @param int $type Table rows are represented as: (possible values)<ul>
+   *  <li>Neevo::ASSOC  - Associative arrays</li>
+   *  <li>Neevo::OBJECT - Objects</li></ul>
+   *  Default is Neevo::ASSOC. If only one column is returned in each row, row is represented as
+   *  a value of that column (string, number, etc.), not an array with only one element.
    * @return mixed Array or string (if only one value is returned) or FALSE (if nothing is returned).
    */
   public function fetch($type = Neevo::ASSOC){
@@ -642,8 +659,7 @@ class NeevoMySQLQuery {
   private function build_where(){
     foreach ($this->where as $where) {
       if(empty($where[3])) $where[3] = 'AND';
-      if(strtolower($where[1]) == "in"){
-        if(!is_array($where[2])) $where[2] = explode(", ", $where[2]);
+      if(is_array($where[2])){
         $where[2] = "(" .join(", ", NeevoStatic::escape_array($where[2])) .")";
         $in_construct = true;
       }
@@ -705,7 +721,6 @@ class NeevoMySQLQuery {
    * @return string
    */
   private function build_select_cols(){
-    
     foreach ($this->columns as $col) {
       $col = trim($col);
       if($col != '*'){
@@ -771,40 +786,39 @@ class NeevoMySQLQuery {
  */
 class NeevoStatic {
 
-  private static $highlight_colors = array(
-    'background' => '#f9f9f9',
-    'columns'    => '#0000ff',
-    'chars'      => '#000000',
-    'keywords'   => '#008000',
-    'joins'      => '#555555',
-    'functions'  => '#008000',
-    'constants'  => '#ff0000'
+  private static $highlight_classes = array(
+    'columns'    => 'sql-col',
+    'chars'      => 'sql-char',
+    'keywords'   => 'sql-kword',
+    'joins'      => 'sql-join',
+    'functions'  => 'sql-func',
+    'constants'  => 'sql-const'
     );
 
-  private static $sql_funcs=array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK', 'RAND');
+  private static $sql_functions=array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK', 'RAND');
 
   /** Highlights given MySQL query */
   public static function highlight_sql($sql){
-    $chcolors = array('chars'=>'black','keywords'=>'green','joins'=>'grey','functions'=>'green','constants'=>'red');
-    $hcolors = self::$highlight_colors;
-    unset($hcolors['columns']);
-    unset($hcolors['background']);
+    $classes = self::$highlight_classes;
+    unset($classes['columns']);
 
-    $words = array('keywords'=>array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
-      'joins' => array('JOIN', 'INNER', 'OUTER', 'FULL', 'NATURAL', 'LEFT', 'RIGHT'),
-      'functions' => self::$sql_funcs,
-      'chars' => '/([\\.,!\\(\\)<>:=`]+)/i',
-      'constants' => '/(\'[^\']*\'|[0-9]+)/i');
+    $words = array(
+      'keywords'  => array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
+      'joins'     => array('JOIN', 'INNER', 'OUTER', 'FULL', 'NATURAL', 'LEFT', 'RIGHT'),
+      'functions' => self::$sql_functions,
+      'chars'     => '/([\\.,!\\(\\)<>:=`]+)/i',
+      'constants' => '/(\'[^\']*\'|[0-9]+)/i'
+    );
 
     $sql=str_replace('\\\'','\\&#039;', $sql);
 
-    foreach($chcolors as $key => $color){
+    foreach($classes as $key => $class){
       $regexp = in_array( $key, array('constants', 'chars')) ? $words[$key] : '/\\b(' .join("|", $words[$key]) .')\\b/i';
-      $sql = preg_replace($regexp, "<span style=\"color:$color\">$1</span>", $sql);
+      $sql = preg_replace($regexp, "<span class=\"$class\">$1</span>", $sql);
     }
 
     $sql = str_replace($chcolors, $hcolors, $sql);
-    return "<code style=\"color:".self::$highlight_colors['columns'].";background:".self::$highlight_colors['background']."\"> $sql </code>\n";
+    return "<code class=\"".self::$highlight_classes['columns']."\"> $sql </code>\n";
   }
 
   /** Escapes whole array for use in MySQL */
@@ -827,7 +841,7 @@ class NeevoStatic {
     if(is_string($string)){
       $is_plmn = preg_match("/^(\w*)(\+|-)(\w*)/", $string);
       $var = strtoupper(preg_replace('/[^a-zA-Z0-9_\(\)]/', '', $string));
-      $is_sql = in_array( preg_replace('/\(.*\)/', '', $var), self::$sql_funcs);
+      $is_sql = in_array( preg_replace('/\(.*\)/', '', $var), self::$sql_functions);
       return ($is_sql || $is_plmn);
     }
     else return false;
