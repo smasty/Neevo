@@ -105,7 +105,7 @@ class NeevoDriverMySQL implements INeevoDriver{
     $no = mysql_errno();
     $mysql_msg = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $mysql_msg);
     $msg = "$neevo_msg. $mysql_msg";
-    $mode = $this->error_reporting();
+    $mode = $this->neevo->error_reporting();
     if($mode != Neevo::E_NONE){
       if(($mode != Neevo::E_STRICT && $catch) || $mode == Neevo::E_CATCH){
         try{
