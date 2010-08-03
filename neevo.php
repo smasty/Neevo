@@ -7,11 +7,10 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * @copyright  Copyright (c) 2010 Martin Srank (http://smasty.net)
- * @license    http://www.opensource.org/licenses/mit-license.php  MIT license
- * @link       http://labs.smasty.net/neevo/
- * @package    Neevo
- * @version    0.02dev
+ * @author   Martin Srank (http://smasty.net)
+ * @license  http://www.opensource.org/licenses/mit-license.php  MIT license
+ * @link     http://labs.smasty.net/neevo/
+ * @package  Neevo
  *
  */
 
@@ -36,6 +35,10 @@ class Neevo{
   const E_CATCH   = 2;
   const E_WARNING = 3;
   const E_STRICT  = 4;
+
+  // Neevo version
+  const VERSION = "0.2dev";
+  const REVISION = "62";
 
 
   /**
@@ -289,6 +292,11 @@ class Neevo{
    */
   public function memory(){
     return NeevoStatic::filesize(memory_get_usage(true));
+  }
+
+
+  public function version(){
+    return "Neevo ".self::VERSION." (revision ".self::REVISION.").";
   }
 
 }

@@ -3,7 +3,6 @@ Neevo - Tiny open-source database abstraction layer for PHP
 Info
 ====
 
-- Version: v0.02dev
 - Available under MIT license (http://www.opensource.org/licenses/mit-license.php)
 - Author: Martin Srank - Smasty (http://smasty.net)
 - Website: http://labs.smasty.net/neevo/
@@ -11,6 +10,8 @@ Info
 
 About Neevo
 ===========
+
+First of all, thank you for downloading Neevo!
 
 Neevo is a very small, fully object-oriented database abstraction layer for PHP.
 It's open-source and released under the terms and conditions of the MIT license.

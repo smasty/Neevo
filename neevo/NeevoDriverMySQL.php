@@ -7,11 +7,10 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * @copyright  Copyright (c) 2010 Martin Srank (http://smasty.net)
- * @license    http://www.opensource.org/licenses/mit-license.php  MIT license
- * @link       http://labs.smasty.net/neevo/
- * @package    Neevo
- * @version    0.02dev
+ * @author   Martin Srank (http://smasty.net)
+ * @license  http://www.opensource.org/licenses/mit-license.php  MIT license
+ * @link     http://labs.smasty.net/neevo/
+ * @package  Neevo
  *
  */
 
