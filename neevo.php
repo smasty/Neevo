@@ -15,6 +15,8 @@
  *
  */
 
+include dirname(__FILE__). "/neevo/NeevoQuery.php";
+include dirname(__FILE__). "/neevo/NeevoStatic.php";
 include dirname(__FILE__). "/neevo/INeevoDriver.php";
 include dirname(__FILE__). "/neevo/NeevoDriverMySQL.php";
 
@@ -242,6 +244,7 @@ class Neevo{
   /**
    * If error_reporting is turned on, throws NeevoException available to catch.
    * @param string $neevo_msg Error message
+   * @param bool $catch Catch this error or not
    * @return false
    */
   public function error($neevo_msg, $catch = false){

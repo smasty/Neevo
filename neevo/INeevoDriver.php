@@ -73,6 +73,7 @@ interface INeevoDriver {
   /**
    * If error_reporting is turned on, throws NeevoException available to catch.
    * @param string $neevo_msg Error message
+   * @param bool $catch Catch this error or not
    * @throws NeevoException
    * @return false
    */
@@ -118,5 +119,12 @@ interface INeevoDriver {
    * @return string the Query
    */
   public function build(NeevoQuery $query);
+
+  /**
+   * Escapes given string for use in SQL
+   * @param string $string
+   * @return string
+   */
+  public function escape_string($string);
 }
 ?>

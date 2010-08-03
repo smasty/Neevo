@@ -21,17 +21,38 @@
  */
 class NeevoDriverMySQL implements INeevoDriver{
 
+  /** Character used as column quote, e.g `column` in MySQL */
   const COL_QUOTE = '`';
+  /** Character ussed to escape quotes in queries, e.g. \ in MySQL */
   const ESCAPE_CHAR  = "\\";
-  
+
+  /** @var Neevo $neevo Reference to main Neevo object */
   private $neevo;
 
+
+  /**
+   * If driver extension is loaded, sets Neevo reference, otherwise throw exception
+   * @param Neevo $neevo
+   * @throws NeevoException
+   */
   public function  __construct($neevo){
     if(!extension_loaded("mysql")) throw new NeevoException("PHP extension 'mysql' not loaded.");
     $this->neevo = $neevo;
   }
 
 
+  /**
+   * Connects to database server, selects database and sets encoding (if defined)
+   * @param array $opts Array of options in following format:
+   * <pre>Array(
+   *   host            =>  localhost,
+   *   username        =>  username,
+   *   password        =>  password,
+   *   database        =>  database_name,
+   *   encoding        =>  utf8
+   * );</pre>
+   * @return bool
+   */
   public function connect(array $opts){
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
     if(!is_resource($connection) or !$this->test_connection($connection)) $this->neevo->error("Connection to host '".$opts['host']."' failed");
@@ -52,10 +73,33 @@ class NeevoDriverMySQL implements INeevoDriver{
   }
 
 
+  /**
+   * Closes given resource
+   * @param resource $resource
+   */
+  public function close($resource){
+    @mysql_close($resource);
+  }
+
+
+  /**
+   * Executes given SQL query
+   * @param string $query_string Query-string.
+   * @param resource Connection resource
+   * @return resource
+   */
   public function query($query_string, $resource){
     return @mysql_query($query_string, $resource);
   }
 
+
+   /**
+   * If error_reporting is turned on, throws NeevoException available to catch.
+   * @param string $neevo_msg Error message
+    * @param bool $catch Catch this error or not
+   * @throws NeevoException
+   * @return false
+   */
   public function error($neevo_msg, $catch){
     $mysql_msg = mysql_error();
     $no = mysql_errno();
@@ -73,33 +117,13 @@ class NeevoDriverMySQL implements INeevoDriver{
       else throw new NeevoException($msg);
     }
   }
-  
-
-  /**
-   * Closes MySQL connection
-   * @param resource $resource
-   */
-  public function close($resource){
-    @mysql_close($resource);
-  }
 
 
   /**
-   * Tests if MySQL connection is usable (wrong username without password)
-   * @param resource $resource
-   * @return bool
+   * Fetches data from given Query resource
+   * @param resource $resource Query resource
+   * @return mixed Array or string (if only one value is returned) or FALSE (if nothing is returned).
    */
-  private function test_connection($resource){
-    try{
-      $q = mysql_query("SHOW DATABASES", $resource);
-      $r = $this->fetch($q);
-      if(!$r || $r == "information_schema") throw new NeevoException("Error!");
-    }
-    catch (NeevoException $e){return false;}
-    return true;
-  }
-
-
   public function fetch($resource){
     while($tmp_rows = @mysql_fetch_assoc($resource))
       $rows[] = (count($tmp_rows) == 1) ? $tmp_rows[max(array_keys($tmp_rows))] : $tmp_rows;
@@ -113,14 +137,34 @@ class NeevoDriverMySQL implements INeevoDriver{
     return $rows;
   }
 
+
+  /**
+   * Move internal result pointer
+   * @param resource $resource Query resource
+   * @param int $row_number Row number of the new result pointer.
+   * @return bool
+   */
   public function seek($resource, $row_number){
     return @mysql_data_seek($resource, $row_number);
   }
 
+
+  /**
+   * Randomize result order.
+   * @param NeevoQuery $query NeevoQuery instance
+   * @return NeevoQuery
+   */
   public function rand(NeevoQuery $query){
     $query->order('RAND()');
   }
 
+
+  /**
+   * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
+   * @param NeevoQuery $query NeevoQuery instance
+   * @param bool $string Return rows as a string ("Rows: 5", "Affected: 10"). Default: FALSE
+   * @return mixed Number of rows (int) or FALSE
+   */
   public function rows(NeevoQuery $query, $string){
     if($query->type!='select') $aff_rows = $query->time() ? @mysql_affected_rows($query->neevo->resource()) : false;
     else $num_rows = @mysql_num_rows($query->resource);
@@ -133,6 +177,61 @@ class NeevoDriverMySQL implements INeevoDriver{
     }
     else return false;
   }
+
+
+  /**
+   * Builds Query from NeevoQuery instance
+   * @param NeevoQuery $query NeevoQuery instance
+   * @return string the Query
+   */
+  public function build(NeevoQuery $query){
+
+    if($query->sql)
+      $q = $query->sql;
+
+    else{
+      $table = $this->build_tablename($query);
+
+      if($query->where)
+        $where = $this->build_where($query);
+
+      if($query->order)
+        $order = $this->build_order($query);
+
+      if($query->limit) $limit = " LIMIT " .$query->limit;
+      if($query->offset) $limit .= " OFFSET " .$query->offset;
+
+      if($query->type == 'select'){
+        $cols = $this->build_select_cols($query);
+        $q .= "SELECT $cols FROM $table$where$order$limit";
+      }
+
+      if($query->type == 'insert' && $query->data){
+        $insert_data = $this->build_insert_data($query);
+        $q .= "INSERT INTO $table$insert_data";
+      }
+
+      if($query->type == 'update' && $query->data){
+        $update_data = $this->build_update_data($query);
+        $q .= "UPDATE $table$update_data$where$order$limit";
+      }
+
+      if($query->type == 'delete')
+        $q .= "DELETE FROM $table$where$order$limit";
+    }
+    return "$q;";
+  }
+
+
+  /**
+   * Escapes given string for use in SQL
+   * @param string $string
+   * @return string
+   */
+  public function escape_string($string){
+    return mysql_real_escape_string($string);
+  }
+
 
   /**
    * Builds table-name for queries
@@ -233,53 +332,21 @@ class NeevoDriverMySQL implements INeevoDriver{
     }
     return join(', ', $cols);
   }
-
+  
 
   /**
-   * Builds Query from NeevoQuery instance
-   * @param NeevoQuery $query NeevoQuery instance
-   * @return string the Query
+   * Tests if MySQL connection is usable (wrong username without password)
+   * @param resource $resource
+   * @return bool
    */
-  public function build(NeevoQuery $query){
-
-    if($query->sql)
-      $q = $query->sql;
-
-    else{
-      $table = $this->build_tablename($query);
-
-      if($query->where)
-        $where = $this->build_where($query);
-
-      if($query->order)
-        $order = $this->build_order($query);
-
-      if($query->limit) $limit = " LIMIT " .$query->limit;
-      if($query->offset) $limit .= " OFFSET " .$query->offset;
-
-      if($query->type == 'select'){
-        $cols = $this->build_select_cols($query);
-        $q .= "SELECT $cols FROM $table$where$order$limit";
-      }
-
-      if($query->type == 'insert' && $query->data){
-        $insert_data = $this->build_insert_data($query);
-        $q .= "INSERT INTO $table$insert_data";
-      }
-
-      if($query->type == 'update' && $query->data){
-        $update_data = $this->build_update_data($query);
-        $q .= "UPDATE $table$update_data$where$order$limit";
-      }
-
-      if($query->type == 'delete')
-        $q .= "DELETE FROM $table$where$order$limit";
+  private function test_connection($resource){
+    try{
+      $q = mysql_query("SHOW DATABASES", $resource);
+      $r = $this->fetch($q);
+      if(!$r || $r == "information_schema") throw new NeevoException("Error!");
     }
-    return "$q;";
-  }
-
-  public function escape_string($string){
-    return mysql_real_escape_string($string);
+    catch (NeevoException $e){return false;}
+    return true;
   }
 }
 

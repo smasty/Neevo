@@ -56,7 +56,7 @@ class NeevoStatic {
     return "<code class=\"".self::$highlight_classes['columns']."\"> $sql </code>\n";
   }
 
-  /** Escapes whole array for use in MySQL */
+  /** Escapes whole array for use in SQL */
   public static function escape_array(array $array, Neevo $neevo){
     foreach($array as &$value){
        $value = is_numeric($value) ? $value : ( is_string($value) ? self::escape_string($value, $neevo) : ( is_array($value) ? self::escape_array($value) : $value ) );
@@ -64,7 +64,7 @@ class NeevoStatic {
     return $array;
   }
 
-  /** Escapes given string for use in MySQL */
+  /** Escapes given string for use in SQL */
   public static function escape_string($string,Neevo $neevo){
     if(get_magic_quotes_gpc()) $string = stripslashes($string);
     $string = $neevo->driver()->escape_string($string);
