@@ -281,6 +281,11 @@ class Neevo{
 
 }
 
+
+/**
+ * Neevo Exceptions
+ * @package Neevo
+ */
 class NeevoException extends Exception{};
 
 ?>
