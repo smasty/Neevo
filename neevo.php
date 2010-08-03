@@ -39,7 +39,7 @@ class Neevo{
 
 
   /**
-   * Neevo main class.
+   * Neevo
    * @param array $opts Array of options in following format:
    * <pre>Array(
    *   driver          =>  driver to use
@@ -73,6 +73,7 @@ class Neevo{
    * Sets Neevo SQL driver to use
    * @param string $driver Driver name
    * @return void
+   * @internal
    */
   private function set_driver($driver){
     if(!$driver) throw new NeevoException("Driver not set.");
@@ -96,10 +97,22 @@ class Neevo{
     return $this->driver;
   }
 
+
+  /**
+   * Sets connection resource
+   * @param resource $resource
+   * @internal
+   */
   public function set_resource($resource){
     $this->resource = $resource;
   }
 
+
+  /**
+   * Sets connection options
+   * @param array $opts
+   * @internal
+   */
   public function set_options(array $opts){
     $this->options = $opts;
   }
@@ -107,7 +120,6 @@ class Neevo{
   
   /**
    * Connects to database server, selects database and sets encoding (if defined)
-   * @access private
    * @param array $opts
    * @return bool
    */
@@ -183,12 +195,11 @@ class Neevo{
 
   /**
    * Performs Query
-   * @access private
    * @param NeevoQuery $query Query to perform.
    * @param bool $catch_error Catch exception by default if mode is not E_STRICT
    * @return resource
    */
-  public final function query(NeevoQuery $query, $catch_error = false){
+  public function query(NeevoQuery $query, $catch_error = false){
     $q = $this->driver()->query($query->build(), $this->resource());
     $this->queries(1);
     $this->last($query);
@@ -203,7 +214,7 @@ class Neevo{
    * @param string $table Database table to use for selecting
    * @return NeevoQuery
    */
-  public final function select($columns, $table){
+  public function select($columns, $table){
     $q = new NeevoQuery($this, 'select', $table);
     return $q->cols($columns);
   }
@@ -215,7 +226,7 @@ class Neevo{
    * @param array $data Associative array of values to insert in format column_name=>column_value
    * @return NeevoQuery
    */
-  public final function insert($table, array $data){
+  public function insert($table, array $data){
     $q = new NeevoQuery($this, 'insert', $table);
     return $q->data($data);
   }
@@ -227,7 +238,7 @@ class Neevo{
    * @param array $data Associative array of values for update in format column_name=>column_value
    * @return NeevoQuery
    */
-  public final function update($table, array $data){
+  public function update($table, array $data){
     $q = new NeevoQuery($this, 'update', $table);
     return $q->data($data);
   }
@@ -238,13 +249,14 @@ class Neevo{
    * @param string $table Database table to use for deleting
    * @return NeevoQuery
    */
-  public final function delete($table){
+  public function delete($table){
     return new NeevoQuery($this, 'delete', $table);
   }
 
 
   /**
    * If error_reporting is turned on, throws NeevoException available to catch.
+   * @internal
    * @param string $neevo_msg Error message
    * @param bool $catch Catch this error or not
    * @return false
@@ -285,6 +297,7 @@ class Neevo{
 /**
  * Neevo Exceptions
  * @package Neevo
+ * @internal
  */
 class NeevoException extends Exception{};
 

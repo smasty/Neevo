@@ -215,10 +215,9 @@ class NeevoQuery {
 
   /**
    * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
-   * @param bool $string Return rows as a string ("Rows: 5", "Affected: 10"). Default: FALSE
    * @return mixed Number of rows (int) or FALSE
    */
-  public function rows($string = false){
+  public function rows(){
     return $this->neevo->driver()->rows($this, $string);
   }
 
@@ -321,101 +320,6 @@ class NeevoQuery {
       } else $this->neevo->error("Undo failed: No such Query part '$sql_part' for this kind of Query", true);
     }
     return $this;
-  }
-
-
-  /**
-   * Builds table-name for queries
-   * @return string
-   */
-  private function build_tablename(){
-    $pieces = explode(".", $this->table);
-    $prefix = $this->neevo->prefix();
-    if($pieces[1])
-      return Neevo::COL_QUOTE .$pieces[0] .Neevo::COL_QUOTE ."." .Neevo::COL_QUOTE .$prefix .$pieces[1] .Neevo::COL_QUOTE;
-    else return Neevo::COL_QUOTE .$prefix .$pieces[0] .Neevo::COL_QUOTE;
-  }
-
-
-  /**
-   * Builds WHERE statement for queries
-   * @return string
-   */
-  private function build_where(){
-    foreach ($this->where as $where) {
-      if(empty($where[3])) $where[3] = 'AND';
-      if(is_array($where[2])){
-        $where[2] = "(" .join(", ", NeevoStatic::escape_array($where[2])) .")";
-        $in_construct = true;
-      }
-      $wheres[] = $where;
-    }
-    unset($wheres[count($wheres)-1][3]);
-    foreach ($wheres as $in_where) {
-      $in_where[0] = (NeevoStatic::is_sql_func($in_where[0])) ? NeevoStatic::quote_sql_func($in_where[0]) : Neevo::COL_QUOTE .$in_where[0] .Neevo::COL_QUOTE;
-      if(!$in_construct) $in_where[2] = NeevoStatic::escape_string($in_where[2]);
-      $wheres2[] = join(' ', $in_where);
-    }
-    foreach ($wheres2 as &$rplc_where){
-      $rplc_where = str_replace(array(' = ', ' != '), array('=', '!='), $rplc_where);
-    }
-    return " WHERE ".join(' ', $wheres2);
-  }
-
-
-  /**
-   * Builds data part for INSERT queries ([INSERT INTO] (...) VALUES (...) )
-   * @return string
-   */
-  private function build_insert_data(){
-    foreach(NeevoStatic::escape_array($this->data) as $col => $value){
-      $cols[] = Neevo::COL_QUOTE .$col .Neevo::COL_QUOTE;
-      $values[] = $value;
-    }
-    return " (".join(', ',$cols).") VALUES (".join(', ',$values).")";
-  }
-
-
-  /**
-   * Builds data part for UPDATE queries ([UPDATE ...] SET ...)
-   * @return string
-   */
-  private function build_update_data(){
-    foreach(NeevoStatic::escape_array($this->data) as $col => $value){
-      $update[] = Neevo::COL_QUOTE .$col .Neevo::COL_QUOTE ."=" .$value;
-    }
-    return " SET " .join(', ', $update);
-  }
-
-
-  /**
-   * Builds ORDER BY statement for queries
-   * @return string
-   */
-  private function build_order(){
-    foreach ($this->order as $in_order) {
-      $in_order[0] = (NeevoStatic::is_sql_func($in_order[0])) ? $in_order[0] : Neevo::COL_QUOTE .$in_order[0] .Neevo::COL_QUOTE;
-      $orders[] = join(' ', $in_order);
-    }
-    return " ORDER BY ".join(', ', $orders);
-  }
-
-
-  /**
-   * Builds columns part for SELECT queries
-   * @return string
-   */
-  private function build_select_cols(){
-    foreach ($this->columns as $col) {
-      $col = trim($col);
-      if($col != '*'){
-        if(NeevoStatic::is_as_constr($col)) $col = NeevoStatic::quote_as_constr($col);
-        elseif(NeevoStatic::is_sql_func($col)) $col = NeevoStatic::quote_sql_func($col);
-        else $col = Neevo::COL_QUOTE .$col .Neevo::COL_QUOTE;
-      }
-      $cols[] = $col;
-    }
-    return join(', ', $cols);
   }
 
 

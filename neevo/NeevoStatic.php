@@ -18,6 +18,7 @@
 /**
  * Main Neevo class for some additional static methods
  * @package Neevo
+ * @internal
  */
 class NeevoStatic {
 

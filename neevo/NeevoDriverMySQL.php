@@ -93,10 +93,10 @@ class NeevoDriverMySQL implements INeevoDriver{
   }
 
 
-   /**
+  /**
    * If error_reporting is turned on, throws NeevoException available to catch.
    * @param string $neevo_msg Error message
-    * @param bool $catch Catch this error or not
+   * @param bool $catch Catch this error or not
    * @throws NeevoException
    * @return false
    */
@@ -162,10 +162,9 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
    * @param NeevoQuery $query NeevoQuery instance
-   * @param bool $string Return rows as a string ("Rows: 5", "Affected: 10"). Default: FALSE
    * @return mixed Number of rows (int) or FALSE
    */
-  public function rows(NeevoQuery $query, $string){
+  public function rows(NeevoQuery $query){
     if($query->type!='select') $aff_rows = $query->time() ? @mysql_affected_rows($query->neevo->resource()) : false;
     else $num_rows = @mysql_num_rows($query->resource);
 
@@ -225,6 +224,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Escapes given string for use in SQL
+   * @internal
    * @param string $string
    * @return string
    */
@@ -235,6 +235,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds table-name for queries
+   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -249,6 +250,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds WHERE statement for queries
+   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -276,6 +278,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds data part for INSERT queries ([INSERT INTO] (...) VALUES (...) )
+   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -290,6 +293,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds data part for UPDATE queries ([UPDATE ...] SET ...)
+   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -303,6 +307,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds ORDER BY statement for queries
+   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -317,6 +322,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds columns part for SELECT queries
+   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -336,6 +342,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Tests if MySQL connection is usable (wrong username without password)
+   * @internal
    * @param resource $resource
    * @return bool
    */
