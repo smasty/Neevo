@@ -76,7 +76,7 @@ class Neevo{
    * @param array $opts
    * @return bool
    */
-  protected function connect(array $opts){
+  private function connect(array $opts){
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
     if(!is_resource($connection) or !$this->test_connection($connection)) $this->error("Connection to host '".$opts['host']."' failed");
     if($opts['database']){
@@ -376,7 +376,6 @@ class NeevoMySQLQuery {
    */
   public function cols($columns){
     if(!is_array($columns)) $columns = explode(',', $columns);
-    $cols = array();
     $this->columns = $columns;
     return $this;
   }
@@ -519,7 +518,7 @@ class NeevoMySQLQuery {
   /**
    * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
    * @param bool $string Return rows as a string ("Rows: 5", "Affected: 10"). Default: FALSE
-   * @return mixed Number of rows (int) or FALSE if used on invalid query.
+   * @return mixed Number of rows (int) or FALSE
    */
   public function rows($string = false){
     if($this->type!='select') $aff_rows = $this->time() ? @mysql_affected_rows($this->neevo->resource()) : false;
@@ -868,7 +867,7 @@ class NeevoStatic {
 
   /** Returns formatted filesize */
   public static function filesize($bytes){
-    $unit=array('B','kB','MB','GB','TB','PB');
+    $unit = array('B','kB','MB','GB','TB','PB');
     return @round($bytes/pow(1024, ($i = floor(log($bytes, 1024)))), 2).' '.$unit[$i];
   }
 
