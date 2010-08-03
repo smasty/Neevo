@@ -139,6 +139,7 @@ class Neevo{
    */
   public function error_reporting($value = null){
     if(isset($value)) $this->error_reporting = $value;
+    if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
     return $this->error_reporting;
   }
 

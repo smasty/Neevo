@@ -1,12 +1,54 @@
 Neevo - Tiny open-source database abstraction layer for PHP
 
-Will be released under MIT license (http://www.opensource.org/licenses/mit-license.php)
+Info
+====
 
-Author: Martin Srank - Smasty (http://smasty.net)
+- Version: v0.02dev
+- Available under MIT license (http://www.opensource.org/licenses/mit-license.php)
+- Author: Martin Srank - Smasty (http://smasty.net)
+- Website: http://labs.smasty.net/neevo/
+- Public API: http://labs.smasty.net/neevo/doc/
 
-More info will be available on: http://labs.smasty.net/neevo/
+About Neevo
+===========
 
-Public API documentation available on http://labs.smasty.net/neevo/doc/
+Neevo is a very small, fully object-oriented database abstraction layer for PHP.
+It's open-source and released under the terms and conditions of the MIT license.
 
-Currently supported drivers:
+Neevo allows you to easily write SQL queries for different SQL drivers
+in unified syntax with the use of Object-oriented PHP. Of course, Neevo automatically
+escapes all code to avoid SQL Injection attacs, etc.
+
+Neevo currently supports only one SQL driver - MySQL (through PHP extension 'mysql')
+but more drivers are beiing prepared: PostgreSQL and SQLite. Neevo also offers
+an Interface for other programmers, so new drivers can be easily added.
+
+Features
+========
+ - SELECT queries (JOINs not supported)
+ - INSERT queries
+ - UPDATE queries
+ - DELETE queries
+
+ - Multiple drivers support *
+ - Fetch results: "one method to rule them all" - only one intelligent method
+                   for fetching data from database.
+ - Affected rows
+ - Retrieved rows
+ - Seek
+ - Table prefix support
+ - Query execution time
+ - Last executed query
+ - Wxecuted queries counter
+ - Query and connection info
+ - Randomize result order
+ - Dump queries
+ - Multi-level error-reporting system (based on Exceptions):
+    - E_NONE:    No errors and warnings are reported.
+    - E_CATCH:   All errors and warnings are auto-catched (printed with "echo").
+    - E_WARNING: Warnings are catched, errros thrown only.
+    - E_STRICT:  All errors and warnings are thrown only.
+
+
+* Currently supported SQL drivers:
  - MySQL (PHP extension 'mysql')
