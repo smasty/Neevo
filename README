@@ -1,4 +1,4 @@
-Neevo - Tiny open-source MySQL layer for PHP.
+Neevo - Tiny open-source database abstraction layer for PHP
 
 Will be released under MIT license (http://www.opensource.org/licenses/mit-license.php)
 
@@ -7,3 +7,6 @@ Author: Martin Srank - Smasty (http://smasty.net)
 More info will be available on: http://labs.smasty.net/neevo/
 
 Public API documentation available on http://labs.smasty.net/neevo/doc/
+
+Currently supported drivers:
+ - MySQL (PHP extension 'mysql')

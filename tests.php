@@ -29,6 +29,7 @@ include('neevo.php');
 
 // Connect to MySQL database
 $sql = new Neevo(array(
+  'driver'   => 'mysql',
   'host'     => 'localhost',
   'username' => 'root',
   'password' => '',
@@ -44,7 +45,7 @@ $sql->prefix('dp_');
 
 
 // Using  "WHERE col IN (val1, val2, ...)" construction
-$s = $sql->select("id", 'neevo_demo.client')->where("id", null, "or")->where("name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))->limit(5)->dump()->fetch(Neevo::OBJECT);
+$s = $sql->select("id", 'neevo_demo.client')->where("id", null, "or")->where("name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))->limit(5)->dump()->fetch();
 print_r($s);
 
 // Data for Insert query demos
