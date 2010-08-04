@@ -254,6 +254,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    * @return string
    */
   private function build_where(NeevoQuery $query){
+    $prefix = $query->neevo->prefix();
     foreach ($query->where as $where) {
       if(empty($where[3])) $where[3] = 'AND';
       if(is_array($where[2])){
@@ -264,7 +265,8 @@ class NeevoDriverMySQL implements INeevoDriver{
     }
     unset($wheres[count($wheres)-1][3]);
     foreach ($wheres as $in_where) {
-      $in_where[0] = (NeevoStatic::is_sql_func($in_where[0])) ? NeevoStatic::quote_sql_func($in_where[0]) : self::COL_QUOTE .$in_where[0] .self::COL_QUOTE;
+      $in_where[0] = (NeevoStatic::is_sql_func($in_where[0])) ? NeevoStatic::quote_sql_func($in_where[0]) : $in_where[0];
+      $in_where[0] = (strstr($in_where[0], ".")) ? preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]{1,64})#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $in_where[0]) : self::COL_QUOTE .$in_where[0] .self::COL_QUOTE;
       if(!$in_construct) $in_where[2] = NeevoStatic::escape_string($in_where[2], $this->neevo);
       $wheres2[] = join(' ', $in_where);
     }
@@ -326,12 +328,19 @@ class NeevoDriverMySQL implements INeevoDriver{
    * @return string
    */
   private function build_select_cols(NeevoQuery $query){
+    $prefix = $query->neevo->prefix();
     foreach ($query->columns as $col) {
       $col = trim($col);
       if($col != '*'){
-        if(NeevoStatic::is_as_constr($col)) $col = NeevoStatic::quote_as_constr($col, self::COL_QUOTE);
-        elseif(NeevoStatic::is_sql_func($col)) $col = NeevoStatic::quote_sql_func($col);
-        else $col = self::COL_QUOTE .$col .self::COL_QUOTE;
+        if(strstr($col, ".*")){
+          $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)(\*)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE .".*", $col);
+        }
+        else{
+          (strstr($col, ".")) ? $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]{1,64})#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $col) : false;
+          if(NeevoStatic::is_as_constr($col)) $col = NeevoStatic::quote_as_constr($col, self::COL_QUOTE);
+          elseif(NeevoStatic::is_sql_func($col)) $col = NeevoStatic::quote_sql_func($col);
+          else $col = self::COL_QUOTE .$col .self::COL_QUOTE;
+        }
       }
       $cols[] = $col;
     }

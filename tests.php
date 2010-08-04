@@ -45,7 +45,7 @@ $sql->prefix('dp_');
 
 
 // Using  "WHERE col IN (val1, val2, ...)" construction
-$s = $sql->select("id", 'neevo_demo.client')->where("id", null, "or")->where("name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))->limit(5)->dump()->fetch();
+$s = $sql->select("client.*", 'neevo_demo.client')->where("md5(client.id)", null, "or")->where("name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))->limit(5)->dump()->fetch();
 print_r($s);
 
 // Data for Insert query demos

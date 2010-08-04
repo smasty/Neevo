@@ -107,10 +107,9 @@ interface INeevoDriver {
   /**
    * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
    * @param NeevoQuery $query NeevoQuery instance
-   * @param bool $string Return rows as a string ("Rows: 5", "Affected: 10"). Default: FALSE
    * @return mixed Number of rows (int) or FALSE
    */
-  public function rows(NeevoQuery $query, $string);
+  public function rows(NeevoQuery $query);
 
   /**
    * Builds Query from NeevoQuery instance
