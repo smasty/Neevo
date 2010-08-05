@@ -63,5 +63,6 @@ Todo
  - PostgreSQL driver
  - SQLite driver
  - Show database and table structure
+ - One-file-only minified version
  - MySQLi driver (?)
- - Foreign keys support (?, probably not)
+ - Foreign keys support (?; probably not)
