@@ -14,11 +14,11 @@
  *
  */
 
-include dirname(__FILE__). "/neevo/NeevoQuery.php";
-include dirname(__FILE__). "/neevo/NeevoStatic.php";
-include dirname(__FILE__). "/neevo/INeevoDriver.php";
+include "./neevo/NeevoStatic.php";
+include "./neevo/NeevoQuery.php";
+include "./neevo/INeevoDriver.php";
 
-include dirname(__FILE__). "/neevo/NeevoDriverMySQL.php";
+include "./neevo/NeevoDriverMySQL.php";
 
 /**
  * Main Neevo layer class
@@ -27,7 +27,7 @@ include dirname(__FILE__). "/neevo/NeevoDriverMySQL.php";
 class Neevo{
 
   // Fields
-  private $resource, $last, $table_prefix, $queries, $error_reporting, $driver;
+  private $resource, $last, $table_prefix, $queries, $error_reporting, $driver, $error_handler;
   private $options = array();
 
   // Error-reporting levels
@@ -38,7 +38,10 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.2dev";
-  const REVISION = "62";
+  const REVISION = "64";
+
+  // Default error handler
+  const DEFAULT_E_HANDLER = "neevo_default_handler";
 
 
   /**
@@ -73,10 +76,21 @@ class Neevo{
 
 
   /**
+   * Connects to database server, selects database and sets encoding (if defined)
+   * @param array $opts
+   * @return bool
+   */
+  private function connect(array $opts){
+    return $this->driver()->connect($opts);
+  }
+
+
+  /**
    * Sets Neevo SQL driver to use
    * @param string $driver Driver name
    * @return void
    * @internal
+   * @ignore
    */
   private function set_driver($driver){
     if(!$driver) throw new NeevoException("Driver not set.");
@@ -105,6 +119,7 @@ class Neevo{
    * Sets connection resource
    * @param resource $resource
    * @internal
+   * @ignore
    */
   public function set_resource($resource){
     $this->resource = $resource;
@@ -112,22 +127,22 @@ class Neevo{
 
 
   /**
+   * Returns resource identifier
+   * @return resource
+   */
+  public function resource(){
+    return $this->resource;
+  }
+
+
+  /**
    * Sets connection options
    * @param array $opts
    * @internal
+   * @ignore
    */
   public function set_options(array $opts){
     $this->options = $opts;
-  }
-
-  
-  /**
-   * Connects to database server, selects database and sets encoding (if defined)
-   * @param array $opts
-   * @return bool
-   */
-  private function connect(array $opts){
-    return $this->driver()->connect($opts);
   }
 
 
@@ -147,7 +162,7 @@ class Neevo{
    * @param int $value Value of error-reporting.
    * Possible values:
    * <ul><li>Neevo::E_NONE: Turns Neevo error-reporting off</li>
-   * <li>Neevo::E_CATCH: Catches all Neevo exceptions by default handler</li>
+   * <li>Neevo::E_CATCH: Catches all Neevo exceptions by defined handler</li>
    * <li>Neevo::E_WARNING: Catches only Neevo warnings</li>
    * <li>Neevo::E_STRICT: Catches no Neevo exceptions</li></ul>
    * @return int
@@ -156,6 +171,19 @@ class Neevo{
     if(isset($value)) $this->error_reporting = $value;
     if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
     return $this->error_reporting;
+  }
+
+
+  /**
+   * Sets and/or returns error-handler
+   * @param string $handler_function Name of error-handler function
+   * @return string
+   */
+  public function error_handler($handler_function = null){
+    if(function_exists($handler_function))
+      $this->error_handler = $handler_function;
+    else $this->error_handler = self::DEFAULT_E_HANDLER;
+    return $this->error_handler;
   }
 
 
@@ -173,15 +201,6 @@ class Neevo{
   public function queries($val = null){
     if(is_numeric($val)) $this->queries += $val;
     return $this->queries;
-  }
-
-
-  /**
-   * Returns resource identifier
-   * @return resource
-   */
-  public function resource(){
-    return $this->resource;
   }
 
 
@@ -260,13 +279,13 @@ class Neevo{
   /**
    * If error_reporting is turned on, throws NeevoException available to catch.
    * @internal
+   * @ignore
    * @param string $neevo_msg Error message
-   * @param bool $catch Catch this error or not
+   * @param bool $warning This error is warning only
    * @return false
    */
-  public function error($neevo_msg, $catch = false){
-    $this->driver()->error($neevo_msg, $catch);
-    return false;
+  public function error($neevo_msg, $warning = false){
+    return $this->driver()->error($neevo_msg, $warning);
   }
 
   /**
@@ -306,7 +325,24 @@ class Neevo{
  * Neevo Exceptions
  * @package Neevo
  * @internal
+ * @ignore
  */
 class NeevoException extends Exception{};
 
+
+/**
+ * Neevo's default error handler function
+ * @param string $msg Error message
+ */
+function neevo_default_handler($msg){
+  echo "<b>Neevo error:</b> $msg.\n";
+}
+
+
+/**
+ * @ignore
+ */
+function r($r){
+  return $r;
+}
 ?>

@@ -17,12 +17,12 @@ Neevo is a very small, fully object-oriented database abstraction layer for PHP.
 It's open-source and released under the terms and conditions of the MIT license.
 
 Neevo allows you to easily write SQL queries for different SQL drivers
-in unified syntax with the use of Object-oriented PHP. Of course, Neevo automatically
-escapes all code to avoid SQL Injection attacs, etc.
+in unified syntax with the use of Object-oriented PHP and fluent interfaces.
+Of course, Neevo automatically escapes all code to avoid SQL Injection attacs, etc.
 
 Neevo currently supports only one SQL driver - MySQL (through PHP extension 'mysql')
-but more drivers are beiing prepared: PostgreSQL and SQLite. Neevo also offers
-an Interface for other programmers, so new drivers can be easily added.
+but more drivers are being prepared: PostgreSQL and SQLite for now. Neevo also offers
+an Interface and Public API for other programmers, so new drivers can be easily added.
 
 Features
 ========
@@ -40,16 +40,17 @@ Features
  - Table prefix support
  - Query execution time
  - Last executed query
- - Wxecuted queries counter
+ - Executed queries counter
  - Query and connection info
  - Randomize result order
  - Dump queries
- - "Undo" - Removes some piece from Query (e.g. 2nd WHERE condition or column "email")
+ - "Undo" - Removes some piece from already built queries (e.g. "2nd WHERE condition" or "column `email`")
  - Multi-level error-reporting system (based on Exceptions):
     - E_NONE:    No errors and warnings are reported.
     - E_CATCH:   All errors and warnings are auto-catched (printed with "echo").
     - E_WARNING: Warnings are catched, errros thrown only.
     - E_STRICT:  All errors and warnings are thrown only.
+ - Ability to use your own error handler function.
 
 
 * Currently supported SQL drivers:
@@ -63,4 +64,4 @@ Todo
  - SQLite driver
  - Show database and table structure
  - MySQLi driver (?)
- - Foreign keys support (?)
+ - Foreign keys support (?, probably not)

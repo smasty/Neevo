@@ -179,12 +179,25 @@ class NeevoQuery {
 
 
   /**
-   * Fetches data from given Query resource and executes query (if it haven't already been executed)
-   * @return mixed Array or string (if only one value is returned) or FALSE (if nothing is returned).
+   * Fetches data from given Query resource.
+   * @return mixed Array of rows represented as associative arrays
+   * (column => value), if two or more rows are fetched.<br>
+   * Only row as associative array, if only one row is fetched.<br>
+   * Numerical array of values from fetched column, if there's only one column
+   * fetched in all rows.<br>
+   * String or int, if only one column value is fetched at all.
    */
   public function fetch(){
     $resource = is_resource($this->resource) ? $this->resource : $this->run();
-    $rows = $this->neevo->fetch($resource);
+    while($tmp_rows = $this->neevo->fetch($resource))
+      $rows[] = (count($tmp_rows) == 1) ? $tmp_rows[max(array_keys($tmp_rows))] : $tmp_rows;
+
+    if(count($rows) == 1)
+      $rows = $rows[0];
+
+    if(!count($rows) && is_array($rows)) return false; // Empty
+
+    $this->neevo->driver()->free($resource);
     return $resource ? $rows : $this->neevo->error("Fetching result data failed");
   }
 

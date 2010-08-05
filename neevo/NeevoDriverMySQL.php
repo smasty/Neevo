@@ -22,8 +22,6 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /** Character used as column quote, e.g `column` in MySQL */
   const COL_QUOTE = '`';
-  /** Character ussed to escape quotes in queries, e.g. \ in MySQL */
-  const ESCAPE_CHAR  = "\\";
 
   /** @var Neevo $neevo Reference to main Neevo object */
   private $neevo;
@@ -33,6 +31,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    * If driver extension is loaded, sets Neevo reference, otherwise throw exception
    * @param Neevo $neevo
    * @throws NeevoException
+   * @return void
    */
   public function  __construct($neevo){
     if(!extension_loaded("mysql")) throw new NeevoException("PHP extension 'mysql' not loaded.");
@@ -54,7 +53,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    */
   public function connect(array $opts){
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
-    if(!is_resource($connection) or !$this->test_connection($connection)) $this->neevo->error("Connection to host '".$opts['host']."' failed");
+    if(!is_resource($connection)) $this->neevo->error("Connection to host '".$opts['host']."' failed");
     if($opts['database']){
       $db = mysql_select_db($opts['database']);
       if(!$db) $this->neevo->error("Could not select database '{$opts['database']}'");
@@ -75,9 +74,20 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Closes given resource
    * @param resource $resource
+   * @return void
    */
   public function close($resource){
     @mysql_close($resource);
+  }
+
+
+  /**
+   * Frees memory used by result
+   * @param resource $result
+   * @return bool
+   */
+  public function free($result){
+    return @mysql_free_result($result);
   }
 
 
@@ -92,48 +102,38 @@ class NeevoDriverMySQL implements INeevoDriver{
   }
 
 
-  /**
-   * If error_reporting is turned on, throws NeevoException available to catch.
+ /**
+   * If error-reporting is turned on, handle errors following current error mode:
+   * <ul><li>E_NONE: does nothing.</li>
+   * <li>E_CATCH: handles the error by defined error-handler.</li>
+   * <li>E_WARNING: handles the error if $catch==true, otherwise throws new NeevoException.</li>
+   * <li>E_STRICT throws new NeevoException.</li></ul>
    * @param string $neevo_msg Error message
-   * @param bool $catch Catch this error or not
+   * @param bool $warning This error is warning only
    * @throws NeevoException
    * @return false
    */
-  public function error($neevo_msg, $catch){
+  public function error($neevo_msg, $warning = false){
     $mysql_msg = mysql_error();
-    $no = mysql_errno();
     $mysql_msg = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $mysql_msg);
     $msg = "$neevo_msg. $mysql_msg";
     $mode = $this->neevo->error_reporting();
     if($mode != Neevo::E_NONE){
       if(($mode != Neevo::E_STRICT && $catch) || $mode == Neevo::E_CATCH){
-        try{
-          throw new NeevoException($msg);
-        } catch (NeevoException $e){
-          echo "<b>Catched NeevoException:</b> ".$e->getMessage()."\n";
-        }
+        call_user_func($this->neevo->error_handler(), $msg);
       }
       else throw new NeevoException($msg);
-    }
+    } return false;
   }
 
 
   /**
-   * Fetches data from given Query resource
+   * Fetches row from given Query resource as associative array.
    * @param resource $resource Query resource
-   * @return mixed Array or string (if only one value is returned) or FALSE (if nothing is returned).
+   * @return array
    */
   public function fetch($resource){
-    while($tmp_rows = @mysql_fetch_assoc($resource))
-      $rows[] = (count($tmp_rows) == 1) ? $tmp_rows[max(array_keys($tmp_rows))] : $tmp_rows;
-
-    if(count($rows) == 1)
-      $rows = $rows[0];
-
-    if(!count($rows) && is_array($rows)) return false; // Empty
-
-    mysql_free_result($resource);
-    return $rows;
+    return @mysql_fetch_assoc($resource);
   }
 
 
@@ -235,6 +235,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds table-name for queries
    * @internal
+   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -250,6 +251,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds WHERE statement for queries
    * @internal
+   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -265,9 +267,14 @@ class NeevoDriverMySQL implements INeevoDriver{
     }
     unset($wheres[count($wheres)-1][3]);
     foreach ($wheres as $in_where) {
-      $in_where[0] = (NeevoStatic::is_sql_func($in_where[0])) ? NeevoStatic::quote_sql_func($in_where[0]) : $in_where[0];
-      $in_where[0] = (strstr($in_where[0], ".")) ? preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]{1,64})#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $in_where[0]) : self::COL_QUOTE .$in_where[0] .self::COL_QUOTE;
-      if(!$in_construct) $in_where[2] = NeevoStatic::escape_string($in_where[2], $this->neevo);
+      if(NeevoStatic::is_sql_func($in_where[0]))
+        $in_where[0] = NeevoStatic::quote_sql_func($in_where[0]);
+      if(strstr($in_where[0], "."))
+        $in_where[0] = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]{1,64})#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $in_where[0]);
+      else
+        $in_where[0] = self::COL_QUOTE .$in_where[0] .self::COL_QUOTE;
+      if(!$in_construct)
+        $in_where[2] = NeevoStatic::escape_string($in_where[2], $this->neevo);
       $wheres2[] = join(' ', $in_where);
     }
     foreach ($wheres2 as &$rplc_where){
@@ -280,6 +287,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds data part for INSERT queries ([INSERT INTO] (...) VALUES (...) )
    * @internal
+   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -295,6 +303,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds data part for UPDATE queries ([UPDATE ...] SET ...)
    * @internal
+   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -309,6 +318,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds ORDER BY statement for queries
    * @internal
+   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -324,6 +334,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds columns part for SELECT queries
    * @internal
+   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -336,32 +347,19 @@ class NeevoDriverMySQL implements INeevoDriver{
           $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)(\*)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE .".*", $col);
         }
         else{
-          (strstr($col, ".")) ? $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]{1,64})#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $col) : false;
-          if(NeevoStatic::is_as_constr($col)) $col = NeevoStatic::quote_as_constr($col, self::COL_QUOTE);
-          elseif(NeevoStatic::is_sql_func($col)) $col = NeevoStatic::quote_sql_func($col);
-          else $col = self::COL_QUOTE .$col .self::COL_QUOTE;
+          if(strstr($col, "."))
+            $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]{1,64})#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $col);
+          if(NeevoStatic::is_as_constr($col))
+            $col = NeevoStatic::quote_as_constr($col, self::COL_QUOTE);
+          elseif(NeevoStatic::is_sql_func($col))
+            $col = NeevoStatic::quote_sql_func($col);
+          elseif(!strstr($col, "."))
+            $col = self::COL_QUOTE .$col .self::COL_QUOTE;
         }
       }
       $cols[] = $col;
     }
     return join(', ', $cols);
-  }
-  
-
-  /**
-   * Tests if MySQL connection is usable (wrong username without password)
-   * @internal
-   * @param resource $resource
-   * @return bool
-   */
-  private function test_connection($resource){
-    try{
-      $q = mysql_query("SHOW DATABASES", $resource);
-      $r = $this->fetch($q);
-      if(!$r || $r == "information_schema") throw new NeevoException("Error!");
-    }
-    catch (NeevoException $e){return false;}
-    return true;
   }
 }
 

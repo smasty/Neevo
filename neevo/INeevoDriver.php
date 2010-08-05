@@ -23,8 +23,6 @@ interface INeevoDriver {
 
   /* Character used as column quote, e.g `column` in MySQL
   const COL_QUOTE; */
-  /* Character ussed to escape quotes in queries, e.g. \ in MySQL
-  const ESCAPE_CHAR; */
 
 
   /* @var Neevo $neevo Reference to main Neevo object
@@ -35,6 +33,7 @@ interface INeevoDriver {
    * If driver extension is loaded, sets Neevo reference, otherwise throw exception
    * @param Neevo $neevo
    * @throws NeevoException
+   * @return void
    */
   public function  __construct($neevo);
 
@@ -56,8 +55,17 @@ interface INeevoDriver {
   /**
    * Closes given resource
    * @param resource $resource
+   * @return void
    */
   public function close($resource);
+
+
+  /**
+   * Frees memory used by result
+   * @param resource $result
+   * @return bool
+   */
+  public function free($result);
 
 
   /**
@@ -70,19 +78,23 @@ interface INeevoDriver {
 
 
   /**
-   * If error_reporting is turned on, throws NeevoException available to catch.
+   * If error-reporting is turned on, handle errors following current error mode:
+   * <ul><li>E_NONE: does nothing.</li>
+   * <li>E_CATCH: handles the error by defined error-handler.</li>
+   * <li>E_WARNING: handles the error if $warning==true, otherwise throws new NeevoException.</li>
+   * <li>E_STRICT throws new NeevoException.</li></ul>
    * @param string $neevo_msg Error message
-   * @param bool $catch Catch this error or not
+   * @param bool $warning This error is warning only
    * @throws NeevoException
    * @return false
    */
-  public function error($neevo_msg, $catch);
+  public function error($neevo_msg, $warning = false);
 
 
   /**
-   * Fetches data from given Query resource
+   * Fetches row from given Query resource as associative array.
    * @param resource $resource Query resource
-   * @return mixed Array or string (if only one value is returned) or FALSE (if nothing is returned).
+   * @return array
    */
   public function fetch($resource);
 
