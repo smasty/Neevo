@@ -13,7 +13,6 @@ Neevo - Tiny open-source database abstraction layer for PHP
 Info
 ====
 
-- Version: v0.02dev
 - Available under MIT license (http://www.opensource.org/licenses/mit-license.php)
 - Author: Martin Srank - Smasty (http://smasty.net)
 - Website: http://labs.smasty.net/neevo/
@@ -22,16 +21,18 @@ Info
 About Neevo
 ===========
 
+First of all, thank you for downloading Neevo!
+
 Neevo is a very small, fully object-oriented database abstraction layer for PHP.
 It's open-source and released under the terms and conditions of the MIT license.
 
 Neevo allows you to easily write SQL queries for different SQL drivers
-in unified syntax with the use of Object-oriented PHP. Of course, Neevo automatically
-escapes all code to avoid SQL Injection attacs, etc.
+in unified syntax with the use of Object-oriented PHP and fluent interfaces.
+Of course, Neevo automatically escapes all code to avoid SQL Injection attacs, etc.
 
 Neevo currently supports only one SQL driver - MySQL (through PHP extension 'mysql')
-but more drivers are beiing prepared: PostgreSQL and SQLite. Neevo also offers
-an Interface for other programmers, so new drivers can be easily added.
+but more drivers are being prepared: PostgreSQL and SQLite for now. Neevo also offers
+an Interface and Public API for other programmers, so new drivers can be easily added.
 
 Features
 ========
@@ -49,23 +50,35 @@ Features
  - Table prefix support
  - Query execution time
  - Last executed query
- - Wxecuted queries counter
+ - Executed queries counter
  - Query and connection info
  - Randomize result order
  - Dump queries
+ - &quot;Undo&quot; - Removes some piece from already built queries (e.g. &quot;2nd WHERE condition&quot; or &quot;column `email`&quot;)
  - Multi-level error-reporting system (based on Exceptions):
     - E_NONE:    No errors and warnings are reported.
     - E_CATCH:   All errors and warnings are auto-catched (printed with &quot;echo&quot;).
     - E_WARNING: Warnings are catched, errros thrown only.
     - E_STRICT:  All errors and warnings are thrown only.
+ - Ability to use your own error handler function.
 
 
 * Currently supported SQL drivers:
  - MySQL (PHP extension 'mysql')
 
+
+Todo
+====
+
+ - PostgreSQL driver
+ - SQLite driver
+ - Show database and table structure
+ - One-file-only minified version
+ - MySQLi driver (?)
+ - Foreign keys support (?; probably not)
 </pre>
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 03 Aug 2010 17:57:13 +0200 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Thu, 05 Aug 2010 23:04:04 +0200 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</body>
 </html>

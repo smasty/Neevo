@@ -60,6 +60,8 @@ Features
 Todo
 ====
 
+ - Better site and Public API documentation ;-)
+
  - PostgreSQL driver
  - SQLite driver
  - Show database and table structure

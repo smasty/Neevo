@@ -16,7 +16,7 @@
 
 /**
  * Neevo MySQL driver class
- * @package Neevo
+ * @package NeevoDrivers
  */
 class NeevoDriverMySQL implements INeevoDriver{
 

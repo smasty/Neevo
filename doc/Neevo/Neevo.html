@@ -23,7 +23,7 @@
         		<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Main Neevo layer class</p>
 		<p class="notes">
-			Located in <a class="field" href="_neevo.php.html">/neevo.php</a> (line <span class="field">28</span>)
+			Located in <a class="field" href="_neevo.php.html">/neevo.php</a> (line <span class="field">27</span>)
 		</p>
 		
 				
@@ -47,6 +47,11 @@
 			<div class="const-summary">
 								<div class="const-title">
 					<img src="../media/images/Constant.png" alt=" " />
+					<a href="#DEFAULT_E_HANDLER" title="details" class="const-name">DEFAULT_E_HANDLER</a> = 					<span class="var-type"> &quot;neevo_default_handler&quot;</span>
+
+				</div>
+								<div class="const-title">
+					<img src="../media/images/Constant.png" alt=" " />
 					<a href="#E_CATCH" title="details" class="const-name">E_CATCH</a> = 					<span class="var-type"> 2</span>
 
 				</div>
@@ -65,6 +70,16 @@
 					<a href="#E_WARNING" title="details" class="const-name">E_WARNING</a> = 					<span class="var-type"> 3</span>
 
 				</div>
+								<div class="const-title">
+					<img src="../media/images/Constant.png" alt=" " />
+					<a href="#REVISION" title="details" class="const-name">REVISION</a> = 					<span class="var-type"> &quot;64&quot;</span>
+
+				</div>
+								<div class="const-title">
+					<img src="../media/images/Constant.png" alt=" " />
+					<a href="#VERSION" title="details" class="const-name">VERSION</a> = 					<span class="var-type"> &quot;0.2dev&quot;</span>
+
+				</div>
 							</div>
 		</div>
 	</div>
@@ -81,7 +96,7 @@
 		</div>
 		<div class="info-box-body">			
 			<div class="method-summary">
-																																																																																																																																																												
+																																																																																																																																																				
 												<div class="method-definition">
 											<span class="method-result">Neevo</span>
 										<a href="#__construct" title="details" class="method-name">__construct</a>
@@ -103,9 +118,9 @@
 										()
 									</div>
 																<div class="method-definition">
-											<span class="method-result">false</span>
-										<a href="#error" title="details" class="method-name">error</a>
-											(<span class="var-type">string</span>&nbsp;<span class="var-name">$neevo_msg</span>, [<span class="var-type">bool</span>&nbsp;<span class="var-name">$catch</span> = <span class="var-default">false</span>])
+											<span class="method-result">string</span>
+										<a href="#error_handler" title="details" class="method-name">error_handler</a>
+											([<span class="var-type">string</span>&nbsp;<span class="var-name">$handler_function</span> = <span class="var-default">null</span>])
 									</div>
 																<div class="method-definition">
 											<span class="method-result">int</span>
@@ -163,19 +178,14 @@
 											(<span class="var-type">mixed</span>&nbsp;<span class="var-name">$columns</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$table</span>)
 									</div>
 																<div class="method-definition">
-											<span class="method-result">void</span>
-										<a href="#set_options" title="details" class="method-name">set_options</a>
-											(<span class="var-type"></span>&nbsp;<span class="var-name">$opts</span>)
-									</div>
-																<div class="method-definition">
-											<span class="method-result">void</span>
-										<a href="#set_resource" title="details" class="method-name">set_resource</a>
-											(<span class="var-type">resource</span>&nbsp;<span class="var-name">$resource</span>)
-									</div>
-																<div class="method-definition">
 											<span class="method-result"><a href="../Neevo/NeevoQuery.html">NeevoQuery</a></span>
 										<a href="#update" title="details" class="method-name">update</a>
 											(<span class="var-type">string</span>&nbsp;<span class="var-name">$table</span>, <span class="var-type"></span>&nbsp;<span class="var-name">$data</span>)
+									</div>
+																<div class="method-definition">
+											<span class="method-result">void</span>
+										<a href="#version" title="details" class="method-name">version</a>
+										()
 									</div>
 								</div>
 		</div>
@@ -196,10 +206,10 @@
 			<A NAME='method_detail'></A>
 
 <a name="method__construct" id="__construct"><!-- --></a>
-<div class="oddrow">
+<div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">Constructor __construct</span> (line <span class="line-number">56</span>)
+		<span class="method-title">Constructor __construct</span> (line <span class="line-number">62</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -235,10 +245,10 @@
 			
 	</div>
 <a name="method__destruct" id="__destruct"><!-- --></a>
-<div class="evenrow">
+<div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">Destructor __destruct</span> (line <span class="line-number">67</span>)
+		<span class="method-title">Destructor __destruct</span> (line <span class="line-number">73</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -259,10 +269,10 @@
 			
 	</div>
 <a name="methoddelete" id="delete"><!-- --></a>
-<div class="oddrow">
+<div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">delete</span> (line <span class="line-number">252</span>)
+		<span class="method-title">delete</span> (line <span class="line-number">274</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -288,10 +298,10 @@
 			
 	</div>
 <a name="methoddriver" id="driver"><!-- --></a>
-<div class="evenrow">
+<div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">driver</span> (line <span class="line-number">96</span>)
+		<span class="method-title">driver</span> (line <span class="line-number">113</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -311,43 +321,40 @@
 		
 			
 	</div>
-<a name="methoderror" id="error"><!-- --></a>
-<div class="oddrow">
+<a name="methoderror_handler" id="error_handler"><!-- --></a>
+<div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">error</span> (line <span class="line-number">264</span>)
+		<span class="method-title">error_handler</span> (line <span class="line-number">182</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">If error_reporting is turned on, throws NeevoException available to catch.</p>
+<p class="short-description">Sets and/or returns error-handler</p>
 	<ul class="tags">
 				<li><span class="field">access:</span> public</li>
 			</ul>
 	
 	<div class="method-signature">
-		<span class="method-result">false</span>
+		<span class="method-result">string</span>
 		<span class="method-name">
-			error
+			error_handler
 		</span>
-					(<span class="var-type">string</span>&nbsp;<span class="var-name">$neevo_msg</span>, [<span class="var-type">bool</span>&nbsp;<span class="var-name">$catch</span> = <span class="var-default">false</span>])
+					([<span class="var-type">string</span>&nbsp;<span class="var-name">$handler_function</span> = <span class="var-default">null</span>])
 			</div>
 	
 			<ul class="parameters">
 					<li>
 				<span class="var-type">string</span>
-				<span class="var-name">$neevo_msg</span><span class="var-description">: Error message</span>			</li>
-					<li>
-				<span class="var-type">bool</span>
-				<span class="var-name">$catch</span><span class="var-description">: Catch this error or not</span>			</li>
+				<span class="var-name">$handler_function</span><span class="var-description">: Name of error-handler function</span>			</li>
 				</ul>
 		
 			
 	</div>
 <a name="methoderror_reporting" id="error_reporting"><!-- --></a>
-<div class="evenrow">
+<div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">error_reporting</span> (line <span class="line-number">152</span>)
+		<span class="method-title">error_reporting</span> (line <span class="line-number">170</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -367,16 +374,16 @@
 			<ul class="parameters">
 					<li>
 				<span class="var-type">int</span>
-				<span class="var-name">$value</span><span class="var-description">: Value of error-reporting.  Possible values:  <ul><li>Neevo::E_NONE: Turns Neevo error-reporting off</li><li>Neevo::E_CATCH: Catches all Neevo exceptions by default handler</li><li>Neevo::E_WARNING: Catches only Neevo warnings</li><li>Neevo::E_STRICT: Catches no Neevo exceptions</li></ul></span>			</li>
+				<span class="var-name">$value</span><span class="var-description">: Value of error-reporting.  Possible values:  <ul><li>Neevo::E_NONE: Turns Neevo error-reporting off</li><li>Neevo::E_CATCH: Catches all Neevo exceptions by defined handler</li><li>Neevo::E_WARNING: Catches only Neevo warnings</li><li>Neevo::E_STRICT: Catches no Neevo exceptions</li></ul></span>			</li>
 				</ul>
 		
 			
 	</div>
 <a name="methodfetch" id="fetch"><!-- --></a>
-<div class="oddrow">
+<div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">fetch</span> (line <span class="line-number">191</span>)
+		<span class="method-title">fetch</span> (line <span class="line-number">213</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -403,10 +410,10 @@
 			
 	</div>
 <a name="methodinfo" id="info"><!-- --></a>
-<div class="evenrow">
+<div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">info</span> (line <span class="line-number">273</span>)
+		<span class="method-title">info</span> (line <span class="line-number">295</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -427,10 +434,10 @@
 			
 	</div>
 <a name="methodinsert" id="insert"><!-- --></a>
-<div class="oddrow">
+<div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">insert</span> (line <span class="line-number">229</span>)
+		<span class="method-title">insert</span> (line <span class="line-number">251</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -459,10 +466,10 @@
 			
 	</div>
 <a name="methodlast" id="last"><!-- --></a>
-<div class="evenrow">
+<div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">last</span> (line <span class="line-number">164</span>)
+		<span class="method-title">last</span> (line <span class="line-number">195</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -488,10 +495,10 @@
 			
 	</div>
 <a name="methodmemory" id="memory"><!-- --></a>
-<div class="oddrow">
+<div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">memory</span> (line <span class="line-number">290</span>)
+		<span class="method-title">memory</span> (line <span class="line-number">312</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -512,10 +519,10 @@
 			
 	</div>
 <a name="methodprefix" id="prefix"><!-- --></a>
-<div class="evenrow">
+<div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">prefix</span> (line <span class="line-number">136</span>)
+		<span class="method-title">prefix</span> (line <span class="line-number">154</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -541,10 +548,10 @@
 			
 	</div>
 <a name="methodqueries" id="queries"><!-- --></a>
-<div class="oddrow">
+<div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">queries</span> (line <span class="line-number">170</span>)
+		<span class="method-title">queries</span> (line <span class="line-number">201</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -569,10 +576,10 @@
 			
 	</div>
 <a name="methodquery" id="query"><!-- --></a>
-<div class="evenrow">
+<div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">query</span> (line <span class="line-number">202</span>)
+		<span class="method-title">query</span> (line <span class="line-number">224</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -601,10 +608,10 @@
 			
 	</div>
 <a name="methodresource" id="resource"><!-- --></a>
-<div class="oddrow">
+<div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">resource</span> (line <span class="line-number">180</span>)
+		<span class="method-title">resource</span> (line <span class="line-number">133</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -625,10 +632,10 @@
 			
 	</div>
 <a name="methodselect" id="select"><!-- --></a>
-<div class="evenrow">
+<div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">select</span> (line <span class="line-number">217</span>)
+		<span class="method-title">select</span> (line <span class="line-number">239</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -656,69 +663,11 @@
 		
 			
 	</div>
-<a name="methodset_options" id="set_options"><!-- --></a>
-<div class="oddrow">
-	
-	<div class="method-header">
-		<span class="method-title">set_options</span> (line <span class="line-number">116</span>)
-	</div> 
-	
-	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Sets connection options</p>
-	<ul class="tags">
-				<li><span class="field">access:</span> public</li>
-			</ul>
-	
-	<div class="method-signature">
-		<span class="method-result">void</span>
-		<span class="method-name">
-			set_options
-		</span>
-					(<span class="var-type"></span>&nbsp;<span class="var-name">$opts</span>)
-			</div>
-	
-			<ul class="parameters">
-					<li>
-				<span class="var-type">array</span>
-				<span class="var-name">$opts</span>			</li>
-				</ul>
-		
-			
-	</div>
-<a name="methodset_resource" id="set_resource"><!-- --></a>
+<a name="methodupdate" id="update"><!-- --></a>
 <div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">set_resource</span> (line <span class="line-number">106</span>)
-	</div> 
-	
-	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Sets connection resource</p>
-	<ul class="tags">
-				<li><span class="field">access:</span> public</li>
-			</ul>
-	
-	<div class="method-signature">
-		<span class="method-result">void</span>
-		<span class="method-name">
-			set_resource
-		</span>
-					(<span class="var-type">resource</span>&nbsp;<span class="var-name">$resource</span>)
-			</div>
-	
-			<ul class="parameters">
-					<li>
-				<span class="var-type">resource</span>
-				<span class="var-name">$resource</span>			</li>
-				</ul>
-		
-			
-	</div>
-<a name="methodupdate" id="update"><!-- --></a>
-<div class="oddrow">
-	
-	<div class="method-header">
-		<span class="method-title">update</span> (line <span class="line-number">241</span>)
+		<span class="method-title">update</span> (line <span class="line-number">263</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -746,6 +695,29 @@
 		
 			
 	</div>
+<a name="methodversion" id="version"><!-- --></a>
+<div class="oddrow">
+	
+	<div class="method-header">
+		<span class="method-title">version</span> (line <span class="line-number">317</span>)
+	</div> 
+	
+	<!-- ========== Info from phpDoc block ========= -->
+	<ul class="tags">
+				<li><span class="field">access:</span> public</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			version
+		</span>
+				()
+			</div>
+	
+		
+			
+	</div>
 						
 		</div>
 	</div>
@@ -763,15 +735,15 @@
 							
 					</div>
 		<div class="info-box-body">
-			<a name="constE_CATCH" id="E_CATCH"><!-- --></A>
+			<a name="constDEFAULT_E_HANDLER" id="DEFAULT_E_HANDLER"><!-- --></A>
 <div class="evenrow">
 
 	<div class="const-header">
 		<img src="../media/images/Variable.png" />
 		<span class="const-title">
-			<span class="const-name">E_CATCH</span>
-			 = <span class="const-default"> 2</span>
-			(line <span class="line-number">36</span>)
+			<span class="const-name">DEFAULT_E_HANDLER</span>
+			 = <span class="const-default"> &quot;neevo_default_handler&quot;</span>
+			(line <span class="line-number">44</span>)
 		</span>
 	</div>
 
@@ -779,14 +751,14 @@
 	
 	
 </div>
-<a name="constE_NONE" id="E_NONE"><!-- --></A>
+<a name="constE_CATCH" id="E_CATCH"><!-- --></A>
 <div class="oddrow">
 
 	<div class="const-header">
 		<img src="../media/images/Variable.png" />
 		<span class="const-title">
-			<span class="const-name">E_NONE</span>
-			 = <span class="const-default"> 1</span>
+			<span class="const-name">E_CATCH</span>
+			 = <span class="const-default"> 2</span>
 			(line <span class="line-number">35</span>)
 		</span>
 	</div>
@@ -795,15 +767,31 @@
 	
 	
 </div>
-<a name="constE_STRICT" id="E_STRICT"><!-- --></A>
+<a name="constE_NONE" id="E_NONE"><!-- --></A>
 <div class="evenrow">
+
+	<div class="const-header">
+		<img src="../media/images/Variable.png" />
+		<span class="const-title">
+			<span class="const-name">E_NONE</span>
+			 = <span class="const-default"> 1</span>
+			(line <span class="line-number">34</span>)
+		</span>
+	</div>
+
+	<!-- ========== Info from phpDoc block ========= -->
+	
+	
+</div>
+<a name="constE_STRICT" id="E_STRICT"><!-- --></A>
+<div class="oddrow">
 
 	<div class="const-header">
 		<img src="../media/images/Variable.png" />
 		<span class="const-title">
 			<span class="const-name">E_STRICT</span>
 			 = <span class="const-default"> 4</span>
-			(line <span class="line-number">38</span>)
+			(line <span class="line-number">37</span>)
 		</span>
 	</div>
 
@@ -812,14 +800,46 @@
 	
 </div>
 <a name="constE_WARNING" id="E_WARNING"><!-- --></A>
-<div class="oddrow">
+<div class="evenrow">
 
 	<div class="const-header">
 		<img src="../media/images/Variable.png" />
 		<span class="const-title">
 			<span class="const-name">E_WARNING</span>
 			 = <span class="const-default"> 3</span>
-			(line <span class="line-number">37</span>)
+			(line <span class="line-number">36</span>)
+		</span>
+	</div>
+
+	<!-- ========== Info from phpDoc block ========= -->
+	
+	
+</div>
+<a name="constREVISION" id="REVISION"><!-- --></A>
+<div class="oddrow">
+
+	<div class="const-header">
+		<img src="../media/images/Variable.png" />
+		<span class="const-title">
+			<span class="const-name">REVISION</span>
+			 = <span class="const-default"> &quot;64&quot;</span>
+			(line <span class="line-number">41</span>)
+		</span>
+	</div>
+
+	<!-- ========== Info from phpDoc block ========= -->
+	
+	
+</div>
+<a name="constVERSION" id="VERSION"><!-- --></A>
+<div class="evenrow">
+
+	<div class="const-header">
+		<img src="../media/images/Variable.png" />
+		<span class="const-title">
+			<span class="const-name">VERSION</span>
+			 = <span class="const-default"> &quot;0.2dev&quot;</span>
+			(line <span class="line-number">40</span>)
 		</span>
 	</div>
 
@@ -832,7 +852,7 @@
 	</div>
 
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 03 Aug 2010 17:57:14 +0200 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Thu, 05 Aug 2010 23:04:05 +0200 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</div></body>
 </html>

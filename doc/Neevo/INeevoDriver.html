@@ -21,7 +21,7 @@
         		<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Neevo Driver interface</p>
 		<p class="notes">
-			Located in <a class="field" href="_neevo---INeevoDriver.php.html">/neevo/INeevoDriver.php</a> (line <span class="field">22</span>)
+			Located in <a class="field" href="_neevo---INeevoDriver.php.html">/neevo/INeevoDriver.php</a> (line <span class="field">21</span>)
 		</p>
 		
 				
@@ -42,9 +42,9 @@
 		</div>
 		<div class="info-box-body">			
 			<div class="method-summary">
-																																																																																												
+																																																																																																				
 												<div class="method-definition">
-											<span class="method-result">INeevoDriver</span>
+											<span class="method-result">void</span>
 										<a href="#__construct" title="details" class="method-name">__construct</a>
 											(<span class="var-type"><a href="../Neevo/Neevo.html">Neevo</a></span>&nbsp;<span class="var-name">$neevo</span>)
 									</div>
@@ -66,7 +66,7 @@
 																<div class="method-definition">
 											<span class="method-result">false</span>
 										<a href="#error" title="details" class="method-name">error</a>
-											(<span class="var-type">string</span>&nbsp;<span class="var-name">$neevo_msg</span>, <span class="var-type">bool</span>&nbsp;<span class="var-name">$catch</span>)
+											(<span class="var-type">string</span>&nbsp;<span class="var-name">$neevo_msg</span>, [<span class="var-type">bool</span>&nbsp;<span class="var-name">$warning</span> = <span class="var-default">false</span>])
 									</div>
 																<div class="method-definition">
 											<span class="method-result">string</span>
@@ -74,9 +74,14 @@
 											(<span class="var-type">string</span>&nbsp;<span class="var-name">$string</span>)
 									</div>
 																<div class="method-definition">
-											<span class="method-result">mixed</span>
+											<span class="method-result">array</span>
 										<a href="#fetch" title="details" class="method-name">fetch</a>
 											(<span class="var-type">resource</span>&nbsp;<span class="var-name">$resource</span>)
+									</div>
+																<div class="method-definition">
+											<span class="method-result">bool</span>
+										<a href="#free" title="details" class="method-name">free</a>
+											(<span class="var-type">resource</span>&nbsp;<span class="var-name">$result</span>)
 									</div>
 																<div class="method-definition">
 											<span class="method-result">resource</span>
@@ -91,7 +96,7 @@
 																<div class="method-definition">
 											<span class="method-result">mixed</span>
 										<a href="#rows" title="details" class="method-name">rows</a>
-											(<span class="var-type"><a href="../Neevo/NeevoQuery.html">NeevoQuery</a></span>&nbsp;<span class="var-name">$query</span>, <span class="var-type">bool</span>&nbsp;<span class="var-name">$string</span>)
+											(<span class="var-type"><a href="../Neevo/NeevoQuery.html">NeevoQuery</a></span>&nbsp;<span class="var-name">$query</span>)
 									</div>
 																<div class="method-definition">
 											<span class="method-result">bool</span>
@@ -118,7 +123,7 @@
 <div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">Constructor __construct</span> (line <span class="line-number">40</span>)
+		<span class="method-title">Constructor __construct</span> (line <span class="line-number">38</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -129,7 +134,7 @@
 			</ul>
 	
 	<div class="method-signature">
-		<span class="method-result">INeevoDriver</span>
+		<span class="method-result">void</span>
 		<span class="method-name">
 			__construct
 		</span>
@@ -148,7 +153,7 @@
 <div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">build</span> (line <span class="line-number">121</span>)
+		<span class="method-title">build</span> (line <span class="line-number">131</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -178,7 +183,7 @@
 <div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">close</span> (line <span class="line-number">61</span>)
+		<span class="method-title">close</span> (line <span class="line-number">60</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -207,7 +212,7 @@
 <div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">connect</span> (line <span class="line-number">54</span>)
+		<span class="method-title">connect</span> (line <span class="line-number">52</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -242,11 +247,12 @@
 <div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">error</span> (line <span class="line-number">80</span>)
+		<span class="method-title">error</span> (line <span class="line-number">91</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">If error_reporting is turned on, throws NeevoException available to catch.</p>
+<p class="short-description">If error-reporting is turned on, handle errors following current error mode:</p>
+<p class="description"><p><ul><li>E_NONE: does nothing.</li><li>E_CATCH: handles the error by defined error-handler.</li><li>E_WARNING: handles the error if $warning==true, otherwise throws new NeevoException.</li><li>E_STRICT throws new NeevoException.</li></ul></p></p>
 	<ul class="tags">
 				<li><span class="field">throws:</span> NeevoException</li>
 				<li><span class="field">access:</span> public</li>
@@ -257,7 +263,7 @@
 		<span class="method-name">
 			error
 		</span>
-					(<span class="var-type">string</span>&nbsp;<span class="var-name">$neevo_msg</span>, <span class="var-type">bool</span>&nbsp;<span class="var-name">$catch</span>)
+					(<span class="var-type">string</span>&nbsp;<span class="var-name">$neevo_msg</span>, [<span class="var-type">bool</span>&nbsp;<span class="var-name">$warning</span> = <span class="var-default">false</span>])
 			</div>
 	
 			<ul class="parameters">
@@ -266,7 +272,7 @@
 				<span class="var-name">$neevo_msg</span><span class="var-description">: Error message</span>			</li>
 					<li>
 				<span class="var-type">bool</span>
-				<span class="var-name">$catch</span><span class="var-description">: Catch this error or not</span>			</li>
+				<span class="var-name">$warning</span><span class="var-description">: This error is warning only</span>			</li>
 				</ul>
 		
 			
@@ -275,7 +281,7 @@
 <div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">escape_string</span> (line <span class="line-number">128</span>)
+		<span class="method-title">escape_string</span> (line <span class="line-number">138</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -304,18 +310,17 @@
 <div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">fetch</span> (line <span class="line-number">88</span>)
+		<span class="method-title">fetch</span> (line <span class="line-number">99</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Fetches data from given Query resource</p>
+<p class="short-description">Fetches row from given Query resource as associative array.</p>
 	<ul class="tags">
-				<li><span class="field">return:</span> Array or string (if only one value is returned) or FALSE (if nothing is returned).</li>
 				<li><span class="field">access:</span> public</li>
 			</ul>
 	
 	<div class="method-signature">
-		<span class="method-result">mixed</span>
+		<span class="method-result">array</span>
 		<span class="method-name">
 			fetch
 		</span>
@@ -330,11 +335,40 @@
 		
 			
 	</div>
-<a name="methodquery" id="query"><!-- --></a>
+<a name="methodfree" id="free"><!-- --></a>
 <div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">query</span> (line <span class="line-number">70</span>)
+		<span class="method-title">free</span> (line <span class="line-number">68</span>)
+	</div> 
+	
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Frees memory used by result</p>
+	<ul class="tags">
+				<li><span class="field">access:</span> public</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">bool</span>
+		<span class="method-name">
+			free
+		</span>
+					(<span class="var-type">resource</span>&nbsp;<span class="var-name">$result</span>)
+			</div>
+	
+			<ul class="parameters">
+					<li>
+				<span class="var-type">resource</span>
+				<span class="var-name">$result</span>			</li>
+				</ul>
+		
+			
+	</div>
+<a name="methodquery" id="query"><!-- --></a>
+<div class="evenrow">
+	
+	<div class="method-header">
+		<span class="method-title">query</span> (line <span class="line-number">77</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -363,10 +397,10 @@
 			
 	</div>
 <a name="methodrand" id="rand"><!-- --></a>
-<div class="evenrow">
+<div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">rand</span> (line <span class="line-number">105</span>)
+		<span class="method-title">rand</span> (line <span class="line-number">116</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -392,10 +426,10 @@
 			
 	</div>
 <a name="methodrows" id="rows"><!-- --></a>
-<div class="oddrow">
+<div class="evenrow">
 	
 	<div class="method-header">
-		<span class="method-title">rows</span> (line <span class="line-number">114</span>)
+		<span class="method-title">rows</span> (line <span class="line-number">124</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -410,25 +444,22 @@
 		<span class="method-name">
 			rows
 		</span>
-					(<span class="var-type"><a href="../Neevo/NeevoQuery.html">NeevoQuery</a></span>&nbsp;<span class="var-name">$query</span>, <span class="var-type">bool</span>&nbsp;<span class="var-name">$string</span>)
+					(<span class="var-type"><a href="../Neevo/NeevoQuery.html">NeevoQuery</a></span>&nbsp;<span class="var-name">$query</span>)
 			</div>
 	
 			<ul class="parameters">
 					<li>
 				<span class="var-type"><a href="../Neevo/NeevoQuery.html">NeevoQuery</a></span>
 				<span class="var-name">$query</span><span class="var-description">: NeevoQuery instance</span>			</li>
-					<li>
-				<span class="var-type">bool</span>
-				<span class="var-name">$string</span><span class="var-description">: Return rows as a string (&quot;Rows: 5&quot;, &quot;Affected: 10&quot;). Default: FALSE</span>			</li>
 				</ul>
 		
 			
 	</div>
 <a name="methodseek" id="seek"><!-- --></a>
-<div class="evenrow">
+<div class="oddrow">
 	
 	<div class="method-header">
-		<span class="method-title">seek</span> (line <span class="line-number">97</span>)
+		<span class="method-title">seek</span> (line <span class="line-number">108</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -462,7 +493,7 @@
 
 
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 03 Aug 2010 17:57:13 +0200 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Thu, 05 Aug 2010 23:04:05 +0200 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</div></body>
 </html>
