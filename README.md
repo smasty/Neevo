@@ -1,15 +1,15 @@
 Neevo - Tiny open-source database abstraction layer for PHP
 
 Info
-====
+----
 
-- Available under MIT license [](http://www.opensource.org/licenses/mit-license.php)
+- Available under MIT license (http://www.opensource.org/licenses/mit-license.php)
 - Author: Martin Srank - Smasty (http://smasty.net)
 - Website (temporary): http://labs.smasty.net/neevo/
 - Public API (temporary): http://labs.smasty.net/neevo/doc/
 
 About Neevo
-===========
+-----------
 
 First of all, thank you for downloading Neevo!
 
@@ -26,7 +26,8 @@ an Interface and Public API for other programmers, so new drivers can be easily 
 
 
 Features
-========
+--------
+
  - SELECT queries (JOINs not supported)
  - INSERT queries
  - UPDATE queries
@@ -46,7 +47,7 @@ Features
  - Randomize result order
  - Dump queries
  - "Undo" - Removes some piece from already built queries
-   (e.g. "2nd WHERE condition" or "column `email`")
+   (e.g. "2nd `WHERE` condition" or "column `email`")
  - Multi-level error-reporting system (based on Exceptions):
     - E_NONE:    No errors and warnings are reported.
     - E_CATCH:   All errors and warnings are handled by defined error handler.
@@ -58,12 +59,12 @@ Features
 
 
 Supported drivers
-=================
- - MySQL (PHP extension 'mysql')
+-----------------
+ - MySQL (PHP extension `mysql`)
 
 
 Todo
-====
+----
 
  - Better site and Public API documentation ;-)
 
@@ -80,16 +81,17 @@ Neevo comes with what I call "compiler" - PHP CLI (command-line interface) scrip
 which simplifies some boring work for me: Minifies source to one file without
 comments and whitespace, regenerates PHPDoc and increments revision number.
 
-Usage: $ php compiler [help] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
+Usage:
+    $ php compiler [help] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
 
-  help        Displays help
-  rev+        Increments REVISION in <filename>
-  rev-        Decrements REVISION in <filename>
-  doc         Runs PHPDoc generator
-  -<config>   PHPDoc config file; if not set, default used
-  min         Minifies source code of <filename>
-  min+        + shorten var names.
-  <filename>  File to compile; if not set, default used
+      help        Displays help
+      rev+        Increments REVISION in <filename>
+      rev-        Decrements REVISION in <filename>
+      doc         Runs PHPDoc generator
+      -<config>   PHPDoc config file; if not set, default used
+      min         Minifies source code of <filename>
+      min+        + shorten var names.
+      <filename>  File to compile; if not set, default used
 
 Minification part is made up from functions written by Jakub Vrana (http://php.vrana.cz)
 for his Adminer "Compact MySQL management" (http://adminer.org) licensed under
