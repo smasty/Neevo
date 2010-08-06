@@ -12,12 +12,30 @@ define("PHPDOC_PATH", "http://localhost/phpdoc/docbuilder/builder.php?setting_us
 // PHPDoc default config.
 define("DEFAULT_PHPDOC_CONFIG", "neevo");
 
+// Known arguments
+$known_arguments = array("help", "rev+", "rev-", "doc", "min", "min+");
+
 
 
 if(count($argv) <= 1){
-  echo "\nError: No arguments passed to script.\n\n";
+  echo "\nError: No arguments passed.\n\n";
   help();
   exit;
+}
+
+// Check for unknow arguments
+
+// Filter out non-command argments
+foreach($argv as $arg)
+  preg_match("#^[a-z]+[\+-]?$#i", $arg) ? ( $arg !== basename(__FILE__) ? $args[] = $arg : 0 ) : 0;
+
+// Search for argument in known arguments
+foreach($args as $arg){
+  if(!in_array($arg, $known_arguments)){
+    echo "\nError: Unknown argument '$arg' passed.\n\n";
+    help();
+    exit;
+  }
 }
 
 if($argv[0] == basename(__FILE__))
