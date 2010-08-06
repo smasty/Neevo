@@ -54,13 +54,16 @@ Features
  - Query and connection info
  - Randomize result order
  - Dump queries
- - &quot;Undo&quot; - Removes some piece from already built queries (e.g. &quot;2nd WHERE condition&quot; or &quot;column `email`&quot;)
+ - &quot;Undo&quot; - Removes some piece from already built queries
+            (e.g. &quot;2nd WHERE condition&quot; or &quot;column `email`&quot;)
  - Multi-level error-reporting system (based on Exceptions):
     - E_NONE:    No errors and warnings are reported.
-    - E_CATCH:   All errors and warnings are auto-catched (printed with &quot;echo&quot;).
-    - E_WARNING: Warnings are catched, errros thrown only.
+    - E_CATCH:   All errors and warnings are handled by defined error handler.
+    - E_WARNING: Warnings are handled, errros thrown only.
     - E_STRICT:  All errors and warnings are thrown only.
  - Ability to use your own error handler function.
+ - One-file-only minified version
+    (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
 
 
 * Currently supported SQL drivers:
@@ -78,7 +81,7 @@ Todo
  - MySQLi driver (?)
 </pre>
 	<p class="notes" id="credit">
-		Documentation generated on Fri, 06 Aug 2010 14:01:00 +0200 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Fri, 06 Aug 2010 15:37:14 +0200 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</body>
 </html>

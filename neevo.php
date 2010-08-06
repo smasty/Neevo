@@ -38,7 +38,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.2dev";
-  const REVISION = 69;
+  const REVISION = 70;
 
 
   /**

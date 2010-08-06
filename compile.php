@@ -28,6 +28,7 @@ if($_SERVER['SHELL'])
   $args = $_SERVER['argv'];
 
 if(count($args) <= 1){
+  echo "\nError: No arguments passed to script.\n\n";
   help();
   exit;
 }
@@ -39,35 +40,57 @@ echo "\n";
 
 foreach ($args as $key => $value) {
   $match = preg_match("#([0-9a-z-_]){1}\.php#i", $value);
-  if($match && file_exists($value)) $file = $value;
-  else $file = DEFAULT_FILE;
+  if($match) $file = $value;
+}
+
+// Defined file does't exist, using default
+if(!file_exists($file)){
+  echo "File '$file' doesn't exist, using default '".DEFAULT_FILE."'\n";
+  $file = DEFAULT_FILE;
+  // Defined file exists
+} else echo "Using file '$file'\n";
+
+// Show help end exit
+if(in_array('help', $args)){
+  help();
+  exit;
 }
 
 if(in_array('rev+', $args) && in_array('rev-', $args))
   echo "Error: Cannot use both 'rev+' and 'rev-' arguments.\nRevision number change skipped.\n";
 else{
-  if(in_array('rev+', $args)) // Increment Revision number
+  // Increment Revision number
+  if(in_array('rev+', $args))
     echo rev_number(1, $file);
 
-  if(in_array('rev-', $args)) // Decrement Revision number
+  // Decrement Revision number
+  if(in_array('rev-', $args))
     echo rev_number(-1, $file);
 }
 
-if(in_array('doc', $args)) // Generate PHPDoc; TODO: add config
+// Generate PHPDoc;
+// TODO: add config
+if(in_array('doc', $args))
   echo phpdoc();
 
 if(in_array('min', $args) && in_array('min-', $args))
   echo "Error: Cannot use both 'min+' and 'min-' arguments.\nMinify skipped.\n";
 else{
-  if(in_array('min', $args)) // Minify file
+   // Minify file
+  if(in_array('min', $args))
     echo minify($file);
 
-  if(in_array('min-', $args)) // Minify file and shorten variable names
+  // Minify file and shorten variable names
+  if(in_array('min-', $args)) 
     echo minify($file);
 }
 echo "\n";
 
 
+/**
+ * Generates PHPDoc
+ * @return string
+ */
 function phpdoc(){
   $response = file_get_contents(PHPDOC_PATH);
   if(strstr($response, "<h1>Operation Completed!!</h1>"))
@@ -78,6 +101,12 @@ function phpdoc(){
 }
 
 
+/**
+ * Increments/decrements revision number
+ * @param <type> $i Increment by
+ * @param <type> $file File to search for REVISION constant
+ * @return <type> string
+ */
 function rev_number($i, $file){
   $source = file_get_contents($file);
   global $inc;
@@ -85,10 +114,15 @@ function rev_number($i, $file){
   $newsource = preg_replace_callback("#const REVISION = (\d+);#", "rev_number_callback", $source);
   $x = file_put_contents($file, $newsource);
   $response = $x ? "Revision number successfuly changed" : "Error: Revision number change failed";
-  return "$response (File: '$file')\n";
+  return "$response\n";
 }
 
 
+/**
+ * Revision callback
+ * @param int $n Revison number
+ * @return string
+ */
 function rev_number_callback($n){
   global $inc;
   $res = $n[1]+$inc;
@@ -96,6 +130,12 @@ function rev_number_callback($n){
 }
 
 
+/**
+ * Minifies source
+ * @param string $file Filename to minify
+ * @param bool $short_variables If true, variable names are shorted.
+ * @return string
+ */
 function minify($file, $short_variables = false){
   $path = pathinfo($file);
   $result_file = $path['dirname']."/".$path['filename'].".minified.".$path['extension'];
@@ -106,7 +146,7 @@ function minify($file, $short_variables = false){
   $x = file_put_contents($result_file, $result);
   //highlight_string($result);
   $response =  $x ? "Project minified successfuly!" : "Error: Project minification failed!";
-  return "$response (File: '$file')\n";
+  return "$response\n";
 }
 
 
@@ -156,7 +196,7 @@ function short_identifier($number, $chars) {
  * Part of Adminer - "Compact MySQL management", http://adminer.org
  * Based on http://latrine.dgx.cz/jak-zredukovat-php-skripty
  * @param string $input Input PHP code
- * @param bool $shorted Short variable names or not?
+ * @param bool $shorted If true, variable names are shorted.
  * @return string
  * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
  */
@@ -233,12 +273,7 @@ function php_shrink($input, $shorted) {
 }
 
 function help(){
-echo "
-Error: No arguments passed to compiler.
-
-Usage: php -f ".basename(__FILE__)." -- [rev+|rev-] [doc] [min|min-] [<filename>]
-
-Arguments available:
+echo "Usage: php ".basename(__FILE__)." [rev+|rev-] [doc] [min|min-] [<filename>]
 
    rev+        Increments REVISION number by 1 in <filename>.
    rev-        Decrements REVISION number by 1 in <filename>.
