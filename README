@@ -44,13 +44,16 @@ Features
  - Query and connection info
  - Randomize result order
  - Dump queries
- - "Undo" - Removes some piece from already built queries (e.g. "2nd WHERE condition" or "column `email`")
+ - "Undo" - Removes some piece from already built queries
+            (e.g. "2nd WHERE condition" or "column `email`")
  - Multi-level error-reporting system (based on Exceptions):
     - E_NONE:    No errors and warnings are reported.
-    - E_CATCH:   All errors and warnings are auto-catched (printed with "echo").
-    - E_WARNING: Warnings are catched, errros thrown only.
+    - E_CATCH:   All errors and warnings are handled by defined error handler.
+    - E_WARNING: Warnings are handled, errros thrown only.
     - E_STRICT:  All errors and warnings are thrown only.
  - Ability to use your own error handler function.
+ - One-file-only minified version
+    (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
 
 
 * Currently supported SQL drivers:
