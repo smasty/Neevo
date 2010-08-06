@@ -45,10 +45,12 @@ foreach ($args as $key => $value) {
 
 // Defined file does't exist, using default
 if(!file_exists($file)){
-  echo "File '$file' doesn't exist, using default '".DEFAULT_FILE."'\n";
+  if($file!='') echo "Error: File '$file' doesn't exist, default will be used\n";
   $file = DEFAULT_FILE;
   // Defined file exists
-} else echo "Using file '$file'\n";
+}
+if(file_exists($file))
+  echo "Success: Using file '$file'\n";
 
 // Show help end exit
 if(in_array('help', $args)){
@@ -93,8 +95,8 @@ echo "\n";
  */
 function phpdoc(){
   $response = file_get_contents(PHPDOC_PATH);
-  if(strstr($response, "<h1>Operation Completed!!</h1>"))
-    $response = "PHPDoc generated successfuly";
+  if(strstr($response, "Operation Completed"))
+    $response = "Success: PHPDoc generated";
   else $response = "Error: PHPDoc generation failed";
 
   return "$response\n";
@@ -109,11 +111,11 @@ function phpdoc(){
  */
 function rev_number($i, $file){
   $source = file_get_contents($file);
-  global $inc;
+  global $inc, $new_rev;
   $inc = $i;
   $newsource = preg_replace_callback("#const REVISION = (\d+);#", "rev_number_callback", $source);
   $x = file_put_contents($file, $newsource);
-  $response = $x ? "Revision number successfuly changed" : "Error: Revision number change failed";
+  $response = $x ? "Success: Revision number changed to $new_rev" : "Error: Revision number change failed";
   return "$response\n";
 }
 
@@ -124,8 +126,9 @@ function rev_number($i, $file){
  * @return string
  */
 function rev_number_callback($n){
-  global $inc;
+  global $inc, $new_rev;
   $res = $n[1]+$inc;
+  $new_rev = $res;
   return "const REVISION = $res;";
 }
 
@@ -145,7 +148,7 @@ function minify($file, $short_variables = false){
   $result = php_shrink($source, $short_variables);
   $x = file_put_contents($result_file, $result);
   //highlight_string($result);
-  $response =  $x ? "Project minified successfuly!" : "Error: Project minification failed!";
+  $response =  $x ? "Success: Source minified" : "Error: Minification failed";
   return "$response\n";
 }
 
