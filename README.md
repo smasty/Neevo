@@ -3,7 +3,7 @@ Neevo - Tiny open-source database abstraction layer for PHP
 Info
 ====
 
-- Available under MIT license (http://www.opensource.org/licenses/mit-license.php)
+- Available under MIT license [](http://www.opensource.org/licenses/mit-license.php)
 - Author: Martin Srank - Smasty (http://smasty.net)
 - Website (temporary): http://labs.smasty.net/neevo/
 - Public API (temporary): http://labs.smasty.net/neevo/doc/
