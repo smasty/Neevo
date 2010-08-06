@@ -62,10 +62,10 @@ class NeevoDriverMySQL implements INeevoDriver{
     $this->neevo->set_options($opts);
 
     if($opts['encoding']){
-      try{
-        $e = mysql_query("SET NAMES ".$opts['encoding']);
-      }
-      catch (NeevoException $e){}
+      if (function_exists('mysql_set_charset'))
+				$ok = @mysql_set_charset($opts['encoding'], $this->neevo->resource());
+			if (!$ok)
+				$this->neevo->sql("SET NAMES ".$opts['encoding'])->run();
     }
     return (bool) $connection;
   }
@@ -270,7 +270,7 @@ class NeevoDriverMySQL implements INeevoDriver{
       if(NeevoStatic::is_sql_func($in_where[0]))
         $in_where[0] = NeevoStatic::quote_sql_func($in_where[0]);
       if(strstr($in_where[0], "."))
-        $in_where[0] = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]{1,64})#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $in_where[0]);
+        $in_where[0] = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $in_where[0]);
       else
         $in_where[0] = self::COL_QUOTE .$in_where[0] .self::COL_QUOTE;
       if(!$in_construct)
@@ -344,11 +344,11 @@ class NeevoDriverMySQL implements INeevoDriver{
       $col = trim($col);
       if($col != '*'){
         if(strstr($col, ".*")){
-          $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)(\*)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE .".*", $col);
+          $col = preg_replace("#([0-9A-Za-z_]+)(\.)(\*)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE .".*", $col);
         }
         else{
           if(strstr($col, "."))
-            $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]{1,64})#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $col);
+            $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $col);
           if(NeevoStatic::is_as_constr($col))
             $col = NeevoStatic::quote_as_constr($col, self::COL_QUOTE);
           elseif(NeevoStatic::is_sql_func($col))

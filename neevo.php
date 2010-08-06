@@ -38,10 +38,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.2dev";
-  const REVISION = "64";
-
-  // Default error handler
-  const DEFAULT_E_HANDLER = "neevo_default_handler";
+  const REVISION = 69;
 
 
   /**
@@ -182,8 +179,16 @@ class Neevo{
   public function error_handler($handler_function = null){
     if(function_exists($handler_function))
       $this->error_handler = $handler_function;
-    else $this->error_handler = self::DEFAULT_E_HANDLER;
+    else $this->error_handler = array('Neevo', 'default_error_handler');
     return $this->error_handler;
+  }
+
+  /**
+   * Neevo's default error handler function
+   * @param string $msg Error message
+   */
+  public static function default_error_handler($msg){
+    echo "<b>Neevo error:</b> $msg.\n";
   }
 
 
@@ -277,6 +282,17 @@ class Neevo{
 
 
   /**
+   * Creates NeevoQuery object for direct SQL query
+   * @param string $sql Direct SQL query
+   * @return NeevoQuery
+   */
+  public function sql($sql){
+    $q = new NeevoQuery($this);
+    return $q->sql($sql);
+  }
+
+
+  /**
    * If error_reporting is turned on, throws NeevoException available to catch.
    * @internal
    * @ignore
@@ -287,6 +303,7 @@ class Neevo{
   public function error($neevo_msg, $warning = false){
     return $this->driver()->error($neevo_msg, $warning);
   }
+
 
   /**
    * Returns some info about connection as an array
@@ -328,21 +345,4 @@ class Neevo{
  * @ignore
  */
 class NeevoException extends Exception{};
-
-
-/**
- * Neevo's default error handler function
- * @param string $msg Error message
- */
-function neevo_default_handler($msg){
-  echo "<b>Neevo error:</b> $msg.\n";
-}
-
-
-/**
- * @ignore
- */
-function r($r){
-  return $r;
-}
 ?>
