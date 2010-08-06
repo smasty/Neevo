@@ -163,13 +163,13 @@ function help(){
 echo "Usage: php ".basename(__FILE__)." [help] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
 
   help        Displays help
-  rev+        Increments REVISION number by 1 in <filename>.
-  rev-        Decrements REVISION number by 1 in <filename>.
+  rev+        Increments REVISION in <filename>
+  rev-        Decrements REVISION in <filename>
   doc         Runs PHPDoc generator
-  -<config>   PHPDoc config file to use
-  min         Minifies source code of <filename> and saves it as filename.minified.ext
-  min+        Minifies source code of <filename> and shorten variable names too.
-  <filename>  File to compile; if not set, default file is used.
+  -<config>   PHPDoc config file; if not set, default used
+  min         Minifies source code of <filename>
+  min+        + shorten var names.
+  <filename>  File to compile; if not set, default used
 
 ";
 }
