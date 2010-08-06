@@ -34,7 +34,7 @@ Features
 
  - Multiple drivers support (*)
  - Fetch results: "one method to rule them all" - only one intelligent method
-                   for fetching data from database.
+   for fetching data from database.
  - Affected rows
  - Retrieved rows
  - Seek
@@ -46,7 +46,7 @@ Features
  - Randomize result order
  - Dump queries
  - "Undo" - Removes some piece from already built queries
-            (e.g. "2nd WHERE condition" or "column `email`")
+   (e.g. "2nd WHERE condition" or "column `email`")
  - Multi-level error-reporting system (based on Exceptions):
     - E_NONE:    No errors and warnings are reported.
     - E_CATCH:   All errors and warnings are handled by defined error handler.
