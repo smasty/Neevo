@@ -76,7 +76,7 @@ if(in_array('doc', $argv)){
   echo phpdoc($config);
 }
 
-if(in_array('min', $argv) && in_array('min-', $argv))
+if(in_array('min', $argv) && in_array('min+', $argv))
   echo "Error: Cannot use both 'min+' and 'min-' arguments.\nMinify skipped.\n";
 else{
    // Minify file
