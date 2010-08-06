@@ -2,28 +2,30 @@
 #!/usr/bin/php
 if(!$_SERVER['SHELL']) trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
 
-// Default file to process
+
+// Default file to process.
 define("DEFAULT_FILE", "neevo.php");
 
-// PhpDoc builder path
-define("PHPDOC_PATH", "http://localhost/phpdoc/docbuilder/builder.php?setting_useconfig=neevo&interface=web&dataform=true");
+// PHPDoc builder path. Use %CONFIG% placeholder.
+define("PHPDOC_PATH", "http://localhost/phpdoc/docbuilder/builder.php?setting_useconfig=%CONFIG%&interface=web&dataform=true");
+
+// PHPDoc default config.
+define("DEFAULT_PHPDOC_CONFIG", "neevo");
 
 
-if($_SERVER['SHELL'])
-  $args = $_SERVER['argv'];
 
-if(count($args) <= 1){
+if(count($argv) <= 1){
   echo "\nError: No arguments passed to script.\n\n";
   help();
   exit;
 }
 
-if($args[0] == basename(__FILE__))
-  unset ($args[0]);
+if($argv[0] == basename(__FILE__))
+  unset ($argv[0]);
 
 echo "\n";
 
-foreach ($args as $key => $value) {
+foreach ($argv as $key => $value) {
   $match = preg_match("#([0-9a-z-_]){1}\.php#i", $value);
   if($match) $file = $value;
 }
@@ -37,38 +39,52 @@ if(!file_exists($file)){
 if(file_exists($file))
   echo "Using file '$file'\n";
 
+
+
+// ===== ARGUMENTS
+
 // Show help end exit
-if(in_array('help', $args)){
+if(in_array('help', $argv)){
   help();
   exit;
 }
 
-if(in_array('rev+', $args) && in_array('rev-', $args))
+if(in_array('rev+', $argv) && in_array('rev-', $argv))
   echo "Error: Cannot use both 'rev+' and 'rev-' arguments.\nRevision number change skipped.\n";
 else{
   // Increment Revision number
-  if(in_array('rev+', $args))
+  if(in_array('rev+', $argv))
     echo rev_number(1, $file);
 
   // Decrement Revision number
-  if(in_array('rev-', $args))
+  if(in_array('rev-', $argv))
     echo rev_number(-1, $file);
 }
 
-// Generate PHPDoc;
-// TODO: add config
-if(in_array('doc', $args))
-  echo phpdoc();
+// Generate PHPDoc
+if(in_array('doc', $argv)){
+  $k = array_search('doc', $argv);
+  $k = (int) $k + 1;
+  if(preg_match("#-([0-9a-z_-]+)#i", $argv[$k])){
+    $config = substr($argv[$k], 1);
+    echo "Using PHPDoc configuration '$config'\n";
+  }
+  else{
+    $config = DEFAULT_PHPDOC_CONFIG;
+    echo "Using default PHPDoc configuration '$config'\n";
+  }
+  echo phpdoc($config);
+}
 
-if(in_array('min', $args) && in_array('min-', $args))
+if(in_array('min', $argv) && in_array('min-', $argv))
   echo "Error: Cannot use both 'min+' and 'min-' arguments.\nMinify skipped.\n";
 else{
    // Minify file
-  if(in_array('min', $args))
+  if(in_array('min', $argv))
     echo minify($file);
 
   // Minify file and shorten variable names
-  if(in_array('min-', $args)) 
+  if(in_array('min+', $argv))
     echo minify($file);
 }
 echo "\n";
@@ -78,8 +94,9 @@ echo "\n";
  * Generates PHPDoc
  * @return string
  */
-function phpdoc(){
-  $response = file_get_contents(PHPDOC_PATH);
+function phpdoc($config){
+  $path = str_replace("%CONFIG%", $config, PHPDOC_PATH);
+  $response = file_get_contents($path);
   if(strstr($response, "Operation Completed"))
     $response = "Success: PHPDoc generated";
   else $response = "Error: PHPDoc generation failed";
@@ -135,6 +152,26 @@ function minify($file, $short_variables = false){
   //highlight_string($result);
   $response =  $x ? "Success: Source minified" : "Error: Minification failed";
   return "$response\n";
+}
+
+
+/**
+ * Prints help
+ * @return void
+ */
+function help(){
+echo "Usage: php ".basename(__FILE__)." [help] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
+
+  help        Displays help
+  rev+        Increments REVISION number by 1 in <filename>.
+  rev-        Decrements REVISION number by 1 in <filename>.
+  doc         Runs PHPDoc generator
+  -<config>   PHPDoc config file to use
+  min         Minifies source code of <filename> and saves it as filename.minified.ext
+  min+        Minifies source code of <filename> and shorten variable names too.
+  <filename>  File to compile; if not set, default file is used.
+
+";
 }
 
 
@@ -258,18 +295,5 @@ function php_shrink($input, $shorted) {
 		}
 	}
 	return $output;
-}
-
-function help(){
-echo "Usage: php ".basename(__FILE__)." [rev+|rev-] [doc] [min|min-] [<filename>]
-
-   rev+        Increments REVISION number by 1 in <filename>.
-   rev-        Decrements REVISION number by 1 in <filename>.
-   doc         Runs PHPDoc generator
-   min         Minifies source code of <filename> and saves it as filename.minified.ext
-   min-        Minifies source code of <filename> and shorten variable names too.
-   <filename>  File to compile; if not set, default file is used.
-
-";
 }
 ?>
