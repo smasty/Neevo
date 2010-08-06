@@ -27,6 +27,11 @@ define("PHPDOC_PATH", "http://localhost/phpdoc/docbuilder/builder.php?setting_us
 if($_SERVER['SHELL'])
   $args = $_SERVER['argv'];
 
+if(count($args) <= 1){
+  help();
+  exit;
+}
+
 if($args[0] == basename(__FILE__))
   unset ($args[0]);
 
@@ -38,18 +43,28 @@ foreach ($args as $key => $value) {
   else $file = DEFAULT_FILE;
 }
 
-if(in_array('rev+', $args)) // Increment Revision number
-  echo rev_number(1, $file);
+if(in_array('rev+', $args) && in_array('rev-', $args))
+  echo "Error: Cannot use both 'rev+' and 'rev-' arguments.\nRevision number change skipped.\n";
+else{
+  if(in_array('rev+', $args)) // Increment Revision number
+    echo rev_number(1, $file);
 
-if(in_array('rev-', $args)) // Decrement Revision number
-  echo rev_number(-1, $file);
+  if(in_array('rev-', $args)) // Decrement Revision number
+    echo rev_number(-1, $file);
+}
 
-if(in_array('doc', $args)) // Generate PHPDoc TODO: add config
+if(in_array('doc', $args)) // Generate PHPDoc; TODO: add config
   echo phpdoc();
 
-if(in_array('min', $args)) // Minify file
-  echo minify($file);
+if(in_array('min', $args) && in_array('min-', $args))
+  echo "Error: Cannot use both 'min+' and 'min-' arguments.\nMinify skipped.\n";
+else{
+  if(in_array('min', $args)) // Minify file
+    echo minify($file);
 
+  if(in_array('min-', $args)) // Minify file and shorten variable names
+    echo minify($file);
+}
 echo "\n";
 
 
@@ -81,13 +96,13 @@ function rev_number_callback($n){
 }
 
 
-function minify($file){
+function minify($file, $short_variables = false){
   $path = pathinfo($file);
   $result_file = $path['dirname']."/".$path['filename'].".minified.".$path['extension'];
   $source = preg_replace_callback('~include "([^"]+)";~', 'include_file', file_get_contents($file));
   $source = str_replace(array("<?php", "?>"), "", $source);
   $source = "<?php\n$source\n?>";
-  $result = php_shrink($source);
+  $result = php_shrink($source, $short_variables);
   $x = file_put_contents($result_file, $result);
   //highlight_string($result);
   $response =  $x ? "Project minified successfuly!" : "Error: Project minification failed!";
@@ -141,13 +156,14 @@ function short_identifier($number, $chars) {
  * Part of Adminer - "Compact MySQL management", http://adminer.org
  * Based on http://latrine.dgx.cz/jak-zredukovat-php-skripty
  * @param string $input Input PHP code
+ * @param bool $shorted Short variable names or not?
  * @return string
- *  @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
+ * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
  */
-function php_shrink($input) {
+function php_shrink($input, $shorted) {
 	$special_variables = array_flip(array('$this', '$GLOBALS', '$_GET', '$_POST', '$_FILES', '$_COOKIE', '$_SESSION', '$_SERVER'));
 	$short_variables = array();
-	$shortening = false;
+	$shortening = $shorted;
 	$tokens = token_get_all($input);
 
 	foreach ($tokens as $i => $token) {
@@ -187,7 +203,7 @@ function php_shrink($input) {
 				$shortening = false;
 			} elseif (!$shortening) {
 				if ($token[1] == ';') {
-					$shortening = false;
+					$shortening = $shorted;
 				}
 			} elseif ($token[0] == T_ECHO) {
 				$in_echo = true;
@@ -214,5 +230,23 @@ function php_shrink($input) {
 		}
 	}
 	return $output;
+}
+
+function help(){
+echo "
+Error: No arguments passed to compiler.
+
+Usage: php -f ".basename(__FILE__)." -- [rev+|rev-] [doc] [min|min-] [<filename>]
+
+Arguments available:
+
+   rev+        Increments REVISION number by 1 in <filename>.
+   rev-        Decrements REVISION number by 1 in <filename>.
+   doc         Runs PHPDoc generator
+   min         Minifies source code of <filename> and saves it as filename.minified.ext
+   min-        Minifies source code of <filename> and shorten variable names too.
+   <filename>  File to compile; if not set, default file is used.
+
+";
 }
 ?>
