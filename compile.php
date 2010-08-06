@@ -1,5 +1,6 @@
 <?php
 #!/usr/bin/php
+if(!$_SERVER['SHELL']) trigger_error("This script should be run from command line only.", E_USER_ERROR);
 
 /**
  * Neevo - Tiny open-source database abstraction layer for PHP
@@ -16,44 +17,40 @@
  *
  */
 
+// Default file to process
 define("DEFAULT_FILE", "neevo.php");
+
+// PhpDoc builder path
 define("PHPDOC_PATH", "http://localhost/phpdoc/docbuilder/builder.php?setting_useconfig=neevo&interface=web&dataform=true");
 
 
-if($_SERVER['SHELL']){
-
+if($_SERVER['SHELL'])
   $args = $_SERVER['argv'];
 
-  if($args[0] == basename(__FILE__)){
-    unset ($args[0]);
+if($args[0] == basename(__FILE__))
+  unset ($args[0]);
 
-    echo "\n";
-    
-    foreach ($args as $key => $value) {
-      $match = preg_match("#([0-9a-z-_]){1}\.php#i", $value);
-      if($match && file_exists($value)) $file = $value;
-      else $file = DEFAULT_FILE;
-    }
+echo "\n";
 
-    if(in_array('rev+', $args)) // Increment Revision number
-      echo rev_number(1, $file);
-
-    if(in_array('rev-', $args)) // Decrement Revision number
-      echo rev_number(-1, $file);
-
-    if(in_array('doc', $args)) // Generate PHPDoc TODO: add config
-      echo phpdoc();
-
-    if(in_array('min', $args)) // Minify file
-      echo minify($file);
-
-    echo "\n";
-
-  }
-
-
+foreach ($args as $key => $value) {
+  $match = preg_match("#([0-9a-z-_]){1}\.php#i", $value);
+  if($match && file_exists($value)) $file = $value;
+  else $file = DEFAULT_FILE;
 }
-else trigger_error("This script should be run from command line only.", E_USER_ERROR);
+
+if(in_array('rev+', $args)) // Increment Revision number
+  echo rev_number(1, $file);
+
+if(in_array('rev-', $args)) // Decrement Revision number
+  echo rev_number(-1, $file);
+
+if(in_array('doc', $args)) // Generate PHPDoc TODO: add config
+  echo phpdoc();
+
+if(in_array('min', $args)) // Minify file
+  echo minify($file);
+
+echo "\n";
 
 
 function phpdoc(){
