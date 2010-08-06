@@ -160,7 +160,7 @@ function minify($file, $short_variables = false){
  * @return void
  */
 function help(){
-echo "Usage: php ".basename(__FILE__)." [help] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
+echo "Usage: $ php ".basename(__FILE__)." [help] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
 
   help        Displays help
   rev+        Increments REVISION in <filename>
