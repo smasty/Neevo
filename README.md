@@ -82,6 +82,7 @@ which simplifies some boring work for me: Minifies source to one file without
 comments and whitespace, regenerates PHPDoc and increments revision number.
 
 Usage:
+
     $ php compiler [help] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
 
       help        Displays help
