@@ -1,21 +1,6 @@
 <?php
 #!/usr/bin/php
-if(!$_SERVER['SHELL']) trigger_error("This script should be run from command line only.", E_USER_ERROR);
-
-/**
- * Neevo - Tiny open-source database abstraction layer for PHP
- *
- * Copyright 2010 Martin Srank (http://smasty.net)
- *
- * This source file is subject to the MIT license that is bundled
- * with this package in the file license.txt.
- *
- * @author   Martin Srank (http://smasty.net)
- * @license  http://www.opensource.org/licenses/mit-license.php  MIT license
- * @link     http://labs.smasty.net/neevo/
- * @package  compiler
- *
- */
+if(!$_SERVER['SHELL']) trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
 
 // Default file to process
 define("DEFAULT_FILE", "neevo.php");
