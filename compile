@@ -30,12 +30,12 @@ foreach ($args as $key => $value) {
 
 // Defined file does't exist, using default
 if(!file_exists($file)){
-  if($file!='') echo "Error: File '$file' doesn't exist, default will be used\n";
+  if($file!='') echo "File '$file' doesn't exist, default will be used\n";
   $file = DEFAULT_FILE;
   // Defined file exists
 }
 if(file_exists($file))
-  echo "Success: Using file '$file'\n";
+  echo "Using file '$file'\n";
 
 // Show help end exit
 if(in_array('help', $args)){

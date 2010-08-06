@@ -34,6 +34,7 @@ Neevo currently supports only one SQL driver - MySQL (through PHP extension 'mys
 but more drivers are being prepared: PostgreSQL and SQLite for now. Neevo also offers
 an Interface and Public API for other programmers, so new drivers can be easily added.
 
+
 Features
 ========
  - SELECT queries (JOINs not supported)
@@ -41,7 +42,7 @@ Features
  - UPDATE queries
  - DELETE queries
 
- - Multiple drivers support *
+ - Multiple drivers support (*)
  - Fetch results: &quot;one method to rule them all&quot; - only one intelligent method
                    for fetching data from database.
  - Affected rows
@@ -66,7 +67,8 @@ Features
     (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
 
 
-* Currently supported SQL drivers:
+Supported drivers
+=================
  - MySQL (PHP extension 'mysql')
 
 
@@ -78,10 +80,31 @@ Todo
  - PostgreSQL driver
  - SQLite driver
  - Show database and table structure
- - MySQLi driver (?)
+ - MySQLi driver
+
+
+Compiler
+========
+
+Neevo comes with what I call &quot;compiler&quot; - PHP CLI (command-line interface) script
+which simplifies some boring work for me: Minifies source to one file without
+comments and whitespace,regenerates PHPDoc and increments revision number.
+
+Usage: php compiler [rev+|rev-] [doc] [min|min-] [&lt;filename&gt;]
+
+   rev+        Increments REVISION number by 1 in &lt;filename&gt;.
+   rev-        Decrements REVISION number by 1 in &lt;filename&gt;.
+   doc         Runs PHPDoc generator
+   min         Minifies source code of&Acirc;&nbsp;&lt;filename&gt; and saves it as filename.minified.ext
+   min-        Minifies source code of &lt;filename&gt; and shorten variable names too.
+   &lt;filename&gt;  File to compile; if not set, default file is used.
+
+Minification part is made up from functions written by Jakub Vrana (http://php.vrana.cz)
+for his Adminer &quot;Compact MySQL management&quot; (http://adminer.org) licensed under
+Apache license 2.0 and are used with his permission.
 </pre>
 	<p class="notes" id="credit">
-		Documentation generated on Fri, 06 Aug 2010 16:27:35 +0200 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Fri, 06 Aug 2010 17:21:51 +0200 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</body>
 </html>

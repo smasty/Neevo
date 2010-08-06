@@ -24,6 +24,7 @@ Neevo currently supports only one SQL driver - MySQL (through PHP extension 'mys
 but more drivers are being prepared: PostgreSQL and SQLite for now. Neevo also offers
 an Interface and Public API for other programmers, so new drivers can be easily added.
 
+
 Features
 ========
  - SELECT queries (JOINs not supported)
@@ -31,7 +32,7 @@ Features
  - UPDATE queries
  - DELETE queries
 
- - Multiple drivers support *
+ - Multiple drivers support (*)
  - Fetch results: "one method to rule them all" - only one intelligent method
                    for fetching data from database.
  - Affected rows
@@ -56,7 +57,8 @@ Features
     (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
 
 
-* Currently supported SQL drivers:
+Supported drivers
+=================
  - MySQL (PHP extension 'mysql')
 
 
@@ -68,4 +70,25 @@ Todo
  - PostgreSQL driver
  - SQLite driver
  - Show database and table structure
- - MySQLi driver (?)
+ - MySQLi driver
+
+
+Compiler
+========
+
+Neevo comes with what I call "compiler" - PHP CLI (command-line interface) script
+which simplifies some boring work for me: Minifies source to one file without
+comments and whitespace,regenerates PHPDoc and increments revision number.
+
+Usage: php compiler [rev+|rev-] [doc] [min|min-] [<filename>]
+
+   rev+        Increments REVISION number by 1 in <filename>.
+   rev-        Decrements REVISION number by 1 in <filename>.
+   doc         Runs PHPDoc generator
+   min         Minifies source code of <filename> and saves it as filename.minified.ext
+   min-        Minifies source code of <filename> and shorten variable names too.
+   <filename>  File to compile; if not set, default file is used.
+
+Minification part is made up from functions written by Jakub Vrana (http://php.vrana.cz)
+for his Adminer "Compact MySQL management" (http://adminer.org) licensed under
+Apache license 2.0 and are used with his permission.
