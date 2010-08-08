@@ -113,7 +113,7 @@ class NeevoQuery {
     if(is_array($value)) $where_condition[1] = "IN";
     if(!isset($where_condition[1])) $where_condition[1] = '=';
     $column = $where_condition[0];
-    $condition = array($column, $where_condition[1], $value, strtoupper($glue));
+    $condition = array($column, $where_condition[1], $value, strtoupper($glue ? $glue : "and"));
     $this->where[] = $condition;
     return $this;
   }

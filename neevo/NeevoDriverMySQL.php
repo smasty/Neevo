@@ -258,7 +258,6 @@ class NeevoDriverMySQL implements INeevoDriver{
   private function build_where(NeevoQuery $query){
     $prefix = $query->neevo->prefix();
     foreach ($query->where as $where) {
-      if(empty($where[3])) $where[3] = 'AND';
       if(is_array($where[2])){
         $where[2] = "(" .join(", ", NeevoStatic::escape_array($where[2], $this->neevo)) .")";
         $in_construct = true;

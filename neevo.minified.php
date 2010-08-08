@@ -60,7 +60,7 @@ cols($columns){if(!is_array($columns))$columns=explode(',',$columns);$this->colu
 function
 data(array$data){$this->data=$data;return$this;}public
 function
-where($where,$value,$glue=null){$where_condition=explode(' ',$where);if(is_null($value)){$where_condition[1]="IS";$value="NULL";}if(is_array($value))$where_condition[1]="IN";if(!isset($where_condition[1]))$where_condition[1]='=';$column=$where_condition[0];$condition=array($column,$where_condition[1],$value,strtoupper($glue));$this->where[]=$condition;return$this;}public
+where($where,$value,$glue=null){$where_condition=explode(' ',$where);if(is_null($value)){$where_condition[1]="IS";$value="NULL";}if(is_array($value))$where_condition[1]="IN";if(!isset($where_condition[1]))$where_condition[1]='=';$column=$where_condition[0];$condition=array($column,$where_condition[1],$value,strtoupper($glue?$glue:"and"));$this->where[]=$condition;return$this;}public
 function
 order($args){$rules=array();$arguments=func_get_args();foreach($arguments
 as$argument){$order_rule=explode(' ',$argument);$rules[]=$order_rule;}$this->order=$rules;return$this;}public
@@ -159,7 +159,7 @@ return
 self::COL_QUOTE.$prefix.$pieces[0].self::COL_QUOTE;}private
 function
 build_where(NeevoQuery$query){$prefix=$query->neevo->prefix();foreach($query->where
-as$where){if(empty($where[3]))$where[3]='AND';if(is_array($where[2])){$where[2]="(".join(", ",NeevoStatic::escape_array($where[2],$this->neevo)).")";$in_construct=true;}$wheres[]=$where;}unset($wheres[count($wheres)-1][3]);foreach($wheres
+as$where){if(is_array($where[2])){$where[2]="(".join(", ",NeevoStatic::escape_array($where[2],$this->neevo)).")";$in_construct=true;}$wheres[]=$where;}unset($wheres[count($wheres)-1][3]);foreach($wheres
 as$in_where){if(NeevoStatic::is_sql_func($in_where[0]))$in_where[0]=NeevoStatic::quote_sql_func($in_where[0]);if(strstr($in_where[0],"."))$in_where[0]=preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#",self::COL_QUOTE."$prefix$1".self::COL_QUOTE.".".self::COL_QUOTE."$3".self::COL_QUOTE,$in_where[0]);else$in_where[0]=self::COL_QUOTE.$in_where[0].self::COL_QUOTE;if(!$in_construct)$in_where[2]=NeevoStatic::escape_string($in_where[2],$this->neevo);$wheres2[]=join(' ',$in_where);}foreach($wheres2
 as&$rplc_where){$rplc_where=str_replace(array(' = ',' != '),array('=','!='),$rplc_where);}return" WHERE ".join(' ',$wheres2);}private
 function
@@ -179,7 +179,7 @@ E_CATCH=2;const
 E_WARNING=3;const
 E_STRICT=4;const
 VERSION="0.2dev";const
-REVISION=75;public
+REVISION=76;public
 function
 __construct(array$opts){$this->set_driver($opts['driver']);$this->connect($opts);if($opts['error_reporting'])$this->error_reporting=$opts['error_reporting'];if($opts['table_prefix'])$this->table_prefix=$opts['table_prefix'];}public
 function
