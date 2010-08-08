@@ -192,12 +192,12 @@ class NeevoQuery {
     while($tmp_rows = $this->neevo->fetch($resource))
       $rows[] = (count($tmp_rows) == 1) ? $tmp_rows[max(array_keys($tmp_rows))] : $tmp_rows;
 
+    $this->neevo->driver()->free($resource);
+
     if(count($rows) == 1)
       $rows = $rows[0];
 
     if(!count($rows) && is_array($rows)) return false; // Empty
-
-    $this->neevo->driver()->free($resource);
     return $resource ? $rows : $this->neevo->error("Fetching result data failed");
   }
 

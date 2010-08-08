@@ -71,8 +71,8 @@ dump($color=true,$return_string=false){$code=$color?NeevoStatic::highlight_sql($
 function
 run($catch_error=false){$start=explode(" ",microtime());$query=$this->neevo->query($this,$catch_error);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->time($time);$this->resource=$query;return$query;}public
 function
-fetch(){$resource=is_resource($this->resource)?$this->resource:$this->run();while($tmp_rows=$this->neevo->fetch($resource))$rows[]=(count($tmp_rows)==1)?$tmp_rows[max(array_keys($tmp_rows))]:$tmp_rows;if(count($rows)==1)$rows=$rows[0];if(!count($rows)&&is_array($rows))return
-false;$this->neevo->driver()->free($resource);return$resource?$rows:$this->neevo->error("Fetching result data failed");}public
+fetch(){$resource=is_resource($this->resource)?$this->resource:$this->run();while($tmp_rows=$this->neevo->fetch($resource))$rows[]=(count($tmp_rows)==1)?$tmp_rows[max(array_keys($tmp_rows))]:$tmp_rows;$this->neevo->driver()->free($resource);if(count($rows)==1)$rows=$rows[0];if(!count($rows)&&is_array($rows))return
+false;return$resource?$rows:$this->neevo->error("Fetching result data failed");}public
 function
 seek($row_number){if(!is_resource($this->resource))$this->run();$seek=$this->neevo->driver()->seek($this->resource,$row_number);return$seek?$seek:$this->neevo->error("Cannot seek to row $row_number");}public
 function
@@ -179,7 +179,7 @@ E_CATCH=2;const
 E_WARNING=3;const
 E_STRICT=4;const
 VERSION="0.2dev";const
-REVISION=76;public
+REVISION=77;public
 function
 __construct(array$opts){$this->set_driver($opts['driver']);$this->connect($opts);if($opts['error_reporting'])$this->error_reporting=$opts['error_reporting'];if($opts['table_prefix'])$this->table_prefix=$opts['table_prefix'];}public
 function
