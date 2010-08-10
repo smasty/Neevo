@@ -1,5 +1,6 @@
 Neevo - Tiny open-source database abstraction layer for PHP
 
+
 Info
 ====
 
@@ -7,6 +8,7 @@ Info
 - Author: Martin Srank - Smasty (http://smasty.net)
 - Website (temporary): http://neevo.smasty.net
 - Public API (temporary): http://neevo.smasty.net/doc/
+
 
 About Neevo
 ===========
@@ -53,7 +55,7 @@ Features
     - E_WARNING: Warnings are handled, errros thrown only.
     - E_STRICT:  All errors and warnings are thrown only.
  - Ability to use your own error handler function.
- - One-file-only minified version
+ - One-file-only minified version with stripped comments and whitespace
     (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
 
 

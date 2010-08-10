@@ -9,7 +9,7 @@
  *
  * @author   Martin Srank (http://smasty.net)
  * @license  http://www.opensource.org/licenses/mit-license.php  MIT license
- * @link     http://neevo.smasty.net
+ * @link     http://neevo.smasty.net/
  * @package  Neevo
  *
  */class
@@ -181,7 +181,7 @@ E_CATCH=2;const
 E_WARNING=3;const
 E_STRICT=4;const
 VERSION="0.2dev";const
-REVISION=78;public
+REVISION=79;public
 function
 __construct(array$opts){$this->set_driver($opts['driver']);$this->connect($opts);if($opts['error_reporting'])$this->error_reporting=$opts['error_reporting'];if($opts['table_prefix'])$this->table_prefix=$opts['table_prefix'];}public
 function
