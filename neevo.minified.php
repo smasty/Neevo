@@ -50,6 +50,10 @@ filesize($bytes){$unit=array('B','kB','MB','GB','TB','PB');return@round($bytes/p
 NeevoQuery{public$table,$type,$limit,$offset,$neevo,$resource,$time,$sql;public$where,$order,$columns,$data=array();function
 __construct(Neevo$object,$type='',$table=''){$this->neevo=$object;$this->type($type);$this->table($table);}public
 function
+set_time($time){$this->time=$time;}public
+function
+time(){return$this->time;}public
+function
 table($table){$this->table=$table;return$this;}public
 function
 type($type){$this->type=$type;return$this;}public
@@ -69,9 +73,10 @@ limit($limit,$offset=null){$this->limit=$limit;if(isset($offset)&&$this->type=='
 function
 dump($color=true,$return_string=false){$code=$color?NeevoStatic::highlight_sql($this->build()):$this->build();if(!$return_string)echo$code;return$return_string?$code:$this;}public
 function
-run($catch_error=false){$start=explode(" ",microtime());$query=$this->neevo->query($this,$catch_error);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->time($time);$this->resource=$query;return$query;}public
+run($catch_error=false){$start=explode(" ",microtime());$query=$this->neevo->driver()->query($this->build(),$this->neevo->resource());if(!$query){$this->neevo->error('Query failed',$catch_error);return
+false;}else{$this->neevo->increment_queries();$this->neevo->set_last($this);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->set_time($time);$this->resource=$query;return$query;}}public
 function
-fetch(){$resource=is_resource($this->resource)?$this->resource:$this->run();while($tmp_rows=$this->neevo->fetch($resource))$rows[]=(count($tmp_rows)==1)?$tmp_rows[max(array_keys($tmp_rows))]:$tmp_rows;$this->neevo->driver()->free($resource);if(count($rows)==1)$rows=$rows[0];if(!count($rows)&&is_array($rows))return
+fetch(){$resource=is_resource($this->resource)?$this->resource:$this->run();while($tmp_rows=$this->neevo->driver()->fetch($resource))$rows[]=(count($tmp_rows)==1)?$tmp_rows[max(array_keys($tmp_rows))]:$tmp_rows;$this->neevo->driver()->free($resource);if(count($rows)==1)$rows=$rows[0];if(!count($rows)&&is_array($rows))return
 false;return$resource?$rows:$this->neevo->error("Fetching result data failed");}public
 function
 seek($row_number){if(!is_resource($this->resource))$this->run();$seek=$this->neevo->driver()->seek($this->resource,$row_number);return$seek?$seek:$this->neevo->error("Cannot seek to row $row_number");}public
@@ -79,8 +84,6 @@ function
 rand(){$this->neevo->driver()->rand($this);return$this;}public
 function
 rows(){return$this->neevo->driver()->rows($this,$string);}public
-function
-time($time=null){if(isset($time))$this->time=$time;return$this->time;}public
 function
 info(){$exec_time=$this->time()?$this->time():-1;$rows=$this->time()?$this->rows():-1;$info=array('resource'=>$this->neevo->resource(),'query'=>$this->dump($html,true),'exec_time'=>$exec_time,'rows'=>$rows);if($this->type=='select')$info['query_resource']=$this->resource;return$info;}public
 function
@@ -143,8 +146,7 @@ seek($resource,$row_number){return@mysql_data_seek($resource,$row_number);}publi
 function
 rand(NeevoQuery$query){$query->order('RAND()');}public
 function
-rows(NeevoQuery$query){if($query->type!='select')$aff_rows=$query->time()?@mysql_affected_rows($query->neevo->resource()):false;else$num_rows=@mysql_num_rows($query->resource);if($num_rows||$aff_rows){if($string){return$num_rows?"Rows: $num_rows":"Affected: $aff_rows";}else
-return$num_rows?$num_rows:$aff_rows;}else
+rows(NeevoQuery$query){if($query->type!='select')$aff_rows=$query->time()?@mysql_affected_rows($query->neevo->resource()):false;else$num_rows=@mysql_num_rows($query->resource);if($num_rows||$aff_rows)return$num_rows?$num_rows:$aff_rows;else
 return
 false;}public
 function
@@ -179,7 +181,7 @@ E_CATCH=2;const
 E_WARNING=3;const
 E_STRICT=4;const
 VERSION="0.2dev";const
-REVISION=77;public
+REVISION=78;public
 function
 __construct(array$opts){$this->set_driver($opts['driver']);$this->connect($opts);if($opts['error_reporting'])$this->error_reporting=$opts['error_reporting'];if($opts['table_prefix'])$this->table_prefix=$opts['table_prefix'];}public
 function
@@ -202,25 +204,25 @@ resource(){return$this->resource;}public
 function
 set_options(array$opts){$this->options=$opts;}public
 function
-prefix($prefix=null){if(isset($prefix))$this->table_prefix=$prefix;return$this->table_prefix;}public
+set_prefix($prefix){$this->table_prefix=$prefix;}public
 function
-error_reporting($value=null){if(isset($value))$this->error_reporting=$value;if(!isset($this->error_reporting))$this->error_reporting=self::E_WARNING;return$this->error_reporting;}public
+prefix(){return$this->table_prefix;}public
 function
-error_handler($handler_function=null){if(function_exists($handler_function))$this->error_handler=$handler_function;else$this->error_handler=array('Neevo','default_error_handler');return$this->error_handler;}public
-static
+set_error_reporting($value){$this->error_reporting=$value;if(!isset($this->error_reporting))$this->error_reporting=self::E_WARNING;}public
 function
-default_error_handler($msg){echo"<b>Neevo error:</b> $msg.\n";}public
+error_reporting(){if(!isset($this->error_reporting))$this->error_reporting=self::E_WARNING;return$this->error_reporting;}public
 function
-last(NeevoQuery$last=null){if($last
-instanceof
-NeevoQuery)$this->last=$last;return$this->last;}public
+set_error_handler($handler_function){if(function_exists($handler_function))$this->error_handler=$handler_function;else$this->error_handler=array('Neevo','default_error_handler');}public
 function
-queries($val=null){if(is_numeric($val))$this->queries+=$val;return$this->queries;}public
+error_handler(){if(!function_exists($this->error_handler))$this->error_handler=array('Neevo','default_error_handler');return$this->error_handler;}public
 function
-fetch($resource){return$this->driver()->fetch($resource);}public
+set_last(NeevoQuery$last){$this->last=$last;}public
 function
-query(NeevoQuery$query,$catch_error=false){$q=$this->driver()->query($query->build(),$this->resource());$this->queries(1);$this->last($query);if($q)return$q;else
-return$this->error('Query failed',$catch_error);}public
+last(){return$this->last;}public
+function
+increment_queries(){$this->queries++;}public
+function
+queries(){return$this->queries;}public
 function
 select($columns,$table){$q=new
 NeevoQuery($this,'select',$table);return$q->cols($columns);}public
@@ -240,7 +242,10 @@ NeevoQuery($this);return$q->sql($sql);}public
 function
 error($neevo_msg,$warning=false){return$this->driver()->error($neevo_msg,$warning);}public
 function
-info(){$info=$this->options;unset($info['password']);$info['queries']=$this->queries();$info['last']=$this->last();$info['table_prefix']=$this->prefix();$info['error_reporting']=$this->error_reporting();$info['memory_usage']=$this->memory();return$info;}public
+info(){$info=$this->options;unset($info['password']);$info['queries']=$this->queries();$info['last']=$this->last();$info['table_prefix']=$this->prefix();$info['error_reporting']=$this->error_reporting();$info['memory_usage']=$this->memory();$info['version']=$this->version();return$info;}public
+static
+function
+default_error_handler($msg){echo"<b>Neevo error:</b> $msg.\n";}public
 function
 memory(){return
 NeevoStatic::filesize(memory_get_usage(true));}public

@@ -39,6 +39,25 @@ class NeevoQuery {
 
 
   /**
+   * Sets execution time of Query
+   * @param int $time Time value to set.
+   * @return void
+   */
+  public function set_time($time){
+    $this->time = $time;
+  }
+
+
+  /**
+   * Returns wxecution time of Query
+   * @return int
+   */
+  public function time(){
+    return $this->time;
+  }
+
+
+  /**
    * Sets table to interact
    * @param string $table
    * @return NeevoQuery
@@ -169,12 +188,21 @@ class NeevoQuery {
    */
   public function run($catch_error = false){
     $start = explode(" ", microtime());
-    $query = $this->neevo->query($this, $catch_error);
-    $end = explode(" ", microtime());
-    $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
-    $this->time($time);
-    $this->resource = $query;
-    return $query;
+    $query = $this->neevo->driver()->query($this->build(), $this->neevo->resource());
+    if(!$query){
+      $this->neevo->error('Query failed', $catch_error);
+      return false;
+    }
+    else{
+      $this->neevo->increment_queries();
+      $this->neevo->set_last($this);
+
+      $end = explode(" ", microtime());
+      $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
+      $this->set_time($time);
+      $this->resource = $query;
+      return $query;
+    }
   }
 
 
@@ -189,7 +217,7 @@ class NeevoQuery {
    */
   public function fetch(){
     $resource = is_resource($this->resource) ? $this->resource : $this->run();
-    while($tmp_rows = $this->neevo->fetch($resource))
+    while($tmp_rows = $this->neevo->driver()->fetch($resource))
       $rows[] = (count($tmp_rows) == 1) ? $tmp_rows[max(array_keys($tmp_rows))] : $tmp_rows;
 
     $this->neevo->driver()->free($resource);
@@ -231,17 +259,6 @@ class NeevoQuery {
    */
   public function rows(){
     return $this->neevo->driver()->rows($this, $string);
-  }
-
-
-  /**
-   * Sets and/or returns Execution time of Query
-   * @param int $time Time value to set.
-   * @return int Query execution time
-   */
-  public function time($time = null){
-    if(isset($time)) $this->time = $time;
-    return $this->time;
   }
 
 

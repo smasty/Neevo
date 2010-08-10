@@ -164,15 +164,11 @@ class NeevoDriverMySQL implements INeevoDriver{
    * @return mixed Number of rows (int) or FALSE
    */
   public function rows(NeevoQuery $query){
-    if($query->type!='select') $aff_rows = $query->time() ? @mysql_affected_rows($query->neevo->resource()) : false;
+    if($query->type != 'select') $aff_rows = $query->time() ? @mysql_affected_rows($query->neevo->resource()) : false;
     else $num_rows = @mysql_num_rows($query->resource);
 
-    if($num_rows || $aff_rows){
-      if($string){
-        return $num_rows ? "Rows: $num_rows" : "Affected: $aff_rows";
-      }
-      else return $num_rows ? $num_rows : $aff_rows;
-    }
+    if($num_rows || $aff_rows)
+      return $num_rows ? $num_rows : $aff_rows;
     else return false;
   }
 
@@ -223,7 +219,6 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Escapes given string for use in SQL
-   * @internal
    * @param string $string
    * @return string
    */
@@ -235,7 +230,6 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds table-name for queries
    * @internal
-   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -251,42 +245,45 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds WHERE statement for queries
    * @internal
-   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
   private function build_where(NeevoQuery $query){
     $prefix = $query->neevo->prefix();
+
     foreach ($query->where as $where) {
-      if(is_array($where[2])){
+      if(is_array($where[2])){ // WHERE col IN(...)
         $where[2] = "(" .join(", ", NeevoStatic::escape_array($where[2], $this->neevo)) .")";
         $in_construct = true;
       }
       $wheres[] = $where;
     }
-    unset($wheres[count($wheres)-1][3]);
-    foreach ($wheres as $in_where) {
+    unset($wheres[count($wheres)-1][3]); // Unset last glue
+    
+    foreach ($wheres as $in_where) { // Fre each cndition...
       if(NeevoStatic::is_sql_func($in_where[0]))
         $in_where[0] = NeevoStatic::quote_sql_func($in_where[0]);
-      if(strstr($in_where[0], "."))
+      
+      if(strstr($in_where[0], ".")) // If format is table.column
         $in_where[0] = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $in_where[0]);
       else
         $in_where[0] = self::COL_QUOTE .$in_where[0] .self::COL_QUOTE;
-      if(!$in_construct)
+      
+      if(!$in_construct) // If not col IN(...), escape value
         $in_where[2] = NeevoStatic::escape_string($in_where[2], $this->neevo);
-      $wheres2[] = join(' ', $in_where);
+
+      $wheres2[] = join(' ', $in_where); // Join each condition to string
     }
-    foreach ($wheres2 as &$rplc_where){
+    foreach ($wheres2 as &$rplc_where){ // Trim some whitespce
       $rplc_where = str_replace(array(' = ', ' != '), array('=', '!='), $rplc_where);
     }
-    return " WHERE ".join(' ', $wheres2);
+    return " WHERE ".join(' ', $wheres2); // And finally, join t one string
   }
 
 
   /**
    * Builds data part for INSERT queries ([INSERT INTO] (...) VALUES (...) )
    * @internal
-   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -302,7 +299,6 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds data part for UPDATE queries ([UPDATE ...] SET ...)
    * @internal
-   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -317,7 +313,6 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds ORDER BY statement for queries
    * @internal
-   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
@@ -333,26 +328,25 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds columns part for SELECT queries
    * @internal
-   * @ignore
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
   private function build_select_cols(NeevoQuery $query){
     $prefix = $query->neevo->prefix();
-    foreach ($query->columns as $col) {
+    foreach ($query->columns as $col) { // For each col
       $col = trim($col);
       if($col != '*'){
-        if(strstr($col, ".*")){
+        if(strstr($col, ".*")){ // If format is table.*
           $col = preg_replace("#([0-9A-Za-z_]+)(\.)(\*)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE .".*", $col);
         }
         else{
-          if(strstr($col, "."))
+          if(strstr($col, ".")) // If format is table.col
             $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $col);
           if(NeevoStatic::is_as_constr($col))
             $col = NeevoStatic::quote_as_constr($col, self::COL_QUOTE);
           elseif(NeevoStatic::is_sql_func($col))
             $col = NeevoStatic::quote_sql_func($col);
-          elseif(!strstr($col, "."))
+          elseif(!strstr($col, ".")) // If normal format
             $col = self::COL_QUOTE .$col .self::COL_QUOTE;
         }
       }

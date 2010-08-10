@@ -65,7 +65,7 @@ class NeevoStatic {
   }
 
   /** Escapes given string for use in SQL */
-  public static function escape_string($string,Neevo $neevo){
+  public static function escape_string($string, Neevo $neevo){
     if(get_magic_quotes_gpc()) $string = stripslashes($string);
     $string = $neevo->driver()->escape_string($string);
     return is_numeric($string) ? $string : ( is_string($string) ? ( self::is_sql_func($string) ? self::quote_sql_func($string) : "'$string'" ) : $string );

@@ -38,7 +38,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.2dev";
-  const REVISION = 77;
+  const REVISION = 78;
 
 
   /**
@@ -52,9 +52,9 @@ class Neevo{
    *   database        =>  database_name,
    *   encoding        =>  utf8,
    *   table_prefix    =>  prefix_
-   *   error_reporting =>  error_reporting_level; See error_reporting() for possible values.
+   *   error_reporting =>  error-reporting level; See set_error_reporting() for possible values.
    * );</pre>
-   * @see Neevo::error_reporting(), Neevo::prefix()
+   * @see Neevo::set_error_reporting(), Neevo::set_prefix();
    */
   public function __construct(array $opts){
     $this->set_driver($opts['driver']);
@@ -87,7 +87,6 @@ class Neevo{
    * @param string $driver Driver name
    * @return void
    * @internal
-   * @ignore
    */
   private function set_driver($driver){
     if(!$driver) throw new NeevoException("Driver not set.");
@@ -116,7 +115,6 @@ class Neevo{
    * Sets connection resource
    * @param resource $resource
    * @internal
-   * @ignore
    */
   public function set_resource($resource){
     $this->resource = $resource;
@@ -136,7 +134,6 @@ class Neevo{
    * Sets connection options
    * @param array $opts
    * @internal
-   * @ignore
    */
   public function set_options(array $opts){
     $this->options = $opts;
@@ -144,94 +141,109 @@ class Neevo{
 
 
   /**
-   * Sets and/or returns table prefix
+   * Sets table prefix
    * @param string $prefix Table prefix to set
+   * @return void
+   */
+  public function set_prefix($prefix){
+    $this->table_prefix = $prefix;
+  }
+
+
+  /**
+   * Returns table prefix
    * @return mixed
    */
-  public function prefix($prefix = null){
-    if(isset($prefix)) $this->table_prefix = $prefix;
+  public function prefix(){
     return $this->table_prefix;
   }
 
 
   /**
-   * Sets and/or returns error-reporting
-   * @param int $value Value of error-reporting.
+   * Sets error-reporting level
+   * @param int $value Error-reporting level.
    * Possible values:
    * <ul><li>Neevo::E_NONE: Turns Neevo error-reporting off</li>
    * <li>Neevo::E_CATCH: Catches all Neevo exceptions by defined handler</li>
    * <li>Neevo::E_WARNING: Catches only Neevo warnings</li>
    * <li>Neevo::E_STRICT: Catches no Neevo exceptions</li></ul>
+   * @return void
+   */
+  public function set_error_reporting($value){
+    $this->error_reporting = $value;
+    if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
+  }
+
+
+  /**
+   * Returns error-reporting level
    * @return int
    */
-  public function error_reporting($value = null){
-    if(isset($value)) $this->error_reporting = $value;
+  public function error_reporting(){
     if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
     return $this->error_reporting;
   }
 
 
   /**
-   * Sets and/or returns error-handler
+   * Sets error-handler function
    * @param string $handler_function Name of error-handler function
-   * @return string
+   * @return void
    */
-  public function error_handler($handler_function = null){
+  public function set_error_handler($handler_function){
     if(function_exists($handler_function))
       $this->error_handler = $handler_function;
     else $this->error_handler = array('Neevo', 'default_error_handler');
+  }
+
+
+  /**
+   * Returns error-handler function name
+   * @param string $handler_function Name of error-handler function
+   * @return string
+   */
+  public function error_handler(){
+    if(!function_exists($this->error_handler))
+      $this->error_handler = array('Neevo', 'default_error_handler');
     return $this->error_handler;
   }
 
+
   /**
-   * Neevo's default error handler function
-   * @param string $msg Error message
+   * Sets last executed query
+   * @param NeevoQuery $last Last executed query
+   * @return void
    */
-  public static function default_error_handler($msg){
-    echo "<b>Neevo error:</b> $msg.\n";
+  public function set_last(NeevoQuery $last){
+    $this->last = $last;
   }
 
 
   /**
-   * Sets and/or returns last executed query
+   * Returns last executed query
    * @param NeevoQuery $last Last executed query
    * @return NeevoQuery
    */
-  public function last(NeevoQuery $last = null){
-    if($last instanceof NeevoQuery) $this->last = $last;
+  public function last(){
     return $this->last;
   }
 
 
-  public function queries($val = null){
-    if(is_numeric($val)) $this->queries += $val;
+  /**
+   * Increments queries counter
+   * @return void
+   */
+  public function increment_queries(){
+    $this->queries++;
+  }
+
+
+  /**
+   * Returns amount of executed queries
+   * @return int
+   */
+  public function queries(){
     return $this->queries;
-  }
-
-
-  /**
-   * Fetches data
-   * @param resource $resource
-   * @return mixed
-   * @see NeevoQuery::fetch()
-   */
-  public function fetch($resource){
-    return $this->driver()->fetch($resource);
-  }
-
-
-  /**
-   * Performs Query
-   * @param NeevoQuery $query Query to perform.
-   * @param bool $catch_error Catch exception by default if mode is not E_STRICT
-   * @return resource
-   */
-  public function query(NeevoQuery $query, $catch_error = false){
-    $q = $this->driver()->query($query->build(), $this->resource());
-    $this->queries(1);
-    $this->last($query);
-    if($q) return $q;
-    else return $this->error('Query failed', $catch_error);
   }
 
 
@@ -317,8 +329,18 @@ class Neevo{
     $info['table_prefix'] = $this->prefix();
     $info['error_reporting'] = $this->error_reporting();
     $info['memory_usage'] = $this->memory();
+    $info['version'] = $this->version();
 
     return $info;
+  }
+
+
+  /**
+   * Neevo's default error handler function
+   * @param string $msg Error message
+   */
+  public static function default_error_handler($msg){
+    echo "<b>Neevo error:</b> $msg.\n";
   }
 
 
@@ -342,7 +364,6 @@ class Neevo{
  * Neevo Exceptions
  * @package Neevo
  * @internal
- * @ignore
  */
 class NeevoException extends Exception{};
 ?>

@@ -38,13 +38,13 @@ $sql = new Neevo(array(
 ));
 
 // Set Neevo error reporting
-$sql->error_reporting(Neevo::E_STRICT);
+$sql->set_error_reporting(Neevo::E_STRICT);
 
 // Set error-handler function
-$sql->error_handler("my_own_handler");
+$sql->set_error_handler("my_own_handler");
 
 // Set table pefix to "dp_"
-$sql->prefix('dp_');
+$sql->set_prefix('dp_');
 
 
 // Using  "WHERE col IN (val1, val2, ...)" construction
