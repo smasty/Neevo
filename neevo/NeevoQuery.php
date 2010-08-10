@@ -9,7 +9,7 @@
  *
  * @author   Martin Srank (http://smasty.net)
  * @license  http://www.opensource.org/licenses/mit-license.php  MIT license
- * @link     http://labs.smasty.net/neevo/
+ * @link     http://neevo.smasty.net
  * @package  Neevo
  *
  */
