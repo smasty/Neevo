@@ -29,6 +29,7 @@ an Interface and Public API for other programmers, so new drivers can be easily 
 
 Features
 ========
+
  - SELECT queries (JOINs not supported)
  - INSERT queries
  - UPDATE queries
@@ -61,6 +62,7 @@ Features
 
 Supported drivers
 =================
+
  - MySQL (PHP extension 'mysql')
 
 
