@@ -149,6 +149,16 @@ class NeevoDriverMySQL implements INeevoDriver{
 
 
   /**
+   * Get the ID generated in the INSERT query
+   * @param resource $resource Query resource
+   * @return int
+   */
+  public function insert_id($resource){
+    return mysql_insert_id($resource);
+  }
+
+
+  /**
    * Randomize result order.
    * @param NeevoQuery $query NeevoQuery instance
    * @return NeevoQuery
@@ -159,7 +169,8 @@ class NeevoDriverMySQL implements INeevoDriver{
 
 
   /**
-   * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
+   * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number
+   * of rows in result for SELECT queries
    * @param NeevoQuery $query NeevoQuery instance
    * @return mixed Number of rows (int) or FALSE
    */

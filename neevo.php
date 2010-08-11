@@ -14,11 +14,11 @@
  *
  */
 
-include "./neevo/NeevoStatic.php";
-include "./neevo/NeevoQuery.php";
-include "./neevo/INeevoDriver.php";
+include dirname(__FILE__). "/neevo/NeevoStatic.php";
+include dirname(__FILE__). "/neevo/NeevoQuery.php";
+include dirname(__FILE__). "/neevo/INeevoDriver.php";
 
-include "./neevo/NeevoDriverMySQL.php";
+include dirname(__FILE__). "/neevo/NeevoDriverMySQL.php";
 
 /**
  * Main Neevo layer class
@@ -38,7 +38,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.2dev";
-  const REVISION = 79;
+  const REVISION = 80;
 
 
   /**

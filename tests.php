@@ -80,8 +80,9 @@ $insert->undo('value', 'city');
 
 $insert->dump();
 
-// Run query
-$insert_resource = $insert->run();
+// Run query;
+$insert_id = $insert->run()->id();
+echo "LAST_INSERT_ID: $insert_id";
 
 
 // UPDATE QUERY

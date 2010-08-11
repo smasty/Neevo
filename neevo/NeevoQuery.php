@@ -20,7 +20,7 @@
  */
 class NeevoQuery {
 
-  public $table, $type, $limit, $offset, $neevo, $resource, $time, $sql;
+  public $table, $type, $limit, $offset, $neevo, $resource, $time, $sql, $performed;
   public $where, $order, $columns, $data = array();
 
 
@@ -184,7 +184,7 @@ class NeevoQuery {
   /**
    * Performs Query
    * @param bool $catch_error Catch exception by default if mode is not E_STRICT
-   * @return resource
+   * @return resource|NeevoQuery Query resource on SELECT queries or NeevoQuery object
    */
   public function run($catch_error = false){
     $start = explode(" ", microtime());
@@ -200,15 +200,21 @@ class NeevoQuery {
       $end = explode(" ", microtime());
       $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
       $this->set_time($time);
-      $this->resource = $query;
-      return $query;
+      
+      $this->performed = true;
+      if($this->type == 'select'){
+        $this->resource = $query;
+        return $query;
+      }
+      else return $this;
+
     }
   }
 
 
   /**
    * Fetches data from given Query resource.
-   * @return mixed Array of rows represented as associative arrays
+   * @return array|string|int Array of rows represented as associative arrays
    * (column => value), if two or more rows are fetched.<br>
    * Only row as associative array, if only one row is fetched.<br>
    * Numerical array of values from fetched column, if there's only one column
@@ -216,7 +222,9 @@ class NeevoQuery {
    * String or int, if only one column value is fetched at all.
    */
   public function fetch(){
-    $resource = is_resource($this->resource) ? $this->resource : $this->run();
+    if($this->type != 'select') $this->neevo->error('Cannot fetch on this kind of query');
+
+    $resource = $this->performed ? $this->resource : $this->run();
     while($tmp_rows = $this->neevo->driver()->fetch($resource))
       $rows[] = (count($tmp_rows) == 1) ? $tmp_rows[max(array_keys($tmp_rows))] : $tmp_rows;
 
@@ -236,10 +244,19 @@ class NeevoQuery {
    * @return bool
    */
   public function seek($row_number){
-    if(!is_resource($this->resource)) $this->run();
+    if(!$this->performed) $this->run();
 
     $seek = $this->neevo->driver()->seek($this->resource, $row_number);
     return $seek ? $seek : $this->neevo->error("Cannot seek to row $row_number");
+  }
+
+
+  /**
+   * Get the ID generated in the INSERT query
+   * @return int
+   */
+  public function id(){
+    return $this->neevo->driver()->insert_id($this->neevo->resource());
   }
 
 

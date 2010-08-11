@@ -47,7 +47,7 @@ preg_replace('/(.*) (as) (\w*)/i','$1 AS '.$col_quote.'$3'.$col_quote,$as_constr
 static
 function
 filesize($bytes){$unit=array('B','kB','MB','GB','TB','PB');return@round($bytes/pow(1024,($i=floor(log($bytes,1024)))),2).' '.$unit[$i];}}class
-NeevoQuery{public$table,$type,$limit,$offset,$neevo,$resource,$time,$sql;public$where,$order,$columns,$data=array();function
+NeevoQuery{public$table,$type,$limit,$offset,$neevo,$resource,$time,$sql,$performed;public$where,$order,$columns,$data=array();function
 __construct(Neevo$object,$type='',$table=''){$this->neevo=$object;$this->type($type);$this->table($table);}public
 function
 set_time($time){$this->time=$time;}public
@@ -74,12 +74,15 @@ function
 dump($color=true,$return_string=false){$code=$color?NeevoStatic::highlight_sql($this->build()):$this->build();if(!$return_string)echo$code;return$return_string?$code:$this;}public
 function
 run($catch_error=false){$start=explode(" ",microtime());$query=$this->neevo->driver()->query($this->build(),$this->neevo->resource());if(!$query){$this->neevo->error('Query failed',$catch_error);return
-false;}else{$this->neevo->increment_queries();$this->neevo->set_last($this);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->set_time($time);$this->resource=$query;return$query;}}public
+false;}else{$this->neevo->increment_queries();$this->neevo->set_last($this);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->set_time($time);$this->performed=true;if($this->type=='select'){$this->resource=$query;return$query;}else
+return$this;}}public
 function
-fetch(){$resource=is_resource($this->resource)?$this->resource:$this->run();while($tmp_rows=$this->neevo->driver()->fetch($resource))$rows[]=(count($tmp_rows)==1)?$tmp_rows[max(array_keys($tmp_rows))]:$tmp_rows;$this->neevo->driver()->free($resource);if(count($rows)==1)$rows=$rows[0];if(!count($rows)&&is_array($rows))return
+fetch(){if($this->type!='select')$this->neevo->error('Cannot fetch on this kind of query');$resource=$this->performed?$this->resource:$this->run();while($tmp_rows=$this->neevo->driver()->fetch($resource))$rows[]=(count($tmp_rows)==1)?$tmp_rows[max(array_keys($tmp_rows))]:$tmp_rows;$this->neevo->driver()->free($resource);if(count($rows)==1)$rows=$rows[0];if(!count($rows)&&is_array($rows))return
 false;return$resource?$rows:$this->neevo->error("Fetching result data failed");}public
 function
-seek($row_number){if(!is_resource($this->resource))$this->run();$seek=$this->neevo->driver()->seek($this->resource,$row_number);return$seek?$seek:$this->neevo->error("Cannot seek to row $row_number");}public
+seek($row_number){if(!$this->performed)$this->run();$seek=$this->neevo->driver()->seek($this->resource,$row_number);return$seek?$seek:$this->neevo->error("Cannot seek to row $row_number");}public
+function
+id(){return$this->neevo->driver()->insert_id($this->neevo->resource());}public
 function
 rand(){$this->neevo->driver()->rand($this);return$this;}public
 function
@@ -109,6 +112,8 @@ function
 fetch($resource);public
 function
 seek($resource,$row_number);public
+function
+insert_id($resource);public
 function
 rand(NeevoQuery$query);public
 function
@@ -143,6 +148,9 @@ function
 fetch($resource){return@mysql_fetch_assoc($resource);}public
 function
 seek($resource,$row_number){return@mysql_data_seek($resource,$row_number);}public
+function
+insert_id($resource){return
+mysql_insert_id($resource);}public
 function
 rand(NeevoQuery$query){$query->order('RAND()');}public
 function
@@ -181,7 +189,7 @@ E_CATCH=2;const
 E_WARNING=3;const
 E_STRICT=4;const
 VERSION="0.2dev";const
-REVISION=79;public
+REVISION=80;public
 function
 __construct(array$opts){$this->set_driver($opts['driver']);$this->connect($opts);if($opts['error_reporting'])$this->error_reporting=$opts['error_reporting'];if($opts['table_prefix'])$this->table_prefix=$opts['table_prefix'];}public
 function

@@ -109,6 +109,14 @@ interface INeevoDriver {
 
 
   /**
+   * Get the ID generated in the INSERT query
+   * @param resource $resource Query resource
+   * @return int
+   */
+  public function insert_id($resource);
+
+
+  /**
    * Randomize result order.
    * @param NeevoQuery $query NeevoQuery instance
    * @return NeevoQuery

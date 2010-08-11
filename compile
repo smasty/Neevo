@@ -162,7 +162,8 @@ function rev_number_callback($n){
 function minify($file, $short_variables = false){
   $path = pathinfo($file);
   $result_file = $path['dirname']."/".$path['filename'].".minified.".$path['extension'];
-  $source = preg_replace_callback('~include "([^"]+)";~', 'include_file', file_get_contents($file));
+  $source = str_replace("include dirname(__FILE__). \"", "include \".", file_get_contents($file));
+  $source = preg_replace_callback('~include "([^"]+)";~', 'include_file', $source);
   $source = str_replace(array("<?php", "?>"), "", $source);
   $source = "<?php\n$source\n?>";
   $result = php_shrink($source, $short_variables);
