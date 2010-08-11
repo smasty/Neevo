@@ -189,7 +189,7 @@ E_CATCH=2;const
 E_WARNING=3;const
 E_STRICT=4;const
 VERSION="0.2dev";const
-REVISION=80;public
+REVISION=81;public
 function
 __construct(array$opts){$this->set_driver($opts['driver']);$this->connect($opts);if($opts['error_reporting'])$this->error_reporting=$opts['error_reporting'];if($opts['table_prefix'])$this->table_prefix=$opts['table_prefix'];}public
 function
@@ -250,7 +250,7 @@ NeevoQuery($this);return$q->sql($sql);}public
 function
 error($neevo_msg,$warning=false){return$this->driver()->error($neevo_msg,$warning);}public
 function
-info(){$info=$this->options;unset($info['password']);$info['queries']=$this->queries();$info['last']=$this->last();$info['table_prefix']=$this->prefix();$info['error_reporting']=$this->error_reporting();$info['memory_usage']=$this->memory();$info['version']=$this->version();return$info;}public
+info(){$info=$this->options;unset($info['password']);$info['queries']=$this->queries();$info['last']=$this->last();$info['table_prefix']=$this->prefix();$info['error_reporting']=$this->error_reporting();$info['memory_usage']=$this->memory();$info['version']=$this->version(false);return$info;}public
 static
 function
 default_error_handler($msg){echo"<b>Neevo error:</b> $msg.\n";}public
@@ -258,7 +258,7 @@ function
 memory(){return
 NeevoStatic::filesize(memory_get_usage(true));}public
 function
-version(){return"Neevo ".self::VERSION." (revision ".self::REVISION.").";}}class
+version($string=true){if($string)$return="Neevo ".self::VERSION." (revision ".self::REVISION.").";else$return=array('version'=>self::VERSION,'revision'=>self::REVISION);return$return;}}class
 NeevoException
 extends
 Exception{};?>
