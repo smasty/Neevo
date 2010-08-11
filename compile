@@ -113,6 +113,7 @@ echo "\n";
  * @return string
  */
 function phpdoc($config){
+  recursive_remove_directory("./doc");
   $path = str_replace("%CONFIG%", $config, PHPDOC_PATH);
   $response = file_get_contents($path);
   if(strstr($response, "Operation Completed"))
@@ -226,12 +227,12 @@ function include_file($match) {
  * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
  */
 function short_identifier($number, $chars) {
-	$return = '';
-	while ($number >= 0) {
-		$return .= $chars{$number % strlen($chars)};
-		$number = floor($number / strlen($chars)) - 1;
-	}
-	return $return;
+  $return = '';
+  while ($number >= 0) {
+    $return .= $chars{$number % strlen($chars)};
+    $number = floor($number / strlen($chars)) - 1;
+  }
+  return $return;
 }
 
 /**
@@ -245,74 +246,100 @@ function short_identifier($number, $chars) {
  * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
  */
 function php_shrink($input, $shorted) {
-	$special_variables = array_flip(array('$this', '$GLOBALS', '$_GET', '$_POST', '$_FILES', '$_COOKIE', '$_SESSION', '$_SERVER'));
-	$short_variables = array();
-	$shortening = $shorted;
-	$tokens = token_get_all($input);
+  $special_variables = array_flip(array('$this', '$GLOBALS', '$_GET', '$_POST', '$_FILES', '$_COOKIE', '$_SESSION', '$_SERVER'));
+  $short_variables = array();
+  $shortening = $shorted;
+  $tokens = token_get_all($input);
 
-	foreach ($tokens as $i => $token) {
-		if ($token[0] === T_VARIABLE && !isset($special_variables[$token[1]])) {
-			$short_variables[$token[1]]++;
-		}
-	}
+  foreach ($tokens as $i => $token) {
+    if ($token[0] === T_VARIABLE && !isset($special_variables[$token[1]])) {
+      $short_variables[$token[1]]++;
+    }
+  }
 
-	arsort($short_variables);
-	foreach (array_keys($short_variables) as $number => $key) {
-		$short_variables[$key] = short_identifier($number, implode("", range('a', 'z')) . '_' . implode("", range('A', 'Z'))); // could use also numbers and \x7f-\xff
-	}
+  arsort($short_variables);
+  foreach (array_keys($short_variables) as $number => $key) {
+    $short_variables[$key] = short_identifier($number, implode("", range('a', 'z')) . '_' . implode("", range('A', 'Z'))); // could use also numbers and \x7f-\xff
+  }
 
-	$set = array_flip(preg_split('//', '!"#$&\'()*+,-./:;<=>?@[\]^`{|}'));
-	$space = '';
-	$output = '';
-	$in_echo = false;
-	$doc_comment = false; // include only first /**
-	for (reset($tokens); list($i, $token) = each($tokens); ) {
-		if (!is_array($token)) {
-			$token = array(0, $token);
-		}
-		if ($tokens[$i+2][0] === T_CLOSE_TAG && $tokens[$i+3][0] === T_INLINE_HTML && $tokens[$i+4][0] === T_OPEN_TAG
-			&& strlen(addcslashes($tokens[$i+3][1], "'\\")) < strlen($tokens[$i+3][1]) + 3
-		) {
-			$tokens[$i+2] = array(T_ECHO, 'echo');
-			$tokens[$i+3] = array(T_CONSTANT_ENCAPSED_STRING, "'" . addcslashes($tokens[$i+3][1], "'\\") . "'");
-			$tokens[$i+4] = array(0, ';');
-		}
-		if ($token[0] == T_COMMENT || $token[0] == T_WHITESPACE || ($token[0] == T_DOC_COMMENT && $doc_comment)) {
-			$space = "\n";
-		} else {
-			if ($token[0] == T_DOC_COMMENT) {
-				$doc_comment = true;
-			}
-			if ($token[0] == T_VAR) {
-				$shortening = false;
-			} elseif (!$shortening) {
-				if ($token[1] == ';') {
-					$shortening = $shorted;
-				}
-			} elseif ($token[0] == T_ECHO) {
-				$in_echo = true;
-			} elseif ($token[1] == ';' && $in_echo) {
-				if ($tokens[$i+1][0] === T_WHITESPACE && $tokens[$i+2][0] === T_ECHO) {
-					next($tokens);
-					$i++;
-				}
-				if ($tokens[$i+1][0] === T_ECHO) {
-					// join two consecutive echos
-					next($tokens);
-					$token[1] = ','; // '.' would conflict with "a".1+2 and would use more memory //! remove ',' and "," but not $var","
-				} else {
-					$in_echo = false;
-				}
-			} elseif ($token[0] === T_VARIABLE && !isset($special_variables[$token[1]])) {
-				$token[1] = '$' . $short_variables[$token[1]];
-			}
-			if (isset($set[substr($output, -1)]) || isset($set[$token[1]{0}])) {
-				$space = '';
-			}
-			$output .= $space . $token[1];
-			$space = '';
-		}
-	}
-	return $output;
+  $set = array_flip(preg_split('//', '!"#$&\'()*+,-./:;<=>?@[\]^`{|}'));
+  $space = '';
+  $output = '';
+  $in_echo = false;
+  $doc_comment = false; // include only first /**
+  for (reset($tokens); list($i, $token) = each($tokens); ) {
+    if (!is_array($token)) {
+      $token = array(0, $token);
+    }
+    if ($tokens[$i+2][0] === T_CLOSE_TAG && $tokens[$i+3][0] === T_INLINE_HTML && $tokens[$i+4][0] === T_OPEN_TAG
+      && strlen(addcslashes($tokens[$i+3][1], "'\\")) < strlen($tokens[$i+3][1]) + 3
+    ) {
+      $tokens[$i+2] = array(T_ECHO, 'echo');
+      $tokens[$i+3] = array(T_CONSTANT_ENCAPSED_STRING, "'" . addcslashes($tokens[$i+3][1], "'\\") . "'");
+      $tokens[$i+4] = array(0, ';');
+    }
+    if ($token[0] == T_COMMENT || $token[0] == T_WHITESPACE || ($token[0] == T_DOC_COMMENT && $doc_comment)) {
+      $space = "\n";
+    } else {
+      if ($token[0] == T_DOC_COMMENT) {
+        $doc_comment = true;
+      }
+      if ($token[0] == T_VAR) {
+        $shortening = false;
+      } elseif (!$shortening) {
+        if ($token[1] == ';') {
+          $shortening = $shorted;
+        }
+      } elseif ($token[0] == T_ECHO) {
+        $in_echo = true;
+      } elseif ($token[1] == ';' && $in_echo) {
+        if ($tokens[$i+1][0] === T_WHITESPACE && $tokens[$i+2][0] === T_ECHO) {
+          next($tokens);
+          $i++;
+        }
+        if ($tokens[$i+1][0] === T_ECHO) {
+          // join two consecutive echos
+          next($tokens);
+          $token[1] = ','; // '.' would conflict with "a".1+2 and would use more memory //! remove ',' and "," but not $var","
+        } else {
+          $in_echo = false;
+        }
+      } elseif ($token[0] === T_VARIABLE && !isset($special_variables[$token[1]])) {
+        $token[1] = '$' . $short_variables[$token[1]];
+      }
+      if (isset($set[substr($output, -1)]) || isset($set[$token[1]{0}])) {
+        $space = '';
+      }
+      $output .= $space . $token[1];
+      $space = '';
+    }
+  }
+  return $output;
+}
+
+function recursive_remove_directory($directory, $empty = false){
+  if(substr($directory,-1) == '/')
+    $directory = substr($directory,0,-1);
+  if(!file_exists($directory) || !is_dir($directory))
+    return false;
+  elseif(is_readable($directory)){
+    $handle = opendir($directory);
+    while (FALSE !== ($item = readdir($handle))){
+      if($item != '.' && $item != '..'){
+        $path = $directory.'/'.$item;
+        if(is_dir($path)) 
+          recursive_remove_directory($path);
+        else
+          unlink($path);
+      }
+    }
+    closedir($handle);
+    if($empty == FALSE){
+      if(!rmdir($directory)){
+        return FALSE;
+      }
+    }
+  }
+  return TRUE;
 }
 ?>
