@@ -55,6 +55,7 @@ class Neevo{
    *   error_reporting =>  error-reporting level; See set_error_reporting() for possible values.
    * );</pre>
    * @see Neevo::set_error_reporting(), Neevo::set_prefix();
+   * @return void
    */
   public function __construct(array $opts){
     $this->set_driver($opts['driver']);
@@ -66,6 +67,7 @@ class Neevo{
 
   /**
    * Closes connection to server.
+   * @return void
    */
   public function  __destruct(){
     $this->driver()->close($this->resource);
@@ -86,7 +88,7 @@ class Neevo{
    * Sets Neevo SQL driver to use
    * @param string $driver Driver name
    * @return void
-   * @internal
+   * @access private
    */
   private function set_driver($driver){
     if(!$driver) throw new NeevoException("Driver not set.");
@@ -114,7 +116,8 @@ class Neevo{
   /**
    * Sets connection resource
    * @param resource $resource
-   * @internal
+   * @return void
+   * @access private
    */
   public function set_resource($resource){
     $this->resource = $resource;
@@ -133,7 +136,8 @@ class Neevo{
   /**
    * Sets connection options
    * @param array $opts
-   * @internal
+   * @return void
+   * @access private
    */
   public function set_options(array $opts){
     $this->options = $opts;
@@ -152,7 +156,7 @@ class Neevo{
 
   /**
    * Returns table prefix
-   * @return mixed
+   * @return string
    */
   public function prefix(){
     return $this->table_prefix;
@@ -232,6 +236,7 @@ class Neevo{
   /**
    * Increments queries counter
    * @return void
+   * @access private
    */
   public function increment_queries(){
     $this->queries++;
@@ -262,7 +267,7 @@ class Neevo{
   /**
    * Creates NeevoQuery object for INSERT query
    * @param string $table Database table to use for inserting
-   * @param array $data Associative array of values to insert in format column_name=>column_value
+   * @param array $data Associative array of values to insert in format column => value
    * @return NeevoQuery
    */
   public function insert($table, array $data){
@@ -274,7 +279,7 @@ class Neevo{
   /**
    * Creates NeevoQuery object for UPDATE query
    * @param string $table Database table to use for updating
-   * @param array $data Associative array of values for update in format column_name=>column_value
+   * @param array $data Associative array of values for update in format column => value
    * @return NeevoQuery
    */
   public function update($table, array $data){
@@ -306,11 +311,11 @@ class Neevo{
 
   /**
    * If error_reporting is turned on, throws NeevoException available to catch.
-   * @internal
-   * @ignore
+
    * @param string $neevo_msg Error message
    * @param bool $warning This error is warning only
-   * @return false
+   * @return FALSE
+   * @access private
    */
   public function error($neevo_msg, $warning = false){
     return $this->driver()->error($neevo_msg, $warning);
@@ -329,7 +334,7 @@ class Neevo{
     $info['table_prefix'] = $this->prefix();
     $info['error_reporting'] = $this->error_reporting();
     $info['memory_usage'] = $this->memory();
-    $info['version'] = $this->version();
+    $info['version'] = $this->version(false);
 
     return $info;
   }
@@ -338,6 +343,8 @@ class Neevo{
   /**
    * Neevo's default error handler function
    * @param string $msg Error message
+   * @return void
+   * @access private
    */
   public static function default_error_handler($msg){
     echo "<b>Neevo error:</b> $msg.\n";
@@ -353,17 +360,28 @@ class Neevo{
   }
 
 
-  public function version(){
-    return "Neevo ".self::VERSION." (revision ".self::REVISION.").";
+  /**
+   * Returns Neevo version and revision
+   * @param bool $string Return as a string, not array
+   * @return string|array
+   */
+  public function version($string = true){
+    if($string)
+      $return = "Neevo ".self::VERSION." (revision ".self::REVISION.").";
+    else
+      $return = array(
+        'version'  => self::VERSION,
+        'revision' => self::REVISION
+      );
+    return $return;
   }
 
 }
 
 
 /**
- * Neevo Exceptions
+ * Neevo Exception
  * @package Neevo
- * @internal
  */
 class NeevoException extends Exception{};
 ?>

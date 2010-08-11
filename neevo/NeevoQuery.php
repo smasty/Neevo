@@ -29,6 +29,7 @@ class NeevoQuery {
    * @param array $object Reference to instance of Neevo class which initialized Query
    * @param string $type Query type. Possible values: select, insert, update, delete
    * @param string $table Table to interact with
+   * @return void
    */
   function  __construct(Neevo $object, $type = '', $table = ''){
     $this->neevo = $object;
@@ -92,7 +93,7 @@ class NeevoQuery {
 
   /**
    * Sets columns to retrive in SELECT queries
-   * @param mixed $columns Array or comma-separated list of columns.
+   * @param array|string $columns Array or comma-separated list of columns.
    * @return NeevoQuery
    */
   public function cols($columns){
@@ -119,7 +120,7 @@ class NeevoQuery {
    * <p>Supports LIKE and IN functions</p>
    *
    * @param string $where Column to use and optionaly operator/function: "email !=", "email LIKE" or "email IN".
-   * @param mixed $value Value to search for: "spam@foo.com", "%@foo.com" or array('john@foo.com', 'doe@foo.com', 'john.doe@foo.com')
+   * @param string|array $value Value to search for: "spam@foo.com", "%@foo.com" or array('john@foo.com', 'doe@foo.com', 'john.doe@foo.com')
    * @param string $glue Glue (AND, OR, etc.) to use betweet this and next WHERE condition. If not set, AND will be used.
    * @return NeevoQuery
    */
@@ -214,12 +215,12 @@ class NeevoQuery {
 
   /**
    * Fetches data from given Query resource.
-   * @return array|string|int Array of rows represented as associative arrays
+   * @return array|string Array of rows represented as associative arrays
    * (column => value), if two or more rows are fetched.<br>
    * Only row as associative array, if only one row is fetched.<br>
    * Numerical array of values from fetched column, if there's only one column
    * fetched in all rows.<br>
-   * String or int, if only one column value is fetched at all.
+   * String, if only one column value is fetched at all.
    */
   public function fetch(){
     if($this->type != 'select') $this->neevo->error('Cannot fetch on this kind of query');
@@ -272,7 +273,7 @@ class NeevoQuery {
 
   /**
    * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
-   * @return mixed Number of rows (int) or FALSE
+   * @return int|FALSE Number of rows (int) or FALSE
    */
   public function rows(){
     return $this->neevo->driver()->rows($this, $string);
@@ -312,11 +313,11 @@ class NeevoQuery {
      * <li>limit (for LIMIT clause)</li>
      * <li>offset (for OFFSET clause)</li>
    * </ul>
-   * @param mixed $position Exact piece of Query part. This can be:
+   * @param int|string|array $position Exact piece of Query part:
    * <ul>
-     * <li>(int) Ordinal number of Query part piece (WHERE condition, ORDER BY clause, columns in SELECT queries) to unset.</li>
-     * <li>(string) Column name from defined values (values to put/set in INSERT and UPDATE queries) to unset.</li>
-     * <li>(array) Array of options (from pevious two) if you want to unset more than one piece of Query part (e.g 2nd and 3rd WHERE condition).</li>
+     * <li>int: Ordinal number of Query part piece (WHERE condition, ORDER BY clause, columns in SELECT queries) to unset.</li>
+     * <li>string: Column name from defined values (values to put/set in INSERT and UPDATE queries) to unset.</li>
+     * <li>array: Array of options (from pevious two) if you want to unset more than one piece of Query part (e.g 2nd and 3rd WHERE condition).</li>
    * </ul>
    * This argument is not required for LIMIT & OFFSET. Default is (int) 1.
    * @return NeevoQuery
@@ -371,7 +372,8 @@ class NeevoQuery {
 
   /**
    * Builds Query from NeevoQuery instance
-   * @return string the Query
+   * @return string The Query in SQL dialect
+   * @access private
    */
   public function build(){
 

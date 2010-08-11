@@ -172,7 +172,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number
    * of rows in result for SELECT queries
    * @param NeevoQuery $query NeevoQuery instance
-   * @return mixed Number of rows (int) or FALSE
+   * @return int|FALSE Number of rows (int) or FALSE
    */
   public function rows(NeevoQuery $query){
     if($query->type != 'select') $aff_rows = $query->time() ? @mysql_affected_rows($query->neevo->resource()) : false;
@@ -187,7 +187,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Builds Query from NeevoQuery instance
    * @param NeevoQuery $query NeevoQuery instance
-   * @return string the Query
+   * @return string The Query
    */
   public function build(NeevoQuery $query){
 
@@ -240,9 +240,9 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds table-name for queries
-   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
+   * @access private
    */
   private function build_tablename(NeevoQuery $query){
     $pieces = explode(".", $query->table);
@@ -255,9 +255,9 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds WHERE statement for queries
-   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
+   * @access private
    */
   private function build_where(NeevoQuery $query){
     $prefix = $query->neevo->prefix();
@@ -294,9 +294,9 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds data part for INSERT queries ([INSERT INTO] (...) VALUES (...) )
-   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
+   * @access private
    */
   private function build_insert_data(NeevoQuery $query){
     foreach(NeevoStatic::escape_array($query->data, $this->neevo) as $col => $value){
@@ -309,9 +309,9 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds data part for UPDATE queries ([UPDATE ...] SET ...)
-   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
+   * @access private
    */
   private function build_update_data(NeevoQuery $query){
     foreach(NeevoStatic::escape_array($query->data, $this->neevo) as $col => $value){
@@ -323,9 +323,9 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds ORDER BY statement for queries
-   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
+   * @access private
    */
   private function build_order(NeevoQuery $query){
     foreach ($query->order as $in_order) {
@@ -338,9 +338,9 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Builds columns part for SELECT queries
-   * @internal
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
+   * @access private
    */
   private function build_select_cols(NeevoQuery $query){
     $prefix = $query->neevo->prefix();

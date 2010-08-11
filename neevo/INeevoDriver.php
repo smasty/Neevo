@@ -86,7 +86,7 @@ interface INeevoDriver {
    * @param string $neevo_msg Error message
    * @param bool $warning This error is warning only
    * @throws NeevoException
-   * @return false
+   * @return FALSE
    */
   public function error($neevo_msg, $warning = false);
 
@@ -127,7 +127,7 @@ interface INeevoDriver {
   /**
    * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
    * @param NeevoQuery $query NeevoQuery instance
-   * @return mixed Number of rows (int) or FALSE
+   * @return int|FALSE Number of rows (int) or FALSE
    */
   public function rows(NeevoQuery $query);
 
