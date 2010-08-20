@@ -25,7 +25,6 @@
 
 <pre><?php
 
-include "debug.php";
 include "neevo.php";
 
 // Connect to MySQL database
@@ -41,10 +40,9 @@ $sql = new Neevo(array(
 // Set Neevo error reporting
 $sql->set_error_reporting(Neevo::E_STRICT);
 
+// Nette\Debug for debugging (http://nette.org)
+include "debug.php";
 Debug::enable();
-
-// Set error-handler function
-//$sql->set_error_handler("my_own_handler");
 
 // Set table pefix to "dp_"
 $sql->set_prefix('dp_');
