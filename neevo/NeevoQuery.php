@@ -201,7 +201,7 @@ class NeevoQuery {
       $end = explode(" ", microtime());
       $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
       $this->set_time($time);
-      
+
       $this->performed = true;
       if($this->type == 'select'){
         $this->resource = $query;
@@ -256,7 +256,9 @@ class NeevoQuery {
    * Get the ID generated in the INSERT query
    * @return int
    */
-  public function id(){
+  public function insert_id(){
+    if(!$this->performed) $this->run();
+
     return $this->neevo->driver()->insert_id($this->neevo->resource());
   }
 
@@ -276,7 +278,9 @@ class NeevoQuery {
    * @return int|FALSE Number of rows (int) or FALSE
    */
   public function rows(){
-    return $this->neevo->driver()->rows($this, $string);
+    if(!$this->performed) $this->run();
+
+    return $this->neevo->driver()->rows($this);
   }
 
 
@@ -285,13 +289,11 @@ class NeevoQuery {
    * @return array Info about Query
    */
   public function info(){
-    $exec_time = $this->time() ? $this->time() : -1;
-    $rows = $this->time() ? $this->rows() : -1;
     $info = array(
       'resource' => $this->neevo->resource(),
-      'query' => $this->dump($html, true),
-      'exec_time' => $exec_time,
-      'rows' => $rows
+      'query' => $this->dump(false, true),
+      'exec_time' => ($this->performed ? $this->time() : -1),
+      'rows' => ($this->performed ? $this->rows() : -1)
     );
     if($this->type == 'select') $info['query_resource'] = $this->resource;
     return $info;

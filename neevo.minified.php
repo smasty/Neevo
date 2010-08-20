@@ -82,13 +82,13 @@ false;return$resource?$rows:$this->neevo->error("Fetching result data failed");}
 function
 seek($row_number){if(!$this->performed)$this->run();$seek=$this->neevo->driver()->seek($this->resource,$row_number);return$seek?$seek:$this->neevo->error("Cannot seek to row $row_number");}public
 function
-id(){return$this->neevo->driver()->insert_id($this->neevo->resource());}public
+insert_id(){if(!$this->performed)$this->run();return$this->neevo->driver()->insert_id($this->neevo->resource());}public
 function
 rand(){$this->neevo->driver()->rand($this);return$this;}public
 function
-rows(){return$this->neevo->driver()->rows($this,$string);}public
+rows(){if(!$this->performed)$this->run();return$this->neevo->driver()->rows($this);}public
 function
-info(){$exec_time=$this->time()?$this->time():-1;$rows=$this->time()?$this->rows():-1;$info=array('resource'=>$this->neevo->resource(),'query'=>$this->dump($html,true),'exec_time'=>$exec_time,'rows'=>$rows);if($this->type=='select')$info['query_resource']=$this->resource;return$info;}public
+info(){$info=array('resource'=>$this->neevo->resource(),'query'=>$this->dump(false,true),'exec_time'=>($this->performed?$this->time():-1),'rows'=>($this->performed?$this->rows():-1));if($this->type=='select')$info['query_resource']=$this->resource;return$info;}public
 function
 undo($sql_part,$position=1){switch(strtolower($sql_part)){case'where':$part='where';break;case'order';$part='order';break;case'column';$part='columns';break;case'value';$part='data';break;case'limit':$part='limit';$str=true;break;case'offset':$part='offset';$str=true;break;default:$this->neevo->error("Undo failed: No such Query part '$sql_part' supported for undo()",true);break;}if($str)unset($this->$part);else{if(isset($this->$part)){$positions=array();if(!is_array($position))$positions[]=$position;foreach($positions
 as$pos){$pos=is_numeric($pos)?$pos-1:$pos;$apart=$this->$part;unset($apart[$pos]);foreach($apart
@@ -189,7 +189,7 @@ E_CATCH=2;const
 E_WARNING=3;const
 E_STRICT=4;const
 VERSION="0.2dev";const
-REVISION=81;public
+REVISION=82;public
 function
 __construct(array$opts){$this->set_driver($opts['driver']);$this->connect($opts);if($opts['error_reporting'])$this->error_reporting=$opts['error_reporting'];if($opts['table_prefix'])$this->table_prefix=$opts['table_prefix'];}public
 function
