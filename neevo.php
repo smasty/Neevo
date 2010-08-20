@@ -38,7 +38,10 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.2dev";
-  const REVISION = 83;
+  const REVISION = 84;
+
+  // Fetched format
+  const MULTIPLE = 21;
 
 
   /**

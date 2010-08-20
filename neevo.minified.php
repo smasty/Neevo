@@ -27,10 +27,11 @@ as&$value){$value=is_numeric($value)?$value:(is_string($value)?self::escape_stri
 static
 function
 escape_string($string,Neevo$neevo){if(get_magic_quotes_gpc())$string=stripslashes($string);$string=$neevo->driver()->escape_string($string);return
-is_numeric($string)?$string:(is_string($string)?(self::is_sql_func($string)?self::quote_sql_func($string):"'$string'"):$string);}public
+self::is_sql_func($string)?self::quote_sql_func($string):"'$string'";}public
 static
 function
-is_sql_func($string){if(is_string($string)){$is_plmn=preg_match("/^(\w*)(\+|-)(\w*)/",$string);$var=strtoupper(preg_replace('/[^a-zA-Z0-9_\(\)]/','',$string));$is_sql=in_array(preg_replace('/\(.*\)/','',$var),self::$sql_functions);return($is_sql||$is_plmn);}else
+is_sql_func($string){if(is_string($string)){$var=strtoupper(preg_replace('/[^a-zA-Z0-9_\(\)]/','',$string));return
+in_array(preg_replace('/\(.*\)/','',$var),self::$sql_functions);}else
 return
 false;}public
 static
@@ -77,7 +78,7 @@ run($catch_error=false){$start=explode(" ",microtime());$query=$this->neevo->dri
 false;}else{$this->neevo->increment_queries();$this->neevo->set_last($this);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->set_time($time);$this->performed=true;if($this->type=='select'){$this->resource=$query;return$query;}else
 return$this;}}public
 function
-fetch(){if($this->type!='select')$this->neevo->error('Cannot fetch on this kind of query');$resource=$this->performed?$this->resource:$this->run();while($tmp_rows=$this->neevo->driver()->fetch($resource))$rows[]=(count($tmp_rows)==1)?$tmp_rows[max(array_keys($tmp_rows))]:$tmp_rows;$this->neevo->driver()->free($resource);if(count($rows)==1)$rows=$rows[0];if(!count($rows)&&is_array($rows))return
+fetch($fetch_type=null){if($this->type!='select')$this->neevo->error('Cannot fetch on this kind of query');$resource=$this->performed?$this->resource:$this->run();while($tmp_rows=$this->neevo->driver()->fetch($resource))$rows[]=(count($tmp_rows)==1)?$tmp_rows[max(array_keys($tmp_rows))]:$tmp_rows;$this->neevo->driver()->free($resource);if(count($rows)==1&&$fetch_type!=Neevo::MULTIPLE)$rows=$rows[0];if(!count($rows)&&is_array($rows))return
 false;return$resource?$rows:$this->neevo->error("Fetching result data failed");}public
 function
 seek($row_number){if(!$this->performed)$this->run();$seek=$this->neevo->driver()->seek($this->resource,$row_number);return$seek?$seek:$this->neevo->error("Cannot seek to row $row_number");}public
@@ -189,7 +190,8 @@ E_CATCH=2;const
 E_WARNING=3;const
 E_STRICT=4;const
 VERSION="0.2dev";const
-REVISION=83;public
+REVISION=84;const
+MULTIPLE=21;public
 function
 __construct(array$opts){$this->set_driver($opts['driver']);$this->connect($opts);if($opts['error_reporting'])$this->error_reporting=$opts['error_reporting'];if($opts['table_prefix'])$this->table_prefix=$opts['table_prefix'];}public
 function

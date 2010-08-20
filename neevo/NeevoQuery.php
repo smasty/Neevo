@@ -215,6 +215,8 @@ class NeevoQuery {
 
   /**
    * Fetches data from given Query resource.
+   * @param int $fetch_type Result format. If set to Neevo::MULTIPLE,
+   * number of fetched rows is ignored.
    * @return array|string Array of rows represented as associative arrays
    * (column => value), if two or more rows are fetched.<br>
    * Only row as associative array, if only one row is fetched.<br>
@@ -222,16 +224,17 @@ class NeevoQuery {
    * fetched in all rows.<br>
    * String, if only one column value is fetched at all.
    */
-  public function fetch(){
+  public function fetch($fetch_type = null){
     if($this->type != 'select') $this->neevo->error('Cannot fetch on this kind of query');
 
     $resource = $this->performed ? $this->resource : $this->run();
+
     while($tmp_rows = $this->neevo->driver()->fetch($resource))
       $rows[] = (count($tmp_rows) == 1) ? $tmp_rows[max(array_keys($tmp_rows))] : $tmp_rows;
 
     $this->neevo->driver()->free($resource);
 
-    if(count($rows) == 1)
+    if(count($rows) == 1 && $fetch_type != Neevo::MULTIPLE)
       $rows = $rows[0];
 
     if(!count($rows) && is_array($rows)) return false; // Empty

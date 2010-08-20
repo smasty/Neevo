@@ -69,16 +69,14 @@ class NeevoStatic {
   public static function escape_string($string, Neevo $neevo){
     if(get_magic_quotes_gpc()) $string = stripslashes($string);
     $string = $neevo->driver()->escape_string($string);
-    return is_numeric($string) ? $string : ( is_string($string) ? ( self::is_sql_func($string) ? self::quote_sql_func($string) : "'$string'" ) : $string );
+    return self::is_sql_func($string) ? self::quote_sql_func($string) : "'$string'";
   }
 
   /** Checks whether a given string is a SQL function or not */
   public static function is_sql_func($string){
     if(is_string($string)){
-      $is_plmn = preg_match("/^(\w*)(\+|-)(\w*)/", $string);
       $var = strtoupper(preg_replace('/[^a-zA-Z0-9_\(\)]/', '', $string));
-      $is_sql = in_array( preg_replace('/\(.*\)/', '', $var), self::$sql_functions);
-      return ($is_sql || $is_plmn);
+      return in_array( preg_replace('/\(.*\)/', '', $var), self::$sql_functions);
     }
     else return false;
 

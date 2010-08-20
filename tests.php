@@ -54,7 +54,7 @@ print_r($s);
 
 // Data for Insert query demos
 $insert_data = array(
-  'name'  => 'John Doe',
+  'name'  => 'John-Doe',
   'mail' => 'john.doe@example.com',
   'city' => 'Springfield',
   'about' => 'Lorem ipsum dolorem...',
