@@ -21,21 +21,22 @@
  */
 class NeevoStatic {
 
-  private static $highlight_classes = array(
-    'columns'    => 'sql-col',
-    'chars'      => 'sql-char',
-    'keywords'   => 'sql-kword',
-    'joins'      => 'sql-join',
-    'functions'  => 'sql-func',
-    'constants'  => 'sql-const'
+  private static $highlight_colors = array(
+    'columns'    => '#00f',
+    'chars'      => '#000',
+    'keywords'   => '#008000',
+    'joins'      => '#555',
+    'functions'  => '#008000',
+    'constants'  => '#f00'
     );
 
   private static $sql_functions=array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK', 'RAND');
 
   /** Highlights given MySQL query */
   public static function highlight_sql($sql){
-    $classes = self::$highlight_classes;
-    unset($classes['columns']);
+    $color_codes = array('chars'=>'chars','keywords'=>'kwords','joins'=>'jonis','functions'=>'funcs','constants'=>'consts');
+    $colors = self::$highlight_colors;
+    unset($colors['columns']);
 
     $words = array(
       'keywords'  => array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
@@ -47,13 +48,13 @@ class NeevoStatic {
 
     $sql=str_replace('\\\'','\\&#039;', $sql);
 
-    foreach($classes as $key => $class){
+    foreach($color_codes as $key => $code){
       $regexp = in_array( $key, array('constants', 'chars')) ? $words[$key] : '/\\b(' .join("|", $words[$key]) .')\\b/i';
-      $sql = preg_replace($regexp, "<span class=\"$class\">$1</span>", $sql);
+      $sql = preg_replace($regexp, "<span style=\"color:$code\">$1</span>", $sql);
     }
 
-    $sql = str_replace($chcolors, $hcolors, $sql);
-    return "<code class=\"".self::$highlight_classes['columns']."\"> $sql </code>\n";
+    $sql = str_replace($color_codes, $colors, $sql);
+    return "<code style=\"color:".self::$highlight_colors['columns']."\"> $sql </code>\n";
   }
 
   /** Escapes whole array for use in SQL */

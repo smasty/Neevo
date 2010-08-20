@@ -25,7 +25,8 @@
 
 <pre><?php
 
-include('neevo.php');
+include "debug.php";
+include "neevo.php";
 
 // Connect to MySQL database
 $sql = new Neevo(array(
@@ -40,8 +41,10 @@ $sql = new Neevo(array(
 // Set Neevo error reporting
 $sql->set_error_reporting(Neevo::E_STRICT);
 
+Debug::enable();
+
 // Set error-handler function
-$sql->set_error_handler("my_own_handler");
+//$sql->set_error_handler("my_own_handler");
 
 // Set table pefix to "dp_"
 $sql->set_prefix('dp_');
@@ -81,7 +84,7 @@ $insert->undo('value', 'city');
 $insert->dump();
 
 // Run query;
-$insert_id = $insert->run()->id();
+$insert_id = $insert->insert_id();
 echo "LAST_INSERT_ID: $insert_id";
 
 

@@ -191,6 +191,11 @@ class NeevoDriverMySQL implements INeevoDriver{
    */
   public function build(NeevoQuery $query){
 
+    $where = "";
+    $order = "";
+    $limit = "";
+    $q = "";
+
     if($query->sql)
       $q = $query->sql;
 
@@ -247,7 +252,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   private function build_tablename(NeevoQuery $query){
     $pieces = explode(".", $query->table);
     $prefix = $query->neevo->prefix();
-    if($pieces[1])
+    if(isset($pieces[1]))
       return self::COL_QUOTE .$pieces[0] .self::COL_QUOTE ."." .self::COL_QUOTE .$prefix .$pieces[1] .self::COL_QUOTE;
     else return self::COL_QUOTE .$prefix .$pieces[0] .self::COL_QUOTE;
   }
@@ -261,6 +266,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    */
   private function build_where(NeevoQuery $query){
     $prefix = $query->neevo->prefix();
+    $in_construct = false;
 
     foreach ($query->where as $where) {
       if(is_array($where[2])){ // WHERE col IN(...)

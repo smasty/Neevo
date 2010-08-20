@@ -14,12 +14,12 @@
  *
  */class
 NeevoStatic{private
-static$highlight_classes=array('columns'=>'sql-col','chars'=>'sql-char','keywords'=>'sql-kword','joins'=>'sql-join','functions'=>'sql-func','constants'=>'sql-const');private
+static$highlight_colors=array('columns'=>'#00f','chars'=>'#000','keywords'=>'#008000','joins'=>'#555','functions'=>'#008000','constants'=>'#f00');private
 static$sql_functions=array('MIN','MAX','SUM','COUNT','AVG','CAST','COALESCE','CHAR_LENGTH','LENGTH','SUBSTRING','DAY','MONTH','YEAR','DATE_FORMAT','CRC32','CURDATE','SYSDATE','NOW','GETDATE','FROM_UNIXTIME','FROM_DAYS','TO_DAYS','HOUR','IFNULL','ISNULL','NVL','NVL2','INET_ATON','INET_NTOA','INSTR','FOUND_ROWS','LAST_INSERT_ID','LCASE','LOWER','UCASE','UPPER','LPAD','RPAD','RTRIM','LTRIM','MD5','MINUTE','ROUND','SECOND','SHA1','STDDEV','STR_TO_DATE','WEEK','RAND');public
 static
 function
-highlight_sql($sql){$classes=self::$highlight_classes;unset($classes['columns']);$words=array('keywords'=>array('SELECT','UPDATE','INSERT','DELETE','REPLACE','INTO','CREATE','ALTER','TABLE','DROP','TRUNCATE','FROM','ADD','CHANGE','COLUMN','KEY','WHERE','ON','CASE','WHEN','THEN','END','ELSE','AS','USING','USE','INDEX','CONSTRAINT','REFERENCES','DUPLICATE','LIMIT','OFFSET','SET','SHOW','STATUS','BETWEEN','AND','IS','NOT','OR','XOR','INTERVAL','TOP','GROUP BY','ORDER BY','DESC','ASC','COLLATE','NAMES','UTF8','DISTINCT','DATABASE','CALC_FOUND_ROWS','SQL_NO_CACHE','MATCH','AGAINST','LIKE','REGEXP','RLIKE','PRIMARY','AUTO_INCREMENT','DEFAULT','IDENTITY','VALUES','PROCEDURE','FUNCTION','TRAN','TRANSACTION','COMMIT','ROLLBACK','SAVEPOINT','TRIGGER','CASCADE','DECLARE','CURSOR','FOR','DEALLOCATE'),'joins'=>array('JOIN','INNER','OUTER','FULL','NATURAL','LEFT','RIGHT'),'functions'=>self::$sql_functions,'chars'=>'/([\\.,!\\(\\)<>:=`]+)/i','constants'=>'/(\'[^\']*\'|[0-9]+)/i');$sql=str_replace('\\\'','\\&#039;',$sql);foreach($classes
-as$key=>$class){$regexp=in_array($key,array('constants','chars'))?$words[$key]:'/\\b('.join("|",$words[$key]).')\\b/i';$sql=preg_replace($regexp,"<span class=\"$class\">$1</span>",$sql);}$sql=str_replace($chcolors,$hcolors,$sql);return"<code class=\"".self::$highlight_classes['columns']."\"> $sql </code>\n";}public
+highlight_sql($sql){$color_codes=array('chars'=>'chars','keywords'=>'kwords','joins'=>'jonis','functions'=>'funcs','constants'=>'consts');$colors=self::$highlight_colors;unset($colors['columns']);$words=array('keywords'=>array('SELECT','UPDATE','INSERT','DELETE','REPLACE','INTO','CREATE','ALTER','TABLE','DROP','TRUNCATE','FROM','ADD','CHANGE','COLUMN','KEY','WHERE','ON','CASE','WHEN','THEN','END','ELSE','AS','USING','USE','INDEX','CONSTRAINT','REFERENCES','DUPLICATE','LIMIT','OFFSET','SET','SHOW','STATUS','BETWEEN','AND','IS','NOT','OR','XOR','INTERVAL','TOP','GROUP BY','ORDER BY','DESC','ASC','COLLATE','NAMES','UTF8','DISTINCT','DATABASE','CALC_FOUND_ROWS','SQL_NO_CACHE','MATCH','AGAINST','LIKE','REGEXP','RLIKE','PRIMARY','AUTO_INCREMENT','DEFAULT','IDENTITY','VALUES','PROCEDURE','FUNCTION','TRAN','TRANSACTION','COMMIT','ROLLBACK','SAVEPOINT','TRIGGER','CASCADE','DECLARE','CURSOR','FOR','DEALLOCATE'),'joins'=>array('JOIN','INNER','OUTER','FULL','NATURAL','LEFT','RIGHT'),'functions'=>self::$sql_functions,'chars'=>'/([\\.,!\\(\\)<>:=`]+)/i','constants'=>'/(\'[^\']*\'|[0-9]+)/i');$sql=str_replace('\\\'','\\&#039;',$sql);foreach($color_codes
+as$key=>$code){$regexp=in_array($key,array('constants','chars'))?$words[$key]:'/\\b('.join("|",$words[$key]).')\\b/i';$sql=preg_replace($regexp,"<span style=\"color:$code\">$1</span>",$sql);}$sql=str_replace($color_codes,$colors,$sql);return"<code style=\"color:".self::$highlight_colors['columns']."\"> $sql </code>\n";}public
 static
 function
 escape_array(array$array,Neevo$neevo){foreach($array
@@ -90,7 +90,7 @@ rows(){if(!$this->performed)$this->run();return$this->neevo->driver()->rows($thi
 function
 info(){$info=array('resource'=>$this->neevo->resource(),'query'=>$this->dump(false,true),'exec_time'=>($this->performed?$this->time():-1),'rows'=>($this->performed?$this->rows():-1));if($this->type=='select')$info['query_resource']=$this->resource;return$info;}public
 function
-undo($sql_part,$position=1){switch(strtolower($sql_part)){case'where':$part='where';break;case'order';$part='order';break;case'column';$part='columns';break;case'value';$part='data';break;case'limit':$part='limit';$str=true;break;case'offset':$part='offset';$str=true;break;default:$this->neevo->error("Undo failed: No such Query part '$sql_part' supported for undo()",true);break;}if($str)unset($this->$part);else{if(isset($this->$part)){$positions=array();if(!is_array($position))$positions[]=$position;foreach($positions
+undo($sql_part,$position=1){$str=false;switch(strtolower($sql_part)){case'where':$part='where';break;case'order';$part='order';break;case'column';$part='columns';break;case'value';$part='data';break;case'limit':$part='limit';$str=true;break;case'offset':$part='offset';$str=true;break;default:$this->neevo->error("Undo failed: No such Query part '$sql_part' supported for undo()",true);break;}if($str)unset($this->$part);else{if(isset($this->$part)){$positions=array();if(!is_array($position))$positions[]=$position;foreach($positions
 as$pos){$pos=is_numeric($pos)?$pos-1:$pos;$apart=$this->$part;unset($apart[$pos]);foreach($apart
 as$key=>$value){$loop[$key]=$value;}$this->$part=$loop;}}else$this->neevo->error("Undo failed: No such Query part '$sql_part' for this kind of Query",true);}return$this;}public
 function
@@ -158,17 +158,17 @@ rows(NeevoQuery$query){if($query->type!='select')$aff_rows=$query->time()?@mysql
 return
 false;}public
 function
-build(NeevoQuery$query){if($query->sql)$q=$query->sql;else{$table=$this->build_tablename($query);if($query->where)$where=$this->build_where($query);if($query->order)$order=$this->build_order($query);if($query->limit)$limit=" LIMIT ".$query->limit;if($query->offset)$limit.=" OFFSET ".$query->offset;if($query->type=='select'){$cols=$this->build_select_cols($query);$q.="SELECT $cols FROM $table$where$order$limit";}if($query->type=='insert'&&$query->data){$insert_data=$this->build_insert_data($query);$q.="INSERT INTO $table$insert_data";}if($query->type=='update'&&$query->data){$update_data=$this->build_update_data($query);$q.="UPDATE $table$update_data$where$order$limit";}if($query->type=='delete')$q.="DELETE FROM $table$where$order$limit";}return"$q;";}public
+build(NeevoQuery$query){$where="";$order="";$limit="";$q="";if($query->sql)$q=$query->sql;else{$table=$this->build_tablename($query);if($query->where)$where=$this->build_where($query);if($query->order)$order=$this->build_order($query);if($query->limit)$limit=" LIMIT ".$query->limit;if($query->offset)$limit.=" OFFSET ".$query->offset;if($query->type=='select'){$cols=$this->build_select_cols($query);$q.="SELECT $cols FROM $table$where$order$limit";}if($query->type=='insert'&&$query->data){$insert_data=$this->build_insert_data($query);$q.="INSERT INTO $table$insert_data";}if($query->type=='update'&&$query->data){$update_data=$this->build_update_data($query);$q.="UPDATE $table$update_data$where$order$limit";}if($query->type=='delete')$q.="DELETE FROM $table$where$order$limit";}return"$q;";}public
 function
 escape_string($string){return
 mysql_real_escape_string($string);}private
 function
-build_tablename(NeevoQuery$query){$pieces=explode(".",$query->table);$prefix=$query->neevo->prefix();if($pieces[1])return
+build_tablename(NeevoQuery$query){$pieces=explode(".",$query->table);$prefix=$query->neevo->prefix();if(isset($pieces[1]))return
 self::COL_QUOTE.$pieces[0].self::COL_QUOTE.".".self::COL_QUOTE.$prefix.$pieces[1].self::COL_QUOTE;else
 return
 self::COL_QUOTE.$prefix.$pieces[0].self::COL_QUOTE;}private
 function
-build_where(NeevoQuery$query){$prefix=$query->neevo->prefix();foreach($query->where
+build_where(NeevoQuery$query){$prefix=$query->neevo->prefix();$in_construct=false;foreach($query->where
 as$where){if(is_array($where[2])){$where[2]="(".join(", ",NeevoStatic::escape_array($where[2],$this->neevo)).")";$in_construct=true;}$wheres[]=$where;}unset($wheres[count($wheres)-1][3]);foreach($wheres
 as$in_where){if(NeevoStatic::is_sql_func($in_where[0]))$in_where[0]=NeevoStatic::quote_sql_func($in_where[0]);if(strstr($in_where[0],"."))$in_where[0]=preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#",self::COL_QUOTE."$prefix$1".self::COL_QUOTE.".".self::COL_QUOTE."$3".self::COL_QUOTE,$in_where[0]);else$in_where[0]=self::COL_QUOTE.$in_where[0].self::COL_QUOTE;if(!$in_construct)$in_where[2]=NeevoStatic::escape_string($in_where[2],$this->neevo);$wheres2[]=join(' ',$in_where);}foreach($wheres2
 as&$rplc_where){$rplc_where=str_replace(array(' = ',' != '),array('=','!='),$rplc_where);}return" WHERE ".join(' ',$wheres2);}private
@@ -189,7 +189,7 @@ E_CATCH=2;const
 E_WARNING=3;const
 E_STRICT=4;const
 VERSION="0.2dev";const
-REVISION=82;public
+REVISION=83;public
 function
 __construct(array$opts){$this->set_driver($opts['driver']);$this->connect($opts);if($opts['error_reporting'])$this->error_reporting=$opts['error_reporting'];if($opts['table_prefix'])$this->table_prefix=$opts['table_prefix'];}public
 function

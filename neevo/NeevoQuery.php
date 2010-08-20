@@ -325,6 +325,7 @@ class NeevoQuery {
    * @return NeevoQuery
    */
   public function undo($sql_part, $position = 1){
+    $str = false;
     switch (strtolower($sql_part)) {
       case 'where':
         $part = 'where';
