@@ -27,7 +27,7 @@ include dirname(__FILE__). "/neevo/NeevoDriverMySQL.php";
 class Neevo{
 
   // Fields
-  private $resource, $last, $table_prefix, $queries, $error_reporting, $driver, $error_handler;
+  private $resource, $connection, $last, $table_prefix, $queries, $error_reporting, $driver, $error_handler;
   private $options = array();
 
   // Error-reporting levels
@@ -60,11 +60,9 @@ class Neevo{
    * @see Neevo::set_error_reporting(), Neevo::set_prefix();
    * @return void
    */
-  public function __construct(array $opts){
-    $this->set_driver($opts['driver']);
-    $this->connect($opts);
-    if($opts['error_reporting']) $this->error_reporting = $opts['error_reporting'];
-    if($opts['table_prefix']) $this->table_prefix = $opts['table_prefix'];
+  public function __construct($driver){
+    if(!$driver) throw new NeevoException("Driver not set.");
+    $this->driver = new NeevoDriver($driver, $this);
   }
 
 
@@ -79,37 +77,29 @@ class Neevo{
 
   /**
    * Connects to database server, selects database and sets encoding (if defined)
-   * @param array $opts
+   * @param array $opts Array of options in following format:
+   * <pre>Array(
+   *   driver          =>  driver to use
+   *   host            =>  localhost,
+   *   username        =>  username,
+   *   password        =>  password,
+   *   database        =>  database_name,
+   *   encoding        =>  utf8,
+   *   table_prefix    =>  prefix_
+   *   error_reporting =>  error-reporting level; See set_error_reporting() for possible values.
+   * );</pre>
    * @return bool
    */
   private function connect(array $opts){
-    return $this->driver()->connect($opts);
+    $connection = new NeevoConnection($this, $this->driver(), $opts['username'], $opts['password'], $opts['host'], $opts['database'], $opts['encoding'], $opts['table_prefix']);
+    $this->connection = $connection;
+    return (bool) $connection;
   }
 
 
   /**
-   * Sets Neevo SQL driver to use
-   * @param string $driver Driver name
-   * @return void
-   * @access private
-   */
-  private function set_driver($driver){
-    if(!$driver) throw new NeevoException("Driver not set.");
-    switch (strtolower($driver)) {
-      case "mysql":
-        $this->driver = new NeevoDriverMySQL($this);
-        break;
-
-      default:
-        throw new NeevoException("Driver $driver not supported.");
-        break;
-    }
-  }
-
-
-  /**
-   * Returns Neevo SQL driver
-   * @return INeevoDriver
+   * Returns Neevo Driver
+   * @return NeevoDriver
    */
   public function driver(){
     return $this->driver;
