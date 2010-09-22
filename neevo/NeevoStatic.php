@@ -93,14 +93,14 @@ class NeevoStatic {
   }
 
   /** Quotes given 'AS construction' */
-  public static function quote_as_constr($as_constr, $col_quote){
+  public static function quote_as_constr($as_constr, array $col_quote){
     $construction = explode(' ', $as_constr);
     $escape = preg_match('/^\w{1,}$/', $construction[0]) ? true : false;
     if($escape){
-      $construction[0] = $col_quote .$construction[0] .$col_quote;
+      $construction[0] = $col_quote[0] .$construction[0] .$col_quote[1];
     }
     $as_constr = join(' ', $construction);
-    return preg_replace('/(.*) (as) (\w*)/i','$1 AS ' .$col_quote .'$3' .$col_quote, $as_constr);
+    return preg_replace('/(.*) (as) (\w*)/i','$1 AS ' .$col_quote[0] .'$3' .$col_quote[1], $as_constr);
   }
 
   /** Returns formatted filesize */
