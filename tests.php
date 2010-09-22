@@ -49,7 +49,11 @@ $sql->set_prefix('dp_');
 
 
 // Using  "WHERE col IN (val1, val2, ...)" construction
-$s = $sql->select("client.id", 'neevo_demo.client')->where("md5(client.id)", null, "or")->where("name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))->limit(5)->dump()->fetch();
+$s = $sql->select("client.id", 'neevo_demo.client')
+         ->where("md5(client.id)", null, "or")
+         ->where("name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))
+         ->limit(5)->dump()->fetch();
+
 print_r($s);
 
 // Data for Insert query demos
@@ -87,10 +91,9 @@ echo "LAST_INSERT_ID: $insert_id";
 
 
 // UPDATE QUERY
-$update = $sql->update('client', $update_data)->where('name', 'John Doe')->where('id !=', 101)->order('id DESC');
+$update = $sql->update('client', $update_data)->where('name', 'John-Doe')->where('id !=', 101)->order('id DESC');
 $update_resource = $update->run();
 
-// Get info about query (1. return as a string, 2. return as HTML)
 $update->dump();
 
 // DELETE QUERY

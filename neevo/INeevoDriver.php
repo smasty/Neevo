@@ -20,11 +20,6 @@
  */
 interface INeevoDriver {
 
-
-  /* Character used as column quote, e.g `column` in MySQL
-  const COL_QUOTE; */
-
-
   /* @var Neevo $neevo Reference to main Neevo object
   private $neevo; */
 
@@ -131,6 +126,7 @@ interface INeevoDriver {
    */
   public function rows(NeevoQuery $query);
 
+
   /**
    * Builds Query from NeevoQuery instance
    * @param NeevoQuery $query NeevoQuery instance
@@ -138,11 +134,19 @@ interface INeevoDriver {
    */
   public function build(NeevoQuery $query);
 
+
   /**
    * Escapes given string for use in SQL
    * @param string $string
    * @return string
    */
   public function escape_string($string);
+
+
+  /**
+   * Returns driver-specific column quotes (opening and closing chars)
+   * @return array
+   */
+  public function get_quotes();
 }
 ?>

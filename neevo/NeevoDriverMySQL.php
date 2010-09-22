@@ -20,8 +20,12 @@
  */
 class NeevoDriverMySQL implements INeevoDriver{
 
-  /** Character used as column quote, e.g `column` in MySQL */
-  const COL_QUOTE = '`';
+  /** Character used as opening column quote, e.g `column` in MySQL */
+  const COL_QUOTE_OPENING = '`';
+  
+  /** Character used as closing column quote, e.g `column` in MySQL */
+  const COL_QUOTE_CLOSING = '`';
+
 
   /** @var Neevo $neevo Reference to main Neevo object */
   private $neevo;
@@ -244,6 +248,15 @@ class NeevoDriverMySQL implements INeevoDriver{
 
 
   /**
+   * Returns driver-specific column quotes (opening and closing chars)
+   * @return array
+   */
+  public function get_quotes(){
+    return array(self::COL_QUOTE_OPENING, self::COL_QUOTE_CLOSING);
+  }
+
+
+  /**
    * Builds table-name for queries
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
@@ -253,8 +266,8 @@ class NeevoDriverMySQL implements INeevoDriver{
     $pieces = explode(".", $query->table);
     $prefix = $query->neevo->prefix();
     if(isset($pieces[1]))
-      return self::COL_QUOTE .$pieces[0] .self::COL_QUOTE ."." .self::COL_QUOTE .$prefix .$pieces[1] .self::COL_QUOTE;
-    else return self::COL_QUOTE .$prefix .$pieces[0] .self::COL_QUOTE;
+      return self::COL_QUOTE_OPENING .$pieces[0] .self::COL_QUOTE_CLOSING ."." .self::COL_QUOTE_OPENING .$prefix .$pieces[1] .self::COL_QUOTE_CLOSING;
+    else return self::COL_QUOTE_OPENING .$prefix .$pieces[0] .self::COL_QUOTE_CLOSING;
   }
 
 
@@ -282,17 +295,14 @@ class NeevoDriverMySQL implements INeevoDriver{
         $in_where[0] = NeevoStatic::quote_sql_func($in_where[0]);
       
       if(strstr($in_where[0], ".")) // If format is table.column
-        $in_where[0] = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $in_where[0]);
+        $in_where[0] = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#", self::COL_QUOTE_OPENING ."$prefix$1" .self::COL_QUOTE_CLOSING ."." .self::COL_QUOTE_OPENING ."$3" .self::COL_QUOTE_CLOSING, $in_where[0]);
       else
-        $in_where[0] = self::COL_QUOTE .$in_where[0] .self::COL_QUOTE;
+        $in_where[0] = self::COL_QUOTE_OPENING .$in_where[0] .self::COL_QUOTE_CLOSING;
       
       if(!$in_construct) // If not col IN(...), escape value
         $in_where[2] = NeevoStatic::escape_string($in_where[2], $this->neevo);
 
       $wheres2[] = join(' ', $in_where); // Join each condition to string
-    }
-    foreach ($wheres2 as &$rplc_where){ // Trim some whitespce
-      $rplc_where = str_replace(array(' = ', ' != '), array('=', '!='), $rplc_where);
     }
     return " WHERE ".join(' ', $wheres2); // And finally, join t one string
   }
@@ -306,7 +316,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    */
   private function build_insert_data(NeevoQuery $query){
     foreach(NeevoStatic::escape_array($query->data, $this->neevo) as $col => $value){
-      $cols[] = self::COL_QUOTE .$col .self::COL_QUOTE;
+      $cols[] = self::COL_QUOTE_OPENING .$col .self::COL_QUOTE_CLOSING;
       $values[] = $value;
     }
     return " (".join(', ',$cols).") VALUES (".join(', ',$values).")";
@@ -321,7 +331,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    */
   private function build_update_data(NeevoQuery $query){
     foreach(NeevoStatic::escape_array($query->data, $this->neevo) as $col => $value){
-      $update[] = self::COL_QUOTE .$col .self::COL_QUOTE ."=" .$value;
+      $update[] = self::COL_QUOTE_OPENING .$col .self::COL_QUOTE_CLOSING ."=" .$value;
     }
     return " SET " .join(', ', $update);
   }
@@ -335,7 +345,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    */
   private function build_order(NeevoQuery $query){
     foreach ($query->order as $in_order) {
-      $in_order[0] = (NeevoStatic::is_sql_func($in_order[0])) ? $in_order[0] : self::COL_QUOTE .$in_order[0] .self::COL_QUOTE;
+      $in_order[0] = (NeevoStatic::is_sql_func($in_order[0])) ? $in_order[0] : self::COL_QUOTE_OPENING .$in_order[0] .self::COL_QUOTE_CLOSING;
       $orders[] = join(' ', $in_order);
     }
     return " ORDER BY ".join(', ', $orders);
@@ -354,17 +364,17 @@ class NeevoDriverMySQL implements INeevoDriver{
       $col = trim($col);
       if($col != '*'){
         if(strstr($col, ".*")){ // If format is table.*
-          $col = preg_replace("#([0-9A-Za-z_]+)(\.)(\*)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE .".*", $col);
+          $col = preg_replace("#([0-9A-Za-z_]+)(\.)(\*)#", self::COL_QUOTE_OPENING ."$prefix$1" .self::COL_QUOTE_CLOSING .".*", $col);
         }
         else{
           if(strstr($col, ".")) // If format is table.col
-            $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#", self::COL_QUOTE ."$prefix$1" .self::COL_QUOTE ."." .self::COL_QUOTE ."$3" .self::COL_QUOTE, $col);
+            $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#", self::COL_QUOTE_OPENING ."$prefix$1" .self::COL_QUOTE_CLOSING ."." .self::COL_QUOTE_OPENING ."$3" .self::COL_QUOTE_CLOSING, $col);
           if(NeevoStatic::is_as_constr($col))
-            $col = NeevoStatic::quote_as_constr($col, self::COL_QUOTE);
+            $col = NeevoStatic::quote_as_constr($col, $this->get_quotes());
           elseif(NeevoStatic::is_sql_func($col))
             $col = NeevoStatic::quote_sql_func($col);
           elseif(!strstr($col, ".")) // If normal format
-            $col = self::COL_QUOTE .$col .self::COL_QUOTE;
+            $col = self::COL_QUOTE_OPENING .$col .self::COL_QUOTE_CLOSING;
         }
       }
       $cols[] = $col;
