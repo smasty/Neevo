@@ -25,27 +25,28 @@
 
 <pre><?php
 
-include "neevo.php";
-
-// Connect to MySQL database
-$sql = new Neevo(array(
-  'driver'   => 'mysql',
-  'host'     => 'localhost',
-  'username' => 'root',
-  'password' => '',
-  'database' => 'neevo_demo',
-  'encoding' => 'utf8'
-));
-
-// Set Neevo error reporting
-$sql->set_error_reporting(Neevo::E_STRICT);
-
 // Nette\Debug for debugging (http://nette.org)
 include "debug.php";
 Debug::enable();
 
-// Set table pefix to "dp_"
-$sql->set_prefix('dp_');
+include "neevo.php";
+
+// Set driver to MySQL
+$sql = new Neevo('MySQL');
+
+// Set Neevo error reporting
+$sql->set_error_reporting(Neevo::E_STRICT);
+
+// Create connection to database server
+$sql->connect(array(
+  'driver'       => 'mysql',
+  'host'         => 'localhost',
+  'username'     => 'root',
+  'password'     => '',
+  'database'     => 'neevo_demo',
+  'encoding'     => 'utf8',
+  'table_prefix' => 'dp_'
+));
 
 
 // Using  "WHERE col IN (val1, val2, ...)" construction

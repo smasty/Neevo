@@ -16,6 +16,8 @@
 
 include dirname(__FILE__). "/neevo/NeevoStatic.php";
 include dirname(__FILE__). "/neevo/NeevoQuery.php";
+include dirname(__FILE__). "/neevo/NeevoDriver.php";
+include dirname(__FILE__). "/neevo/NeevoConnection.php";
 include dirname(__FILE__). "/neevo/INeevoDriver.php";
 
 include dirname(__FILE__). "/neevo/NeevoDriverMySQL.php";
@@ -46,23 +48,12 @@ class Neevo{
 
   /**
    * Neevo
-   * @param array $opts Array of options in following format:
-   * <pre>Array(
-   *   driver          =>  driver to use
-   *   host            =>  localhost,
-   *   username        =>  username,
-   *   password        =>  password,
-   *   database        =>  database_name,
-   *   encoding        =>  utf8,
-   *   table_prefix    =>  prefix_
-   *   error_reporting =>  error-reporting level; See set_error_reporting() for possible values.
-   * );</pre>
-   * @see Neevo::set_error_reporting(), Neevo::set_prefix();
+   * @param string $driver Name of driver to use
    * @return void
    */
-  public function __construct($driver){
+  public function __construct($driver = false){
     if(!$driver) throw new NeevoException("Driver not set.");
-    $this->driver = new NeevoDriver($driver, $this);
+    $this->set_driver($driver);
   }
 
 
@@ -90,16 +81,54 @@ class Neevo{
    * );</pre>
    * @return bool
    */
-  private function connect(array $opts){
+  public function connect(array $opts){
     $connection = new NeevoConnection($this, $this->driver(), $opts['username'], $opts['password'], $opts['host'], $opts['database'], $opts['encoding'], $opts['table_prefix']);
-    $this->connection = $connection;
+    $this->set_connection($connection);
     return (bool) $connection;
   }
 
 
   /**
-   * Returns Neevo Driver
-   * @return NeevoDriver
+   * Returns current NeevoConnection instance
+   * @return NeevoConnection
+   */
+  public function connection(){
+    return $this->connection;
+  }
+
+
+  /**
+   * Sets Neevo Connection to use
+   * @param NeevoConnection $connection Instance to use
+   */
+  public function set_connection(NeevoConnection $connection){
+    $this->connection = $connection;
+  }
+
+
+  /**
+   * Sets Neevo SQL driver to use
+   * @param string $driver Driver name
+   * @return void
+   * @access private
+   */
+  private function set_driver($driver){
+    if(!$driver) throw new NeevoException("Driver not set.");
+    switch (strtolower($driver)) {
+      case "mysql":
+        $this->driver = new NeevoDriverMySQL($this);
+        break;
+
+      default:
+        throw new NeevoException("Driver $driver not supported.");
+        break;
+    }
+  }
+
+
+  /**
+   * Returns Neevo Driver class
+   * @return INeevoDriver
    */
   public function driver(){
     return $this->driver;
@@ -138,21 +167,11 @@ class Neevo{
 
 
   /**
-   * Sets table prefix
-   * @param string $prefix Table prefix to set
-   * @return void
-   */
-  public function set_prefix($prefix){
-    $this->table_prefix = $prefix;
-  }
-
-
-  /**
    * Returns table prefix
    * @return string
    */
   public function prefix(){
-    return $this->table_prefix;
+    return $this->connection()->prefix();
   }
 
 

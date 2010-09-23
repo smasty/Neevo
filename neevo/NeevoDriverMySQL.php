@@ -18,7 +18,7 @@
  * Neevo MySQL driver class
  * @package NeevoDrivers
  */
-class NeevoDriverMySQL implements INeevoDriver{
+class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
 
   /** Character used as opening column quote, e.g `column` in MySQL */
   const COL_QUOTE_OPENING = '`';
@@ -38,6 +38,8 @@ class NeevoDriverMySQL implements INeevoDriver{
    * @return void
    */
   public function  __construct($neevo){
+    //parent::__construct($neevo);
+    
     if(!extension_loaded("mysql")) throw new NeevoException("PHP extension 'mysql' not loaded.");
     $this->neevo = $neevo;
   }

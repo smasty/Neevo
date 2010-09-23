@@ -20,18 +20,45 @@
  */
 class NeevoConnection{
 
-  private $neevo, $driver, $user, $pswd, $host, $database, $encoding, $table_pefix;
+  private $neevo, $driver, $username, $password, $host, $database, $encoding, $table_prefix;
 
 
   public function __construct(Neevo $neevo, NeevoDriver $driver, $user = null, $pswd = null, $host = null, $database = null, $encoding = null, $table_prefix = null){
     $this->neevo = $neevo;
     $this->driver = $driver;
-    $this->user = $user;
-    $this->pswd = $pswd;
+    $this->username = $user;
+    $this->password = $pswd;
     $this->host = $host;
     $this->database = $database;
     $this->encoding = $encoding;
-    $this->table_pefix = $table_prefix;
+    $this->table_prefix = $table_prefix;
+
+    $this->driver()->connect($this->get_vars());
+  }
+
+
+  /**
+   * Returns current NeevoDriver
+   * @return NeevoDriver
+   */
+  private function driver(){
+    return $this->driver;
+  }
+
+
+  /**
+   * Returns object variables as associative array
+   * @return array
+   */
+  public function get_vars(){
+    $options = get_object_vars($this);
+    unset($options['neevo'], $options['driver']);
+    return $options;
+  }
+
+
+  public function prefix(){
+    return $this->table_prefix;
   }
 
 }
