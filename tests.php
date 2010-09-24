@@ -8,14 +8,8 @@
       td, th{padding:2px 10px;text-align:left}
       th{background:#ddd}
       #logfile{height:150px;overflow:auto;border:1px solid #555}
-      code{display:block;margin-bottom:1em}
+      code{display:block}
       table code{display:inline;margin:0}
-
-      .sql-col{color:#00f}
-      .sql-char{color:#000}
-      .sql-kword, .sql-func{color:#008000}
-      .sql-join{color:#555}
-      .sql-const{color:#f00}
     </style>
   </head>
 
@@ -28,18 +22,22 @@
 // Nette\Debug for debugging (http://nette.org)
 include "debug.php";
 Debug::enable();
+Debug::$strictMode = TRUE;
+
 
 include "neevo.php";
 
-// Set driver to MySQL
+
+// Initialize Neevo and set driver to MySQL
 $sql = new Neevo('MySQL');
 
-// Set Neevo error reporting
-$sql->set_error_reporting(Neevo::E_HANDLE);
 
-// Create connection to database server
+// Set Neevo error reporting level
+$sql->set_error_reporting(Neevo::E_STRICT);
+
+
+// Create connection to a database server
 $sql->connect(array(
-  'driver'       => 'mysql',
   'host'         => 'localhost',
   'username'     => 'root',
   'password'     => '',
@@ -50,9 +48,9 @@ $sql->connect(array(
 
 
 // Using  "WHERE col IN (val1, val2, ...)" construction
-$s = $sql->select("client.sid", 'neevo_demo.client')
+$s = $sql->select("client.id", 'neevo_demo.client')
          ->where("md5(client.id)", null, "or")
-         ->where("name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))
+         ->where("client.name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))
          ->limit(5)->dump()->fetch();
 
 print_r($s);
@@ -88,7 +86,7 @@ $insert->dump();
 
 // Run query;
 $insert_id = $insert->insert_id();
-echo "LAST_INSERT_ID: $insert_id";
+echo " LAST_INSERT_ID: $insert_id\n\n";
 
 
 // UPDATE QUERY

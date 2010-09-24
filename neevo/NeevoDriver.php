@@ -26,7 +26,7 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  public function build_tablename(NeevoQuery $query){
+  protected function build_tablename(NeevoQuery $query){
     $pieces = explode(".", $query->table);
     $prefix = $query->neevo->connection()->prefix();
     if(isset($pieces[1]))
@@ -40,7 +40,7 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  public function build_where(NeevoQuery $query){
+  protected function build_where(NeevoQuery $query){
     $prefix = $query->neevo->connection()->prefix();
     $in_construct = false;
 
@@ -76,7 +76,7 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  public function build_insert_data(NeevoQuery $query){
+  protected function build_insert_data(NeevoQuery $query){
     foreach(NeevoStatic::escape_array($query->data, $this) as $col => $value){
       $cols[] = $this->col_quotes[0] .$col .$this->col_quotes[1];
       $values[] = $value;
@@ -90,7 +90,7 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  public function build_update_data(NeevoQuery $query){
+  protected function build_update_data(NeevoQuery $query){
     foreach(NeevoStatic::escape_array($query->data, $this) as $col => $value){
       $update[] = $this->col_quotes[0] .$col .$this->col_quotes[1] ."=" .$value;
     }
@@ -103,7 +103,7 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  public function build_order(NeevoQuery $query){
+  protected function build_order(NeevoQuery $query){
     foreach ($query->order as $in_order) {
       $in_order[0] = (NeevoStatic::is_sql_func($in_order[0])) ? $in_order[0] : $this->col_quotes[0] .$in_order[0] .$this->col_quotes[1];
       $orders[] = join(' ', $in_order);
@@ -117,7 +117,7 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  public function build_select_cols(NeevoQuery $query){
+  protected function build_select_cols(NeevoQuery $query){
     $prefix = $query->neevo->connection()->prefix();
     foreach ($query->columns as $col) { // For each col
       $col = trim($col);
