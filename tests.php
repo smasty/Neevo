@@ -135,14 +135,5 @@ foreach ($select_result as $row){
 
 ?>
 </table>
-
-<pre>
-INFO:
-
-<?php
-// Info about Neevo connections
-print_r($sql->info()); ?>
-</pre>
-
   </body>
 </html>

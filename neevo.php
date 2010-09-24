@@ -29,7 +29,7 @@ include dirname(__FILE__). "/neevo/NeevoDriverMySQL.php";
 class Neevo{
 
   // Fields
-  private $resource, $connection, $last, $table_prefix, $queries, $error_reporting, $driver, $error_handler;
+  private $connection, $last, $table_prefix, $queries, $error_reporting, $driver, $error_handler;
   private $options = array();
 
   // Error-reporting levels
@@ -39,10 +39,10 @@ class Neevo{
   const E_STRICT  = 4;
 
   // Neevo version
-  const VERSION = "0.2dev";
-  const REVISION = 84;
+  const VERSION = "0.3dev";
+  const REVISION = 100;
 
-  // Fetched format
+  // Fetch format
   const MULTIPLE = 21;
 
 
@@ -62,12 +62,12 @@ class Neevo{
    * @return void
    */
   public function  __destruct(){
-    $this->driver()->close($this->resource);
+    $this->driver()->close($this->connection()->resource());
   }
 
 
   /**
-   * Connects to database server, selects database and sets encoding (if defined)
+   * Creates and uses a new connection to a server.
    * @param array $opts Array of options in following format:
    * <pre>Array(
    *   driver          =>  driver to use
@@ -82,7 +82,7 @@ class Neevo{
    * @return bool
    */
   public function connect(array $opts){
-    $connection = new NeevoConnection($this, $this->driver(), $opts['username'], $opts['password'], $opts['host'], $opts['database'], $opts['encoding'], $opts['table_prefix']);
+    $connection = $this->create_connection($opts);
     $this->set_connection($connection);
     return (bool) $connection;
   }
@@ -94,6 +94,28 @@ class Neevo{
    */
   public function connection(){
     return $this->connection;
+  }
+
+
+  /**
+   * Creates new NeevoConnection instance from given associative array
+   * @param array $opts Array of connection options, see Neevo->connect()
+   * @see Neevo->connect()
+   * @return NeevoConnection
+   */
+  public function create_connection(array $opts){
+    return new NeevoConnection($this, $this->driver(), $opts['username'], $opts['password'], $opts['host'], $opts['database'], $opts['encoding'], $opts['table_prefix']);
+  }
+
+
+  /**
+   * Uses given NeevoConnection instance
+   * @param NeevoConnection $connection
+   * @return Neevo
+   */
+  public function use_connection(NeevoConnection $connection){
+    $this->set_connection($connection);
+    return $this;
   }
 
 
@@ -127,51 +149,22 @@ class Neevo{
 
 
   /**
+   * Uses given Neevo SQL driver
+   * @param string $driver
+   * @return Neevo
+   */
+  public function use_driver($driver){
+    $this->set_driver($driver);
+    return $this;
+  }
+
+
+  /**
    * Returns Neevo Driver class
    * @return INeevoDriver
    */
   public function driver(){
     return $this->driver;
-  }
-
-
-  /**
-   * Sets connection resource
-   * @param resource $resource
-   * @return void
-   * @access private
-   */
-  public function set_resource($resource){
-    $this->resource = $resource;
-  }
-
-
-  /**
-   * Returns resource identifier
-   * @return resource
-   */
-  public function resource(){
-    return $this->resource;
-  }
-
-
-  /**
-   * Sets connection options
-   * @param array $opts
-   * @return void
-   * @access private
-   */
-  public function set_options(array $opts){
-    $this->options = $opts;
-  }
-
-
-  /**
-   * Returns table prefix
-   * @return string
-   */
-  public function prefix(){
-    return $this->connection()->prefix();
   }
 
 
@@ -331,24 +324,6 @@ class Neevo{
    */
   public function error($neevo_msg, $warning = false){
     return $this->driver()->error($neevo_msg, $warning);
-  }
-
-
-  /**
-   * Returns some info about connection as an array
-   * @return array
-   */
-  public function info(){
-    $info = $this->options;
-    unset($info['password']);
-    $info['queries'] = $this->queries();
-    $info['last'] = $this->last();
-    $info['table_prefix'] = $this->prefix();
-    $info['error_reporting'] = $this->error_reporting();
-    $info['memory_usage'] = $this->memory();
-    $info['version'] = $this->version(false);
-
-    return $info;
   }
 
 

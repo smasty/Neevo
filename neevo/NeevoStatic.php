@@ -58,17 +58,17 @@ class NeevoStatic {
   }
 
   /** Escapes whole array for use in SQL */
-  public static function escape_array(array $array, Neevo $neevo){
+  public static function escape_array(array $array, INeevoDriver $driver){
     foreach($array as &$value){
-       $value = is_numeric($value) ? $value : ( is_string($value) ? self::escape_string($value, $neevo) : ( is_array($value) ? self::escape_array($value) : $value ) );
+       $value = is_numeric($value) ? $value : ( is_string($value) ? self::escape_string($value, $driver) : ( is_array($value) ? self::escape_array($value) : $value ) );
     }
     return $array;
   }
 
   /** Escapes given string for use in SQL */
-  public static function escape_string($string, Neevo $neevo){
+  public static function escape_string($string, INeevoDriver $driver){
     if(get_magic_quotes_gpc()) $string = stripslashes($string);
-    $string = $neevo->driver()->escape_string($string);
+    $string = $driver->escape_string($string);
     return self::is_sql_func($string) ? self::quote_sql_func($string) : "'$string'";
   }
 

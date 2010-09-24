@@ -20,10 +20,10 @@
  */
 class NeevoConnection{
 
-  private $neevo, $driver, $username, $password, $host, $database, $encoding, $table_prefix;
+  private $neevo, $driver, $username, $password, $host, $database, $encoding, $table_prefix, $resource;
 
 
-  public function __construct(Neevo $neevo, NeevoDriver $driver, $user = null, $pswd = null, $host = null, $database = null, $encoding = null, $table_prefix = null){
+  public function __construct(Neevo $neevo, INeevoDriver $driver, $user = null, $pswd = null, $host = null, $database = null, $encoding = null, $table_prefix = null){
     $this->neevo = $neevo;
     $this->driver = $driver;
     $this->username = $user;
@@ -33,13 +33,14 @@ class NeevoConnection{
     $this->encoding = $encoding;
     $this->table_prefix = $table_prefix;
 
-    $this->driver()->connect($this->get_vars());
+    $resource = $this->driver()->connect($this->get_vars());
+    $this->set_resource($resource);
   }
 
 
   /**
    * Returns current NeevoDriver
-   * @return NeevoDriver
+   * @return INeevoDriver
    */
   private function driver(){
     return $this->driver;
@@ -52,13 +53,33 @@ class NeevoConnection{
    */
   public function get_vars(){
     $options = get_object_vars($this);
-    unset($options['neevo'], $options['driver']);
+    unset($options['neevo'], $options['driver'], $options['resource']);
     return $options;
   }
 
 
   public function prefix(){
     return $this->table_prefix;
+  }
+
+
+  /**
+   * Sets connection resource
+   * @param resource $resource
+   * @return void
+   */
+  public function set_resource($resource){
+    if(is_resource($resource))
+      $this->resource = $resource;
+  }
+
+
+  /**
+   * Returns resource identifier
+   * @return resource
+   */
+  public function resource(){
+    return $this->resource;
   }
 
 }

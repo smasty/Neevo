@@ -189,7 +189,7 @@ class NeevoQuery {
    */
   public function run($catch_error = false){
     $start = explode(" ", microtime());
-    $query = $this->neevo->driver()->query($this->build(), $this->neevo->resource());
+    $query = $this->neevo->driver()->query($this->build(), $this->neevo->connection()->resource());
     if(!$query){
       $this->neevo->error('Query failed', $catch_error);
       return false;
@@ -262,7 +262,7 @@ class NeevoQuery {
   public function insert_id(){
     if(!$this->performed) $this->run();
 
-    return $this->neevo->driver()->insert_id($this->neevo->resource());
+    return $this->neevo->driver()->insert_id($this->neevo->connection()->resource());
   }
 
 
@@ -284,22 +284,6 @@ class NeevoQuery {
     if(!$this->performed) $this->run();
 
     return $this->neevo->driver()->rows($this);
-  }
-
-
-  /**
-   * Returns some info about this Query as an array
-   * @return array Info about Query
-   */
-  public function info(){
-    $info = array(
-      'resource' => $this->neevo->resource(),
-      'query' => $this->dump(false, true),
-      'exec_time' => ($this->performed ? $this->time() : -1),
-      'rows' => ($this->performed ? $this->rows() : -1)
-    );
-    if($this->type == 'select') $info['query_resource'] = $this->resource;
-    return $info;
   }
 
 
