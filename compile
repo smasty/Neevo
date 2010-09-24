@@ -1,0 +1,345 @@
+#!/usr/bin/php
+<?php
+if(!$_SERVER['SHELL']) trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
+
+
+// Default file to process.
+define("DEFAULT_FILE", "neevo.php");
+
+// PHPDoc builder path. Use %CONFIG% placeholder.
+define("PHPDOC_PATH", "http://localhost/phpdoc/docbuilder/builder.php?setting_useconfig=%CONFIG%&interface=web&dataform=true");
+
+// PHPDoc default config.
+define("DEFAULT_PHPDOC_CONFIG", "neevo");
+
+// Known arguments
+$known_arguments = array("help", "rev+", "rev-", "doc", "min", "min+");
+
+
+
+if(count($argv) <= 1){
+  echo "\nError: No arguments passed.\n\n";
+  help();
+  exit;
+}
+
+// Check for unknow arguments
+
+// Filter out non-command argments
+foreach($argv as $arg)
+  preg_match("#^[a-z]+[\+-]?$#i", $arg) ? ( $arg !== basename(__FILE__) ? $args[] = $arg : 0 ) : 0;
+
+// Search for argument in known arguments
+foreach($args as $arg){
+  if(!in_array($arg, $known_arguments)){
+    echo "\nError: Unknown argument '$arg' passed.\n\n";
+    help();
+    exit;
+  }
+}
+
+if($argv[0] == basename(__FILE__))
+  unset ($argv[0]);
+
+echo "\n";
+
+foreach ($argv as $key => $value) {
+  $match = preg_match("#([0-9a-z-_]){1}\.php#i", $value);
+  if($match) $file = $value;
+}
+
+// Defined file does't exist, using default
+if(!file_exists($file)){
+  if($file!='') echo "File '$file' doesn't exist, default will be used\n";
+  $file = DEFAULT_FILE;
+  // Defined file exists
+}
+if(file_exists($file))
+  echo "Using file '$file'\n";
+
+
+
+// ===== ARGUMENTS
+
+// Show help end exit
+if(in_array('help', $argv)){
+  help();
+  exit;
+}
+
+if(in_array('rev+', $argv) && in_array('rev-', $argv))
+  echo "Error: Cannot use both 'rev+' and 'rev-' arguments.\nRevision number change skipped.\n";
+else{
+  // Increment Revision number
+  if(in_array('rev+', $argv))
+    echo rev_number(1, $file);
+
+  // Decrement Revision number
+  if(in_array('rev-', $argv))
+    echo rev_number(-1, $file);
+}
+
+// Generate PHPDoc
+if(in_array('doc', $argv)){
+  $k = array_search('doc', $argv);
+  $k = (int) $k + 1;
+  if(preg_match("#-([0-9a-z_-]+)#i", $argv[$k])){
+    $config = substr($argv[$k], 1);
+    echo "Using PHPDoc configuration '$config'\n";
+  }
+  else{
+    $config = DEFAULT_PHPDOC_CONFIG;
+    echo "Using default PHPDoc configuration '$config'\n";
+  }
+  echo phpdoc($config);
+}
+
+if(in_array('min', $argv) && in_array('min+', $argv))
+  echo "Error: Cannot use both 'min+' and 'min-' arguments.\nMinify skipped.\n";
+else{
+   // Minify file
+  if(in_array('min', $argv))
+    echo minify($file);
+
+  // Minify file and shorten variable names
+  if(in_array('min+', $argv))
+    echo minify($file);
+}
+echo "\n";
+
+
+/**
+ * Generates PHPDoc
+ * @return string
+ */
+function phpdoc($config){
+  recursive_remove_directory("./doc");
+  $path = str_replace("%CONFIG%", $config, PHPDOC_PATH);
+  $response = file_get_contents($path);
+  if(strstr($response, "Operation Completed"))
+    $response = "Success: PHPDoc generated";
+  else $response = "Error: PHPDoc generation failed";
+
+  return "$response\n";
+}
+
+
+/**
+ * Increments/decrements revision number
+ * @param <type> $i Increment by
+ * @param <type> $file File to search for REVISION constant
+ * @return <type> string
+ */
+function rev_number($i, $file){
+  $source = file_get_contents($file);
+  global $inc, $new_rev;
+  $inc = $i;
+  $newsource = preg_replace_callback("#const REVISION = (\d+);#", "rev_number_callback", $source);
+  $x = file_put_contents($file, $newsource);
+  $response = $x ? "Success: Revision number changed to $new_rev" : "Error: Revision number change failed";
+  return "$response\n";
+}
+
+
+/**
+ * Revision callback
+ * @param int $n Revison number
+ * @return string
+ */
+function rev_number_callback($n){
+  global $inc, $new_rev;
+  $res = $n[1]+$inc;
+  $new_rev = $res;
+  return "const REVISION = $res;";
+}
+
+
+/**
+ * Minifies source
+ * @param string $file Filename to minify
+ * @param bool $short_variables If true, variable names are shorted.
+ * @return string
+ */
+function minify($file, $short_variables = false){
+  $path = pathinfo($file);
+  $result_file = $path['dirname']."/".$path['filename'].".minified.".$path['extension'];
+  $source = str_replace("include dirname(__FILE__). \"", "include \".", file_get_contents($file));
+  $source = preg_replace_callback('~include "([^"]+)";~', 'include_file', $source);
+  $source = str_replace(array("<?php", "?>"), "", $source);
+  $source = "<?php\n$source\n?>";
+  $result = php_shrink($source, $short_variables);
+  $x = file_put_contents($result_file, $result);
+  //highlight_string($result);
+  $response =  $x ? "Success: Source minified" : "Error: Minification failed";
+  return "$response\n";
+}
+
+
+/**
+ * Prints help
+ * @return void
+ */
+function help(){
+echo "Usage: $ php ".basename(__FILE__)." [help] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
+
+  help        Displays help
+  rev+        Increments REVISION in <filename>
+  rev-        Decrements REVISION in <filename>
+  doc         Runs PHPDoc generator
+  -<config>   PHPDoc config file; if not set, default used
+  min         Minifies source code of <filename>
+  min+        + shorten var names.
+  <filename>  File to compile; if not set, default used
+
+";
+}
+
+
+/**
+ * Core minify functions (include_file, short_identifier and php_shrink) used in this
+ * script are written by Jakub Vrana (http://php.vrana.cz) and extracted from
+ * his open-soure "Compact MySQL management" - Adminer (http://adminer.org)
+ * released under Apache license 2.0.
+ */
+
+/**
+ * Include source from file
+ * @param string $match File to include
+ * @return string
+ * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
+ */
+function include_file($match) {
+  $file = file_get_contents($match[1]);
+  $token = end(token_get_all($file));
+  $php = (is_array($token) && in_array($token[0], array(T_CLOSE_TAG, T_INLINE_HTML)));
+  $file = "// FILE = ".basename($match[1]).$file;
+  return "?>\n$file" . ($php ? "<?php" : "");
+}
+
+
+/**
+ * Create short alpha identifier for number.
+ *
+ * Part of Adminer - "Compact MySQL management", http://adminer.org
+ * @param int $number
+ * @param string $chars Available chars
+ * @return string
+ * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
+ */
+function short_identifier($number, $chars) {
+  $return = '';
+  while ($number >= 0) {
+    $return .= $chars{$number % strlen($chars)};
+    $number = floor($number / strlen($chars)) - 1;
+  }
+  return $return;
+}
+
+/**
+ * Shrinks PHP code.
+ *
+ * Part of Adminer - "Compact MySQL management", http://adminer.org
+ * Based on http://latrine.dgx.cz/jak-zredukovat-php-skripty
+ * @param string $input Input PHP code
+ * @param bool $shorted If true, variable names are shorted.
+ * @return string
+ * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
+ */
+function php_shrink($input, $shorted) {
+  $special_variables = array_flip(array('$this', '$GLOBALS', '$_GET', '$_POST', '$_FILES', '$_COOKIE', '$_SESSION', '$_SERVER'));
+  $short_variables = array();
+  $shortening = $shorted;
+  $tokens = token_get_all($input);
+
+  foreach ($tokens as $i => $token) {
+    if ($token[0] === T_VARIABLE && !isset($special_variables[$token[1]])) {
+      $short_variables[$token[1]]++;
+    }
+  }
+
+  arsort($short_variables);
+  foreach (array_keys($short_variables) as $number => $key) {
+    $short_variables[$key] = short_identifier($number, implode("", range('a', 'z')) . '_' . implode("", range('A', 'Z'))); // could use also numbers and \x7f-\xff
+  }
+
+  $set = array_flip(preg_split('//', '!"#$&\'()*+,-./:;<=>?@[\]^`{|}'));
+  $space = '';
+  $output = '';
+  $in_echo = false;
+  $doc_comment = false; // include only first /**
+  for (reset($tokens); list($i, $token) = each($tokens); ) {
+    if (!is_array($token)) {
+      $token = array(0, $token);
+    }
+    if ($tokens[$i+2][0] === T_CLOSE_TAG && $tokens[$i+3][0] === T_INLINE_HTML && $tokens[$i+4][0] === T_OPEN_TAG
+      && strlen(addcslashes($tokens[$i+3][1], "'\\")) < strlen($tokens[$i+3][1]) + 3
+    ) {
+      $tokens[$i+2] = array(T_ECHO, 'echo');
+      $tokens[$i+3] = array(T_CONSTANT_ENCAPSED_STRING, "'" . addcslashes($tokens[$i+3][1], "'\\") . "'");
+      $tokens[$i+4] = array(0, ';');
+    }
+    if ($token[0] == T_COMMENT || $token[0] == T_WHITESPACE || ($token[0] == T_DOC_COMMENT && $doc_comment)) {
+      $space = "\n";
+    } else {
+      if ($token[0] == T_DOC_COMMENT) {
+        $doc_comment = true;
+      }
+      if ($token[0] == T_VAR) {
+        $shortening = false;
+      } elseif (!$shortening) {
+        if ($token[1] == ';') {
+          $shortening = $shorted;
+        }
+      } elseif ($token[0] == T_ECHO) {
+        $in_echo = true;
+      } elseif ($token[1] == ';' && $in_echo) {
+        if ($tokens[$i+1][0] === T_WHITESPACE && $tokens[$i+2][0] === T_ECHO) {
+          next($tokens);
+          $i++;
+        }
+        if ($tokens[$i+1][0] === T_ECHO) {
+          // join two consecutive echos
+          next($tokens);
+          $token[1] = ','; // '.' would conflict with "a".1+2 and would use more memory //! remove ',' and "," but not $var","
+        } else {
+          $in_echo = false;
+        }
+      } elseif ($token[0] === T_VARIABLE && !isset($special_variables[$token[1]])) {
+        $token[1] = '$' . $short_variables[$token[1]];
+      }
+      if (isset($set[substr($output, -1)]) || isset($set[$token[1]{0}])) {
+        $space = '';
+      }
+      $output .= $space . $token[1];
+      $space = '';
+    }
+  }
+  return $output;
+}
+
+function recursive_remove_directory($directory, $empty = false){
+  if(substr($directory,-1) == '/')
+    $directory = substr($directory,0,-1);
+  if(!file_exists($directory) || !is_dir($directory))
+    return false;
+  elseif(is_readable($directory)){
+    $handle = opendir($directory);
+    while (FALSE !== ($item = readdir($handle))){
+      if($item != '.' && $item != '..'){
+        $path = $directory.'/'.$item;
+        if(is_dir($path)) 
+          recursive_remove_directory($path);
+        else
+          unlink($path);
+      }
+    }
+    closedir($handle);
+    if($empty == FALSE){
+      if(!rmdir($directory)){
+        return FALSE;
+      }
+    }
+  }
+  return TRUE;
+}
+?>
