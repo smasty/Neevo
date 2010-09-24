@@ -73,17 +73,11 @@ interface INeevoDriver {
 
 
   /**
-   * If error-reporting is turned on, handle errors following current error mode:
-   * <ul><li>E_NONE: does nothing.</li>
-   * <li>E_CATCH: handles the error by defined error-handler.</li>
-   * <li>E_WARNING: handles the error if $warning==true, otherwise throws new NeevoException.</li>
-   * <li>E_STRICT throws new NeevoException.</li></ul>
+   * Returns error message with driver-specific additions
    * @param string $neevo_msg Error message
-   * @param bool $warning This error is warning only
-   * @throws NeevoException
-   * @return FALSE
+   * @return string
    */
-  public function error($neevo_msg, $warning = false);
+  public function error($neevo_msg);
 
 
   /**

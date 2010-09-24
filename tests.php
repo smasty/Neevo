@@ -35,7 +35,7 @@ include "neevo.php";
 $sql = new Neevo('MySQL');
 
 // Set Neevo error reporting
-$sql->set_error_reporting(Neevo::E_STRICT);
+$sql->set_error_reporting(Neevo::E_HANDLE);
 
 // Create connection to database server
 $sql->connect(array(
@@ -50,7 +50,7 @@ $sql->connect(array(
 
 
 // Using  "WHERE col IN (val1, val2, ...)" construction
-$s = $sql->select("client.id", 'neevo_demo.client')
+$s = $sql->select("client.sid", 'neevo_demo.client')
          ->where("md5(client.id)", null, "or")
          ->where("name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))
          ->limit(5)->dump()->fetch();
@@ -92,26 +92,40 @@ echo "LAST_INSERT_ID: $insert_id";
 
 
 // UPDATE QUERY
-$update = $sql->update('client', $update_data)->where('name', 'John-Doe')->where('id !=', 101)->order('id DESC');
+$update = $sql->update('client', $update_data)
+              ->where('name', 'John-Doe')
+              ->where('id !=', 101)
+              ->order('id DESC');
+
 $update_resource = $update->run();
 
 $update->dump();
 
 // DELETE QUERY
-$delete = $sql->delete('client')->where('mail', 'john@doe.name')->order('id DESC')->limit(1);
+$delete = $sql->delete('client')
+              ->where('mail', 'john@doe.name')
+              ->order('id DESC')
+              ->limit(1);
+
 $delete_resource = $delete->run();
 
 $delete->dump();
 
 
 // SELECT ONE VALUE
-$select_one = $sql->select('name', 'client')->where('id', 101);
+$select_one = $sql->select('name', 'client')
+                  ->where('id', 101);
+
 $select_one->dump();
 
 echo " Result: ". $select_one->fetch() ."\n\n";
 
 // SELECT QUERY
-$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')->where('name !=', 'Fuller Strickland', 'OR')->where('name', 'John Doe')->order('id DESC', 'name ASC')->limit(10);
+$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')
+              ->where('name !=', 'Fuller Strickland', 'OR')
+              ->where('name', 'John Doe')
+              ->order('id DESC', 'name ASC')
+              ->limit(10);
 
 // Seek to 3rd row of resource (counting from zero)
 $select->seek(2);

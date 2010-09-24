@@ -101,27 +101,19 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
 
 
  /**
-   * If error-reporting is turned on, handle errors following current error mode:
-   * <ul><li>E_NONE: does nothing.</li>
-   * <li>E_CATCH: handles the error by defined error-handler.</li>
-   * <li>E_WARNING: handles the error if $catch==true, otherwise throws new NeevoException.</li>
-   * <li>E_STRICT throws new NeevoException.</li></ul>
+   * Returns error message with driver-specific additions
    * @param string $neevo_msg Error message
-   * @param bool $warning This error is warning only
-   * @throws NeevoException
-   * @return false
+   * @return string
    */
-  public function error($neevo_msg, $warning = false){
+  public function error($neevo_msg){
     $mysql_msg = mysql_error();
     $mysql_msg = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $mysql_msg);
-    $msg = "$neevo_msg. $mysql_msg";
-    $mode = $this->neevo->error_reporting();
-    if($mode != Neevo::E_NONE){
-      if(($mode != Neevo::E_STRICT && $catch) || $mode == Neevo::E_CATCH){
-        call_user_func($this->neevo->error_handler(), $msg);
-      }
-      else throw new NeevoException($msg);
-    } return false;
+
+    $msg = $neevo_msg.".";
+    if($mysql_msg)
+      $msg .= " ".$mysql_msg;
+
+    return $msg;
   }
 
 

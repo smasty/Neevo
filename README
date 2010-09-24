@@ -1,5 +1,7 @@
 Neevo - Tiny open-source database abstraction layer for PHP
 
+WARNING: THIS IS A  DEVELOPMENT BRANCH! USE AT YOUR OWN RISK!
+=============================================================
 
 Info
 ====
@@ -51,11 +53,11 @@ Features
  - "Undo" - Removes some piece from already built queries
    (e.g. "2nd WHERE condition" or "column `email`")
  - Multi-level error-reporting system (based on Exceptions):
-    - E_NONE:    No errors and warnings are reported.
-    - E_CATCH:   All errors and warnings are handled by defined error handler.
-    - E_WARNING: Warnings are handled, errros thrown only.
-    - E_STRICT:  All errors and warnings are thrown only.
- - Ability to use your own error handler function.
+    - E_NONE:   No errors are reported.
+    - E_HANDLE: All errors are made to Exceptions and then sent to defined
+                (or default) error handler. (Exceptions are not thrown!)
+    - E_STRICT: All errors are thrown as Exceptions.
+ - Ability to use your own error handler.
  - One-file-only minified version with stripped comments and whitespace
     (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
 
@@ -73,7 +75,7 @@ Todo
 
  - PostgreSQL driver
  - SQLite driver
- - Show database and table structure
+ - Show database and table structure (probably not)
  - MySQLi driver
 
 

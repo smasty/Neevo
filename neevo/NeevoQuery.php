@@ -184,14 +184,13 @@ class NeevoQuery {
 
   /**
    * Performs Query
-   * @param bool $catch_error Catch exception by default if mode is not E_STRICT
    * @return resource|NeevoQuery Query resource on SELECT queries or NeevoQuery object
    */
-  public function run($catch_error = false){
+  public function run(){
     $start = explode(" ", microtime());
     $query = $this->neevo->driver()->query($this->build(), $this->neevo->connection()->resource());
     if(!$query){
-      $this->neevo->error('Query failed', $catch_error);
+      $this->neevo->error('Query failed');
       return false;
     }
     else{
@@ -225,6 +224,7 @@ class NeevoQuery {
    * String, if only one column value is fetched at all.
    */
   public function fetch($fetch_type = null){
+    $rows = null;
     if($this->type != 'select') $this->neevo->error('Cannot fetch on this kind of query');
 
     $resource = $this->performed ? $this->resource : $this->run();
@@ -335,7 +335,7 @@ class NeevoQuery {
         $str = true;
         break;
       default:
-        $this->neevo->error("Undo failed: No such Query part '$sql_part' supported for undo()", true);
+        $this->neevo->error("Undo failed: No such Query part '$sql_part' supported for undo()");
         break;
     }
 
@@ -354,8 +354,10 @@ class NeevoQuery {
           }
           $this->$part = $loop;
         }
-      } else $this->neevo->error("Undo failed: No such Query part '$sql_part' for this kind of Query", true);
+      } else $this->neevo->error("Undo failed: No such Query part '$sql_part' for this kind of Query");
     }
+    $this->performed = null;
+    $this->resource = null;
     return $this;
   }
 

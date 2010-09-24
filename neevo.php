@@ -33,14 +33,13 @@ class Neevo{
   private $options = array();
 
   // Error-reporting levels
-  const E_NONE    = 1;
-  const E_CATCH   = 2;
-  const E_WARNING = 3;
-  const E_STRICT  = 4;
+  const E_NONE    = 11;
+  const E_HANDLE  = 12;
+  const E_STRICT  = 13;
 
   // Neevo version
   const VERSION = "0.3dev";
-  const REVISION = 100;
+  const REVISION = 101;
 
   // Fetch format
   const MULTIPLE = 21;
@@ -169,56 +168,6 @@ class Neevo{
 
 
   /**
-   * Sets error-reporting level
-   * @param int $value Error-reporting level.
-   * Possible values:
-   * <ul><li>Neevo::E_NONE: Turns Neevo error-reporting off</li>
-   * <li>Neevo::E_CATCH: Catches all Neevo exceptions by defined handler</li>
-   * <li>Neevo::E_WARNING: Catches only Neevo warnings</li>
-   * <li>Neevo::E_STRICT: Catches no Neevo exceptions</li></ul>
-   * @return void
-   */
-  public function set_error_reporting($value){
-    $this->error_reporting = $value;
-    if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
-  }
-
-
-  /**
-   * Returns error-reporting level
-   * @return int
-   */
-  public function error_reporting(){
-    if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
-    return $this->error_reporting;
-  }
-
-
-  /**
-   * Sets error-handler function
-   * @param string $handler_function Name of error-handler function
-   * @return void
-   */
-  public function set_error_handler($handler_function){
-    if(function_exists($handler_function))
-      $this->error_handler = $handler_function;
-    else $this->error_handler = array('Neevo', 'default_error_handler');
-  }
-
-
-  /**
-   * Returns error-handler function name
-   * @param string $handler_function Name of error-handler function
-   * @return string
-   */
-  public function error_handler(){
-    if(!function_exists($this->error_handler))
-      $this->error_handler = array('Neevo', 'default_error_handler');
-    return $this->error_handler;
-  }
-
-
-  /**
    * Sets last executed query
    * @param NeevoQuery $last Last executed query
    * @return void
@@ -315,26 +264,102 @@ class Neevo{
 
 
   /**
-   * If error_reporting is turned on, throws NeevoException available to catch.
-
-   * @param string $neevo_msg Error message
-   * @param bool $warning This error is warning only
-   * @return FALSE
-   * @access private
+   * Sets error-reporting level
+   * @param int $value Error-reporting level.
+   * Possible values:
+   * <ul><li>Neevo::E_NONE: Turns Neevo error-reporting off</li>
+   * <li>Neevo::E_HANDLE: Neevo exceptions are sent to defined handler</li>
+   * <li>Neevo::E_STRICT: Throws all Neevo exceptions</li></ul>
+   * @return void
    */
-  public function error($neevo_msg, $warning = false){
-    return $this->driver()->error($neevo_msg, $warning);
+  public function set_error_reporting($value){
+    $this->error_reporting = $value;
+    if(!isset($this->error_reporting)) $this->error_reporting = self::E_HANDLE;
+  }
+
+
+  /**
+   * Returns error-reporting level
+   * @return int
+   */
+  public function error_reporting(){
+    if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
+    return $this->error_reporting;
+  }
+
+
+  /**
+   * Sets error-handler function
+   * @param string $handler_function Name of error-handler function
+   * @return void
+   */
+  public function set_error_handler($handler_function){
+    if(function_exists($handler_function))
+      $this->error_handler = $handler_function;
+    else $this->error_handler = array('Neevo', 'default_error_handler');
+  }
+
+
+  /**
+   * Returns error-handler function name
+   * @param string $handler_function Name of error-handler function
+   * @return string
+   */
+  public function error_handler(){
+    $func = $this->error_handler;
+    if( (is_array($func) && !method_exists($func[0], $func[1]) ) || ( !is_array($func) && !function_exists($func) ) )
+      $this->error_handler = array('Neevo', 'default_error_handler');
+    return $this->error_handler;
+  }
+
+
+  /**
+   * If error_reporting is E_STRICT, throws NeevoException available to catch.
+   * Otherwise, sends NeevoException instance to defined handler.
+   * @param string $neevo_msg Error message
+   * @return false
+   * @throws NeevoException
+   */
+  public function error($neevo_msg){
+    $level = $this->error_reporting();
+
+    if($level != Neevo::E_NONE){
+      $msg = $this->driver()->error($neevo_msg);
+      $exception = new NeevoException($msg);
+
+      if($level == Neevo::E_HANDLE)
+        call_user_func ($this->error_handler(), $exception);
+      if($level == Neevo::E_STRICT)
+        throw $exception;
+    }
+
+    return false;
   }
 
 
   /**
    * Neevo's default error handler function
-   * @param string $msg Error message
-   * @return void
-   * @access private
+   * @param NeevoException $exception
+   * return void
    */
-  public static function default_error_handler($msg){
-    echo "<b>Neevo error:</b> $msg.\n";
+  public static function default_error_handler(NeevoException $exception){
+    $message = $exception->getMessage();
+    $trace = $exception->getTrace();
+    if(!empty($trace)){
+      $last = $trace[count($trace)-1];
+      $line = $last['line'];
+      $path = $last['file'];
+      $act = "occured";
+    }
+    else{
+      $line = $exception->getLine();
+      $path = $exception->getFile();
+      $act = "thrown";
+    }
+    $file = basename($path);
+    $path = str_replace($file, "<strong>$file</strong>", $path);
+
+    echo "<p><strong>Neevo exception</strong> $act in <em>$path</em> on <strong>line $line</strong>: $message</p>\n";
   }
 
 
