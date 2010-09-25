@@ -162,8 +162,8 @@ class NeevoDriver{
     foreach($array as &$value){
        $value = is_numeric($value)
          ? $value : ( is_string($value)
-           ? $this->_escape_string($value) : ( is_array($value) ? $this->_escape_array($value)
-           : $value ) );
+           ? $this->_escape_string($value) : ( is_array($value)
+             ? $this->_escape_array($value) : $value ) );
     }
     return $array;
   }

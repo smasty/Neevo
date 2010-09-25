@@ -53,17 +53,17 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
    */
   public function connect(array $opts){
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
-    if(!is_resource($connection)) $this->neevo->error("Connection to host '".$opts['host']."' failed");
+    if(!is_resource($connection)) $this->neevo()->error("Connection to host '".$opts['host']."' failed");
     if($opts['database']){
       $db = mysql_select_db($opts['database']);
-      if(!$db) $this->neevo->error("Could not select database '{$opts['database']}'");
+      if(!$db) $this->neevo()->error("Could not select database '{$opts['database']}'");
     }
 
     if($opts['encoding'] && is_resource($connection)){
       if (function_exists('mysql_set_charset'))
 				$ok = @mysql_set_charset($opts['encoding'], $connection);
 			if (!$ok)
-				$this->neevo->sql("SET NAMES ".$opts['encoding'])->run();
+				$this->neevo()->sql("SET NAMES ".$opts['encoding'])->run();
     }
     return $connection;
   }

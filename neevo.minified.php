@@ -214,8 +214,8 @@ Neevo{private$connection,$last,$queries,$error_reporting,$driver,$error_handler;
 E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
-VERSION="0.3dev";const
-REVISION=107;const
+VERSION="0.5";const
+REVISION=108;const
 MULTIPLE=21;public
 function
 __construct($driver){if(!$driver)throw
