@@ -192,7 +192,7 @@ function minify($file, $short_variables = false){
   $source = str_replace("include_once dirname(__FILE__). '", "include '.", $file);
   $source = preg_replace_callback("~include '([^']+)';~", 'include_file', $source);
   $source = str_replace(array("<?php", "?>"), "", $source);
-  $source = "<?php\n$source\n?>";
+  $source = "<?php\n$source\n";
   $result = php_shrink($source, $short_variables);
   $x = file_put_contents($result_file, $result);
   //highlight_string($result);exit;
