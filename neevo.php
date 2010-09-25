@@ -39,7 +39,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.3dev";
-  const REVISION = 105;
+  const REVISION = 106;
 
   // Fetch format
   const MULTIPLE = 21;

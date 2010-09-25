@@ -215,7 +215,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.3dev";const
-REVISION=105;const
+REVISION=106;const
 MULTIPLE=21;public
 function
 __construct($driver){if(!$driver)throw
@@ -244,7 +244,7 @@ use_driver($driver){$this->set_driver($driver);return$this;}public
 function
 driver(){return$this->driver;}private
 function
-is_driver($class){return(class_exists($class)&&in_array("INeevoDriver",class_implements($class))&&in_array("NeevoDriver",class_parents($class)));}public
+is_driver($class){return(class_exists($class,false)&&in_array("INeevoDriver",class_implements($class,false))&&in_array("NeevoDriver",class_parents($class,false)));}public
 function
 set_last(NeevoQuery$last){$this->last=$last;}public
 function
@@ -288,4 +288,4 @@ function
 version($string=true){if($string)$return="Neevo ".self::VERSION." (revision ".self::REVISION.").";else$return=array('version'=>self::VERSION,'revision'=>self::REVISION);return$return;}}class
 NeevoException
 extends
-Exception{};?>
+Exception{};
