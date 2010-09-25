@@ -215,7 +215,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.3dev";const
-REVISION=106;const
+REVISION=107;const
 MULTIPLE=21;public
 function
 __construct($driver){if(!$driver)throw
