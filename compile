@@ -12,6 +12,9 @@ define("PHPDOC_PATH", "http://localhost/phpdoc/docbuilder/builder.php?setting_us
 // PHPDoc default config.
 define("DEFAULT_PHPDOC_CONFIG", "neevo");
 
+define("LAST_INCLUDE", "include_once dirname(__FILE__). '/neevo/INeevoDriver.php';");
+define("DRIVERS_PATH", "/neevo/drivers/");
+
 // Known arguments
 $known_arguments = array("help", "rev+", "rev-", "doc", "min", "min+");
 
@@ -25,7 +28,7 @@ if(count($argv) <= 1){
 
 // Check for unknow arguments
 
-// Filter out non-command argments
+// Filter out non-command arguments
 foreach($argv as $arg)
   preg_match("#^[a-z]+[\+-]?$#i", $arg) ? ( $arg !== basename(__FILE__) ? $args[] = $arg : 0 ) : 0;
 
@@ -154,6 +157,28 @@ function rev_number_callback($n){
 }
 
 
+function include_drivers($file){
+  $content = str_replace("
+      @include_once dirname(__FILE__) . '/neevo/drivers/'.strtolower(\$driver).'.php';
+
+      if(!\$this->is_driver(\$class))
+  ", "\n", file_get_contents($file));
+
+  $content = str_replace(LAST_INCLUDE, list_drivers($file), $content);
+  return $content;
+}
+
+
+function list_drivers($file){
+  $pattern = glob(".".DRIVERS_PATH."*.php");
+  sort($pattern);
+  foreach($pattern as $filename){
+    $list .= "\ninclude_once dirname(__FILE__). '".DRIVERS_PATH.basename($filename)."';";
+  }
+  return LAST_INCLUDE.$list;
+}
+
+
 /**
  * Minifies source
  * @param string $file Filename to minify
@@ -163,13 +188,14 @@ function rev_number_callback($n){
 function minify($file, $short_variables = false){
   $path = pathinfo($file);
   $result_file = $path['dirname']."/".$path['filename'].".minified.".$path['extension'];
-  $source = str_replace("include dirname(__FILE__). \"", "include \".", file_get_contents($file));
-  $source = preg_replace_callback('~include "([^"]+)";~', 'include_file', $source);
+  $file = include_drivers($file);
+  $source = str_replace("include_once dirname(__FILE__). '", "include '.", $file);
+  $source = preg_replace_callback("~include '([^']+)';~", 'include_file', $source);
   $source = str_replace(array("<?php", "?>"), "", $source);
   $source = "<?php\n$source\n?>";
   $result = php_shrink($source, $short_variables);
   $x = file_put_contents($result_file, $result);
-  //highlight_string($result);
+  //highlight_string($result);exit;
   $response =  $x ? "Success: Source minified" : "Error: Minification failed";
   return "$response\n";
 }
