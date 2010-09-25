@@ -20,8 +20,8 @@
  */
 class NeevoQuery {
 
-  public $table, $type, $limit, $offset, $neevo, $resource, $time, $sql, $performed;
-  public $where, $order, $columns, $data = array();
+  private  $table, $type, $limit, $offset, $neevo, $resource, $time, $sql, $performed;
+  private  $where, $order, $columns, $data = array();
 
   private static $highlight_colors = array(
     'columns'    => '#00f',
@@ -61,7 +61,7 @@ class NeevoQuery {
 
 
   /**
-   * Returns wxecution time of Query
+   * Returns execution time of Query
    * @return int
    */
   public function time(){
@@ -124,6 +124,116 @@ class NeevoQuery {
     return $this;
   }
 
+  
+  /**
+   * Returns true if query was performed
+   * @return bool
+   */
+  public function performed(){
+    return $this->performed;
+  }
+
+
+  /**
+   * Returns Neevo instance
+   * @return Neevo
+   */
+  public function neevo(){
+    return $this->neevo;
+  }
+
+
+  /**
+   * Returns Query resource
+   * @return resource
+   */
+  public function resource(){
+    return $this->resource;
+  }
+
+
+  /**
+   * Returns table name
+   * @return string
+   */
+  public function get_table(){
+    return $this->table;
+  }
+
+
+  /**
+   * Returns Query type
+   * @return string
+   */
+  public function get_type(){
+    return $this->type;
+  }
+
+
+  /**
+   * Returns Query LIMIT fraction
+   * @return int
+   */
+  public function get_limit(){
+    return $this->limit;
+  }
+
+
+  /**
+   * Returns Query OFFSET fraction
+   * @return int
+   */
+  public function get_offset(){
+    return $this->offset;
+  }
+
+
+  /**
+   * Returns whole query code for direct queries (type=sql)
+   * @return string
+   */
+  public function get_sql(){
+    return $this->sql;
+  }
+
+
+  /**
+   * Returns Query WHERE fraction
+   * @return array
+   */
+  public function get_where(){
+    return $this->where;
+  }
+
+
+  /**
+   * Returns Query ORDER BY fraction
+   * @return array
+   */
+  public function get_order(){
+    return $this->order;
+  }
+
+
+  /**
+   * Returns Query columns fraction for SELECT queries ([SELECT] col1, col2, ...)
+   * @return array
+   */
+  public function get_cols(){
+    return $this->columns;
+  }
+
+
+  /**
+   * Returns Query values fraction for INSERT/UPDATE queries
+   * ([INSERT INTO] (col1,, col2, ...) VALUES (val1, val2, ...) or
+   *  [UPDATE tbl] SET col1 = val1,  col2 = val2, ...)
+   * @return array
+   */
+  public function get_data(){
+    return $this->data;
+  }
+
 
   /**
    * Sets WHERE condition for Query
@@ -175,7 +285,7 @@ class NeevoQuery {
    */
   public function limit($limit, $offset = null){
     $this->limit = $limit;
-    if(isset($offset) && $this->type == 'select') $this->offset = $offset;
+    if(isset($offset) && $this->get_type() == 'select') $this->offset = $offset;
     return $this;
   }
 
@@ -199,21 +309,21 @@ class NeevoQuery {
    */
   public function run(){
     $start = explode(" ", microtime());
-    $query = $this->neevo->driver()->query($this->build(), $this->neevo->connection()->resource());
+    $query = $this->neevo()->driver()->query($this->build(), $this->neevo()->connection()->resource());
     if(!$query){
-      $this->neevo->error('Query failed');
+      $this->neevo()->error('Query failed');
       return false;
     }
     else{
-      $this->neevo->increment_queries();
-      $this->neevo->set_last($this);
+      $this->neevo()->increment_queries();
+      $this->neevo()->set_last($this);
 
       $end = explode(" ", microtime());
       $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
       $this->set_time($time);
 
       $this->performed = true;
-      if($this->type == 'select'){
+      if($this->get_type() == 'select'){
         $this->resource = $query;
         return $query;
       }
@@ -236,20 +346,20 @@ class NeevoQuery {
    */
   public function fetch($fetch_type = null){
     $rows = null;
-    if($this->type != 'select') $this->neevo->error('Cannot fetch on this kind of query');
+    if($this->get_type() != 'select') $this->neevo()->error('Cannot fetch on this kind of query');
 
-    $resource = $this->performed ? $this->resource : $this->run();
+    $resource = $this->performed() ? $this->resource() : $this->run();
 
-    while($tmp_rows = $this->neevo->driver()->fetch($resource))
+    while($tmp_rows = $this->neevo()->driver()->fetch($resource))
       $rows[] = (count($tmp_rows) == 1) ? $tmp_rows[max(array_keys($tmp_rows))] : $tmp_rows;
 
-    $this->neevo->driver()->free($resource);
+    $this->neevo()->driver()->free($resource);
 
     if(count($rows) == 1 && $fetch_type != Neevo::MULTIPLE)
       $rows = $rows[0];
 
     if(!count($rows) && is_array($rows)) return false; // Empty
-    return $resource ? $rows : $this->neevo->error("Fetching result data failed");
+    return $resource ? $rows : $this->neevo()->error("Fetching result data failed");
   }
 
 
@@ -259,10 +369,10 @@ class NeevoQuery {
    * @return bool
    */
   public function seek($row_number){
-    if(!$this->performed) $this->run();
+    if(!$this->performed()) $this->run();
 
-    $seek = $this->neevo->driver()->seek($this->resource, $row_number);
-    return $seek ? $seek : $this->neevo->error("Cannot seek to row $row_number");
+    $seek = $this->neevo()->driver()->seek($this->resource(), $row_number);
+    return $seek ? $seek : $this->neevo()->error("Cannot seek to row $row_number");
   }
 
 
@@ -271,9 +381,9 @@ class NeevoQuery {
    * @return int
    */
   public function insert_id(){
-    if(!$this->performed) $this->run();
+    if(!$this->performed()) $this->run();
 
-    return $this->neevo->driver()->insert_id($this->neevo->connection()->resource());
+    return $this->neevo()->driver()->insert_id($this->neevo()->connection()->resource());
   }
 
 
@@ -282,7 +392,7 @@ class NeevoQuery {
    * @return NeevoQuery
    */
   public function rand(){
-    $this->neevo->driver()->rand($this);
+    $this->neevo()->driver()->rand($this);
     return $this;
   }
 
@@ -292,9 +402,9 @@ class NeevoQuery {
    * @return int|FALSE Number of rows (int) or FALSE
    */
   public function rows(){
-    if(!$this->performed) $this->run();
+    if(!$this->performed()) $this->run();
 
-    return $this->neevo->driver()->rows($this);
+    return $this->neevo()->driver()->rows($this);
   }
 
 
@@ -346,7 +456,7 @@ class NeevoQuery {
         $str = true;
         break;
       default:
-        $this->neevo->error("Undo failed: No such Query part '$sql_part' supported for undo()");
+        $this->neevo()->error("Undo failed: No such Query part '$sql_part' supported for undo()");
         break;
     }
 
@@ -365,7 +475,7 @@ class NeevoQuery {
           }
           $this->$part = $loop;
         }
-      } else $this->neevo->error("Undo failed: No such Query part '$sql_part' for this kind of Query");
+      } else $this->neevo()->error("Undo failed: No such Query part '$sql_part' for this kind of Query");
     }
     $this->performed = null;
     $this->resource = null;
@@ -380,7 +490,7 @@ class NeevoQuery {
    */
   public function build(){
 
-    return $this->neevo->driver()->build($this);
+    return $this->neevo()->driver()->build($this);
 
   }
 

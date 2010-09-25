@@ -14,13 +14,14 @@
  *
  */
 
-include dirname(__FILE__). "/neevo/NeevoStatic.php";
-include dirname(__FILE__). "/neevo/NeevoQuery.php";
-include dirname(__FILE__). "/neevo/NeevoDriver.php";
-include dirname(__FILE__). "/neevo/NeevoConnection.php";
-include dirname(__FILE__). "/neevo/INeevoDriver.php";
+if(version_compare(PHP_VERSION, '5.1.0', '<')){
+	throw new Exception('Neevo needs PHP 5.1.0 or newer.');
+}
 
-include dirname(__FILE__). "/neevo/NeevoDriverMySQL.php";
+include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
+include_once dirname(__FILE__). '/neevo/NeevoQuery.php';
+include_once dirname(__FILE__). '/neevo/NeevoDriver.php';
+include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
 
 /**
  * Main Neevo layer class
@@ -29,8 +30,7 @@ include dirname(__FILE__). "/neevo/NeevoDriverMySQL.php";
 class Neevo{
 
   // Fields
-  private $connection, $last, $table_prefix, $queries, $error_reporting, $driver, $error_handler;
-  private $options = array();
+  private $connection, $last, $queries, $error_reporting, $driver, $error_handler;
 
   // Error-reporting levels
   const E_NONE    = 11;
@@ -39,7 +39,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.3dev";
-  const REVISION = 103;
+  const REVISION = 104;
 
   // Fetch format
   const MULTIPLE = 21;
@@ -49,9 +49,10 @@ class Neevo{
    * Neevo
    * @param string $driver Name of driver to use
    * @return void
+   * @throws NeevoException
    */
-  public function __construct($driver = false){
-    if(!$driver) throw new NeevoException("Driver not set.");
+  public function __construct($driver){
+    if(!$driver) throw new NeevoException("Driver not defined.");
     $this->set_driver($driver);
   }
 
@@ -122,7 +123,7 @@ class Neevo{
    * Sets Neevo Connection to use
    * @param NeevoConnection $connection Instance to use
    */
-  public function set_connection(NeevoConnection $connection){
+  private function set_connection(NeevoConnection $connection){
     $this->connection = $connection;
   }
 
@@ -130,20 +131,20 @@ class Neevo{
   /**
    * Sets Neevo SQL driver to use
    * @param string $driver Driver name
+   * @throws NeevoException
    * @return void
-   * @access private
    */
   private function set_driver($driver){
-    if(!$driver) throw new NeevoException("Driver not set.");
-    switch (strtolower($driver)) {
-      case "mysql":
-        $this->driver = new NeevoDriverMySQL($this);
-        break;
+    $class = "NeevoDriver$driver";
 
-      default:
-        throw new NeevoException("Driver $driver not supported.");
-        break;
+    if(!$this->is_driver($class)){
+      @include_once dirname(__FILE__) . '/neevo/drivers/'.strtolower($driver).'.php';
+
+      if(!$this->is_driver($class))
+        throw new NeevoException("Unable to create instance of Neevo driver '$driver' - 	corresponding class not found or not matching criteria.");
     }
+
+    $this->driver = new $class($this);
   }
 
 
@@ -164,6 +165,11 @@ class Neevo{
    */
   public function driver(){
     return $this->driver;
+  }
+
+
+  private function is_driver($class){
+    return (class_exists($class) && in_array("INeevoDriver", class_implements($class)) && in_array("NeevoDriver", class_parents($class)));
   }
 
 

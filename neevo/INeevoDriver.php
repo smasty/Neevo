@@ -20,9 +20,6 @@
  */
 interface INeevoDriver {
 
-  /* @var Neevo $neevo Reference to main Neevo object
-  private $neevo; */
-
 
   /**
    * If driver extension is loaded, sets Neevo reference, otherwise throw exception
@@ -30,7 +27,7 @@ interface INeevoDriver {
    * @throws NeevoException
    * @return void
    */
-  public function  __construct($neevo);
+  public function  __construct(Neevo $neevo);
 
   /**
    * Connects to database server, selects database and sets encoding (if defined)
@@ -142,5 +139,12 @@ interface INeevoDriver {
    * @return array
    */
   public function get_quotes();
+
+
+  /**
+   * Return Neevo class instance
+   * @return Neevo
+   */
+  public function neevo();
 }
 ?>

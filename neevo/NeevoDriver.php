@@ -27,8 +27,8 @@ class NeevoDriver{
    * @return string
    */
   protected function build_tablename(NeevoQuery $query){
-    $pieces = explode(".", $query->table);
-    $prefix = $query->neevo->connection()->prefix();
+    $pieces = explode(".", $query->get_table());
+    $prefix = $query->neevo()->connection()->prefix();
     if(isset($pieces[1]))
       return $this->col_quotes[0] .$pieces[0] .$this->col_quotes[1] ."." .
              $this->col_quotes[0] .$prefix .$pieces[1] .$this->col_quotes[1];
@@ -43,10 +43,10 @@ class NeevoDriver{
    * @return string
    */
   protected function build_where(NeevoQuery $query){
-    $prefix = $query->neevo->connection()->prefix();
+    $prefix = $query->neevo()->connection()->prefix();
     $in_construct = false;
 
-    foreach ($query->where as $where) {
+    foreach ($query->get_where() as $where) {
       if(is_array($where[2])){ // WHERE col IN(...)
         $where[2] = "(" .join(", ", $this->_escape_array($where[2])) .")";
         $in_construct = true;
@@ -81,7 +81,7 @@ class NeevoDriver{
    * @return string
    */
   protected function build_insert_data(NeevoQuery $query){
-    foreach($this->_escape_array($query->data) as $col => $value){
+    foreach($this->_escape_array($query->get_data()) as $col => $value){
       $cols[] = $this->col_quotes[0] .$col .$this->col_quotes[1];
       $values[] = $value;
     }
@@ -95,7 +95,7 @@ class NeevoDriver{
    * @return string
    */
   protected function build_update_data(NeevoQuery $query){
-    foreach($this->_escape_array($query->data) as $col => $value){
+    foreach($this->_escape_array($query->get_data()) as $col => $value){
       $update[] = $this->col_quotes[0] .$col .$this->col_quotes[1] ."=" .$value;
     }
     return " SET " .join(', ', $update);
@@ -108,7 +108,7 @@ class NeevoDriver{
    * @return string
    */
   protected function build_order(NeevoQuery $query){
-    foreach ($query->order as $in_order) {
+    foreach ($query->get_order() as $in_order) {
       $in_order[0] = ($this->_is_sql_func($in_order[0]))
         ? $in_order[0] : $this->col_quotes[0] .$in_order[0] .$this->col_quotes[1];
       $orders[] = join(' ', $in_order);
@@ -123,8 +123,8 @@ class NeevoDriver{
    * @return string
    */
   protected function build_select_cols(NeevoQuery $query){
-    $prefix = $query->neevo->connection()->prefix();
-    foreach ($query->columns as $col) { // For each col
+    $prefix = $query->neevo()->connection()->prefix();
+    foreach ($query->get_cols() as $col) { // For each col
       $col = trim($col);
       if($col != '*'){
         if(strstr($col, ".*")){ // If format is table.*
