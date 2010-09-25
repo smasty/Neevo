@@ -169,7 +169,7 @@ class Neevo{
 
 
   private function is_driver($class){
-    return (class_exists($class) && in_array("INeevoDriver", class_implements($class)) && in_array("NeevoDriver", class_parents($class)));
+    return (class_exists($class, false) && in_array("INeevoDriver", class_implements($class, false)) && in_array("NeevoDriver", class_parents($class, false)));
   }
 
 
