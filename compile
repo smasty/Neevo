@@ -16,12 +16,14 @@ define("LAST_INCLUDE", "include_once dirname(__FILE__). '/neevo/INeevoDriver.php
 define("DRIVERS_PATH", "/neevo/drivers/");
 
 // Known arguments
-$known_arguments = array("help", "rev+", "rev-", "doc", "min", "min+");
+$known_arguments = array("help", "rev+", "rev-", "doc", "min", "min+", "quiet");
 
-
+if(in_array("quiet", $argv)){
+  $nooutput = true;
+}
 
 if(count($argv) <= 1){
-  echo "\nError: No arguments passed.\n\n";
+  out("\nError: No arguments passed.\n\n");
   help();
   exit;
 }
@@ -35,7 +37,7 @@ foreach($argv as $arg)
 // Search for argument in known arguments
 foreach($args as $arg){
   if(!in_array($arg, $known_arguments)){
-    echo "\nError: Unknown argument '$arg' passed.\n\n";
+    out("\nError: Unknown argument '$arg' passed.\n\n");
     help();
     exit;
   }
@@ -44,7 +46,7 @@ foreach($args as $arg){
 if($argv[0] == basename(__FILE__))
   unset ($argv[0]);
 
-echo "\n";
+out("\n");
 
 foreach ($argv as $key => $value) {
   $match = preg_match("#([0-9a-z-_]){1}\.php#i", $value);
@@ -53,12 +55,12 @@ foreach ($argv as $key => $value) {
 
 // Defined file does't exist, using default
 if(!file_exists($file)){
-  if($file!='') echo "File '$file' doesn't exist, default will be used\n";
+  if($file!='') out("File '$file' doesn't exist, default will be used\n");
   $file = DEFAULT_FILE;
   // Defined file exists
 }
 if(file_exists($file))
-  echo "Using file '$file'\n";
+  out("Using file '$file'\n");
 
 
 
@@ -71,15 +73,15 @@ if(in_array('help', $argv)){
 }
 
 if(in_array('rev+', $argv) && in_array('rev-', $argv))
-  echo "Error: Cannot use both 'rev+' and 'rev-' arguments.\nRevision number change skipped.\n";
+  out("Error: Cannot use both 'rev+' and 'rev-' arguments.\nRevision number change skipped.\n");
 else{
   // Increment Revision number
   if(in_array('rev+', $argv))
-    echo rev_number(1, $file);
+    out(rev_number(1, $file));
 
   // Decrement Revision number
   if(in_array('rev-', $argv))
-    echo rev_number(-1, $file);
+    out(rev_number(-1, $file));
 }
 
 // Generate PHPDoc
@@ -88,27 +90,27 @@ if(in_array('doc', $argv)){
   $k = (int) $k + 1;
   if(preg_match("#-([0-9a-z_-]+)#i", $argv[$k])){
     $config = substr($argv[$k], 1);
-    echo "Using PHPDoc configuration '$config'\n";
+    out("Using PHPDoc configuration '$config'\n");
   }
   else{
     $config = DEFAULT_PHPDOC_CONFIG;
-    echo "Using default PHPDoc configuration '$config'\n";
+    out("Using default PHPDoc configuration '$config'\n");
   }
-  echo phpdoc($config);
+  out(phpdoc($config));
 }
 
 if(in_array('min', $argv) && in_array('min+', $argv))
-  echo "Error: Cannot use both 'min+' and 'min-' arguments.\nMinify skipped.\n";
+  out("Error: Cannot use both 'min+' and 'min-' arguments.\nMinify skipped.\n");
 else{
    // Minify file
   if(in_array('min', $argv))
-    echo minify($file);
+    out(minify($file));
 
   // Minify file and shorten variable names
   if(in_array('min+', $argv))
-    echo minify($file);
+    out(minify($file));
 }
-echo "\n";
+out("\n");
 
 
 /**
@@ -157,6 +159,11 @@ function rev_number_callback($n){
 }
 
 
+/**
+ * Adds include statements for all supported drivers and removes autoloading
+ * @param string $file
+ * @return string
+ */
 function include_drivers($file){
   $content = str_replace("
       @include_once dirname(__FILE__) . '/neevo/drivers/'.strtolower(\$driver).'.php';
@@ -164,18 +171,29 @@ function include_drivers($file){
       if(!\$this->is_driver(\$class))
   ", "\n", file_get_contents($file));
 
-  $content = str_replace(LAST_INCLUDE, list_drivers($file), $content);
+  $content = str_replace(LAST_INCLUDE, list_drivers(), $content);
   return $content;
 }
 
 
-function list_drivers($file){
+/**
+ * Returns include statements for all supported drivers
+ * @return string
+ */
+function list_drivers(){
   $pattern = glob(".".DRIVERS_PATH."*.php");
   sort($pattern);
   foreach($pattern as $filename){
     $list .= "\ninclude_once dirname(__FILE__). '".DRIVERS_PATH.basename($filename)."';";
   }
   return LAST_INCLUDE.$list;
+}
+
+
+function out($string){
+  global $nooutput;
+  if(!$nooutput)
+    echo $output;
 }
 
 
@@ -206,9 +224,10 @@ function minify($file, $short_variables = false){
  * @return void
  */
 function help(){
-echo "Usage: $ php ".basename(__FILE__)." [help] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
+out("Usage: $ php ".basename(__FILE__)." [help] [quiet] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
 
   help        Displays help
+  quiet       Will produce no output
   rev+        Increments REVISION in <filename>
   rev-        Decrements REVISION in <filename>
   doc         Runs PHPDoc generator
@@ -217,7 +236,7 @@ echo "Usage: $ php ".basename(__FILE__)." [help] [rev+|rev-] [doc [-<config>]] [
   min+        + shorten var names.
   <filename>  File to compile; if not set, default used
 
-";
+");
 }
 
 

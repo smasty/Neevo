@@ -84,9 +84,10 @@ Neevo comes with what I call "compiler" - PHP CLI (command-line interface) scrip
 which simplifies some boring work for me: Minifies source to one file without
 comments and whitespace, regenerates PHPDoc and increments revision number.
 
-Usage: $ php compiler [help] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
+Usage: $ php compiler [help] [quiet] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
 
   help        Displays help
+  quiet       Will produce no output
   rev+        Increments REVISION in <filename>
   rev-        Decrements REVISION in <filename>
   doc         Runs PHPDoc generator
