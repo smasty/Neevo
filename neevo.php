@@ -15,7 +15,11 @@
  */
 
 if(version_compare(PHP_VERSION, '5.1.0', '<')){
-	throw new Exception('Neevo needs PHP 5.1.0 or newer.');
+  if(version_compare(PHP_VERSION, '5.0.0', '>='))
+    throw new Exception('Neevo requires PHP version 5.1.0 or newer');
+  if(version_compare(PHP_VERSION, '5.0.0', '<'))
+    trigger_error ('Neevo requires PHP version 5.1.0 or newer', E_USER_ERROR);
+  exit;
 }
 
 include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
@@ -39,7 +43,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.3dev";
-  const REVISION = 108;
+  const REVISION = 109;
 
   // Fetch format
   const MULTIPLE = 21;

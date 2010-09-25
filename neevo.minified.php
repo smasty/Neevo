@@ -179,7 +179,7 @@ __construct(Neevo$neevo){if(!extension_loaded("mysql"))throw
 new
 NeevoException("PHP extension 'mysql' not loaded.");$this->neevo=$neevo;}public
 function
-connect(array$opts){$connection=@mysql_connect($opts['host'],$opts['username'],$opts['password']);if(!is_resource($connection))$this->neevo->error("Connection to host '".$opts['host']."' failed");if($opts['database']){$db=mysql_select_db($opts['database']);if(!$db)$this->neevo->error("Could not select database '{$opts['database']}'");}if($opts['encoding']&&is_resource($connection)){if(function_exists('mysql_set_charset'))$ok=@mysql_set_charset($opts['encoding'],$connection);if(!$ok)$this->neevo->sql("SET NAMES ".$opts['encoding'])->run();}return$connection;}public
+connect(array$opts){$connection=@mysql_connect($opts['host'],$opts['username'],$opts['password']);if(!is_resource($connection))$this->neevo()->error("Connection to host '".$opts['host']."' failed");if($opts['database']){$db=mysql_select_db($opts['database']);if(!$db)$this->neevo()->error("Could not select database '{$opts['database']}'");}if($opts['encoding']&&is_resource($connection)){if(function_exists('mysql_set_charset'))$ok=@mysql_set_charset($opts['encoding'],$connection);if(!$ok)$this->neevo()->sql("SET NAMES ".$opts['encoding'])->run();}return$connection;}public
 function
 close($resource){@mysql_close($resource);}public
 function
@@ -214,8 +214,8 @@ Neevo{private$connection,$last,$queries,$error_reporting,$driver,$error_handler;
 E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
-VERSION="0.5";const
-REVISION=108;const
+VERSION="0.3dev";const
+REVISION=109;const
 MULTIPLE=21;public
 function
 __construct($driver){if(!$driver)throw

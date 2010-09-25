@@ -21,7 +21,7 @@
 
 // NetteDebug for debugging (http://nette.org)
 include "debug.php";
-Debug::enable();
+//Debug::enable();
 Debug::$strictMode = TRUE;
 
 
