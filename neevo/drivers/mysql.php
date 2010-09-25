@@ -253,5 +253,3 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
   }
 
 }
-
-?>

@@ -39,7 +39,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.3dev";
-  const REVISION = 104;
+  const REVISION = 105;
 
   // Fetch format
   const MULTIPLE = 21;
@@ -141,7 +141,7 @@ class Neevo{
       @include_once dirname(__FILE__) . '/neevo/drivers/'.strtolower($driver).'.php';
 
       if(!$this->is_driver($class))
-        throw new NeevoException("Unable to create instance of Neevo driver '$driver' - 	corresponding class not found or not matching criteria.");
+        throw new NeevoException("Unable to create instance of Neevo driver '$driver' - corresponding class not found or not matching criteria.");
     }
 
     $this->driver = new $class($this);
@@ -393,4 +393,3 @@ class Neevo{
  * @package Neevo
  */
 class NeevoException extends Exception{};
-?>
