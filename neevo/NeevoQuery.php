@@ -23,6 +23,17 @@ class NeevoQuery {
   public $table, $type, $limit, $offset, $neevo, $resource, $time, $sql, $performed;
   public $where, $order, $columns, $data = array();
 
+  private static $highlight_colors = array(
+    'columns'    => '#00f',
+    'chars'      => '#000',
+    'keywords'   => '#008000',
+    'joins'      => '#555',
+    'functions'  => '#008000',
+    'constants'  => '#f00'
+    );
+
+  public static $sql_functions = array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK', 'RAND');
+
 
   /**
    * Query base constructor
@@ -176,7 +187,7 @@ class NeevoQuery {
    * @return NeevoQuery
    */
   public function dump($color = true, $return_string = false){
-    $code = $color ? NeevoStatic::highlight_sql($this->build()) : $this->build();
+    $code = $color ? self::_highlight_sql($this->build()) : $this->build();
     if(!$return_string) echo $code;
     return $return_string ? $code : $this;
   }
@@ -371,6 +382,39 @@ class NeevoQuery {
 
     return $this->neevo->driver()->build($this);
 
+  }
+
+
+  /*  ******  Internal methods  ******  */
+
+
+  /**
+   * Highlights given SQL code
+   * @param string $sql
+   * @return string
+   */
+  private static function _highlight_sql($sql){
+    $color_codes = array('chars'=>'chars','keywords'=>'kwords','joins'=>'joins','functions'=>'funcs','constants'=>'consts');
+    $colors = self::$highlight_colors;
+    unset($colors['columns']);
+
+    $words = array(
+      'keywords'  => array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
+      'joins'     => array('JOIN', 'INNER', 'OUTER', 'FULL', 'NATURAL', 'LEFT', 'RIGHT'),
+      'functions' => self::$sql_functions,
+      'chars'     => '/([\\.,!\\(\\)<>:=`]+)/i',
+      'constants' => '/(\'[^\']*\'|[0-9]+)/i'
+    );
+
+    $sql=str_replace('\\\'','\\&#039;', $sql);
+
+    foreach($color_codes as $key => $code){
+      $regexp = in_array( $key, array('constants', 'chars')) ? $words[$key] : '/\\b(' .join("|", $words[$key]) .')\\b/i';
+      $sql = preg_replace($regexp, "<span style=\"color:$code\">$1</span>", $sql);
+    }
+
+    $sql = str_replace($color_codes, $colors, $sql);
+    return "<code style=\"color:".self::$highlight_colors['columns']."\"> $sql </code>\n";
   }
 
 }

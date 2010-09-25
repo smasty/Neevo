@@ -23,7 +23,7 @@ class NeevoConnection{
   private $neevo, $driver, $username, $password, $host, $database, $encoding, $table_prefix, $resource;
 
 
-  public function __construct(Neevo $neevo, INeevoDriver $driver, $user = null, $pswd = null, $host = null, $database = null, $encoding = null, $table_prefix = null){
+  public function __construct(Neevo $neevo, INeevoDriver $driver, $user, $pswd = null, $host, $database, $encoding = null, $table_prefix = null){
     $this->neevo = $neevo;
     $this->driver = $driver;
     $this->username = $user;

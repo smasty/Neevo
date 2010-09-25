@@ -364,15 +364,6 @@ class Neevo{
 
 
   /**
-   * Returns script memory usage
-   * @return string
-   */
-  public function memory(){
-    return NeevoStatic::filesize(memory_get_usage(true));
-  }
-
-
-  /**
    * Returns Neevo version and revision
    * @param bool $string Return as a string, not array
    * @return string|array
