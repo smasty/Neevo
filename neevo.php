@@ -24,7 +24,6 @@ if(version_compare(PHP_VERSION, '5.1.0', '<')){
 
 include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
 include_once dirname(__FILE__). '/neevo/NeevoQuery.php';
-include_once dirname(__FILE__). '/neevo/NeevoRow.php';
 include_once dirname(__FILE__). '/neevo/NeevoDriver.php';
 include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
 
@@ -44,7 +43,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.3dev";
-  const REVISION = 110;
+  const REVISION = 112;
 
   // Fetch format
   const MULTIPLE = 21;

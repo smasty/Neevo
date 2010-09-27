@@ -27,7 +27,9 @@ prefix(){return$this->table_prefix;}public
 function
 set_resource($resource){if(is_resource($resource))$this->resource=$resource;}public
 function
-resource(){return$this->resource;}}class
+resource(){return$this->resource;}public
+function
+info($hide_password=true){$info=$this->get_vars();if($hide_password)$info['password']='*****';$info['driver']=str_replace('NeevoDriver','',get_class($this->driver));return$info;}}class
 NeevoQuery{private$table,$type,$limit,$offset,$neevo,$resource,$time,$sql,$performed;private$where,$order,$columns,$data=array();private
 static$highlight_colors=array('columns'=>'#00f','chars'=>'#000','keywords'=>'#008000','joins'=>'#555','functions'=>'#008000','constants'=>'#f00');public
 static$sql_functions=array('MIN','MAX','SUM','COUNT','AVG','CAST','COALESCE','CHAR_LENGTH','LENGTH','SUBSTRING','DAY','MONTH','YEAR','DATE_FORMAT','CRC32','CURDATE','SYSDATE','NOW','GETDATE','FROM_UNIXTIME','FROM_DAYS','TO_DAYS','HOUR','IFNULL','ISNULL','NVL','NVL2','INET_ATON','INET_NTOA','INSTR','FOUND_ROWS','LAST_INSERT_ID','LCASE','LOWER','UCASE','UPPER','LPAD','RPAD','RTRIM','LTRIM','MD5','MINUTE','ROUND','SECOND','SHA1','STDDEV','STR_TO_DATE','WEEK','RAND');function
@@ -99,7 +101,9 @@ undo($sql_part,$position=1){$str=false;switch(strtolower($sql_part)){case'where'
 as$pos){$pos=is_numeric($pos)?$pos-1:$pos;$apart=$this->$part;unset($apart[$pos]);foreach($apart
 as$key=>$value){$loop[$key]=$value;}$this->$part=$loop;}}else$this->neevo()->error("Undo failed: No such Query part '$sql_part' for this kind of Query");}$this->performed=null;$this->resource=null;return$this;}public
 function
-build(){return$this->neevo()->driver()->build($this);}private
+build(){return$this->neevo()->driver()->build($this);}public
+function
+info($hide_password=true){$info=array('type'=>$this->get_type(),'table'=>$this->get_table(),'executed'=>(bool)$this->performed(),'query-string'=>$this->dump(false,true),'connection'=>$this->neevo()->connection()->info($hide_password));if($this->performed()){$info['time']=$this->time();if($this->get_type()=='insert')$info['last-insert-id']=$this->insert_id();}return$info;}private
 static
 function
 _highlight_sql($sql){$color_codes=array('chars'=>'chars','keywords'=>'kwords','joins'=>'joins','functions'=>'funcs','constants'=>'consts');$colors=self::$highlight_colors;unset($colors['columns']);$words=array('keywords'=>array('SELECT','UPDATE','INSERT','DELETE','REPLACE','INTO','CREATE','ALTER','TABLE','DROP','TRUNCATE','FROM','ADD','CHANGE','COLUMN','KEY','WHERE','ON','CASE','WHEN','THEN','END','ELSE','AS','USING','USE','INDEX','CONSTRAINT','REFERENCES','DUPLICATE','LIMIT','OFFSET','SET','SHOW','STATUS','BETWEEN','AND','IS','NOT','OR','XOR','INTERVAL','TOP','GROUP BY','ORDER BY','DESC','ASC','COLLATE','NAMES','UTF8','DISTINCT','DATABASE','CALC_FOUND_ROWS','SQL_NO_CACHE','MATCH','AGAINST','LIKE','REGEXP','RLIKE','PRIMARY','AUTO_INCREMENT','DEFAULT','IDENTITY','VALUES','PROCEDURE','FUNCTION','TRAN','TRANSACTION','COMMIT','ROLLBACK','SAVEPOINT','TRIGGER','CASCADE','DECLARE','CURSOR','FOR','DEALLOCATE'),'joins'=>array('JOIN','INNER','OUTER','FULL','NATURAL','LEFT','RIGHT'),'functions'=>self::$sql_functions,'chars'=>'/([\\.,!\\(\\)<>:=`]+)/i','constants'=>'/(\'[^\']*\'|[0-9]+)/i');$sql=str_replace('\\\'','\\&#039;',$sql);foreach($color_codes
@@ -215,7 +219,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.3dev";const
-REVISION=110;const
+REVISION=112;const
 MULTIPLE=21;public
 function
 __construct($driver){if(!$driver)throw
