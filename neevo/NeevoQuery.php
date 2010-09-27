@@ -495,6 +495,29 @@ class NeevoQuery {
   }
 
 
+  /**
+   * Returns basic informations about query
+   * @param bool $hide_password If set to TRUE (default), password will be replaced by '*****'.
+   * @return array
+   */
+  public function info($hide_password = true){
+    $info = array(
+      'type' => $this->get_type(),
+      'table' => $this->get_table(),
+      'executed' => (bool) $this->performed(),
+      'query-string' => $this->dump(false, true),
+      'connection' => $this->neevo()->connection()->info($hide_password)
+    );
+    if($this->performed()){
+      $info['time'] = $this->time();
+      if($this->get_type() == 'insert')
+        $info['last-insert-id'] = $this->insert_id();
+    }
+
+    return $info;
+  }
+
+
   /*  ******  Internal methods  ******  */
 
 

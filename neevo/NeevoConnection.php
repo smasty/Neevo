@@ -15,7 +15,7 @@
  */
 
 /**
- * Neevo driver class
+ * Neevo connection class
  * @package Neevo
  */
 class NeevoConnection{
@@ -80,6 +80,19 @@ class NeevoConnection{
    */
   public function resource(){
     return $this->resource;
+  }
+
+
+  /**
+   * Returns basic informations about current connection
+   * @param bool $hide_password If set to TRUE (default), password will be replaced by '*****'.
+   * @return array
+   */
+  public function info($hide_password = true){
+    $info = $this->get_vars();
+    if($hide_password) $info['password'] = '*****';
+    $info['driver'] = str_replace('NeevoDriver', '', get_class($this->driver));
+    return $info;
   }
 
 }

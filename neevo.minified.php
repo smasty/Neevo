@@ -12,9 +12,9 @@
  * @link     http://neevo.smasty.net/
  * @package  Neevo
  *
- */if(version_compare(PHP_VERSION,'5.1.0','<')){throw
+ */if(version_compare(PHP_VERSION,'5.1.0','<')){if(version_compare(PHP_VERSION,'5.0.0','>='))throw
 new
-Exception('Neevo needs PHP 5.1.0 or newer.');}class
+Exception('Neevo requires PHP version 5.1.0 or newer');if(version_compare(PHP_VERSION,'5.0.0','<'))trigger_error('Neevo requires PHP version 5.1.0 or newer',E_USER_ERROR);exit;}class
 NeevoConnection{private$neevo,$driver,$username,$password,$host,$database,$encoding,$table_prefix,$resource;public
 function
 __construct(Neevo$neevo,INeevoDriver$driver,$user,$pswd=null,$host,$database,$encoding=null,$table_prefix=null){$this->neevo=$neevo;$this->driver=$driver;$this->username=$user;$this->password=$pswd;$this->host=$host;$this->database=$database;$this->encoding=$encoding;$this->table_prefix=$table_prefix;$resource=$this->driver()->connect($this->get_vars());$this->set_resource($resource);}private
@@ -215,7 +215,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.3dev";const
-REVISION=109;const
+REVISION=110;const
 MULTIPLE=21;public
 function
 __construct($driver){if(!$driver)throw

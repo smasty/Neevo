@@ -21,8 +21,8 @@
 
 // NetteDebug for debugging (http://nette.org)
 include "debug.php";
-//Debug::enable();
-Debug::$strictMode = TRUE;
+Debug::enable();
+//Debug::$strictMode = TRUE;
 
 
 include "neevo.php";
@@ -132,6 +132,8 @@ $select->seek(2);
 $select_result = $select->fetch();
 
 $select->dump();
+
+print_r($sql->connection()->info());
 
 ?>
 
