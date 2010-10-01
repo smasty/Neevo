@@ -36,6 +36,8 @@ class Neevo{
   // Fields
   private $connection, $last, $queries, $error_reporting, $driver, $error_handler;
 
+  public static $ignore_deprecated = false;
+
   // Error-reporting levels
   const E_NONE    = 11;
   const E_HANDLE  = 12;
@@ -43,7 +45,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.3dev";
-  const REVISION = 120;
+  const REVISION = 121;
 
   // Fetch format
   const MULTIPLE = 21;

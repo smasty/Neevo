@@ -97,7 +97,7 @@ rand(){$this->neevo()->driver()->rand($this);return$this;}public
 function
 rows(){if(!$this->performed())$this->run();return$this->neevo()->driver()->rows($this);}public
 function
-undo($sql_part,$position=1){$str=false;switch(strtolower($sql_part)){case'where':$part='where';break;case'order';$part='order';break;case'column';$part='columns';break;case'value';$part='data';break;case'limit':$part='limit';$str=true;break;case'offset':$part='offset';$str=true;break;default:$this->neevo()->error("Undo failed: No such Query part '$sql_part' supported for undo()");break;}if($str)unset($this->$part);else{if(isset($this->$part)){$positions=array();if(!is_array($position))$positions[]=$position;foreach($positions
+undo($sql_part,$position=1){if(Neevo::$ignore_deprecated!==true)$this->neevo()->error("NeevoQuery::undo() is deprecated and will be removed. To use it, set Neevo::\$ignore_deprecated to TRUE");$str=false;switch(strtolower($sql_part)){case'where':$part='where';break;case'order';$part='order';break;case'column';$part='columns';break;case'value';$part='data';break;case'limit':$part='limit';$str=true;break;case'offset':$part='offset';$str=true;break;default:$this->neevo()->error("Undo failed: No such Query part '$sql_part' supported for undo()");break;}if($str)unset($this->$part);else{if(isset($this->$part)){$positions=array();if(!is_array($position))$positions[]=$position;foreach($positions
 as$pos){$pos=is_numeric($pos)?$pos-1:$pos;$apart=$this->$part;unset($apart[$pos]);foreach($apart
 as$key=>$value){$loop[$key]=$value;}$this->$part=$loop;}}else$this->neevo()->error("Undo failed: No such Query part '$sql_part' for this kind of Query");}$this->performed=null;$this->resource=null;return$this;}public
 function
@@ -216,12 +216,13 @@ function
 getQuotes(){return$this->col_quotes;}public
 function
 neevo(){return$this->neevo;}}class
-Neevo{private$connection,$last,$queries,$error_reporting,$driver,$error_handler;const
+Neevo{private$connection,$last,$queries,$error_reporting,$driver,$error_handler;public
+static$ignore_deprecated=false;const
 E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.3dev";const
-REVISION=120;const
+REVISION=121;const
 MULTIPLE=21;public
 function
 __construct($driver){if(!$driver)throw

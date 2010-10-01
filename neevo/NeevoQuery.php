@@ -434,6 +434,8 @@ class NeevoQuery {
    * @return NeevoQuery
    */
   public function undo($sql_part, $position = 1){
+    if(Neevo::$ignore_deprecated !== true)
+      $this->neevo()->error("NeevoQuery::undo() is deprecated and will be removed. To use it, set Neevo::\$ignore_deprecated to TRUE");
     $str = false;
     switch (strtolower($sql_part)) {
       case 'where':

@@ -80,7 +80,7 @@ $insert->dump();
 echo " Now unset 'city' column:\n";
 
 // Unset 'city' column from values
-$insert->undo('value', 'city');
+//$insert->undo('value', 'city');
 
 $insert->dump();
 
