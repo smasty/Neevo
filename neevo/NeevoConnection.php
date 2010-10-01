@@ -33,8 +33,8 @@ class NeevoConnection{
     $this->encoding = $encoding;
     $this->table_prefix = $table_prefix;
 
-    $resource = $this->driver()->connect($this->get_vars());
-    $this->set_resource($resource);
+    $resource = $this->driver()->connect($this->getVars());
+    $this->setResource($resource);
   }
 
 
@@ -51,7 +51,7 @@ class NeevoConnection{
    * Returns object variables as associative array
    * @return array
    */
-  public function get_vars(){
+  public function getVars(){
     $options = get_object_vars($this);
     unset($options['neevo'], $options['driver'], $options['resource']);
     return $options;
@@ -68,7 +68,7 @@ class NeevoConnection{
    * @param resource $resource
    * @return void
    */
-  public function set_resource($resource){
+  public function setResource($resource){
     if(is_resource($resource))
       $this->resource = $resource;
   }
@@ -89,7 +89,7 @@ class NeevoConnection{
    * @return array
    */
   public function info($hide_password = true){
-    $info = $this->get_vars();
+    $info = $this->getVars();
     if($hide_password) $info['password'] = '*****';
     $info['driver'] = str_replace('NeevoDriver', '', get_class($this->driver));
     return $info;

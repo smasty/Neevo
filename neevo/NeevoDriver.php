@@ -26,8 +26,8 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  public function build_tablename(NeevoQuery $query){
-    $pieces = explode(".", $query->get_table());
+  public function buildTablename(NeevoQuery $query){
+    $pieces = explode(".", $query->getTable());
     $prefix = $query->neevo()->connection()->prefix();
     if(isset($pieces[1]))
       return $this->col_quotes[0] .$pieces[0] .$this->col_quotes[1] ."." .
@@ -42,13 +42,13 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  protected function build_where(NeevoQuery $query){
+  protected function buildWhere(NeevoQuery $query){
     $prefix = $query->neevo()->connection()->prefix();
     $in_construct = false;
 
-    foreach ($query->get_where() as $where) {
+    foreach ($query->getWhere() as $where) {
       if(is_array($where[2])){ // WHERE col IN(...)
-        $where[2] = "(" .join(", ", $this->_escape_array($where[2])) .")";
+        $where[2] = "(" .join(", ", $this->_escapeArray($where[2])) .")";
         $in_construct = true;
       }
       $wheres[] = $where;
@@ -56,8 +56,8 @@ class NeevoDriver{
     unset($wheres[count($wheres)-1][3]); // Unset last glue
 
     foreach ($wheres as $in_where) { // For each condition...
-      if($this->_is_sql_func($in_where[0]))
-        $in_where[0] = $this->_quote_sql_func($in_where[0]);
+      if($this->_isSqlFunc($in_where[0]))
+        $in_where[0] = $this->_quoteSqlFunc($in_where[0]);
 
       if(strstr($in_where[0], ".")) // If format is table.column
         $in_where[0] = preg_replace("#([0-9A-Za-z_]{1,256})(\.)([0-9A-Za-z_]+)#",
@@ -67,7 +67,7 @@ class NeevoDriver{
         $in_where[0] = $this->col_quotes[0] .$in_where[0] .$this->col_quotes[1];
 
       if(!$in_construct) // If not col IN(...), escape value
-        $in_where[2] = $this->_escape_string($in_where[2]);
+        $in_where[2] = $this->_escapeString($in_where[2]);
 
       $wheres2[] = join(' ', $in_where); // Join each condition to string
     }
@@ -80,8 +80,8 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  protected function build_insert_data(NeevoQuery $query){
-    foreach($this->_escape_array($query->get_data()) as $col => $value){
+  protected function buildInsertData(NeevoQuery $query){
+    foreach($this->_escapeArray($query->getData()) as $col => $value){
       $cols[] = $this->col_quotes[0] .$col .$this->col_quotes[1];
       $values[] = $value;
     }
@@ -94,8 +94,8 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  protected function build_update_data(NeevoQuery $query){
-    foreach($this->_escape_array($query->get_data()) as $col => $value){
+  protected function buildUpdateData(NeevoQuery $query){
+    foreach($this->_escapeArray($query->getData()) as $col => $value){
       $update[] = $this->col_quotes[0] .$col .$this->col_quotes[1] ."=" .$value;
     }
     return " SET " .join(', ', $update);
@@ -107,9 +107,9 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  protected function build_order(NeevoQuery $query){
-    foreach ($query->get_order() as $in_order) {
-      $in_order[0] = ($this->_is_sql_func($in_order[0]))
+  protected function buildOrder(NeevoQuery $query){
+    foreach ($query->getOrder() as $in_order) {
+      $in_order[0] = ($this->_isSqlFunc($in_order[0]))
         ? $in_order[0] : $this->col_quotes[0] .$in_order[0] .$this->col_quotes[1];
       $orders[] = join(' ', $in_order);
     }
@@ -122,9 +122,9 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  protected function build_select_cols(NeevoQuery $query){
+  protected function buildSelectCols(NeevoQuery $query){
     $prefix = $query->neevo()->connection()->prefix();
-    foreach ($query->get_cols() as $col) { // For each col
+    foreach ($query->getCols() as $col) { // For each col
       $col = trim($col);
       if($col != '*'){
         if(strstr($col, ".*")){ // If format is table.*
@@ -136,10 +136,10 @@ class NeevoDriver{
             $col = preg_replace("#([0-9A-Za-z_]{1,64})(\.)([0-9A-Za-z_]+)#",
               $this->col_quotes[0] ."$prefix$1" .$this->col_quotes[1] ."." .
               $this->col_quotes[0] ."$3" .$this->col_quotes[1], $col);
-          if($this->_is_as_constr($col))
-            $col = $this->_quote_as_constr($col);
-          elseif($this->_is_sql_func($col))
-            $col = $this->_quote_sql_func($col);
+          if($this->_isAsConstr($col))
+            $col = $this->_quoteAsConstr($col);
+          elseif($this->_isSqlFunc($col))
+            $col = $this->_quoteSqlFunc($col);
           elseif(!strstr($col, ".")) // If normal format
             $col = $this->col_quotes[0] .$col .$this->col_quotes[1];
         }
@@ -158,12 +158,12 @@ class NeevoDriver{
    * @param array $array
    * @return array
    */
-  protected function _escape_array(array $array){
+  protected function _escapeArray(array $array){
     foreach($array as &$value){
        $value = is_numeric($value)
          ? $value : ( is_string($value)
-           ? $this->_escape_string($value) : ( is_array($value)
-             ? $this->_escape_array($value) : $value ) );
+           ? $this->_escapeString($value) : ( is_array($value)
+             ? $this->_escapeArray($value) : $value ) );
     }
     return $array;
   }
@@ -173,10 +173,10 @@ class NeevoDriver{
    * @param string $string
    * @return string
    */
-  protected function _escape_string($string){
+  protected function _escapeString($string){
     if(get_magic_quotes_gpc()) $string = stripslashes($string);
-    $string = $this->escape_string($string);
-    return $this->_is_sql_func($string) ? $this->_quote_sql_func($string) : "'$string'";
+    $string = $this->escapeString($string);
+    return $this->_isSqlFunc($string) ? $this->_quoteSqlFunc($string) : "'$string'";
   }
 
   /**
@@ -184,7 +184,7 @@ class NeevoDriver{
    * @param string $string Query fragmet
    * @return bool
    */
-  protected function _is_sql_func($string){
+  protected function _isSqlFunc($string){
     if(is_string($string)){
       $var = strtoupper(preg_replace('/[^a-zA-Z0-9_\(\)]/', '', $string));
       return in_array( preg_replace('/\(.*\)/', '', $var), NeevoQuery::$sql_functions);
@@ -198,7 +198,7 @@ class NeevoDriver{
    * @param string $sql_func SQL function fragment
    * @return string
    */
-  protected function _quote_sql_func($sql_func){
+  protected function _quoteSqlFunc($sql_func){
     return str_replace(array('("', '")'), array('(\'', '\')'), $sql_func);
   }
 
@@ -207,7 +207,7 @@ class NeevoDriver{
    * @param string $string Query fragment
    * @return bool
    */
-  protected function _is_as_constr($string){
+  protected function _isAsConstr($string){
     return (bool) preg_match('/(.*) as \w*/i', $string);
   }
 
@@ -216,8 +216,8 @@ class NeevoDriver{
    * @param string $as_constr
    * @return string
    */
-  protected function _quote_as_constr($as_constr){
-    $col_quote = $this->get_quotes();
+  protected function _quoteAsConstr($as_constr){
+    $col_quote = $this->getQuotes();
     $construction = explode(' ', $as_constr);
     $escape = preg_match('/^\w{1,}$/', $construction[0]) ? true : false;
     if($escape){

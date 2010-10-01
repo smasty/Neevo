@@ -43,7 +43,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.3dev";
-  const REVISION = 112;
+  const REVISION = 120;
 
   // Fetch format
   const MULTIPLE = 21;
@@ -57,7 +57,7 @@ class Neevo{
    */
   public function __construct($driver){
     if(!$driver) throw new NeevoException("Driver not defined.");
-    $this->set_driver($driver);
+    $this->setDriver($driver);
   }
 
 
@@ -86,8 +86,8 @@ class Neevo{
    * @return bool
    */
   public function connect(array $opts){
-    $connection = $this->create_connection($opts);
-    $this->set_connection($connection);
+    $connection = $this->createConnection($opts);
+    $this->setConnection($connection);
     return (bool) $connection;
   }
 
@@ -107,7 +107,7 @@ class Neevo{
    * @see Neevo->connect()
    * @return NeevoConnection
    */
-  public function create_connection(array $opts){
+  public function createConnection(array $opts){
     return new NeevoConnection($this, $this->driver(), $opts['username'], $opts['password'], $opts['host'], $opts['database'], $opts['encoding'], $opts['table_prefix']);
   }
 
@@ -117,8 +117,8 @@ class Neevo{
    * @param NeevoConnection $connection
    * @return Neevo
    */
-  public function use_connection(NeevoConnection $connection){
-    $this->set_connection($connection);
+  public function useConnection(NeevoConnection $connection){
+    $this->setConnection($connection);
     return $this;
   }
 
@@ -127,7 +127,7 @@ class Neevo{
    * Sets Neevo Connection to use
    * @param NeevoConnection $connection Instance to use
    */
-  private function set_connection(NeevoConnection $connection){
+  private function setConnection(NeevoConnection $connection){
     $this->connection = $connection;
   }
 
@@ -138,13 +138,13 @@ class Neevo{
    * @throws NeevoException
    * @return void
    */
-  private function set_driver($driver){
+  private function setDriver($driver){
     $class = "NeevoDriver$driver";
 
-    if(!$this->is_driver($class)){
+    if(!$this->isDriver($class)){
       @include_once dirname(__FILE__) . '/neevo/drivers/'.strtolower($driver).'.php';
 
-      if(!$this->is_driver($class))
+      if(!$this->isDriver($class))
         throw new NeevoException("Unable to create instance of Neevo driver '$driver' - corresponding class not found or not matching criteria.");
     }
 
@@ -157,8 +157,8 @@ class Neevo{
    * @param string $driver
    * @return Neevo
    */
-  public function use_driver($driver){
-    $this->set_driver($driver);
+  public function useDriver($driver){
+    $this->setDriver($driver);
     return $this;
   }
 
@@ -172,7 +172,7 @@ class Neevo{
   }
 
 
-  private function is_driver($class){
+  private function isDriver($class){
     return (class_exists($class, false) && in_array("INeevoDriver", class_implements($class, false)) && in_array("NeevoDriver", class_parents($class, false)));
   }
 
@@ -182,7 +182,7 @@ class Neevo{
    * @param NeevoQuery $last Last executed query
    * @return void
    */
-  public function set_last(NeevoQuery $last){
+  public function setLast(NeevoQuery $last){
     $this->last = $last;
   }
 
@@ -202,7 +202,7 @@ class Neevo{
    * @return void
    * @access private
    */
-  public function increment_queries(){
+  public function incrementQueries(){
     $this->queries++;
   }
 
@@ -282,7 +282,7 @@ class Neevo{
    * <li>Neevo::E_STRICT: Throws all Neevo exceptions</li></ul>
    * @return void
    */
-  public function set_error_reporting($value){
+  public function setErrorReporting($value){
     $this->error_reporting = $value;
     if(!isset($this->error_reporting)) $this->error_reporting = self::E_HANDLE;
   }
@@ -292,7 +292,7 @@ class Neevo{
    * Returns error-reporting level
    * @return int
    */
-  public function error_reporting(){
+  public function errorReporting(){
     if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
     return $this->error_reporting;
   }
@@ -303,10 +303,10 @@ class Neevo{
    * @param string $handler_function Name of error-handler function
    * @return void
    */
-  public function set_error_handler($handler_function){
+  public function setErrorHandler($handler_function){
     if(function_exists($handler_function))
       $this->error_handler = $handler_function;
-    else $this->error_handler = array('Neevo', 'default_error_handler');
+    else $this->error_handler = array('Neevo', 'defaultErrorHandler');
   }
 
 
@@ -315,10 +315,10 @@ class Neevo{
    * @param string $handler_function Name of error-handler function
    * @return string
    */
-  public function error_handler(){
+  public function errorHandler(){
     $func = $this->error_handler;
     if( (is_array($func) && !method_exists($func[0], $func[1]) ) || ( !is_array($func) && !function_exists($func) ) )
-      $this->error_handler = array('Neevo', 'default_error_handler');
+      $this->error_handler = array('Neevo', 'defaultErrorHandler');
     return $this->error_handler;
   }
 
@@ -331,14 +331,14 @@ class Neevo{
    * @throws NeevoException
    */
   public function error($neevo_msg){
-    $level = $this->error_reporting();
+    $level = $this->errorReporting();
 
     if($level != Neevo::E_NONE){
       $msg = $this->driver()->error($neevo_msg);
       $exception = new NeevoException($msg);
 
       if($level == Neevo::E_HANDLE)
-        call_user_func ($this->error_handler(), $exception);
+        call_user_func ($this->errorHandler(), $exception);
       if($level == Neevo::E_STRICT)
         throw $exception;
     }
@@ -352,7 +352,7 @@ class Neevo{
    * @param NeevoException $exception
    * return void
    */
-  public static function default_error_handler(NeevoException $exception){
+  public static function defaultErrorHandler(NeevoException $exception){
     $message = $exception->getMessage();
     $trace = $exception->getTrace();
     if(!empty($trace)){

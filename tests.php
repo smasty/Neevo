@@ -33,7 +33,7 @@ $sql = new Neevo('MySQL');
 
 
 // Set Neevo error reporting level
-$sql->set_error_reporting(Neevo::E_STRICT);
+$sql->setErrorReporting(Neevo::E_STRICT);
 
 
 // Create connection to a database server
@@ -85,7 +85,7 @@ $insert->undo('value', 'city');
 $insert->dump();
 
 // Run query;
-$insert_id = $insert->insert_id();
+$insert_id = $insert->insertId();
 echo " LAST_INSERT_ID: $insert_id\n\n";
 
 

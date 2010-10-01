@@ -99,7 +99,7 @@ interface INeevoDriver {
    * @param resource $resource Query resource
    * @return int
    */
-  public function insert_id($resource);
+  public function insertId($resource);
 
 
   /**
@@ -131,14 +131,14 @@ interface INeevoDriver {
    * @param string $string
    * @return string
    */
-  public function escape_string($string);
+  public function escapeString($string);
 
 
   /**
    * Returns driver-specific column quotes (opening and closing chars)
    * @return array
    */
-  public function get_quotes();
+  public function getQuotes();
 
 
   /**

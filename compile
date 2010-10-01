@@ -21,6 +21,9 @@ $known_arguments = array("help", "rev+", "rev-", "doc", "min", "min+", "quiet");
 if(in_array("quiet", $argv)){
   $nooutput = true;
 }
+else{
+  $nooutput = false;
+}
 
 if(count($argv) <= 1){
   out("\nError: No arguments passed.\n\n");
@@ -192,8 +195,8 @@ function list_drivers(){
 
 function out($string){
   global $nooutput;
-  if(!$nooutput)
-    echo $output;
+  if($nooutput == false)
+    echo $string;
 }
 
 

@@ -143,7 +143,7 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
    * @param resource $resource Query resource
    * @return int
    */
-  public function insert_id($resource){
+  public function insertId($resource){
     return mysql_insert_id($resource);
   }
 
@@ -165,8 +165,8 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
    * @return int|FALSE Number of rows (int) or FALSE
    */
   public function rows(NeevoQuery $query){
-    if($query->get_type() != 'select')
-      $aff_rows = $query->time()
+    if($query->getType() != 'select')
+      $aff_rows = $query->performed()
         ? @mysql_affected_rows($query->neevo()->connection()->resource()) : false;
     else $num_rows = @mysql_num_rows($query->resource());
 
@@ -188,37 +188,37 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
     $limit = "";
     $q = "";
 
-    if($query->get_sql())
-      $q = $query->get_sql();
+    if($query->getSql())
+      $q = $query->getSql();
 
     else{
-      $table = $this->build_tablename($query);
+      $table = $this->buildTablename($query);
 
-      if($query->get_where())
-        $where = $this->build_where($query);
+      if($query->getWhere())
+        $where = $this->buildWhere($query);
 
-      if($query->get_order())
-        $order = $this->build_order($query);
+      if($query->getOrder())
+        $order = $this->buildOrder($query);
 
-      if($query->get_limit()) $limit = " LIMIT " .$query->get_limit();
-      if($query->get_offset()) $limit .= " OFFSET " .$query->get_offset();
+      if($query->getLimit()) $limit = " LIMIT " .$query->getLimit();
+      if($query->getOffset()) $limit .= " OFFSET " .$query->getOffset();
 
-      if($query->get_type() == 'select'){
-        $cols = $this->build_select_cols($query);
+      if($query->getType() == 'select'){
+        $cols = $this->buildSelectCols($query);
         $q .= "SELECT $cols FROM $table$where$order$limit";
       }
 
-      if($query->get_type() == 'insert' && $query->get_data()){
-        $insert_data = $this->build_insert_data($query);
+      if($query->getType() == 'insert' && $query->getData()){
+        $insert_data = $this->buildInsertData($query);
         $q .= "INSERT INTO $table$insert_data";
       }
 
-      if($query->get_type() == 'update' && $query->get_data()){
-        $update_data = $this->build_update_data($query);
+      if($query->getType() == 'update' && $query->getData()){
+        $update_data = $this->buildUpdateData($query);
         $q .= "UPDATE $table$update_data$where$order$limit";
       }
 
-      if($query->get_type() == 'delete')
+      if($query->getType() == 'delete')
         $q .= "DELETE FROM $table$where$order$limit";
     }
     return "$q;";
@@ -230,7 +230,7 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
    * @param string $string
    * @return string
    */
-  public function escape_string($string){
+  public function escapeString($string){
     return mysql_real_escape_string($string);
   }
 
@@ -239,7 +239,7 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
    * Returns driver-specific column quotes (opening and closing chars)
    * @return array
    */
-  public function get_quotes(){
+  public function getQuotes(){
     return $this->col_quotes;
   }
 

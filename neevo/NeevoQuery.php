@@ -55,7 +55,7 @@ class NeevoQuery {
    * @param int $time Time value to set.
    * @return void
    */
-  public function set_time($time){
+  public function setTime($time){
     $this->time = $time;
   }
 
@@ -157,7 +157,7 @@ class NeevoQuery {
    * Returns table name
    * @return string
    */
-  public function get_table(){
+  public function getTable(){
     return $this->table;
   }
 
@@ -166,7 +166,7 @@ class NeevoQuery {
    * Returns Query type
    * @return string
    */
-  public function get_type(){
+  public function getType(){
     return $this->type;
   }
 
@@ -175,7 +175,7 @@ class NeevoQuery {
    * Returns Query LIMIT fraction
    * @return int
    */
-  public function get_limit(){
+  public function getLimit(){
     return $this->limit;
   }
 
@@ -184,7 +184,7 @@ class NeevoQuery {
    * Returns Query OFFSET fraction
    * @return int
    */
-  public function get_offset(){
+  public function getOffset(){
     return $this->offset;
   }
 
@@ -193,7 +193,7 @@ class NeevoQuery {
    * Returns whole query code for direct queries (type=sql)
    * @return string
    */
-  public function get_sql(){
+  public function getSql(){
     return $this->sql;
   }
 
@@ -202,7 +202,7 @@ class NeevoQuery {
    * Returns Query WHERE fraction
    * @return array
    */
-  public function get_where(){
+  public function getWhere(){
     return $this->where;
   }
 
@@ -211,7 +211,7 @@ class NeevoQuery {
    * Returns Query ORDER BY fraction
    * @return array
    */
-  public function get_order(){
+  public function getOrder(){
     return $this->order;
   }
 
@@ -220,7 +220,7 @@ class NeevoQuery {
    * Returns Query columns fraction for SELECT queries ([SELECT] col1, col2, ...)
    * @return array
    */
-  public function get_cols(){
+  public function getCols(){
     return $this->columns;
   }
 
@@ -231,7 +231,7 @@ class NeevoQuery {
    *  [UPDATE tbl] SET col1 = val1,  col2 = val2, ...)
    * @return array
    */
-  public function get_data(){
+  public function getData(){
     return $this->data;
   }
 
@@ -286,7 +286,7 @@ class NeevoQuery {
    */
   public function limit($limit, $offset = null){
     $this->limit = $limit;
-    if(isset($offset) && $this->get_type() == 'select') $this->offset = $offset;
+    if(isset($offset) && $this->getType() == 'select') $this->offset = $offset;
     return $this;
   }
 
@@ -298,7 +298,7 @@ class NeevoQuery {
    * @return NeevoQuery
    */
   public function dump($color = true, $return_string = false){
-    $code = $color ? self::_highlight_sql($this->build()) : $this->build();
+    $code = $color ? self::_highlightSql($this->build()) : $this->build();
     if(!$return_string) echo $code;
     return $return_string ? $code : $this;
   }
@@ -316,15 +316,15 @@ class NeevoQuery {
       return false;
     }
     else{
-      $this->neevo()->increment_queries();
-      $this->neevo()->set_last($this);
+      $this->neevo()->incrementQueries();
+      $this->neevo()->setLast($this);
 
       $end = explode(" ", microtime());
       $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
-      $this->set_time($time);
+      $this->setTime($time);
 
       $this->performed = true;
-      if(in_array($this->get_type(), array('select', 'sql'))){
+      if(in_array($this->getType(), array('select', 'sql'))){
         $this->resource = $query;
         return $query;
       }
@@ -347,7 +347,7 @@ class NeevoQuery {
    */
   public function fetch($fetch_type = null){
     $rows = null;
-    if(!in_array($this->get_type(), array('select', 'sql'))) $this->neevo()->error('Cannot fetch on this kind of query');
+    if(!in_array($this->getType(), array('select', 'sql'))) $this->neevo()->error('Cannot fetch on this kind of query');
 
     $resource = $this->performed() ? $this->resource() : $this->run();
 
@@ -381,10 +381,10 @@ class NeevoQuery {
    * Get the ID generated in the INSERT query
    * @return int
    */
-  public function insert_id(){
+  public function insertId(){
     if(!$this->performed()) $this->run();
 
-    return $this->neevo()->driver()->insert_id($this->neevo()->connection()->resource());
+    return $this->neevo()->driver()->insertId($this->neevo()->connection()->resource());
   }
 
 
@@ -503,16 +503,16 @@ class NeevoQuery {
    */
   public function info($hide_password = true){
     $info = array(
-      'type' => $this->get_type(),
-      'table' => $this->get_table(),
+      'type' => $this->getType(),
+      'table' => $this->getTable(),
       'executed' => (bool) $this->performed(),
       'query-string' => $this->dump(false, true),
       'connection' => $this->neevo()->connection()->info($hide_password)
     );
     if($this->performed()){
       $info['time'] = $this->time();
-      if($this->get_type() == 'insert')
-        $info['last-insert-id'] = $this->insert_id();
+      if($this->getType() == 'insert')
+        $info['last-insert-id'] = $this->insertId();
     }
 
     return $info;
@@ -522,9 +522,9 @@ class NeevoQuery {
    * Returns name of PRIMARY KEY if defined, NULL otherwise.
    * @return string
    */
-  public function get_primary(){
+  public function getPrimary(){
     $return = null;
-    $table = $this->neevo()->driver()->build_tablename($this);
+    $table = $this->neevo()->driver()->buildTablename($this);
     $q = $this->neevo()->sql('EXPLAIN '. $table);
     foreach($q->fetch(Neevo::MULTIPLE) as $col){
       if($col['Key'] == 'PRI' && !isset($return))
@@ -542,7 +542,7 @@ class NeevoQuery {
    * @param string $sql
    * @return string
    */
-  private static function _highlight_sql($sql){
+  private static function _highlightSql($sql){
     $color_codes = array('chars'=>'chars','keywords'=>'kwords','joins'=>'joins','functions'=>'funcs','constants'=>'consts');
     $colors = self::$highlight_colors;
     unset($colors['columns']);
