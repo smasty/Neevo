@@ -147,6 +147,7 @@ foreach ($select_result as $row){
   echo "<tr><td>". $row['id'] ."<td>". $row['name'] ."<td>". $row['mail'] ."<td>". $row['city'] ."<td><code>". $row['mail_hash'] ."\n";
 }
 
+Debug::barDump($sql->info(), 'Neevo');
 ?>
 </table>
   </body>

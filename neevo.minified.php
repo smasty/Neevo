@@ -103,13 +103,13 @@ as$key=>$value){$loop[$key]=$value;}$this->$part=$loop;}}else$this->neevo()->err
 function
 build(){return$this->neevo()->driver()->build($this);}public
 function
-info($hide_password=true){$info=array('type'=>$this->getType(),'table'=>$this->getTable(),'executed'=>(bool)$this->performed(),'query-string'=>$this->dump(false,true),'connection'=>$this->neevo()->connection()->info($hide_password));if($this->performed()){$info['time']=$this->time();if($this->getType()=='insert')$info['last-insert-id']=$this->insertId();}return$info;}public
+info($hide_password=true,$exclude_connection=false){$info=array('type'=>$this->getType(),'table'=>$this->getTable(),'executed'=>(bool)$this->performed(),'query-string'=>$this->dump(false,true));if($exclude_connection==true)$this->neevo()->connection()->info($hide_password);if($this->performed()){$info['time']=$this->time();if($this->getType()=='insert')$info['last-insert-id']=$this->insertId();}return$info;}public
 function
 getPrimary(){$return=null;$table=$this->neevo()->driver()->buildTablename($this);$q=$this->neevo()->sql('EXPLAIN '.$table);foreach($q->fetch(Neevo::MULTIPLE)as$col){if($col['Key']=='PRI'&&!isset($return))$return=$col['Field'];}return$return;}private
 static
 function
 _highlightSql($sql){$color_codes=array('chars'=>'chars','keywords'=>'kwords','joins'=>'joins','functions'=>'funcs','constants'=>'consts');$colors=self::$highlight_colors;unset($colors['columns']);$words=array('keywords'=>array('SELECT','UPDATE','INSERT','DELETE','REPLACE','INTO','CREATE','ALTER','TABLE','DROP','TRUNCATE','FROM','ADD','CHANGE','COLUMN','KEY','WHERE','ON','CASE','WHEN','THEN','END','ELSE','AS','USING','USE','INDEX','CONSTRAINT','REFERENCES','DUPLICATE','LIMIT','OFFSET','SET','SHOW','STATUS','BETWEEN','AND','IS','NOT','OR','XOR','INTERVAL','TOP','GROUP BY','ORDER BY','DESC','ASC','COLLATE','NAMES','UTF8','DISTINCT','DATABASE','CALC_FOUND_ROWS','SQL_NO_CACHE','MATCH','AGAINST','LIKE','REGEXP','RLIKE','PRIMARY','AUTO_INCREMENT','DEFAULT','IDENTITY','VALUES','PROCEDURE','FUNCTION','TRAN','TRANSACTION','COMMIT','ROLLBACK','SAVEPOINT','TRIGGER','CASCADE','DECLARE','CURSOR','FOR','DEALLOCATE'),'joins'=>array('JOIN','INNER','OUTER','FULL','NATURAL','LEFT','RIGHT'),'functions'=>self::$sql_functions,'chars'=>'/([\\.,!\\(\\)<>:=`]+)/i','constants'=>'/(\'[^\']*\'|[0-9]+)/i');$sql=str_replace('\\\'','\\&#039;',$sql);foreach($color_codes
-as$key=>$code){$regexp=in_array($key,array('constants','chars'))?$words[$key]:'/\\b('.join("|",$words[$key]).')\\b/i';$sql=preg_replace($regexp,"<span style=\"color:$code\">$1</span>",$sql);}$sql=str_replace($color_codes,$colors,$sql);return"<code style=\"color:".self::$highlight_colors['columns']."\"> $sql </code>\n";}}class
+as$key=>$code){$regexp=in_array($key,array('constants','chars'))?$words[$key]:'/\\b('.join("|",$words[$key]).')\\b/i';$sql=preg_replace($regexp,"<span style=\"color:$code\">$1</span>",$sql);}$sql=str_replace($color_codes,$colors,$sql);return"<code style=\"color:".self::$highlight_colors['columns']."\">$sql</code>\n";}}class
 NeevoDriver{public
 function
 buildTablename(NeevoQuery$query){$pieces=explode(".",$query->getTable());$prefix=$query->neevo()->connection()->prefix();if(isset($pieces[1]))return$this->col_quotes[0].$pieces[0].$this->col_quotes[1].".".$this->col_quotes[0].$prefix.$pieces[1].$this->col_quotes[1];else
@@ -222,7 +222,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.3dev";const
-REVISION=121;const
+REVISION=122;const
 MULTIPLE=21;public
 function
 __construct($driver){if(!$driver)throw
@@ -293,7 +293,9 @@ static
 function
 defaultErrorHandler(NeevoException$exception){$message=$exception->getMessage();$trace=$exception->getTrace();if(!empty($trace)){$last=$trace[count($trace)-1];$line=$last['line'];$path=$last['file'];$act="occured";}else{$line=$exception->getLine();$path=$exception->getFile();$act="thrown";}$file=basename($path);$path=str_replace($file,"<strong>$file</strong>",$path);echo"<p><strong>Neevo exception</strong> $act in <em>$path</em> on <strong>line $line</strong>: $message</p>\n";}public
 function
-version($string=true){if($string)$return="Neevo ".self::VERSION." (revision ".self::REVISION.").";else$return=array('version'=>self::VERSION,'revision'=>self::REVISION);return$return;}}class
+version($string=true){if($string)$return="Neevo ".self::VERSION." (revision ".self::REVISION.").";else$return=array('version'=>self::VERSION,'revision'=>self::REVISION);return$return;}public
+function
+info($hide_password=true){$info=array('executed-queries'=>$this->queries(),'last-query'=>$this->last()->info($hide_password,true),'connection'=>$this->connection()->info($hide_password),'version'=>$this->version(false),'error-reporting'=>$this->errorReporting());return$info;}}class
 NeevoException
 extends
 Exception{};

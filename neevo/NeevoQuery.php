@@ -72,7 +72,7 @@ class NeevoQuery {
   /**
    * Sets table to interact
    * @param string $table
-   * @return NeevoQuery
+   * @return NeevoQuery fluent interface
    */
   public function table($table){
     $this->table = $table;
@@ -83,7 +83,7 @@ class NeevoQuery {
   /**
    * Sets query type. Possibe values: select, insert, update, delete
    * @param string $type
-   * @return NeevoQuery
+   * @return NeevoQuery fluent interface
    */
   public function type($type){
     $this->type = $type;
@@ -94,7 +94,7 @@ class NeevoQuery {
   /**
    * Method for running direct SQL code
    * @param string $sql Direct SQL code
-   * @return NeevoQuery
+   * @return NeevoQuery fluent interface
    */
   public function sql($sql){
     $this->sql = $sql;
@@ -106,7 +106,7 @@ class NeevoQuery {
   /**
    * Sets columns to retrive in SELECT queries
    * @param array|string $columns Array or comma-separated list of columns.
-   * @return NeevoQuery
+   * @return NeevoQuery fluent interface
    */
   public function cols($columns){
     if(!is_array($columns)) $columns = explode(',', $columns);
@@ -118,7 +118,7 @@ class NeevoQuery {
   /**
    * Data for INSERT and UPDATE queries
    * @param array $data Data in format "$column=>$value"
-   * @return NeevoQuery
+   * @return NeevoQuery fluent interface
    */
   public function data(array $data){
     $this->data = $data;
@@ -244,7 +244,7 @@ class NeevoQuery {
    * @param string $where Column to use and optionaly operator/function: "email !=", "email LIKE" or "email IN".
    * @param string|array $value Value to search for: "spam@foo.com", "%@foo.com" or array('john@foo.com', 'doe@foo.com', 'john.doe@foo.com')
    * @param string $glue Glue (AND, OR, etc.) to use betweet this and next WHERE condition. If not set, AND will be used.
-   * @return NeevoQuery
+   * @return NeevoQuery fluent interface
    */
   public function where($where, $value, $glue = null){
     $where_condition = explode(' ', $where);
@@ -264,7 +264,7 @@ class NeevoQuery {
   /**
    * Sets ORDER BY rule for Query
    * @param string $args [Infinite arguments] Order rules: "col_name ASC", "col_name" or "col_name DESC", etc...
-   * @return NeevoQuery
+   * @return NeevoQuery fluent interface
    */
   public function order($args){
     $rules = array();
@@ -282,7 +282,7 @@ class NeevoQuery {
    * Sets limit (and offset) for Query
    * @param int $limit Limit
    * @param int $offset Offset
-   * @return NeevoQuery
+   * @return NeevoQuery fluent interface
    */
   public function limit($limit, $offset = null){
     $this->limit = $limit;
@@ -295,7 +295,7 @@ class NeevoQuery {
    * Prints consequential Query (highlighted by default)
    * @param bool $color Highlight query or not (default: yes)
    * @param bool $return_string Return the string or not (default: no)
-   * @return NeevoQuery
+   * @return NeevoQuery|void
    */
   public function dump($color = true, $return_string = false){
     $code = $color ? self::_highlightSql($this->build()) : $this->build();
@@ -390,7 +390,7 @@ class NeevoQuery {
 
   /**
    * Randomize result order. (Shorthand for NeevoQuery->order('RAND()');)
-   * @return NeevoQuery
+   * @return NeevoQuery fluent interface
    */
   public function rand(){
     $this->neevo()->driver()->rand($this);
@@ -411,10 +411,8 @@ class NeevoQuery {
 
   /**
    * Unsets defined parts of Query (WHERE conditions, ORDER BY clauses, affected columns (INSERT, UPDATE), LIMIT, etc.).
-   *
-   * <p>To unset 2nd WHERE condition from Query: <code>SELECT * FROM table WHERE id=5 OR name='John Doe' OR ...</code> use following: <code>$select->undo('where', 2);</code></p>
-   * <p>To unset 'name' column from Query: <code>UPDATE table SET name='John Doe', id=4 WHERE ...</code> use following: <code>$update->undo('value', 'name');</code></p>
-   *
+   * This method is DEPRECATED and will be removed.
+   * 
    * @param string $sql_part Part of Query to unset. Possible values are: (string)
    * <ul>
      * <li>where (for WHERE conditions)</li>
@@ -431,7 +429,7 @@ class NeevoQuery {
      * <li>array: Array of options (from pevious two) if you want to unset more than one piece of Query part (e.g 2nd and 3rd WHERE condition).</li>
    * </ul>
    * This argument is not required for LIMIT & OFFSET. Default is (int) 1.
-   * @return NeevoQuery
+   * @return NeevoQuery fluent interface
    */
   public function undo($sql_part, $position = 1){
     if(Neevo::$ignore_deprecated !== true)
@@ -501,16 +499,20 @@ class NeevoQuery {
   /**
    * Returns basic informations about query
    * @param bool $hide_password If set to TRUE (default), password will be replaced by '*****'.
+   * @param bool $exclude_connection If set to TRUE (default FALSE), connection info will be excluded.
    * @return array
    */
-  public function info($hide_password = true){
+  public function info($hide_password = true, $exclude_connection = false){
     $info = array(
       'type' => $this->getType(),
       'table' => $this->getTable(),
       'executed' => (bool) $this->performed(),
-      'query-string' => $this->dump(false, true),
-      'connection' => $this->neevo()->connection()->info($hide_password)
+      'query-string' => $this->dump(false, true)
     );
+
+    if($exclude_connection == true)
+      $this->neevo()->connection()->info($hide_password);
+
     if($this->performed()){
       $info['time'] = $this->time();
       if($this->getType() == 'insert')
@@ -565,7 +567,7 @@ class NeevoQuery {
     }
 
     $sql = str_replace($color_codes, $colors, $sql);
-    return "<code style=\"color:".self::$highlight_colors['columns']."\"> $sql </code>\n";
+    return "<code style=\"color:".self::$highlight_colors['columns']."\">$sql</code>\n";
   }
 
 }
