@@ -15,7 +15,7 @@
  */
 
 /**
- * Neevo driver class
+ * Neevo connection class
  * @package Neevo
  */
 class NeevoConnection{

@@ -24,6 +24,7 @@ if(version_compare(PHP_VERSION, '5.1.0', '<')){
 
 include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
 include_once dirname(__FILE__). '/neevo/NeevoQuery.php';
+include_once dirname(__FILE__). '/neevo/NeevoRow.php';
 include_once dirname(__FILE__). '/neevo/NeevoDriver.php';
 include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
 

@@ -98,6 +98,7 @@ class NeevoQuery {
    */
   public function sql($sql){
     $this->sql = $sql;
+    $this->type('sql');
     return $this;
   }
 
@@ -323,7 +324,7 @@ class NeevoQuery {
       $this->set_time($time);
 
       $this->performed = true;
-      if($this->get_type() == 'select'){
+      if(in_array($this->get_type(), array('select', 'sql'))){
         $this->resource = $query;
         return $query;
       }
@@ -346,7 +347,7 @@ class NeevoQuery {
    */
   public function fetch($fetch_type = null){
     $rows = null;
-    if($this->get_type() != 'select') $this->neevo()->error('Cannot fetch on this kind of query');
+    if(!in_array($this->get_type(), array('select', 'sql'))) $this->neevo()->error('Cannot fetch on this kind of query');
 
     $resource = $this->performed() ? $this->resource() : $this->run();
 
@@ -492,6 +493,22 @@ class NeevoQuery {
 
     return $this->neevo()->driver()->build($this);
 
+  }
+
+
+  /**
+   * Returns nam of PRIMARY KEY if defined, NULL otherwise.
+   * @return string
+   */
+  public function get_primary(){
+    $return = null;
+    $table = $this->neevo()->driver()->build_tablename($this);
+    $q = $this->neevo()->sql('EXPLAIN '. $table);
+    foreach($q->fetch(Neevo::MULTIPLE) as $col){
+      if($col['Key'] == 'PRI' && !isset($return))
+        $return = $col['Field'];
+    }
+    return $return;
   }
 
 
