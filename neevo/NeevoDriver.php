@@ -26,7 +26,7 @@ class NeevoDriver{
    * @param NeevoQuery $query NeevoQuery instance
    * @return string
    */
-  protected function build_tablename(NeevoQuery $query){
+  public function build_tablename(NeevoQuery $query){
     $pieces = explode(".", $query->get_table());
     $prefix = $query->neevo()->connection()->prefix();
     if(isset($pieces[1]))
