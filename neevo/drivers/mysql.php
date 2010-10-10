@@ -20,9 +20,6 @@
  */
 class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
 
-  /** @var array $col_quotes Characters used as opening and closing column quote, e.g `column` in MySQL */
-  protected $col_quotes = array('`', '`');
-
   /** @var Neevo $neevo Reference to main Neevo object */
   private $neevo;
 
@@ -39,18 +36,6 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
   }
 
 
-  /**
-   * Connects to database server, selects database and sets encoding (if defined)
-   * @param array $opts Array of options in following format:
-   * <pre>Array(
-   *   host            =>  localhost,
-   *   username        =>  username,
-   *   password        =>  password,
-   *   database        =>  database_name,
-   *   encoding        =>  utf8
-   * );</pre>
-   * @return bool
-   */
   public function connect(array $opts){
     $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
     if(!is_resource($connection)) $this->neevo()->error("Connection to host '".$opts['host']."' failed");
@@ -69,42 +54,21 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
   }
 
 
-  /**
-   * Closes given resource
-   * @param resource $resource
-   * @return void
-   */
   public function close($resource){
     @mysql_close($resource);
   }
 
 
-  /**
-   * Frees memory used by result
-   * @param resource $result
-   * @return bool
-   */
   public function free($result){
     return @mysql_free_result($result);
   }
 
 
-  /**
-   * Executes given SQL query
-   * @param string $query_string Query-string.
-   * @param resource Connection resource
-   * @return resource
-   */
   public function query($query_string, $resource){
     return @mysql_query($query_string, $resource);
   }
 
 
- /**
-   * Returns error message with driver-specific additions
-   * @param string $neevo_msg Error message
-   * @return string
-   */
   public function error($neevo_msg){
     $mysql_msg = mysql_error();
     $mysql_msg = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $mysql_msg);
@@ -117,53 +81,26 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
   }
 
 
-  /**
-   * Fetches row from given Query resource as associative array.
-   * @param resource $resource Query resource
-   * @return array
-   */
   public function fetch($resource){
     return @mysql_fetch_assoc($resource);
   }
 
 
-  /**
-   * Move internal result pointer
-   * @param resource $resource Query resource
-   * @param int $row_number Row number of the new result pointer.
-   * @return bool
-   */
   public function seek($resource, $row_number){
     return @mysql_data_seek($resource, $row_number);
   }
 
 
-  /**
-   * Get the ID generated in the INSERT query
-   * @param resource $resource Query resource
-   * @return int
-   */
   public function insertId($resource){
     return mysql_insert_id($resource);
   }
 
 
-  /**
-   * Randomize result order.
-   * @param NeevoQuery $query NeevoQuery instance
-   * @return NeevoQuery
-   */
   public function rand(NeevoQuery $query){
     $query->order('RAND()');
   }
 
 
-  /**
-   * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number
-   * of rows in result for SELECT queries
-   * @param NeevoQuery $query NeevoQuery instance
-   * @return int|FALSE Number of rows (int) or FALSE
-   */
   public function rows(NeevoQuery $query){
     if($query->getType() != 'select')
       $aff_rows = $query->performed()
@@ -176,23 +113,18 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
   }
 
 
-  /**
-   * Builds Query from NeevoQuery instance
-   * @param NeevoQuery $query NeevoQuery instance
-   * @return string The Query
-   */
   public function build(NeevoQuery $query){
 
-    $where = "";
-    $order = "";
-    $limit = "";
-    $q = "";
+    $where = '';
+    $order = '';
+    $limit = '';
+    $q = '';
 
     if($query->getSql())
       $q = $query->getSql();
 
     else{
-      $table = $this->buildTablename($query);
+      $table = $query->getTable();
 
       if($query->getWhere())
         $where = $this->buildWhere($query);
@@ -208,46 +140,48 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
         $q .= "SELECT $cols FROM $table$where$order$limit";
       }
 
-      if($query->getType() == 'insert' && $query->getData()){
+      elseif($query->getType() == 'insert' && $query->getData()){
         $insert_data = $this->buildInsertData($query);
         $q .= "INSERT INTO $table$insert_data";
       }
 
-      if($query->getType() == 'update' && $query->getData()){
+      elseif($query->getType() == 'update' && $query->getData()){
         $update_data = $this->buildUpdateData($query);
         $q .= "UPDATE $table$update_data$where$order$limit";
       }
 
-      if($query->getType() == 'delete')
+      elseif($query->getType() == 'delete')
         $q .= "DELETE FROM $table$where$order$limit";
     }
     return "$q;";
   }
 
 
-  /**
-   * Escapes given string for use in SQL
-   * @param string $string
-   * @return string
-   */
-  public function escapeString($string){
-    return mysql_real_escape_string($string);
+  public function escape($value, $type){
+    switch($type){
+      case Neevo::BOOL:
+        return $value ? 1 :0;
+
+      case Neevo::TEXT:
+        return "'". mysql_real_escape_string($value) ."'";
+        break;
+
+      case Neevo::BINARY:
+        return "_binary'". mysql_real_escape_string($value) ."'";
+
+      case Neevo::DATETIME:
+        return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
+
+      case Neevo::DATE:
+        return ($value instanceof DateTime) ? $value->format("'Y-m-d'") : date("'Y-m-d'", $value);
+        
+      default:
+        $this->neevo()->error('Unsupported data type');
+        break;
+    }
   }
 
 
-  /**
-   * Returns driver-specific column quotes (opening and closing chars)
-   * @return array
-   */
-  public function getQuotes(){
-    return $this->col_quotes;
-  }
-
-
-  /**
-   * Return Neevo class instance
-   * @return Neevo
-   */
   public function neevo(){
     return $this->neevo;
   }

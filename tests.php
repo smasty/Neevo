@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html>
   <head>
@@ -29,7 +30,7 @@ include "neevo.php";
 
 
 // Initialize Neevo and set driver to MySQL
-$sql = new Neevo('MySQL');
+$sql = new Neevo('MySQL', new NeevoCacheSession);
 
 
 // Set Neevo error reporting level
@@ -48,12 +49,12 @@ $sql->connect(array(
 
 
 // Using  "WHERE col IN (val1, val2, ...)" construction
-$s = $sql->select("client.id", 'neevo_demo.client')
-         ->where("md5(client.id)", null, "or")
+$s = $sql->select("client.id")->from('neevo_demo.client')
+         ->where("client.id", null, "or")
          ->where("client.name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))
          ->limit(5)->dump()->fetch();
 
-print_r($s);
+//$s->dump();
 
 // Data for Insert query demos
 $insert_data = array(
@@ -72,16 +73,9 @@ $update_data = array(
 );
 
 // INSERT QUERY
-$insert = $sql->insert('neevo_demo.client', $insert_data);
+$insert = $sql->insertInto('neevo_demo.client')->values($insert_data);
 
 // Echo highlighted query
-$insert->dump();
-
-echo " Now unset 'city' column:\n";
-
-// Unset 'city' column from values
-//$insert->undo('value', 'city');
-
 $insert->dump();
 
 // Run query;
@@ -90,7 +84,7 @@ echo " LAST_INSERT_ID: $insert_id\n\n";
 
 
 // UPDATE QUERY
-$update = $sql->update('client', $update_data)
+$update = $sql->update('client')->set($update_data)
               ->where('name', 'John-Doe')
               ->where('id !=', 101)
               ->order('id DESC');
@@ -111,29 +105,32 @@ $delete->dump();
 
 
 // SELECT ONE VALUE
-$select_one = $sql->select('name', 'client')
-                  ->where('id', 101);
+$select_one = $sql->select('name')->from('client')
+                  ->where('id')->limit(1);
 
 $select_one->dump();
 
 echo " Result: ". $select_one->fetch() ."\n\n";
 
 // SELECT QUERY
-$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash', 'client')
-              ->where('name !=', 'Fuller Strickland', 'OR')
-              ->where('name', 'John Doe')
+$select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash')
+              ->from('neevo_demo.client')
+              ->where('name NOT', array('John-Doe', 'John Doe'))
               ->order('id DESC', 'name ASC')
               ->limit(10);
 
 // Seek to 3rd row of resource (counting from zero)
-$select->seek(2);
+//$select->seek(2);
 
+$select->getPrimary();
 // Fetch results
 $select_result = $select->fetch();
 
 $select->dump();
 
-print_r($sql->connection()->info());
+$row = $select_result[0];
+$row['name'] = "XYZ ABC";
+//$row->update();
 
 ?>
 
@@ -145,6 +142,7 @@ print_r($sql->connection()->info());
 // Loop and print results
 foreach ($select_result as $row){
   echo "<tr><td>". $row['id'] ."<td>". $row['name'] ."<td>". $row['mail'] ."<td>". $row['city'] ."<td><code>". $row['mail_hash'] ."\n";
+
 }
 
 Debug::barDump($sql->info(), 'Neevo');

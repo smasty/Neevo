@@ -21,18 +21,7 @@
 class NeevoQuery {
 
   private  $table, $type, $limit, $offset, $neevo, $resource, $time, $sql, $performed;
-  private  $where, $order, $columns, $data = array();
-
-  private static $highlight_colors = array(
-    'columns'    => '#00f',
-    'chars'      => '#000',
-    'keywords'   => '#008000',
-    'joins'      => '#555',
-    'functions'  => '#008000',
-    'constants'  => '#f00'
-    );
-
-  public static $sql_functions = array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK', 'RAND');
+  private  $where = array(), $order = array(), $columns = array(), $data = array();
 
 
   /**
@@ -42,251 +31,187 @@ class NeevoQuery {
    * @param string $table Table to interact with
    * @return void
    */
-  function  __construct(Neevo $object, $type = '', $table = ''){
+  public function  __construct(Neevo $object){
     $this->neevo = $object;
-
-    $this->type($type);
-    $this->table($table);
   }
 
 
   /**
-   * Sets execution time of Query
-   * @param int $time Time value to set.
-   * @return void
+   * Creates SELECT query.
+   * @param string|array $cols Columns to select (array or comma-separated list)
+   * @return NeevoQuery fluent interface
    */
-  public function setTime($time){
-    $this->time = $time;
+  public function select($cols){
+    $this->setType('select');
+    $this->columns = is_string($cols) ? explode(',', $cols) : $cols;
+    return $this;
   }
 
 
   /**
-   * Returns execution time of Query
-   * @return int
-   */
-  public function time(){
-    return $this->time;
-  }
-
-
-  /**
-   * Sets table to interact
+   * Sets table for SELECT and DELETE queries.
    * @param string $table
    * @return NeevoQuery fluent interface
    */
-  public function table($table){
-    $this->table = $table;
+  public function from($table){
+    $this->setTable($table);
     return $this;
   }
 
 
   /**
-   * Sets query type. Possibe values: select, insert, update, delete
-   * @param string $type
+   * Creates UPDATE query.
+   * @param string $table Table name
    * @return NeevoQuery fluent interface
    */
-  public function type($type){
-    $this->type = $type;
+  public function update($table){
+    $this->setType('update');
+    $this->setTable($table);
     return $this;
   }
 
 
   /**
-   * Method for running direct SQL code
-   * @param string $sql Direct SQL code
-   * @return NeevoQuery fluent interface
+   * Sets data for UPDATE query.
+   * @param array $data Data to update.
+   * @return NeevoQuery
    */
-  public function sql($sql){
-    $this->sql = $sql;
-    $this->type('sql');
-    return $this;
-  }
-
-
-  /**
-   * Sets columns to retrive in SELECT queries
-   * @param array|string $columns Array or comma-separated list of columns.
-   * @return NeevoQuery fluent interface
-   */
-  public function cols($columns){
-    if(!is_array($columns)) $columns = explode(',', $columns);
-    $this->columns = $columns;
-    return $this;
-  }
-
-
-  /**
-   * Data for INSERT and UPDATE queries
-   * @param array $data Data in format "$column=>$value"
-   * @return NeevoQuery fluent interface
-   */
-  public function data(array $data){
+  public function set(array $data){
     $this->data = $data;
     return $this;
   }
 
-  
-  /**
-   * Returns true if query was performed
-   * @return bool
-   */
-  public function performed(){
-    return $this->performed;
-  }
-
 
   /**
-   * Returns Neevo instance
-   * @return Neevo
-   */
-  public function neevo(){
-    return $this->neevo;
-  }
-
-
-  /**
-   * Returns Query resource
-   * @return resource
-   */
-  public function resource(){
-    return $this->resource;
-  }
-
-
-  /**
-   * Returns table name
-   * @return string
-   */
-  public function getTable(){
-    return $this->table;
-  }
-
-
-  /**
-   * Returns Query type
-   * @return string
-   */
-  public function getType(){
-    return $this->type;
-  }
-
-
-  /**
-   * Returns Query LIMIT fraction
-   * @return int
-   */
-  public function getLimit(){
-    return $this->limit;
-  }
-
-
-  /**
-   * Returns Query OFFSET fraction
-   * @return int
-   */
-  public function getOffset(){
-    return $this->offset;
-  }
-
-
-  /**
-   * Returns whole query code for direct queries (type=sql)
-   * @return string
-   */
-  public function getSql(){
-    return $this->sql;
-  }
-
-
-  /**
-   * Returns Query WHERE fraction
-   * @return array
-   */
-  public function getWhere(){
-    return $this->where;
-  }
-
-
-  /**
-   * Returns Query ORDER BY fraction
-   * @return array
-   */
-  public function getOrder(){
-    return $this->order;
-  }
-
-
-  /**
-   * Returns Query columns fraction for SELECT queries ([SELECT] col1, col2, ...)
-   * @return array
-   */
-  public function getCols(){
-    return $this->columns;
-  }
-
-
-  /**
-   * Returns Query values fraction for INSERT/UPDATE queries
-   * ([INSERT INTO] (col1,, col2, ...) VALUES (val1, val2, ...) or
-   *  [UPDATE tbl] SET col1 = val1,  col2 = val2, ...)
-   * @return array
-   */
-  public function getData(){
-    return $this->data;
-  }
-
-
-  /**
-   * Sets WHERE condition for Query
-   *
-   * <p>Supports LIKE and IN functions</p>
-   *
-   * @param string $where Column to use and optionaly operator/function: "email !=", "email LIKE" or "email IN".
-   * @param string|array $value Value to search for: "spam@foo.com", "%@foo.com" or array('john@foo.com', 'doe@foo.com', 'john.doe@foo.com')
-   * @param string $glue Glue (AND, OR, etc.) to use betweet this and next WHERE condition. If not set, AND will be used.
+   * Creates INSERT query.
+   * @param string $table Table name
    * @return NeevoQuery fluent interface
    */
-  public function where($where, $value, $glue = null){
-    $where_condition = explode(' ', $where);
+  public function insert($table){
+    $this->setType('insert');
+    $this->setTable($table);
+    return $this;
+  }
+
+
+  /**
+   * Alias for NeevoQuery::insert().
+   * @return NeevoQuery fluent interface
+   */
+  public function insertInto($table){
+    return $this->insert($table);
+  }
+
+
+  /**
+   * Sets values for INSERT query.
+   * @param array $data Values.
+   * @return NeevoQuery fluent interface
+   */
+  public function values(array $data){
+    $this->data = $data;
+    return $this;
+  }
+
+
+  /**
+   * Creates DELETE query.
+   * @param string $table Table name. Optional, can be set by from() method.
+   * @return NeevoQuery fluent interface
+   */
+  public function delete($table = null){
+    $this->setType('delete');
+    if(isset($table))
+      $this->setTable($table);
+    return $this;
+  }
+
+
+  /**
+   * Sets WHERE condition. More calls appends conditions.
+   * @param string $where Column to use and optionaly operator: "email", "email LIKE", "email !=", etc.
+   * @param string|array $value Value to search for: "string", "%patten%", array, boolean or NULL.
+   * @param string $glue Glue (AND/OR) to use betweet this and next WHERE condition.
+   * @return NeevoQuery fluent interface
+   */
+  public function where($condition, $value = true, $glue = 'AND'){
+    $condition = trim($condition);
+    $column = strstr($condition, ' ') ? substr($condition, 0, strpos($condition, ' ')) : $condition;
+    $operator = strstr($condition, ' ') ? substr($condition, strpos($condition, ' ')+1) : null;
+
     if(is_null($value)){
-      $where_condition[1] = "IS";
-      $value = "NULL";
+      $operator = 'IS';
+      $value = 'NULL';
     }
-    if(is_array($value)) $where_condition[1] = "IN";
-    if(!isset($where_condition[1])) $where_condition[1] = '=';
-    $column = $where_condition[0];
-    $condition = array($column, $where_condition[1], $value, strtoupper($glue ? $glue : "and"));
-    $this->where[] = $condition;
+    elseif($value === true){
+      $operator = '';
+      $value = true;
+    }
+    elseif($value === false){
+      $operator = '';
+      $value = false;
+    }
+    elseif(is_array($value))
+      $operator = (strtoupper($operator) == 'NOT') ? 'NOT IN' : 'IN';
+
+    if(!isset($operator)) $operator = '=';
+
+    $this->where[] = array($column, $operator, $value, strtoupper($glue));
     return $this;
   }
 
 
   /**
-   * Sets ORDER BY rule for Query
-   * @param string $args [Infinite arguments] Order rules: "col_name ASC", "col_name" or "col_name DESC", etc...
+   * Sets ORDER clauses. Accepts infinite arguments (rules).
+   * @param string $rules Order rules: "column", "col1, col2 DESC", etc.
    * @return NeevoQuery fluent interface
    */
-  public function order($args){
-    $rules = array();
-    $arguments = func_get_args();
-    foreach ($arguments as $argument) {
-      $order_rule = explode(' ', $argument);
-      $rules[] = $order_rule;
-    }
-    $this->order = $rules;
+  public function order($rules){
+    $this->order = func_get_args();
     return $this;
   }
 
 
   /**
-   * Sets limit (and offset) for Query
-   * @param int $limit Limit
-   * @param int $offset Offset
+   * Alias for NeevoQuery::order().
+   * @return NeevoQuery fluent interface
+   */
+  public function orderBy($rules){
+    return $this->order($rule);
+  }
+
+
+  /**
+   * Sets LIMIT and OFFSET clause.
+   * @param int $limit
+   * @param int $offset
    * @return NeevoQuery fluent interface
    */
   public function limit($limit, $offset = null){
     $this->limit = $limit;
     if(isset($offset) && $this->getType() == 'select') $this->offset = $offset;
+    return $this;
+  }
+
+
+  /**
+   * Randomize result order. Removes any other order clause.
+   * @return NeevoQuery fluent interface
+   */
+  public function rand(){
+    $this->neevo()->driver()->rand($this);
+    return $this;
+  }
+
+
+  /**
+   * Creates query with direct SQL.
+   * @param string $sql SQL code
+   * @return NeevoQuery fluent interface
+   */
+  public function sql($sql){
+    $this->sql = $sql;
+    $this->setType('sql');
     return $this;
   }
 
@@ -309,7 +234,7 @@ class NeevoQuery {
    * @return resource|NeevoQuery Query resource on SELECT queries or NeevoQuery object
    */
   public function run(){
-    $start = explode(" ", microtime());
+    $start = explode(' ', microtime());
     $query = $this->neevo()->driver()->query($this->build(), $this->neevo()->connection()->resource());
     if(!$query){
       $this->neevo()->error('Query failed');
@@ -338,29 +263,30 @@ class NeevoQuery {
    * Fetches data from given Query resource.
    * @param int $fetch_type Result format. If set to Neevo::MULTIPLE,
    * number of fetched rows is ignored.
-   * @return array|string Array of rows represented as associative arrays
-   * (column => value), if two or more rows are fetched.<br>
-   * Only row as associative array, if only one row is fetched.<br>
+   * @return NeevoResult|NeevoRow NeevoResult instance with rows
+   * represented as NeevoRow instances if two or more rows are fetched.<br>
+   * Row represented as NeevoRow, if only one row is fetched.<br>
    * Numerical array of values from fetched column, if there's only one column
-   * fetched in all rows.<br>
-   * String, if only one column value is fetched at all.
+   * fetched in all rows.
    */
   public function fetch($fetch_type = null){
     $rows = null;
     if(!in_array($this->getType(), array('select', 'sql'))) $this->neevo()->error('Cannot fetch on this kind of query');
 
-    $resource = $this->performed() ? $this->resource() : $this->run();
+    $resource = $this->isPerformed() ? $this->resource() : $this->run();
 
     while($tmp_rows = $this->neevo()->driver()->fetch($resource))
-      $rows[] = (count($tmp_rows) == 1) ? $tmp_rows[max(array_keys($tmp_rows))] : $tmp_rows;
+      $rows[] = new NeevoRow($tmp_rows, $this);
 
     $this->neevo()->driver()->free($resource);
 
-    if(count($rows) == 1 && $fetch_type != Neevo::MULTIPLE)
+    // If only one row, return NeevoRow instead
+    if(count($rows) === 1 && $fetch_type != Neevo::MULTIPLE)
       $rows = $rows[0];
+    else $rows = new NeevoResult($rows, $this);
 
     if(!count($rows) && is_array($rows)) return false; // Empty
-    return $resource ? $rows : $this->neevo()->error("Fetching result data failed");
+    return $resource ? $rows : $this->neevo()->error('Fetching result data failed');
   }
 
 
@@ -370,7 +296,7 @@ class NeevoQuery {
    * @return bool
    */
   public function seek($row_number){
-    if(!$this->performed()) $this->run();
+    if(!$this->isPerformed()) $this->run();
 
     $seek = $this->neevo()->driver()->seek($this->resource(), $row_number);
     return $seek ? $seek : $this->neevo()->error("Cannot seek to row $row_number");
@@ -382,19 +308,9 @@ class NeevoQuery {
    * @return int
    */
   public function insertId(){
-    if(!$this->performed()) $this->run();
+    if(!$this->isPerformed()) $this->run();
 
     return $this->neevo()->driver()->insertId($this->neevo()->connection()->resource());
-  }
-
-
-  /**
-   * Randomize result order. (Shorthand for NeevoQuery->order('RAND()');)
-   * @return NeevoQuery fluent interface
-   */
-  public function rand(){
-    $this->neevo()->driver()->rand($this);
-    return $this;
   }
 
 
@@ -403,84 +319,9 @@ class NeevoQuery {
    * @return int|FALSE Number of rows (int) or FALSE
    */
   public function rows(){
-    if(!$this->performed()) $this->run();
+    if(!$this->isPerformed()) $this->run();
 
     return $this->neevo()->driver()->rows($this);
-  }
-
-
-  /**
-   * Unsets defined parts of Query (WHERE conditions, ORDER BY clauses, affected columns (INSERT, UPDATE), LIMIT, etc.).
-   * This method is DEPRECATED and will be removed.
-   * 
-   * @param string $sql_part Part of Query to unset. Possible values are: (string)
-   * <ul>
-     * <li>where (for WHERE conditions)</li>
-     * <li>order (for ORDER BY clauses)</li>
-     * <li>column (for selected columns in SELECT queries)</li>
-     * <li>value (for values to put/set in INSERT and UPDATE)</li>
-     * <li>limit (for LIMIT clause)</li>
-     * <li>offset (for OFFSET clause)</li>
-   * </ul>
-   * @param int|string|array $position Exact piece of Query part:
-   * <ul>
-     * <li>int: Ordinal number of Query part piece (WHERE condition, ORDER BY clause, columns in SELECT queries) to unset.</li>
-     * <li>string: Column name from defined values (values to put/set in INSERT and UPDATE queries) to unset.</li>
-     * <li>array: Array of options (from pevious two) if you want to unset more than one piece of Query part (e.g 2nd and 3rd WHERE condition).</li>
-   * </ul>
-   * This argument is not required for LIMIT & OFFSET. Default is (int) 1.
-   * @return NeevoQuery fluent interface
-   */
-  public function undo($sql_part, $position = 1){
-    if(Neevo::$ignore_deprecated !== true)
-      $this->neevo()->error("NeevoQuery::undo() is deprecated and will be removed. To use it, set Neevo::\$ignore_deprecated to TRUE");
-    $str = false;
-    switch (strtolower($sql_part)) {
-      case 'where':
-        $part = 'where';
-        break;
-      case 'order';
-        $part = 'order';
-        break;
-      case 'column';
-        $part = 'columns';
-        break;
-      case 'value';
-        $part = 'data';
-        break;
-      case 'limit':
-        $part = 'limit';
-        $str = true;
-        break;
-      case 'offset':
-        $part = 'offset';
-        $str = true;
-        break;
-      default:
-        $this->neevo()->error("Undo failed: No such Query part '$sql_part' supported for undo()");
-        break;
-    }
-
-    if($str)
-      unset($this->$part);
-    else{
-      if(isset($this->$part)){
-        $positions = array();
-        if(!is_array($position)) $positions[] = $position;
-        foreach ($positions as $pos) {
-          $pos = is_numeric($pos) ? $pos-1 : $pos;
-          $apart = $this->$part;
-          unset($apart[$pos]);
-          foreach($apart as $key=>$value){
-            $loop[$key] = $value;
-          }
-          $this->$part = $loop;
-        }
-      } else $this->neevo()->error("Undo failed: No such Query part '$sql_part' for this kind of Query");
-    }
-    $this->performed = null;
-    $this->resource = null;
-    return $this;
   }
 
 
@@ -506,14 +347,14 @@ class NeevoQuery {
     $info = array(
       'type' => $this->getType(),
       'table' => $this->getTable(),
-      'executed' => (bool) $this->performed(),
+      'executed' => (bool) $this->isPerformed(),
       'query-string' => $this->dump(false, true)
     );
 
     if($exclude_connection == true)
       $this->neevo()->connection()->info($hide_password);
 
-    if($this->performed()){
+    if($this->isPerformed()){
       $info['time'] = $this->time();
       if($this->getType() == 'insert')
         $info['last-insert-id'] = $this->insertId();
@@ -522,19 +363,149 @@ class NeevoQuery {
     return $info;
   }
 
+
+  /*  ******  Setters & Getters  ******  */
+
+
+  public function setTime($time){
+    $this->time = $time;
+  }
+
+  public function setTable($table){
+    $this->table = $table;
+    return $this;
+  }
+
+  public function setType($type){
+    $this->type = $type;
+    return $this;
+  }
+
+  /**
+   * Query execution time.
+   * @return int
+   */
+  public function time(){
+    return $this->time;
+  }
+
+  /**
+   * @return Neevo
+   */
+  public function neevo(){
+    return $this->neevo;
+  }
+
+
+  public function resource(){
+    return $this->resource;
+  }
+
+  /**
+   * If query was performed, returns true.
+   * @return bool
+   */
+  public function isPerformed(){
+    return $this->performed;
+  }
+
+  /**
+   * Returns full table name (with prefix)
+   * @return string
+   */
+  public function getTable(){
+    $table = $this->table;
+    $prefix = $this->neevo()->connection()->prefix();
+    if(preg_match('#([^.]+)(\.)([^.]+)#', $table))
+      return str_replace('.', ".$prefix", $table);
+    return $prefix.$table;
+  }
+
+  /**
+   * Returns Query type
+   * @return string
+   */
+  public function getType(){
+    return $this->type;
+  }
+
+  /**
+   * Returns Query LIMIT fraction
+   * @return int
+   */
+  public function getLimit(){
+    return $this->limit;
+  }
+
+  /**
+   * Returns Query OFFSET fraction
+   * @return int
+   */
+  public function getOffset(){
+    return $this->offset;
+  }
+
+  /**
+   * Returns query code for direct queries (type=sql)
+   * @return string
+   */
+  public function getSql(){
+    return $this->sql;
+  }
+
+  /**
+   * Returns Query WHERE fraction
+   * @return array
+   */
+  public function getWhere(){
+    return $this->where;
+  }
+
+  /**
+   * Returns Query ORDER BY fraction
+   * @return array
+   */
+  public function getOrder(){
+    return $this->order;
+  }
+
+  /**
+   * Returns Query columns fraction for SELECT queries ([SELECT] col1, col2, ...)
+   * @return array
+   */
+  public function getCols(){
+    return $this->columns;
+  }
+
+  /**
+   * Returns Query values fraction for INSERT/UPDATE queries
+   * ([INSERT INTO] (col1,, col2, ...) VALUES (val1, val2, ...) or
+   *  [UPDATE tbl] SET col1 = val1,  col2 = val2, ...)
+   * @return array
+   */
+  public function getData(){
+    return $this->data;
+  }
+
   /**
    * Returns name of PRIMARY KEY if defined, NULL otherwise.
    * @return string
    */
   public function getPrimary(){
     $return = null;
-    $table = $this->neevo()->driver()->buildTablename($this);
-    $q = $this->neevo()->sql('EXPLAIN '. $table);
-    foreach($q->fetch(Neevo::MULTIPLE) as $col){
-      if($col['Key'] == 'PRI' && !isset($return))
-        $return = $col['Field'];
+    $table = preg_replace('#[^0-9a-z_.]#i', '', $this->getTable());
+    $cached_primary = $this->neevo()->cacheLoad('table_'.$table.'_primary');
+
+    if(is_null($cached_primary)){
+      $q = $this->neevo()->sql('SHOW FULL COLUMNS FROM '. $table);
+      foreach($q->fetch(Neevo::MULTIPLE) as $col){
+        if($col['Key'] === 'PRI' && !isset($return))
+          $return = $col['Field'];
+      }
+      $this->neevo()->cacheSave('table_'.$table.'_primary', $return);
+      return $return;
     }
-    return $return;
+    return $cached_primary;
   }
 
 
@@ -548,13 +519,13 @@ class NeevoQuery {
    */
   private static function _highlightSql($sql){
     $color_codes = array('chars'=>'chars','keywords'=>'kwords','joins'=>'joins','functions'=>'funcs','constants'=>'consts');
-    $colors = self::$highlight_colors;
+    $colors = Neevo::$highlight_colors;
     unset($colors['columns']);
 
     $words = array(
       'keywords'  => array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
       'joins'     => array('JOIN', 'INNER', 'OUTER', 'FULL', 'NATURAL', 'LEFT', 'RIGHT'),
-      'functions' => self::$sql_functions,
+      'functions' => array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK', 'RAND'),
       'chars'     => '/([\\.,!\\(\\)<>:=`]+)/i',
       'constants' => '/(\'[^\']*\'|[0-9]+)/i'
     );
@@ -567,7 +538,7 @@ class NeevoQuery {
     }
 
     $sql = str_replace($color_codes, $colors, $sql);
-    return "<code style=\"color:".self::$highlight_colors['columns']."\">$sql</code>\n";
+    return '<code style="color:' . Neevo::$highlight_colors['columns'] . '">' . $sql . '</code>' . PHP_EOL;
   }
 
 }

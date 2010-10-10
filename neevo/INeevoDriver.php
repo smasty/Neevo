@@ -127,18 +127,12 @@ interface INeevoDriver {
 
 
   /**
-   * Escapes given string for use in SQL
-   * @param string $string
-   * @return string
+   * Escapes given value
+   * @param mixed $value
+   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @return mixed
    */
-  public function escapeString($string);
-
-
-  /**
-   * Returns driver-specific column quotes (opening and closing chars)
-   * @return array
-   */
-  public function getQuotes();
+  public function escape($value, $type);
 
 
   /**

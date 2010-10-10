@@ -23,9 +23,11 @@ if(version_compare(PHP_VERSION, '5.1.0', '<')){
 }
 
 include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
-include_once dirname(__FILE__). '/neevo/NeevoQuery.php';
-include_once dirname(__FILE__). '/neevo/NeevoDriver.php';
 include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
+include_once dirname(__FILE__). '/neevo/NeevoDriver.php';
+include_once dirname(__FILE__). '/neevo/NeevoQuery.php';
+include_once dirname(__FILE__). '/neevo/NeevoResult.php';
+include_once dirname(__FILE__). '/neevo/NeevoCache.php';
 
 /**
  * Main Neevo layer class
@@ -34,9 +36,24 @@ include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
 class Neevo{
 
   // Fields
-  private $connection, $last, $queries, $error_reporting, $driver, $error_handler;
+  private $connection, $driver, $cache, $error_handler, $last, $queries, $error_reporting;
 
+  /**
+   * @var bool Ignore warning when using deprecated methods.
+   */
   public static $ignore_deprecated = false;
+
+  /**
+   * @var array Default colors for query highlighter.
+   */
+  public static $highlight_colors = array(
+    'columns'    => '#00f',
+    'chars'      => '#000',
+    'keywords'   => '#008000',
+    'joins'      => '#555',
+    'functions'  => '#008000',
+    'constants'  => '#f00'
+  );
 
   // Error-reporting levels
   const E_NONE    = 11;
@@ -44,11 +61,21 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const VERSION = "0.3dev";
-  const REVISION = 122;
+  const VERSION = "0.4dev";
+  const REVISION = 130;
 
   // Fetch format
   const MULTIPLE = 21;
+
+  // Data types
+  const BOOL = 30;
+  const FLOAT = 31;
+  const INT = 32;
+  const TEXT = 33;
+  const BINARY = 34;
+  const IDENTIFIER = 35;
+  const DATETIME = 36;
+  const DATE = 37;
 
 
   /**
@@ -57,9 +84,10 @@ class Neevo{
    * @return void
    * @throws NeevoException
    */
-  public function __construct($driver){
+  public function __construct($driver, INeevoCache $cache = null){
     if(!$driver) throw new NeevoException("Driver not defined.");
     $this->setDriver($driver);
+    $this->cache = $cache;
   }
 
 
@@ -76,14 +104,12 @@ class Neevo{
    * Creates and uses a new connection to a server.
    * @param array $opts Array of options in following format:
    * <pre>Array(
-   *   driver          =>  driver to use
    *   host            =>  localhost,
    *   username        =>  username,
    *   password        =>  password,
    *   database        =>  database_name,
    *   encoding        =>  utf8,
    *   table_prefix    =>  prefix_
-   *   error_reporting =>  error-reporting level; See set_error_reporting() for possible values.
    * );</pre>
    * @return bool
    */
@@ -135,6 +161,26 @@ class Neevo{
 
 
   /**
+   * Returns Neevo Driver class
+   * @return INeevoDriver
+   */
+  public function driver(){
+    return $this->driver;
+  }
+
+
+  /**
+   * Uses given Neevo SQL driver
+   * @param string $driver
+   * @return Neevo
+   */
+  public function useDriver($driver){
+    $this->setDriver($driver);
+    return $this;
+  }
+
+
+  /**
    * Sets Neevo SQL driver to use
    * @param string $driver Driver name
    * @throws NeevoException
@@ -154,38 +200,40 @@ class Neevo{
   }
 
 
-  /**
-   * Uses given Neevo SQL driver
-   * @param string $driver
-   * @return Neevo
-   */
-  public function useDriver($driver){
-    $this->setDriver($driver);
-    return $this;
-  }
-
-
-  /**
-   * Returns Neevo Driver class
-   * @return INeevoDriver
-   */
-  public function driver(){
-    return $this->driver;
-  }
-
-
   private function isDriver($class){
     return (class_exists($class, false) && in_array("INeevoDriver", class_implements($class, false)) && in_array("NeevoDriver", class_parents($class, false)));
   }
+  
+  
+  /**
+   * Neevo cache object
+   * @return INeevoCache|null
+   */
+  public function cache(){
+    return $this->cache;
+  }
 
 
   /**
-   * Sets last executed query
-   * @param NeevoQuery $last Last executed query
+   * Load stored data
+   * @param string $key
+   * @return mixed|null null if not found
+   */
+  public function cacheLoad($key){
+    if(isset($this->cache))
+      return $this->cache()->load($key);
+  }
+
+
+  /**
+   * Save data
+   * @param string $key
+   * @param mixed $value
    * @return void
    */
-  public function setLast(NeevoQuery $last){
-    $this->last = $last;
+  public function cacheSave($key, $value){
+    if(isset($this->cache))
+      $this->cache()->save($key, $value);
   }
 
 
@@ -200,12 +248,12 @@ class Neevo{
 
 
   /**
-   * Increments queries counter
+   * Sets last executed query
+   * @param NeevoQuery $last Last executed query
    * @return void
-   * @access private
    */
-  public function incrementQueries(){
-    $this->queries++;
+  public function setLast(NeevoQuery $last){
+    $this->last = $last;
   }
 
 
@@ -219,59 +267,86 @@ class Neevo{
 
 
   /**
-   * Creates NeevoQuery object for SELECT query
-   * @param mixed $columns Array or comma-separated list of columns to select
-   * @param string $table Database table to use for selecting
-   * @return NeevoQuery
+   * Increments queries counter
+   * @return void
+   * @access private
    */
-  public function select($columns, $table){
-    $q = new NeevoQuery($this, 'select', $table);
-    return $q->cols($columns);
+  public function incrementQueries(){
+    $this->queries++;
   }
 
 
   /**
-   * Creates NeevoQuery object for INSERT query
-   * @param string $table Database table to use for inserting
-   * @param array $data Associative array of values to insert in format column => value
-   * @return NeevoQuery
+   * Creates SELECT query.
+   * @param string|array $cols Columns to select (array or comma-separated list)
+   * @return NeevoQuery fluent interface
    */
-  public function insert($table, array $data){
-    $q = new NeevoQuery($this, 'insert', $table);
-    return $q->data($data);
+  public function select($columns){
+    $q = new NeevoQuery($this);
+    return $q->select($columns);
   }
 
 
   /**
-   * Creates NeevoQuery object for UPDATE query
-   * @param string $table Database table to use for updating
-   * @param array $data Associative array of values for update in format column => value
-   * @return NeevoQuery
+   * Creates INSERT query.
+   * @param string $table Table name
+   * @return NeevoQuery fluent interface
    */
-  public function update($table, array $data){
-    $q = new NeevoQuery($this, 'update', $table);
-    return $q->data($data);
+  public function insert($table){
+    $q = new NeevoQuery($this);
+    return $q->insert($table);
   }
 
 
   /**
-   * Creates NeevoQuery object for DELETE query
-   * @param string $table Database table to use for deleting
-   * @return NeevoQuery
+   * Alias for Neevo::insert().
+   * @return NeevoQuery fluent interface
    */
-  public function delete($table){
-    return new NeevoQuery($this, 'delete', $table);
+  public function insertInto($table){
+    return $this->insert($table);
   }
 
 
   /**
-   * Creates NeevoQuery object for direct SQL query
-   * @param string $sql Direct SQL query
-   * @return NeevoQuery
+   * Creates UPDATE query.
+   * @param string $table Table name.
+   * @return NeevoQuery fluent interface
+   */
+  public function update($table){
+    $q = new NeevoQuery($this);
+    return $q->update($table);
+  }
+
+
+  /**
+   * Creates DELETE query.
+   * @param string $table Table name. Optional, can be set by from() method.
+   * @return NeevoQuery fluent interface
+   */
+  public function delete($table = null){
+    $q = new NeevoQuery($this);
+    return $q->delete($table);
+  }
+
+
+  /**
+   * Creates query with direct SQL.
+   * @param string $sql SQL code
+   * @return NeevoQuery fluent interface
    */
   public function sql($sql){
     $q = new NeevoQuery($this);
     return $q->sql($sql);
+  }
+
+
+  /**
+   * Returns error-reporting level
+   * @return int
+   */
+  public function errorReporting(){
+    if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
+    return $this->error_reporting;
   }
 
 
@@ -291,12 +366,15 @@ class Neevo{
 
 
   /**
-   * Returns error-reporting level
-   * @return int
+   * Returns error-handler function name
+   * @param string $handler_function Name of error-handler function
+   * @return string
    */
-  public function errorReporting(){
-    if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
-    return $this->error_reporting;
+  public function errorHandler(){
+    $func = $this->error_handler;
+    if( (is_array($func) && !method_exists($func[0], $func[1]) ) || ( !is_array($func) && !function_exists($func) ) )
+      $this->error_handler = array('Neevo', 'defaultErrorHandler');
+    return $this->error_handler;
   }
 
 
@@ -309,19 +387,6 @@ class Neevo{
     if(function_exists($handler_function))
       $this->error_handler = $handler_function;
     else $this->error_handler = array('Neevo', 'defaultErrorHandler');
-  }
-
-
-  /**
-   * Returns error-handler function name
-   * @param string $handler_function Name of error-handler function
-   * @return string
-   */
-  public function errorHandler(){
-    $func = $this->error_handler;
-    if( (is_array($func) && !method_exists($func[0], $func[1]) ) || ( !is_array($func) && !function_exists($func) ) )
-      $this->error_handler = array('Neevo', 'defaultErrorHandler');
-    return $this->error_handler;
   }
 
 
@@ -340,7 +405,7 @@ class Neevo{
       $exception = new NeevoException($msg);
 
       if($level == Neevo::E_HANDLE)
-        call_user_func ($this->errorHandler(), $exception);
+        call_user_func($this->errorHandler(), $exception);
       if($level == Neevo::E_STRICT)
         throw $exception;
     }
@@ -382,7 +447,7 @@ class Neevo{
    */
   public function version($string = true){
     if($string)
-      $return = "Neevo ".self::VERSION." (revision ".self::REVISION.").";
+      $return = 'Neevo '.self::VERSION.' (revision '.self::REVISION.').';
     else
       $return = array(
         'version'  => self::VERSION,
@@ -411,3 +476,30 @@ class Neevo{
  * @package Neevo
  */
 class NeevoException extends Exception{};
+
+
+/**
+ * SQL literal value
+ * @package Neevo
+ */
+class NeevoLiteral {
+
+	private $value;
+
+	/**
+   * Creates literal value.
+   * @param string $value
+   */
+	public function __construct($value) {
+		$this->value = $value;
+	}
+
+
+  /**
+   * Returns literal value
+   * @return string
+   */
+  public function __toString(){
+    return $this->value;
+  }
+}
