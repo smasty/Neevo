@@ -261,13 +261,11 @@ class NeevoQuery {
 
   /**
    * Fetches data from given Query resource.
-   * @param int $fetch_type Result format. If set to Neevo::MULTIPLE,
-   * number of fetched rows is ignored.
-   * @return NeevoResult|NeevoRow NeevoResult instance with rows
-   * represented as NeevoRow instances if two or more rows are fetched.<br>
-   * Row represented as NeevoRow, if only one row is fetched.<br>
-   * Numerical array of values from fetched column, if there's only one column
-   * fetched in all rows.
+   *
+   * Returns **NeevoResult** instance with rows represented as **NeevoRow** instances if two or more rows are fetched.<br>
+   * Row represented as **NeevoRow**, if only one row is fetched. **FALSE** if nothing fetched.
+   * @param int $fetch_type Result format. If set to Neevo::MULTIPLE, number of fetched rows is ignored.
+   * @return NeevoResult|NeevoRow|FALSE
    */
   public function fetch($fetch_type = null){
     $rows = null;
@@ -283,7 +281,8 @@ class NeevoQuery {
     // If only one row, return NeevoRow instead
     if(count($rows) === 1 && $fetch_type != Neevo::MULTIPLE)
       $rows = $rows[0];
-    else $rows = new NeevoResult($rows, $this);
+    elseif(!is_null($rows))
+      $rows = new NeevoResult($rows, $this);
 
     if(!count($rows) && is_array($rows)) return false; // Empty
     return $resource ? $rows : $this->neevo()->error('Fetching result data failed');
@@ -328,7 +327,7 @@ class NeevoQuery {
   /**
    * Builds Query from NeevoQuery instance
    * @return string The Query in SQL dialect
-   * @access private
+   * @internal
    */
   public function build(){
 
@@ -367,15 +366,18 @@ class NeevoQuery {
   /*  ******  Setters & Getters  ******  */
 
 
+  /** @internal */
   public function setTime($time){
     $this->time = $time;
   }
 
+  /** @internal */
   public function setTable($table){
     $this->table = $table;
     return $this;
   }
 
+  /** @internal */
   public function setType($type){
     $this->type = $type;
     return $this;
@@ -391,12 +393,14 @@ class NeevoQuery {
 
   /**
    * @return Neevo
+   * @internal
    */
   public function neevo(){
     return $this->neevo;
   }
 
 
+  /** @internal */
   public function resource(){
     return $this->resource;
   }
@@ -516,6 +520,7 @@ class NeevoQuery {
    * Highlights given SQL code
    * @param string $sql
    * @return string
+   * @internal
    */
   private static function _highlightSql($sql){
     $color_codes = array('chars'=>'chars','keywords'=>'kwords','joins'=>'joins','functions'=>'funcs','constants'=>'consts');

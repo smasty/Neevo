@@ -134,6 +134,7 @@ class Neevo{
    * @param array $opts Array of connection options, see Neevo->connect()
    * @see Neevo->connect()
    * @return NeevoConnection
+   * @internal
    */
   public function createConnection(array $opts){
     return new NeevoConnection($this, $this->driver(), $opts['username'], $opts['password'], $opts['host'], $opts['database'], $opts['encoding'], $opts['table_prefix']);
@@ -154,6 +155,7 @@ class Neevo{
   /**
    * Sets Neevo Connection to use
    * @param NeevoConnection $connection Instance to use
+   * @internal
    */
   private function setConnection(NeevoConnection $connection){
     $this->connection = $connection;
@@ -185,6 +187,7 @@ class Neevo{
    * @param string $driver Driver name
    * @throws NeevoException
    * @return void
+   * @internal
    */
   private function setDriver($driver){
     $class = "NeevoDriver$driver";
@@ -200,6 +203,7 @@ class Neevo{
   }
 
 
+  /** @internal */
   private function isDriver($class){
     return (class_exists($class, false) && in_array("INeevoDriver", class_implements($class, false)) && in_array("NeevoDriver", class_parents($class, false)));
   }
@@ -208,6 +212,7 @@ class Neevo{
   /**
    * Neevo cache object
    * @return INeevoCache|null
+   * @internal
    */
   public function cache(){
     return $this->cache;
@@ -251,6 +256,7 @@ class Neevo{
    * Sets last executed query
    * @param NeevoQuery $last Last executed query
    * @return void
+   * @internal
    */
   public function setLast(NeevoQuery $last){
     $this->last = $last;
@@ -269,7 +275,7 @@ class Neevo{
   /**
    * Increments queries counter
    * @return void
-   * @access private
+   * @internal
    */
   public function incrementQueries(){
     $this->queries++;
@@ -417,7 +423,8 @@ class Neevo{
   /**
    * Neevo's default error handler function
    * @param NeevoException $exception
-   * return void
+   * @return void
+   * @internal
    */
   public static function defaultErrorHandler(NeevoException $exception){
     $message = $exception->getMessage();

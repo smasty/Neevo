@@ -122,6 +122,7 @@ class NeevoDriver{
    * @param array $array
    * @param bool $sql_funcs Consider SQL functions
    * @return array
+   * @internal
    */
   protected function _escapeArray(array $array, $sql_funcs = false){
     foreach($array as &$value){
@@ -156,6 +157,7 @@ class NeevoDriver{
    * @param string $string
    * @param bool $sql_funcs Consider SQL functions
    * @return string
+   * @internal
    */
   protected function _escapeString($string, $sql_funcs = false){
     if(get_magic_quotes_gpc()) $string = stripslashes($string);

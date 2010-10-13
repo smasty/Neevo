@@ -51,10 +51,10 @@ $sql->connect(array(
 // Using  "WHERE col IN (val1, val2, ...)" construction
 $s = $sql->select("client.id")->from('neevo_demo.client')
          ->where("client.id", null, "or")
-         ->where("client.name", array("John Doe", "Giacomo Doyle", "Justin Hicks"))
+         ->where("client.name", array("John Doe", "Melyssa Huff", "Paula Harris"))
          ->limit(5)->dump()->fetch();
 
-//$s->dump();
+$s->dump();
 
 // Data for Insert query demos
 $insert_data = array(

@@ -169,7 +169,7 @@ false;}else{$this->neevo()->incrementQueries();$this->neevo()->setLast($this);$e
 return$this;}}public
 function
 fetch($fetch_type=null){$rows=null;if(!in_array($this->getType(),array('select','sql')))$this->neevo()->error('Cannot fetch on this kind of query');$resource=$this->isPerformed()?$this->resource():$this->run();while($tmp_rows=$this->neevo()->driver()->fetch($resource))$rows[]=new
-NeevoRow($tmp_rows,$this);$this->neevo()->driver()->free($resource);if(count($rows)===1&&$fetch_type!=Neevo::MULTIPLE)$rows=$rows[0];else$rows=new
+NeevoRow($tmp_rows,$this);$this->neevo()->driver()->free($resource);if(count($rows)===1&&$fetch_type!=Neevo::MULTIPLE)$rows=$rows[0];elseif(!is_null($rows))$rows=new
 NeevoResult($rows,$this);if(!count($rows)&&is_array($rows))return
 false;return$resource?$rows:$this->neevo()->error('Fetching result data failed');}public
 function
@@ -223,7 +223,7 @@ _highlightSql($sql){$color_codes=array('chars'=>'chars','keywords'=>'kwords','jo
 as$key=>$code){$regexp=in_array($key,array('constants','chars'))?$words[$key]:'/\\b('.join("|",$words[$key]).')\\b/i';$sql=preg_replace($regexp,"<span style=\"color:$code\">$1</span>",$sql);}$sql=str_replace($color_codes,$colors,$sql);return'<code style="color:'.Neevo::$highlight_colors['columns'].'">'.$sql.'</code>'.PHP_EOL;}}class
 NeevoResult
 implements
-ArrayAccess,Countable,Iterator{private$data=array();private$query;public
+ArrayAccess,Countable,IteratorAggregate{private$data=array();private$query;public
 function
 __construct(array$data,NeevoQuery$query){$this->query=$query;foreach($data
 as$key=>$value)is_array($value)?$this->data[$key]=new
@@ -249,17 +249,9 @@ function
 count(){return
 count($this->data);}public
 function
-rewind(){reset($this->data);}public
-function
-current(){return
-current($this->data);}public
-function
-key(){return
-key($this->data);}public
-function
-next(){next($this->data);}public
-function
-valid(){return$this->current();}public
+getIterator(){return
+new
+ArrayIterator($this->data);}public
 function
 dump($return_dump=false){$return='';if(!empty($this->data)){$count=count($this->data);foreach($this->data
 as$key=>$value){$return.='  '.$key.' => ';$len=strlen($value);if(is_bool($value))$return.=$value?"(bool) <strong>TRUE</strong>":"(bool) <strong>FALSE</strong>";elseif(is_int($value))$return.="(int:$len) <strong>$value</strong>";elseif(is_float($value))$return.="(float:$len) <strong>$value</strong>";elseif(is_numeric($value))$return.="(int:$len) <strong>$value</strong>";elseif(is_string($value))$return.="(string:$len) \"<strong>$value</strong>\"";elseif(is_object($value))$return.=str_replace(array("\n",'<pre class="dump">','</pre>'),"\n    ",$value->dump(true));else$return.="(unknown type) \"<strong>".(string)$value."</strong>\"";$return.="\n";}$return="<pre class=\"dump\">\n<strong>NeevoResult</strong> ($count) {\n$return}</pre>";}else$return='<pre class="dump">\n<strong>NeevoResult</strong> (empty)</pre>';if($return_dump)return$return;echo$return;}}class
@@ -344,7 +336,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.4dev";const
-REVISION=130;const
+REVISION=132;const
 MULTIPLE=21;const
 BOOL=30;const
 FLOAT=31;const

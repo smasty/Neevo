@@ -3,171 +3,108 @@
 if(!$_SERVER['SHELL']) trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
 
 
-// Default file to process.
+// Defaults
 define("DEFAULT_FILE", "neevo.php");
-
-// PHPDoc builder path. Use %CONFIG% placeholder.
-define("PHPDOC_PATH", "http://localhost/phpdoc/docbuilder/builder.php?setting_useconfig=%CONFIG%&interface=web&dataform=true");
-
-// PHPDoc default config.
-define("DEFAULT_PHPDOC_CONFIG", "neevo");
-
+define("APIGEN_PATH", "http://localhost/tools/apigen/apigen.php?s=../../projects/Neevo&d=../../projects/Neevo/doc&c=%CONFIG%");
+define("DEFAULT_APIGEN_CONFIG", "neevo");
 define("LAST_INCLUDE", "include_once dirname(__FILE__). '/neevo/INeevoDriver.php';");
 define("DRIVERS_PATH", "/neevo/drivers/");
 
-// Known arguments
-$known_arguments = array("help", "rev+", "rev-", "doc", "min", "min+", "quiet");
+$args = getopt('hrd::mqf::');
 
-if(in_array("quiet", $argv)){
-  $nooutput = true;
-}
-else{
-  $nooutput = false;
-}
+$nooutput = isset($args['q']);
 
-if(count($argv) <= 1){
+if(count($args) < 1){
   out("\nError: No arguments passed.\n\n");
   help();
   exit;
 }
 
-// Check for unknow arguments
 
-// Filter out non-command arguments
-foreach($argv as $arg)
-  preg_match("#^[a-z]+[\+-]?$#i", $arg) ? ( $arg !== basename(__FILE__) ? $args[] = $arg : 0 ) : 0;
 
-// Search for argument in known arguments
-foreach($args as $arg){
-  if(!in_array($arg, $known_arguments)){
-    out("\nError: Unknown argument '$arg' passed.\n\n");
-    help();
-    exit;
-  }
+/* ******* Actions ******* */
+
+
+// -h: Help
+if(isset($args['h'])){
+  help();
+  exit;
 }
-
-if($argv[0] == basename(__FILE__))
-  unset ($argv[0]);
 
 out("\n");
 
-foreach ($argv as $key => $value) {
-  $match = preg_match("#([0-9a-z-_]){1}\.php#i", $value);
-  if($match) $file = $value;
-}
+// -f=<filename>: Set <filename>
+if($args['f'] !== false)
+  $file = str_replace('=', '', $args['f']); // PHP < 5.3 compatibility
 
-// Defined file does't exist, using default
 if(!file_exists($file)){
-  if($file!='') out("File '$file' doesn't exist, default will be used\n");
+  if($file !== '')
+    out("File '$file' doesn't exist, default will be used\n");
   $file = DEFAULT_FILE;
-  // Defined file exists
 }
 if(file_exists($file))
   out("Using file '$file'\n");
 
 
+// -r: Revision number
+if(isset($args['r']))
+  out(revision($file));
 
-// ===== ARGUMENTS
+// -m: Minify source
+if(isset($args['m']))
+  out(minify($file));
 
-// Show help end exit
-if(in_array('help', $argv)){
-  help();
-  exit;
+// -d=<config>: Generate documentation
+if(isset($args['d'])){
+
+  $config = ($args['d'] !== false) ? str_replace(array('=', '.neon'), '', $args['d']) : DEFAULT_APIGEN_CONFIG;
+  $config .= '.neon';
+
+  out("Using Apigen configuration '$config'\n");
+  
+  out(apigen($config));
 }
 
-if(in_array('rev+', $argv) && in_array('rev-', $argv))
-  out("Error: Cannot use both 'rev+' and 'rev-' arguments.\nRevision number change skipped.\n");
-else{
-  // Increment Revision number
-  if(in_array('rev+', $argv))
-    out(rev_number(1, $file));
 
-  // Decrement Revision number
-  if(in_array('rev-', $argv))
-    out(rev_number(-1, $file));
-}
-
-// Generate PHPDoc
-if(in_array('doc', $argv)){
-  $k = array_search('doc', $argv);
-  $k = (int) $k + 1;
-  if(preg_match("#-([0-9a-z_-]+)#i", $argv[$k])){
-    $config = substr($argv[$k], 1);
-    out("Using PHPDoc configuration '$config'\n");
-  }
-  else{
-    $config = DEFAULT_PHPDOC_CONFIG;
-    out("Using default PHPDoc configuration '$config'\n");
-  }
-  out(phpdoc($config));
-}
-
-if(in_array('min', $argv) && in_array('min+', $argv))
-  out("Error: Cannot use both 'min+' and 'min-' arguments.\nMinify skipped.\n");
-else{
-   // Minify file
-  if(in_array('min', $argv))
-    out(minify($file));
-
-  // Minify file and shorten variable names
-  if(in_array('min+', $argv))
-    out(minify($file));
-}
 out("\n");
 
 
-/**
- * Generates PHPDoc
- * @return string
- */
-function phpdoc($config){
-  recursive_remove_directory("./doc");
-  $path = str_replace("%CONFIG%", $config, PHPDOC_PATH);
+
+
+/* ******* Functions ******* */
+
+
+
+function apigen($config){
+  $path = str_replace("%CONFIG%", $config, APIGEN_PATH);
   $response = file_get_contents($path);
-  if(strstr($response, "Operation Completed"))
-    $response = "Success: PHPDoc generated";
-  else $response = "Error: PHPDoc generation failed";
+  if(strstr($response, "Done. Total time:"))
+    $response = "Success: Documentation generated";
+  else $response = "Error: Documentation generation failed";
 
   return "$response\n";
 }
 
 
-/**
- * Increments/decrements revision number
- * @param <type> $i Increment by
- * @param <type> $file File to search for REVISION constant
- * @return <type> string
- */
-function rev_number($i, $file){
+function revision($file){
   $source = file_get_contents($file);
-  global $inc, $new_rev;
-  $inc = $i;
-  $newsource = preg_replace_callback("#const REVISION = (\d+);#", "rev_number_callback", $source);
+  global $new_rev;
+  $newsource = preg_replace_callback("#const REVISION = (\d+);#", "revision_callback", $source);
   $x = file_put_contents($file, $newsource);
   $response = $x ? "Success: Revision number changed to $new_rev" : "Error: Revision number change failed";
   return "$response\n";
 }
 
 
-/**
- * Revision callback
- * @param int $n Revison number
- * @return string
- */
-function rev_number_callback($n){
-  global $inc, $new_rev;
-  $res = $n[1]+$inc;
+function revision_callback($n){
+  global $new_rev;
+  $res = $n[1]+1;
   $new_rev = $res;
   return "const REVISION = $res;";
 }
 
 
-/**
- * Adds include statements for all supported drivers and removes autoloading
- * @param string $file
- * @return string
- */
-function include_drivers($file){
+function drivers($file){
   $content = str_replace("
       @include_once dirname(__FILE__) . '/neevo/drivers/'.strtolower(\$driver).'.php';
 
@@ -179,10 +116,6 @@ function include_drivers($file){
 }
 
 
-/**
- * Returns include statements for all supported drivers
- * @return string
- */
 function list_drivers(){
   $pattern = glob(".".DRIVERS_PATH."*.php");
   sort($pattern);
@@ -195,50 +128,24 @@ function list_drivers(){
 
 function out($string){
   global $nooutput;
-  if($nooutput == false)
+  if($nooutput === false)
     echo $string;
 }
 
 
-/**
- * Minifies source
- * @param string $file Filename to minify
- * @param bool $short_variables If true, variable names are shorted.
- * @return string
- */
-function minify($file, $short_variables = false){
-  $path = pathinfo($file);
-  $result_file = $path['dirname']."/".$path['filename'].".minified.".$path['extension'];
-  $file = include_drivers($file);
-  $source = str_replace("include_once dirname(__FILE__). '", "include '.", $file);
-  $source = preg_replace_callback("~include '([^']+)';~", 'include_file', $source);
-  $source = str_replace(array("<?php", "?>"), "", $source);
-  $source = "<?php\n$source\n";
-  $result = php_shrink($source, $short_variables);
-  $x = file_put_contents($result_file, $result);
-  //highlight_string($result);exit;
-  $response =  $x ? "Success: Source minified" : "Error: Minification failed";
-  return "$response\n";
-}
 
-
-/**
- * Prints help
- * @return void
- */
 function help(){
-out("Usage: $ php ".basename(__FILE__)." [help] [quiet] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
+out("Usage:
+  $ php ".basename(__FILE__)." [options]
 
-  help        Displays help
-  quiet       Will produce no output
-  rev+        Increments REVISION in <filename>
-  rev-        Decrements REVISION in <filename>
-  doc         Runs PHPDoc generator
-  -<config>   PHPDoc config file; if not set, default used
-  min         Minifies source code of <filename>
-  min+        + shorten var names.
-  <filename>  File to compile; if not set, default used
+Options:
 
+  -f=<filename>  File to compile. Defaults to ".DEFAULT_FILE."
+  -r             Increments REVISION in <filename>
+  -m             Minifies source code of <filename>
+  -d=<file>      Runs Apigen with <file> configuration. Defaults to ".DEFAULT_APIGEN_CONFIG."
+  -h             Displays help
+  -q             Script produces no output
 ");
 }
 
@@ -250,12 +157,23 @@ out("Usage: $ php ".basename(__FILE__)." [help] [quiet] [rev+|rev-] [doc [-<conf
  * released under Apache license 2.0.
  */
 
-/**
- * Include source from file
- * @param string $match File to include
- * @return string
- * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
- */
+
+function minify($file, $short_variables = false){
+  $path = pathinfo($file);
+  $result_file = $path['dirname']."/".$path['filename'].".minified.".$path['extension'];
+  $file = drivers($file);
+  $source = str_replace("include_once dirname(__FILE__). '", "include '.", $file);
+  $source = preg_replace_callback("~include '([^']+)';~", 'include_file', $source);
+  $source = str_replace(array("<?php", "?>"), "", $source);
+  $source = "<?php\n$source\n";
+  $result = php_shrink($source, $short_variables);
+  $x = file_put_contents($result_file, $result);
+  //highlight_string($result);exit;
+  $response =  $x ? "Success: Source minified" : "Error: Minification failed";
+  return "$response\n";
+}
+
+/** @copyright Jakub Vrana, http://php.vrana.cz. Used with permission. */
 function include_file($match) {
   $file = file_get_contents($match[1]);
   $token = end(token_get_all($file));
@@ -265,15 +183,7 @@ function include_file($match) {
 }
 
 
-/**
- * Create short alpha identifier for number.
- *
- * Part of Adminer - "Compact MySQL management", http://adminer.org
- * @param int $number
- * @param string $chars Available chars
- * @return string
- * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
- */
+/**  @copyright Jakub Vrana, http://php.vrana.cz. Used with permission. */
 function short_identifier($number, $chars) {
   $return = '';
   while ($number >= 0) {
@@ -283,16 +193,8 @@ function short_identifier($number, $chars) {
   return $return;
 }
 
-/**
- * Shrinks PHP code.
- *
- * Part of Adminer - "Compact MySQL management", http://adminer.org
- * Based on http://latrine.dgx.cz/jak-zredukovat-php-skripty
- * @param string $input Input PHP code
- * @param bool $shorted If true, variable names are shorted.
- * @return string
- * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
- */
+
+/**  @copyright Jakub Vrana, http://php.vrana.cz. Used with permission. */
 function php_shrink($input, $shorted) {
   $special_variables = array_flip(array('$this', '$GLOBALS', '$_GET', '$_POST', '$_FILES', '$_COOKIE', '$_SESSION', '$_SERVER'));
   $short_variables = array();

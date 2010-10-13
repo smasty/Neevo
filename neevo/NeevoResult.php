@@ -18,7 +18,7 @@
  * Neevo result class
  * @package Neevo
  */
-class NeevoResult implements ArrayAccess, Countable, Iterator {
+class NeevoResult implements ArrayAccess, Countable, IteratorAggregate {
 
   private $data = array();
   private $query;
@@ -51,6 +51,7 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
 
   /* Implementation of Array Access */
 
+  /** @internal */
   public function offsetSet($offset, $value){
     if(is_null($offset))
       $this->data[] = $value;
@@ -59,16 +60,19 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
   }
 
 
+  /** @internal */
   public function offsetExists($offset){
     return isset($this->data[$offset]);
   }
 
 
+  /** @internal */
   public function offsetUnset($offset){
     unset($this->data[$offset]);
   }
 
 
+  /** @internal */
   public function offsetGet($offset){
     return isset($this->data[$offset]) ? $this->data[$offset] : null;
   }
@@ -101,32 +105,12 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
   }
 
 
-  /* Implementation of Iterator */
+  /* Implementation of IteratorAggregate */
 
-  public function rewind(){
-//    $this->data = $this->query()->fetch()->data();
-		reset($this->data);
-	}
-
-
-	public function current(){
-		return current($this->data);
-	}
-
-
-  public function key(){
-		return key($this->data);
-	}
-
-
-  public function next(){
-		next($this->data);
-	}
-
-
-  public function valid(){
-		return $this->current();
-	}
+  /** @internal */
+  public function getIterator(){
+    return new ArrayIterator($this->data);
+  }
 
 
   /**
@@ -193,26 +177,31 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
   }
 
 
+  /** @internal */
   public function __get($name){
     return $this->data[$name];
   }
 
 
+  /** @internal */
   public function __set($name, $value){
     $this->modified[$name] = $value;
   }
 
 
+  /** @internal */
   public function __isset($name){
     return isset($this->data[$name]);
   }
 
 
+  /** @internal */
   public function __unset($name){
     unset($this->data[$name]);
   }
 
 
+  /** @internal */
   public function __toString(){
     if($this->single === true) return (string) $this->data;
     return '';
@@ -270,22 +259,26 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
 
   /* Implementation of Array Access */
 
+  /** @internal */
   public function offsetSet($offset, $value){
     if(isset($this->data[$offset]))
       $this->modified[$offset] = $value;
   }
 
 
+  /** @internal */
   public function offsetExists($offset){
     return isset($this->data[$offset]);
   }
 
 
+  /** @internal */
   public function offsetUnset($offset){
     unset($this->modified[$offset]);
   }
 
 
+  /** @internal */
   public function offsetGet($offset){
     return isset($this->modified[$offset]) ? $this->modified[$offset] :
       isset($this->data[$offset]) ? $this->data[$offset] : null;
@@ -301,6 +294,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
 
   /* Implementation of IteratorAggregate */
 
+  /** @internal */
   public function getIterator(){
     return new ArrayIterator($this->data);
   }
@@ -308,11 +302,13 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
 
   /* Implementation of Serializable */
 
+  /** @internal */
   public function serialize(){
     return serialize($this->data);
   }
 
-
+  
+  /** @internal */
   public function unserialize($serialized){
     $this->data = unserialize($serialized);
   }

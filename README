@@ -84,17 +84,17 @@ Neevo comes with what I call "compiler" - PHP CLI (command-line interface) scrip
 which simplifies some boring work for me: Minifies source to one file without
 comments and whitespace, regenerates PHPDoc and increments revision number.
 
-Usage: $ php compiler [help] [quiet] [rev+|rev-] [doc [-<config>]] [min|min+] [<filename>]
+Usage:
+  $ php compile [options]
 
-  help        Displays help
-  quiet       Will produce no output
-  rev+        Increments REVISION in <filename>
-  rev-        Decrements REVISION in <filename>
-  doc         Runs PHPDoc generator
-  -<config>   PHPDoc config file; if not set, default used
-  min         Minifies source code of <filename>
-  min+        + shorten var names.
-  <filename>  File to compile; if not set, default used
+Options:
+
+  -f=<filename>  File to compile. Defaults to neevo.php
+  -r             Increments REVISION in <filename>
+  -m             Minifies source code of <filename>
+  -d=<file>      Runs Apigen with <file> configuration. Defaults to neevo
+  -h             Displays help
+  -q             Script produces no output
 
 Minification part is made up from functions written by Jakub Vrana (http://php.vrana.cz)
 for his Adminer "Compact MySQL management" (http://adminer.org) licensed under
