@@ -121,7 +121,7 @@ class Neevo{
 
 
   /**
-   * Returns current NeevoConnection instance
+   * Current NeevoConnection instance
    * @return NeevoConnection
    */
   public function connection(){
@@ -163,7 +163,7 @@ class Neevo{
 
 
   /**
-   * Returns Neevo Driver class
+   * Neevo Driver class
    * @return INeevoDriver
    */
   public function driver(){
@@ -243,7 +243,7 @@ class Neevo{
 
 
   /**
-   * Returns last executed query
+   * Last executed query
    * @param NeevoQuery $last Last executed query
    * @return NeevoQuery
    */
@@ -264,7 +264,7 @@ class Neevo{
 
 
   /**
-   * Returns amount of executed queries
+   * Amount of executed queries
    * @return int
    */
   public function queries(){
@@ -347,7 +347,7 @@ class Neevo{
 
 
   /**
-   * Returns error-reporting level
+   * Error-reporting level
    * @return int
    */
   public function errorReporting(){
@@ -372,7 +372,7 @@ class Neevo{
 
 
   /**
-   * Returns error-handler function name
+   * Error-handler function name
    * @param string $handler_function Name of error-handler function
    * @return string
    */
@@ -448,7 +448,7 @@ class Neevo{
 
 
   /**
-   * Returns Neevo version and revision
+   * Neevo version and revision
    * @param bool $string Return as a string, not array
    * @return string|array
    */
@@ -464,6 +464,11 @@ class Neevo{
   }
 
 
+  /**
+   * Basic information about library
+   * @param bool $hide_password Password will be replaced by '*****'.
+   * @return array
+   */
   public function info($hide_password = true){
     $info = array(
       'executed-queries' => $this->queries(),
@@ -503,7 +508,7 @@ class NeevoLiteral {
 
 
   /**
-   * Returns literal value
+   * Literal value
    * @return string
    */
   public function __toString(){

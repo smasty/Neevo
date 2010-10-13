@@ -39,7 +39,7 @@ class NeevoConnection{
 
 
   /**
-   * Returns current NeevoDriver
+   * Current NeevoDriver
    * @return INeevoDriver
    */
   private function driver(){
@@ -48,7 +48,7 @@ class NeevoConnection{
 
 
   /**
-   * Returns object variables as associative array
+   * Object variables as associative array
    * @return array
    */
   public function getVars(){
@@ -75,7 +75,7 @@ class NeevoConnection{
 
 
   /**
-   * Returns resource identifier
+   * Resource identifier
    * @return resource
    */
   public function resource(){
@@ -84,8 +84,8 @@ class NeevoConnection{
 
 
   /**
-   * Returns basic informations about current connection
-   * @param bool $hide_password If set to TRUE (default), password will be replaced by '*****'.
+   * Basic information about current connection
+   * @param bool $hide_password Password will be replaced by '*****'.
    * @return array
    */
   public function info($hide_password = true){

@@ -16,7 +16,7 @@
 
 /**
  * Neevo Driver interface
- * @package Neevo
+ * @package NeevoDrivers
  */
 interface INeevoDriver {
 
@@ -70,7 +70,7 @@ interface INeevoDriver {
 
 
   /**
-   * Returns error message with driver-specific additions
+   * Error message with driver-specific additions
    * @param string $neevo_msg Error message
    * @return string
    */
@@ -111,7 +111,7 @@ interface INeevoDriver {
 
 
   /**
-   * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
+   * Number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
    * @param NeevoQuery $query NeevoQuery instance
    * @return int|FALSE Number of rows (int) or FALSE
    */

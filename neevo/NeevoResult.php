@@ -79,7 +79,7 @@ class NeevoResult implements ArrayAccess, Countable, IteratorAggregate {
 
 
   /**
-   * Returns object as an array
+   * Object as an array
    * @return array
    */
   public function toArray(){
@@ -218,7 +218,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
 
 
   /**
-   * Returns object as an array
+   * Object as an array
    * @return array
    */
   public function toArray(){

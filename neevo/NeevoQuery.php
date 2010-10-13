@@ -314,7 +314,7 @@ class NeevoQuery {
 
 
   /**
-   * Returns number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
+   * Number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
    * @return int|FALSE Number of rows (int) or FALSE
    */
   public function rows(){
@@ -337,9 +337,9 @@ class NeevoQuery {
 
 
   /**
-   * Returns basic informations about query
-   * @param bool $hide_password If set to TRUE (default), password will be replaced by '*****'.
-   * @param bool $exclude_connection If set to TRUE (default FALSE), connection info will be excluded.
+   * Basic information about query
+   * @param bool $hide_password Password will be replaced by '*****'.
+   * @param bool $exclude_connection Connection info will be excluded.
    * @return array
    */
   public function info($hide_password = true, $exclude_connection = false){
@@ -414,7 +414,7 @@ class NeevoQuery {
   }
 
   /**
-   * Returns full table name (with prefix)
+   * Full table name (with prefix)
    * @return string
    */
   public function getTable(){
@@ -426,7 +426,7 @@ class NeevoQuery {
   }
 
   /**
-   * Returns Query type
+   * Query type
    * @return string
    */
   public function getType(){
@@ -434,7 +434,7 @@ class NeevoQuery {
   }
 
   /**
-   * Returns Query LIMIT fraction
+   * Query LIMIT fraction
    * @return int
    */
   public function getLimit(){
@@ -442,7 +442,7 @@ class NeevoQuery {
   }
 
   /**
-   * Returns Query OFFSET fraction
+   * Query OFFSET fraction
    * @return int
    */
   public function getOffset(){
@@ -450,7 +450,7 @@ class NeevoQuery {
   }
 
   /**
-   * Returns query code for direct queries (type=sql)
+   * Query code for direct queries (type=sql)
    * @return string
    */
   public function getSql(){
@@ -458,7 +458,7 @@ class NeevoQuery {
   }
 
   /**
-   * Returns Query WHERE fraction
+   *Query WHERE fraction
    * @return array
    */
   public function getWhere(){
@@ -466,7 +466,7 @@ class NeevoQuery {
   }
 
   /**
-   * Returns Query ORDER BY fraction
+   * Query ORDER BY fraction
    * @return array
    */
   public function getOrder(){
@@ -474,7 +474,7 @@ class NeevoQuery {
   }
 
   /**
-   * Returns Query columns fraction for SELECT queries ([SELECT] col1, col2, ...)
+   * Query columns fraction for SELECT queries ([SELECT] col1, col2, ...)
    * @return array
    */
   public function getCols(){
@@ -482,7 +482,7 @@ class NeevoQuery {
   }
 
   /**
-   * Returns Query values fraction for INSERT/UPDATE queries
+   * Query values fraction for INSERT/UPDATE queries
    * ([INSERT INTO] (col1,, col2, ...) VALUES (val1, val2, ...) or
    *  [UPDATE tbl] SET col1 = val1,  col2 = val2, ...)
    * @return array
@@ -492,7 +492,7 @@ class NeevoQuery {
   }
 
   /**
-   * Returns name of PRIMARY KEY if defined, NULL otherwise.
+   * Name of PRIMARY KEY if defined, NULL otherwise.
    * @return string
    */
   public function getPrimary(){
