@@ -351,7 +351,7 @@ class NeevoQuery {
   /**
    * Fetches all data as associative arrays $column as key.
    * @param string $column Column to use as key for row
-   * @param bool $as_array Rows are arrays instead of **NeevoRow** instances.
+   * @param bool $as_array Rows are arrays instead of NeevoRow instances.
    * @return array|FALSE
    */
   public function fetchAssoc($column, $as_array = false){

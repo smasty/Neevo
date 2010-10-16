@@ -76,6 +76,7 @@ out("\n");
 
 
 function apigen($config){
+  recursive_remove_directory("./doc");
   $path = str_replace("%CONFIG%", $config, APIGEN_PATH);
   $response = file_get_contents($path);
   if(strstr($response, "Done. Total time:"))
