@@ -36,8 +36,7 @@ Features
  - DELETE queries
 
  - Multiple drivers support (*)
- - Fetch results: "one method to rule them all" - only one intelligent method
-   for fetching data from database.
+ - More ways to fetch your data: as objects, indexed/associative arrays, key=>value pairs, single...
  - Affected rows
  - Retrieved rows
  - Seek
@@ -48,8 +47,6 @@ Features
  - Query and connection info
  - Randomize result order
  - Dump queries
- - "Undo" - Removes some piece from already built queries
-   (e.g. "2nd WHERE condition" or "column `email`")
  - Multi-level error-reporting system (based on Exceptions):
     - E_NONE:   No errors are reported.
     - E_HANDLE: All errors are made to Exceptions and then sent to defined

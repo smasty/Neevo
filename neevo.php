@@ -62,18 +62,12 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.4dev";
-  const REVISION = 131;
-
-  // Fetch format
-  const MULTIPLE = 21;
+  const REVISION = 135;
 
   // Data types
   const BOOL = 30;
-  const FLOAT = 31;
-  const INT = 32;
   const TEXT = 33;
   const BINARY = 34;
-  const IDENTIFIER = 35;
   const DATETIME = 36;
   const DATE = 37;
 
@@ -284,7 +278,7 @@ class Neevo{
 
   /**
    * Creates SELECT query.
-   * @param string|array $cols Columns to select (array or comma-separated list)
+   * @param string|array $columns Columns to select (array or comma-separated list)
    * @return NeevoQuery fluent interface
    */
   public function select($columns){

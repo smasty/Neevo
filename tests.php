@@ -23,7 +23,7 @@
 // NetteDebug for debugging (http://nette.org)
 include "debug.php";
 Debug::enable();
-//Debug::$strictMode = TRUE;
+Debug::$strictMode = TRUE;
 
 
 include "neevo.php";
@@ -105,6 +105,12 @@ $delete_resource = $delete->run();
 
 $delete->dump();
 
+$pairs = $sql->select('mail')->from('client')->limit(5)->fetchPairs('id', 'name');
+Debug::dump($pairs);
+
+$assoc = $sql->select('name, mail, city, friends')->from('client')->limit(5)->fetchAssoc('id');
+
+Debug::dump($assoc);
 
 // SELECT ONE VALUE
 $select_one = $sql->select('name')->from('client')
@@ -112,7 +118,7 @@ $select_one = $sql->select('name')->from('client')
 
 $select_one->dump();
 
-echo " Result: ". $select_one->fetch() ."\n\n";
+echo " Result: ". $select_one->fetchSingle() ."\n\n";
 
 // SELECT QUERY
 $select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash')

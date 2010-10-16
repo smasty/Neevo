@@ -167,10 +167,34 @@ function
 run(){$start=explode(' ',microtime());$query=$this->neevo()->driver()->query($this->build());if($query===false){$this->neevo()->error('Query failed');return
 false;}$this->neevo()->incrementQueries();$this->neevo()->setLast($this);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->setTime($time);$this->performed=true;if(is_resource($query)){$this->resultSet=$query;$this->numRows=$this->neevo()->driver()->rows($query);}else$this->affectedRows=$this->neevo()->driver()->affectedRows();return$query;}public
 function
-fetch($fetch_type=null){$rows=null;if(!in_array($this->getType(),array('select','sql')))$this->neevo()->error('Cannot fetch on this kind of query');$resource=$this->isPerformed()?$this->resultSet():$this->run();while($tmp_rows=$this->neevo()->driver()->fetch($resource))$rows[]=new
-NeevoRow($tmp_rows,$this);$this->free();if(count($rows)===1&&$fetch_type!=Neevo::MULTIPLE)$rows=$rows[0];elseif(!is_null($rows))$rows=new
-NeevoResult($rows,$this);if(!count($rows)&&is_array($rows))return
-false;return$resource?$rows:$this->neevo()->error('Fetching result data failed');}private
+fetch(){$rows=array();if(!in_array($this->getType(),array('select','sql')))return$this->neevo()->error('Cannot fetch on this kind of query');$resultSet=$this->isPerformed()?$this->resultSet():$this->run();if(!is_resource($resultSet))return$this->neevo()->error('Fetching result data failed');while($tmp_rows=$this->neevo()->driver()->fetch($resultSet))$rows[]=new
+NeevoRow($tmp_rows,$this);$this->free();if(empty($rows))return
+false;return
+new
+NeevoResult($rows,$this);}public
+function
+fetchSingle(){$result=$this->fetch();if($result
+instanceof
+NeevoResult){if(count($result)>1)return$result[0];return$result[0]->getSingle();}return
+false;}public
+function
+fetchPairs($key,$value){if(!in_array($key,$this->columns)||!in_array($value,$this->columns)||!in_array('*',$this->columns)){$this->columns=array($key,$value);$this->performed=false;}$result=$this->fetch();if($result
+instanceof
+NeevoResult){$rows=array();foreach($result
+as$row)$rows[$row[$key]]=$row[$value];unset($result);return$rows;}return
+false;}public
+function
+fetchArray(){$result=$this->fetch();if($result
+instanceof
+NeevoResult){$rows=array();foreach($result
+as$row)$rows[]=$row->toArray();unset($result);return$rows;}return
+false;}public
+function
+fetchAssoc($column,$as_array=false){if(!in_array($column,$this->columns)||!in_array('*',$this->columns)){$this->columns[]=$column;$this->performed=false;}$result=$this->fetch();if($result
+instanceof
+NeevoResult){$rows=array();foreach($result
+as$row){if($as_array)$row=$row->toArray();$k=$row[$column];unset($row[$column]);$rows[$k]=$row;}unset($result);return$rows;}return
+false;}private
 function
 free(){$this->neevo()->driver()->free($this->resultSet);$this->resultSet=null;}public
 function
@@ -277,6 +301,8 @@ __toString(){if($this->single===true)return(string)$this->data;return'';}public
 function
 isSingle(){return$this->single;}public
 function
+getSingle(){if($this->isSingle())return$this->data;}public
+function
 toArray(){return$this->data;}public
 function
 query(){return$this->query;}public
@@ -307,7 +333,7 @@ serialize($this->data);}public
 function
 unserialize($serialized){$this->data=unserialize($serialized);}public
 function
-dump($return_dump=false){$return='';if($this->single)$return="(string:".strlen($this->data).") \"<strong>$this->data</strong>\"";else{if(!empty($this->data)){$count=count($this->data);foreach($this->data
+dump($return_dump=false){$return='';if($this->single)$return="(NeevoRow-single:".strlen($this->data).") \"<strong>$this->data</strong>\"";else{if(!empty($this->data)){$count=count($this->data);foreach($this->data
 as$key=>$value){$return.="  [$key] => ";$len=strlen($value);$value=htmlspecialchars($value);if(is_bool($value))$return.=$value?"(bool) <strong>TRUE</strong>":"(bool) <strong>FALSE</strong>";elseif(is_int($value))$return.="(int:$len) <strong>$value</strong>";elseif(is_float($value))$return.="(float:$len) <strong>$value</strong>";elseif(is_numeric($value))$return.="(num:$len) <strong>$value</strong>";elseif(is_string($value))$return.="(string:$len) \"<strong>$value</strong>\"";else$return.="(unknown type) \"<strong>".(string)$value."</strong>\"";$return.="\n";}$return="<pre class=\"dump\">\n<strong>NeevoRow</strong> ($count) {\n$return}</pre>";}else$return='<pre class="dump">\n<strong>NeevoRow</strong> (empty)</pre>';}if($return_dump)return$return;echo$return;}}interface
 INeevoCache{public
 function
@@ -339,14 +365,10 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.4dev";const
-REVISION=131;const
-MULTIPLE=21;const
+REVISION=135;const
 BOOL=30;const
-FLOAT=31;const
-INT=32;const
 TEXT=33;const
 BINARY=34;const
-IDENTIFIER=35;const
 DATETIME=36;const
 DATE=37;public
 function

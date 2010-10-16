@@ -263,32 +263,115 @@ class NeevoQuery {
 
 
   /**
-   * Fetches data from given Query resource.
+   * Fetches all data from given Query resource.
    *
-   * Returns **NeevoResult** instance with rows represented as **NeevoRow** instances if two or more rows are fetched.<br>
-   * Row represented as **NeevoRow**, if only one row is fetched. **FALSE** if nothing fetched.
-   * @param int $fetch_type Result format. If set to Neevo::MULTIPLE, number of fetched rows is ignored.
-   * @return NeevoResult|NeevoRow|FALSE
+   * Returns **NeevoResult** instance with rows represented as **NeevoRow** instances or FALSE.
+   * @return NeevoResult|FALSE
    */
-  public function fetch($fetch_type = null){
-    $rows = null;
-    if(!in_array($this->getType(), array('select', 'sql'))) $this->neevo()->error('Cannot fetch on this kind of query');
+  public function fetch(){
+    $rows = array();
+    if(!in_array($this->getType(), array('select', 'sql')))
+      return $this->neevo()->error('Cannot fetch on this kind of query');
 
-    $resource = $this->isPerformed() ? $this->resultSet() : $this->run();
+    $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
 
-    while($tmp_rows = $this->neevo()->driver()->fetch($resource))
+    if(!is_resource($resultSet)) // Error
+      return $this->neevo()->error('Fetching result data failed');
+
+    while($tmp_rows = $this->neevo()->driver()->fetch($resultSet))
       $rows[] = new NeevoRow($tmp_rows, $this);
 
     $this->free();
 
-    // If only one row, return NeevoRow instead
-    if(count($rows) === 1 && $fetch_type != Neevo::MULTIPLE)
-      $rows = $rows[0];
-    elseif(!is_null($rows))
-      $rows = new NeevoResult($rows, $this);
+    if(empty($rows)) // Empty
+      return false;
 
-    if(!count($rows) && is_array($rows)) return false; // Empty
-    return $resource ? $rows : $this->neevo()->error('Fetching result data failed');
+    return new NeevoResult($rows, $this);
+  }
+
+
+  /**
+   * Fetches 1st row in result as **NeevoRow** or the only value if only one row with one value was fetched.
+   * @return NeevoRow|mixed|FALSE
+   */
+  public function fetchSingle(){
+    $result = $this->fetch();
+    if($result instanceof NeevoResult){
+      if(count($result) > 1) // Return first row
+        return $result[0];
+      return $result[0]->getSingle(); // Return the only value
+    }
+    return false;
+  }
+
+
+  /**
+   * Fetches data as $key=>$value pairs.
+   *
+   * If $key and $value columns are not defined in SELECT statement, they will
+   * be automatically added to statement and others will be removed.
+   * @param string $key Column to use as array key.
+   * @param string $value Column to use as array value.
+   * @return array|FALSE
+   */
+  public function fetchPairs($key, $value){
+    if(!in_array($key, $this->columns) || !in_array($value, $this->columns) || !in_array('*', $this->columns)){
+      $this->columns = array($key, $value);
+      $this->performed = false; // If query was executed without needed columns, force execution.
+    }
+    $result = $this->fetch();
+    if($result instanceof NeevoResult){
+      $rows = array();
+      foreach($result as $row)
+        $rows[$row[$key]] = $row[$value];
+      unset($result);
+      return $rows;
+    }
+    return false;
+  }
+
+
+  /**
+   * Fetches all data as **indexed array** with rows represented as **associative arrays**.
+   * @return array|FALSE
+   */
+  public function fetchArray(){
+    $result = $this->fetch();
+    if($result instanceof NeevoResult){
+      $rows = array();
+      foreach($result as $row)
+        $rows[] = $row->toArray();
+      unset($result);
+      return $rows;
+    }
+    return false;
+  }
+
+
+  /**
+   * Fetches all data as associative arrays $column as key.
+   * @param string $column Column to use as key for row
+   * @param bool $as_array Rows are arrays instead of **NeevoRow** instances.
+   * @return array|FALSE
+   */
+  public function fetchAssoc($column, $as_array = false){
+    if(!in_array($column, $this->columns) || !in_array('*', $this->columns)){
+      $this->columns[] = $column;
+      $this->performed = false; // If query was executed without needed column, force execution.
+    }
+    $result = $this->fetch();
+    if($result instanceof NeevoResult){
+      $rows = array();
+      foreach($result as $row){
+        if($as_array) $row = $row->toArray(); // Rows as arrays.
+        $k = $row[$column];
+        unset($row[$column]);
+        $rows[$k] = $row;
+      }
+      unset($result);
+      return $rows;
+    }
+    return false;
   }
 
 

@@ -218,6 +218,16 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
 
 
   /**
+   * If there is only one value in row, return it.
+   * @return mixed|void
+   */
+  public function getSingle(){
+    if($this->isSingle())
+      return $this->data;
+  }
+
+
+  /**
    * Object as an array
    * @return array
    */
@@ -322,7 +332,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
   public function dump($return_dump = false){
     $return = '';
     if($this->single)
-      $return = "(string:".strlen($this->data).") \"<strong>$this->data</strong>\"";
+      $return = "(NeevoRow-single:".strlen($this->data).") \"<strong>$this->data</strong>\"";
     
     else{
       if(!empty($this->data)){
