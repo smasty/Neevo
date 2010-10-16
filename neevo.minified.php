@@ -193,7 +193,7 @@ function
 fetchAssoc($column,$as_array=false){if(!in_array($column,$this->columns)||!in_array('*',$this->columns)){$this->columns[]=$column;$this->performed=false;}$result=$this->fetch();if($result
 instanceof
 NeevoResult){$rows=array();foreach($result
-as$row){if($as_array)$row=$row->toArray();$k=$row[$column];unset($row[$column]);$rows[$k]=$row;}unset($result);return$rows;}return
+as$row){if($as_array)$row=$row->toArray();$rows[$row[$column]]=$row;}unset($result);return$rows;}return
 false;}private
 function
 free(){$this->neevo()->driver()->free($this->resultSet);$this->resultSet=null;}public
@@ -365,7 +365,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.4dev";const
-REVISION=135;const
+REVISION=137;const
 BOOL=30;const
 TEXT=33;const
 BINARY=34;const

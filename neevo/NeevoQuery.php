@@ -364,9 +364,7 @@ class NeevoQuery {
       $rows = array();
       foreach($result as $row){
         if($as_array) $row = $row->toArray(); // Rows as arrays.
-        $k = $row[$column];
-        unset($row[$column]);
-        $rows[$k] = $row;
+        $rows[$row[$column]] = $row;
       }
       unset($result);
       return $rows;
