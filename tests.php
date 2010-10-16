@@ -93,6 +93,8 @@ $update_resource = $update->run();
 
 $update->dump();
 
+echo ' Affected: ', $update->affectedRows(), "\n\n";
+
 // DELETE QUERY
 $delete = $sql->delete('client')
               ->where('mail', 'john@doe.name')
@@ -119,14 +121,16 @@ $select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash')
               ->order('id DESC', 'name ASC')
               ->limit(10);
 
-// Seek to 3rd row of resource (counting from zero)
-//$select->seek(2);
+// Seek to 3rd row (counting from zero)
+$select->seek(2);
 
 $select->getPrimary();
 // Fetch results
 $select_result = $select->fetch();
 
 $select->dump();
+
+echo ' Fetched: ', $select->rows(), "\n";
 
 $row = $select_result[0];
 $row['name'] = "XYZ ABC";

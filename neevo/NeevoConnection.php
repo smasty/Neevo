@@ -20,7 +20,7 @@
  */
 class NeevoConnection{
 
-  private $neevo, $driver, $username, $password, $host, $database, $encoding, $table_prefix, $resource;
+  private $neevo, $driver, $username, $password, $host, $database, $encoding, $table_prefix;
 
 
   public function __construct(Neevo $neevo, INeevoDriver $driver, $user, $pswd = null, $host, $database, $encoding = null, $table_prefix = null){
@@ -33,8 +33,7 @@ class NeevoConnection{
     $this->encoding = $encoding;
     $this->table_prefix = $table_prefix;
 
-    $resource = $this->driver()->connect($this->getVars());
-    $this->setResource($resource);
+    $this->driver()->connect($this->getVars());
   }
 
 
@@ -60,26 +59,6 @@ class NeevoConnection{
 
   public function prefix(){
     return $this->table_prefix;
-  }
-
-
-  /**
-   * Sets connection resource
-   * @param resource $resource
-   * @return void
-   */
-  public function setResource($resource){
-    if(is_resource($resource))
-      $this->resource = $resource;
-  }
-
-
-  /**
-   * Resource identifier
-   * @return resource
-   */
-  public function resource(){
-    return $this->resource;
   }
 
 

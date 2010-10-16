@@ -15,19 +15,15 @@
  */if(version_compare(PHP_VERSION,'5.1.0','<')){if(version_compare(PHP_VERSION,'5.0.0','>='))throw
 new
 Exception('Neevo requires PHP version 5.1.0 or newer');if(version_compare(PHP_VERSION,'5.0.0','<'))trigger_error('Neevo requires PHP version 5.1.0 or newer',E_USER_ERROR);exit;}class
-NeevoConnection{private$neevo,$driver,$username,$password,$host,$database,$encoding,$table_prefix,$resource;public
+NeevoConnection{private$neevo,$driver,$username,$password,$host,$database,$encoding,$table_prefix;public
 function
-__construct(Neevo$neevo,INeevoDriver$driver,$user,$pswd=null,$host,$database,$encoding=null,$table_prefix=null){$this->neevo=$neevo;$this->driver=$driver;$this->username=$user;$this->password=$pswd;$this->host=$host;$this->database=$database;$this->encoding=$encoding;$this->table_prefix=$table_prefix;$resource=$this->driver()->connect($this->getVars());$this->setResource($resource);}private
+__construct(Neevo$neevo,INeevoDriver$driver,$user,$pswd=null,$host,$database,$encoding=null,$table_prefix=null){$this->neevo=$neevo;$this->driver=$driver;$this->username=$user;$this->password=$pswd;$this->host=$host;$this->database=$database;$this->encoding=$encoding;$this->table_prefix=$table_prefix;$this->driver()->connect($this->getVars());}private
 function
 driver(){return$this->driver;}public
 function
 getVars(){$options=get_object_vars($this);unset($options['neevo'],$options['driver'],$options['resource']);return$options;}public
 function
 prefix(){return$this->table_prefix;}public
-function
-setResource($resource){if(is_resource($resource))$this->resource=$resource;}public
-function
-resource(){return$this->resource;}public
 function
 info($hide_password=true){$info=$this->getVars();if($hide_password)$info['password']='*****';$info['driver']=str_replace('NeevoDriver','',get_class($this->driver));return$info;}}interface
 INeevoDriver{public
@@ -36,23 +32,25 @@ __construct(Neevo$neevo);public
 function
 connect(array$opts);public
 function
-close($resource);public
+close();public
 function
-free($result);public
+free($resultSet);public
 function
-query($query_string,$resource);public
+query($query_string);public
 function
 error($neevo_msg);public
 function
-fetch($resource);public
+fetch($resultSet);public
 function
-seek($resource,$row_number);public
+seek($resultSet,$row_number);public
 function
-insertId($resource);public
+insertId();public
 function
 rand(NeevoQuery$query);public
 function
-rows(NeevoQuery$query);public
+rows($resultSet);public
+function
+affectedRows();public
 function
 build(NeevoQuery$query);public
 function
@@ -63,34 +61,36 @@ NeevoDriverMySQL
 extends
 NeevoDriver
 implements
-INeevoDriver{private$neevo;public
+INeevoDriver{private$neevo,$resource;public
 function
 __construct(Neevo$neevo){if(!extension_loaded("mysql"))throw
 new
 NeevoException("PHP extension 'mysql' not loaded.");$this->neevo=$neevo;}public
 function
-connect(array$opts){$connection=@mysql_connect($opts['host'],$opts['username'],$opts['password']);if(!is_resource($connection))$this->neevo()->error("Connection to host '".$opts['host']."' failed");if($opts['database']){$db=mysql_select_db($opts['database']);if(!$db)$this->neevo()->error("Could not select database '{$opts['database']}'");}if($opts['encoding']&&is_resource($connection)){if(function_exists('mysql_set_charset'))$ok=@mysql_set_charset($opts['encoding'],$connection);if(!$ok)$this->neevo()->sql("SET NAMES ".$opts['encoding'])->run();}return$connection;}public
+connect(array$opts){$connection=@mysql_connect($opts['host'],$opts['username'],$opts['password']);if(!is_resource($connection))$this->neevo()->error("Connection to host '".$opts['host']."' failed");if($opts['database']){$db=mysql_select_db($opts['database']);if(!$db)$this->neevo()->error("Could not select database '{$opts['database']}'");}if($opts['encoding']&&is_resource($connection)){if(function_exists('mysql_set_charset'))$ok=@mysql_set_charset($opts['encoding'],$connection);if(!$ok)$this->neevo()->sql("SET NAMES ".$opts['encoding'])->run();}$this->resource=$connection;}public
 function
-close($resource){@mysql_close($resource);}public
+close(){@mysql_close($this->resource);}public
 function
-free($result){return@mysql_free_result($result);}public
+free($resultSet){return@mysql_free_result($resultSet);}public
 function
-query($query_string,$resource){return@mysql_query($query_string,$resource);}public
+query($query_string){return@mysql_query($query_string,$this->resource);}public
 function
 error($neevo_msg){$mysql_msg=mysql_error();$mysql_msg=str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use','Syntax error',$mysql_msg);$msg=$neevo_msg.".";if($mysql_msg)$msg.=" ".$mysql_msg;return$msg;}public
 function
-fetch($resource){return@mysql_fetch_assoc($resource);}public
+fetch($resultSet){return@mysql_fetch_assoc($resultSet);}public
 function
-seek($resource,$row_number){return@mysql_data_seek($resource,$row_number);}public
+seek($resultSet,$row_number){return@mysql_data_seek($resultSet,$row_number);}public
 function
-insertId($resource){return
-mysql_insert_id($resource);}public
+insertId(){return
+mysql_insert_id($this->resource);}public
 function
 rand(NeevoQuery$query){$query->order('RAND()');}public
 function
-rows(NeevoQuery$query){if($query->getType()!='select')$aff_rows=$query->performed()?@mysql_affected_rows($query->neevo()->connection()->resource()):false;else$num_rows=@mysql_num_rows($query->resource());if($num_rows||$aff_rows)return$num_rows?$num_rows:$aff_rows;else
-return
-false;}public
+rows($resultSet){return
+mysql_num_rows($resultSet);}public
+function
+affectedRows(){return
+mysql_affected_rows($this->resource);}public
 function
 build(NeevoQuery$query){$where='';$order='';$limit='';$q='';if($query->getSql())$q=$query->getSql();else{$table=$query->getTable();if($query->getWhere())$where=$this->buildWhere($query);if($query->getOrder())$order=$this->buildOrder($query);if($query->getLimit())$limit=" LIMIT ".$query->getLimit();if($query->getOffset())$limit.=" OFFSET ".$query->getOffset();if($query->getType()=='select'){$cols=$this->buildSelectCols($query);$q.="SELECT $cols FROM $table$where$order$limit";}elseif($query->getType()=='insert'&&$query->getData()){$insert_data=$this->buildInsertData($query);$q.="INSERT INTO $table$insert_data";}elseif($query->getType()=='update'&&$query->getData()){$update_data=$this->buildUpdateData($query);$q.="UPDATE $table$update_data$where$order$limit";}elseif($query->getType()=='delete')$q.="DELETE FROM $table$where$order$limit";}return"$q;";}public
 function
@@ -130,7 +130,7 @@ instanceof
 NeevoLiteral)$value=(string)$value;else$value=$this->_escapeString((string)$value);}return$array;}protected
 function
 _escapeString($string,$sql_funcs=false){if(get_magic_quotes_gpc())$string=stripslashes($string);return$this->escape($string,Neevo::TEXT);}}class
-NeevoQuery{private$table,$type,$limit,$offset,$neevo,$resource,$time,$sql,$performed;private$where=array(),$order=array(),$columns=array(),$data=array();public
+NeevoQuery{private$table,$type,$limit,$offset,$neevo,$resultSet,$time,$sql,$performed,$numRows,$affectedRows;private$where=array(),$order=array(),$columns=array(),$data=array();public
 function
 __construct(Neevo$object){$this->neevo=$object;}public
 function
@@ -164,24 +164,27 @@ sql($sql){$this->sql=$sql;$this->setType('sql');return$this;}public
 function
 dump($color=true,$return_string=false){$code=$color?self::_highlightSql($this->build()):$this->build();if(!$return_string)echo$code;return$return_string?$code:$this;}public
 function
-run(){$start=explode(' ',microtime());$query=$this->neevo()->driver()->query($this->build(),$this->neevo()->connection()->resource());if(!$query){$this->neevo()->error('Query failed');return
-false;}else{$this->neevo()->incrementQueries();$this->neevo()->setLast($this);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->setTime($time);$this->performed=true;if(in_array($this->getType(),array('select','sql'))){$this->resource=$query;return$query;}else
-return$this;}}public
+run(){$start=explode(' ',microtime());$query=$this->neevo()->driver()->query($this->build());if($query===false){$this->neevo()->error('Query failed');return
+false;}$this->neevo()->incrementQueries();$this->neevo()->setLast($this);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->setTime($time);$this->performed=true;if(is_resource($query)){$this->resultSet=$query;$this->numRows=$this->neevo()->driver()->rows($query);}else$this->affectedRows=$this->neevo()->driver()->affectedRows();return$query;}public
 function
-fetch($fetch_type=null){$rows=null;if(!in_array($this->getType(),array('select','sql')))$this->neevo()->error('Cannot fetch on this kind of query');$resource=$this->isPerformed()?$this->resource():$this->run();while($tmp_rows=$this->neevo()->driver()->fetch($resource))$rows[]=new
-NeevoRow($tmp_rows,$this);$this->neevo()->driver()->free($resource);if(count($rows)===1&&$fetch_type!=Neevo::MULTIPLE)$rows=$rows[0];elseif(!is_null($rows))$rows=new
+fetch($fetch_type=null){$rows=null;if(!in_array($this->getType(),array('select','sql')))$this->neevo()->error('Cannot fetch on this kind of query');$resource=$this->isPerformed()?$this->resultSet():$this->run();while($tmp_rows=$this->neevo()->driver()->fetch($resource))$rows[]=new
+NeevoRow($tmp_rows,$this);$this->free();if(count($rows)===1&&$fetch_type!=Neevo::MULTIPLE)$rows=$rows[0];elseif(!is_null($rows))$rows=new
 NeevoResult($rows,$this);if(!count($rows)&&is_array($rows))return
-false;return$resource?$rows:$this->neevo()->error('Fetching result data failed');}public
+false;return$resource?$rows:$this->neevo()->error('Fetching result data failed');}private
 function
-seek($row_number){if(!$this->isPerformed())$this->run();$seek=$this->neevo()->driver()->seek($this->resource(),$row_number);return$seek?$seek:$this->neevo()->error("Cannot seek to row $row_number");}public
+free(){$this->neevo()->driver()->free($this->resultSet);$this->resultSet=null;}public
 function
-insertId(){if(!$this->isPerformed())$this->run();return$this->neevo()->driver()->insertId($this->neevo()->connection()->resource());}public
+seek($row_number){if(!$this->isPerformed())$this->run();$seek=$this->neevo()->driver()->seek($this->resultSet(),$row_number);return$seek?$seek:$this->neevo()->error("Cannot seek to row $row_number");}public
 function
-rows(){if(!$this->isPerformed())$this->run();return$this->neevo()->driver()->rows($this);}public
+insertId(){if(!$this->isPerformed())$this->run();return$this->neevo()->driver()->insertId();}public
+function
+rows(){if(!$this->isPerformed())$this->run();return$this->numRows;}public
+function
+affectedRows(){if(!$this->isPerformed())$this->run();return$this->affectedRows;}public
 function
 build(){return$this->neevo()->driver()->build($this);}public
 function
-info($hide_password=true,$exclude_connection=false){$info=array('type'=>$this->getType(),'table'=>$this->getTable(),'executed'=>(bool)$this->isPerformed(),'query-string'=>$this->dump(false,true));if($exclude_connection==true)$this->neevo()->connection()->info($hide_password);if($this->isPerformed()){$info['time']=$this->time();if($this->getType()=='insert')$info['last-insert-id']=$this->insertId();}return$info;}public
+info($hide_password=true,$exclude_connection=false){$info=array('type'=>$this->getType(),'table'=>$this->getTable(),'executed'=>(bool)$this->isPerformed(),'query_string'=>$this->dump(false,true));if($exclude_connection==true)$this->neevo()->connection()->info($hide_password);if($this->isPerformed()){$info['time']=$this->time();if(isset($this->numRows))$info['rows']=$this->numRows;if(isset($this->affectedRows))$info['affected_rows']=$this->affectedRows;if($this->getType()=='insert')$info['last_insert_id']=$this->insertId();}return$info;}public
 function
 setTime($time){$this->time=$time;}public
 function
@@ -193,7 +196,7 @@ time(){return$this->time;}public
 function
 neevo(){return$this->neevo;}public
 function
-resource(){return$this->resource;}public
+resultSet(){return$this->resultSet;}public
 function
 isPerformed(){return$this->performed;}public
 function
@@ -336,7 +339,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.4dev";const
-REVISION=130;const
+REVISION=131;const
 MULTIPLE=21;const
 BOOL=30;const
 FLOAT=31;const
@@ -351,7 +354,7 @@ __construct($driver,INeevoCache$cache=null){if(!$driver)throw
 new
 NeevoException("Driver not defined.");$this->setDriver($driver);$this->cache=$cache;}public
 function
-__destruct(){$this->driver()->close($this->connection()->resource());}public
+__destruct(){$this->driver()->close();}public
 function
 connect(array$opts){$connection=$this->createConnection($opts);$this->setConnection($connection);return(bool)$connection;}public
 function
@@ -407,7 +410,7 @@ function
 sql($sql){$q=new
 NeevoQuery($this);return$q->sql($sql);}public
 function
-errorReporting(){if(!isset($this->error_reporting))$this->error_reporting=self::E_WARNING;return$this->error_reporting;}public
+errorReporting(){if(!isset($this->error_reporting))$this->error_reporting=self::E_HANDLE;return$this->error_reporting;}public
 function
 setErrorReporting($value){$this->error_reporting=$value;if(!isset($this->error_reporting))$this->error_reporting=self::E_HANDLE;}public
 function
@@ -424,7 +427,7 @@ defaultErrorHandler(NeevoException$exception){$message=$exception->getMessage();
 function
 version($string=true){if($string)$return='Neevo '.self::VERSION.' (revision '.self::REVISION.').';else$return=array('version'=>self::VERSION,'revision'=>self::REVISION);return$return;}public
 function
-info($hide_password=true){$info=array('executed-queries'=>$this->queries(),'last-query'=>$this->last()->info($hide_password,true),'connection'=>$this->connection()->info($hide_password),'version'=>$this->version(false),'error-reporting'=>$this->errorReporting());return$info;}}class
+info($hide_password=true){$info=array('executed_queries'=>$this->queries(),'last_query'=>$this->last()->info($hide_password,true),'connection'=>$this->connection()->info($hide_password),'version'=>$this->version(false),'error_reporting'=>$this->errorReporting());return$info;}}class
 NeevoException
 extends
 Exception{};class

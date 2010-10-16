@@ -20,8 +20,7 @@
  */
 class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
 
-  /** @var Neevo $neevo Reference to main Neevo object */
-  private $neevo;
+  private $neevo, $resource;
 
 
   /**
@@ -50,22 +49,22 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
 			if (!$ok)
 				$this->neevo()->sql("SET NAMES ".$opts['encoding'])->run();
     }
-    return $connection;
+    $this->resource = $connection;
   }
 
 
-  public function close($resource){
-    @mysql_close($resource);
+  public function close(){
+    @mysql_close($this->resource);
   }
 
 
-  public function free($result){
-    return @mysql_free_result($result);
+  public function free($resultSet){
+    return @mysql_free_result($resultSet);
   }
 
 
-  public function query($query_string, $resource){
-    return @mysql_query($query_string, $resource);
+  public function query($query_string){
+    return @mysql_query($query_string, $this->resource);
   }
 
 
@@ -81,18 +80,18 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
   }
 
 
-  public function fetch($resource){
-    return @mysql_fetch_assoc($resource);
+  public function fetch($resultSet){
+    return @mysql_fetch_assoc($resultSet);
   }
 
 
-  public function seek($resource, $row_number){
-    return @mysql_data_seek($resource, $row_number);
+  public function seek($resultSet, $row_number){
+    return @mysql_data_seek($resultSet, $row_number);
   }
 
 
-  public function insertId($resource){
-    return mysql_insert_id($resource);
+  public function insertId(){
+    return mysql_insert_id($this->resource);
   }
 
 
@@ -101,15 +100,13 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
   }
 
 
-  public function rows(NeevoQuery $query){
-    if($query->getType() != 'select')
-      $aff_rows = $query->performed()
-        ? @mysql_affected_rows($query->neevo()->connection()->resource()) : false;
-    else $num_rows = @mysql_num_rows($query->resource());
+  public function rows($resultSet){
+    return mysql_num_rows($resultSet);
+  }
 
-    if($num_rows || $aff_rows)
-      return $num_rows ? $num_rows : $aff_rows;
-    else return false;
+
+  public function affectedRows(){
+    return mysql_affected_rows($this->resource);
   }
 
 

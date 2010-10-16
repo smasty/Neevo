@@ -20,7 +20,7 @@
  */
 class NeevoQuery {
 
-  private  $table, $type, $limit, $offset, $neevo, $resource, $time, $sql, $performed;
+  private  $table, $type, $limit, $offset, $neevo, $resultSet, $time, $sql, $performed, $numRows, $affectedRows;
   private  $where = array(), $order = array(), $columns = array(), $data = array();
 
 
@@ -189,7 +189,8 @@ class NeevoQuery {
    */
   public function limit($limit, $offset = null){
     $this->limit = $limit;
-    if(isset($offset) && $this->getType() == 'select') $this->offset = $offset;
+    if(isset($offset) && $this->getType() == 'select')
+      $this->offset = $offset;
     return $this;
   }
 
@@ -231,31 +232,33 @@ class NeevoQuery {
 
   /**
    * Performs Query
-   * @return resource|NeevoQuery Query resource on SELECT queries or NeevoQuery object
+   * @return resource|bool
    */
   public function run(){
     $start = explode(' ', microtime());
-    $query = $this->neevo()->driver()->query($this->build(), $this->neevo()->connection()->resource());
-    if(!$query){
+    $query = $this->neevo()->driver()->query($this->build());
+
+    if($query === false){
       $this->neevo()->error('Query failed');
       return false;
     }
-    else{
-      $this->neevo()->incrementQueries();
-      $this->neevo()->setLast($this);
 
-      $end = explode(" ", microtime());
-      $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
-      $this->setTime($time);
+    $this->neevo()->incrementQueries();
+    $this->neevo()->setLast($this);
 
-      $this->performed = true;
-      if(in_array($this->getType(), array('select', 'sql'))){
-        $this->resource = $query;
-        return $query;
-      }
-      else return $this;
+    $end = explode(" ", microtime());
+    $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
+    $this->setTime($time);
 
+    $this->performed = true;
+    if(is_resource($query)){
+      $this->resultSet = $query;
+      $this->numRows = $this->neevo()->driver()->rows($query);
     }
+    else
+      $this->affectedRows = $this->neevo()->driver()->affectedRows();
+
+    return $query;
   }
 
 
@@ -271,12 +274,12 @@ class NeevoQuery {
     $rows = null;
     if(!in_array($this->getType(), array('select', 'sql'))) $this->neevo()->error('Cannot fetch on this kind of query');
 
-    $resource = $this->isPerformed() ? $this->resource() : $this->run();
+    $resource = $this->isPerformed() ? $this->resultSet() : $this->run();
 
     while($tmp_rows = $this->neevo()->driver()->fetch($resource))
       $rows[] = new NeevoRow($tmp_rows, $this);
 
-    $this->neevo()->driver()->free($resource);
+    $this->free();
 
     // If only one row, return NeevoRow instead
     if(count($rows) === 1 && $fetch_type != Neevo::MULTIPLE)
@@ -290,6 +293,15 @@ class NeevoQuery {
 
 
   /**
+   * Free result set resource.
+   */
+  private function free(){
+    $this->neevo()->driver()->free($this->resultSet);
+    $this->resultSet = null;
+  }
+
+
+  /**
    * Move internal result pointer
    * @param int $row_number Row number of the new result pointer.
    * @return bool
@@ -297,7 +309,7 @@ class NeevoQuery {
   public function seek($row_number){
     if(!$this->isPerformed()) $this->run();
 
-    $seek = $this->neevo()->driver()->seek($this->resource(), $row_number);
+    $seek = $this->neevo()->driver()->seek($this->resultSet(), $row_number);
     return $seek ? $seek : $this->neevo()->error("Cannot seek to row $row_number");
   }
 
@@ -309,18 +321,27 @@ class NeevoQuery {
   public function insertId(){
     if(!$this->isPerformed()) $this->run();
 
-    return $this->neevo()->driver()->insertId($this->neevo()->connection()->resource());
+    return $this->neevo()->driver()->insertId();
   }
 
 
   /**
-   * Number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
-   * @return int|FALSE Number of rows (int) or FALSE
+   * Number of rows in result set
+   * @return int
    */
   public function rows(){
     if(!$this->isPerformed()) $this->run();
+    return $this->numRows;
+  }
 
-    return $this->neevo()->driver()->rows($this);
+
+  /**
+   * Number of rows affected by query
+   * @return int
+   */
+  public function affectedRows(){
+    if(!$this->isPerformed()) $this->run();
+    return $this->affectedRows;
   }
 
 
@@ -347,7 +368,7 @@ class NeevoQuery {
       'type' => $this->getType(),
       'table' => $this->getTable(),
       'executed' => (bool) $this->isPerformed(),
-      'query-string' => $this->dump(false, true)
+      'query_string' => $this->dump(false, true)
     );
 
     if($exclude_connection == true)
@@ -355,8 +376,12 @@ class NeevoQuery {
 
     if($this->isPerformed()){
       $info['time'] = $this->time();
+      if(isset($this->numRows))
+        $info['rows'] = $this->numRows;
+      if(isset($this->affectedRows))
+        $info['affected_rows'] = $this->affectedRows;
       if($this->getType() == 'insert')
-        $info['last-insert-id'] = $this->insertId();
+        $info['last_insert_id'] = $this->insertId();
     }
 
     return $info;
@@ -401,8 +426,8 @@ class NeevoQuery {
 
 
   /** @internal */
-  public function resource(){
-    return $this->resource;
+  public function resultSet(){
+    return $this->resultSet;
   }
 
   /**

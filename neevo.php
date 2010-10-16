@@ -62,7 +62,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.4dev";
-  const REVISION = 130;
+  const REVISION = 131;
 
   // Fetch format
   const MULTIPLE = 21;
@@ -96,7 +96,7 @@ class Neevo{
    * @return void
    */
   public function  __destruct(){
-    $this->driver()->close($this->connection()->resource());
+    $this->driver()->close();
   }
 
 
@@ -351,7 +351,7 @@ class Neevo{
    * @return int
    */
   public function errorReporting(){
-    if(!isset($this->error_reporting)) $this->error_reporting = self::E_WARNING;
+    if(!isset($this->error_reporting)) $this->error_reporting = self::E_HANDLE;
     return $this->error_reporting;
   }
 
@@ -471,11 +471,11 @@ class Neevo{
    */
   public function info($hide_password = true){
     $info = array(
-      'executed-queries' => $this->queries(),
-      'last-query' => $this->last()->info($hide_password, true),
+      'executed_queries' => $this->queries(),
+      'last_query' => $this->last()->info($hide_password, true),
       'connection' => $this->connection()->info($hide_password),
       'version' => $this->version(false),
-      'error-reporting' => $this->errorReporting()
+      'error_reporting' => $this->errorReporting()
     );
     return $info;
   }

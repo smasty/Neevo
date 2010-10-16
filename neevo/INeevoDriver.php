@@ -39,34 +39,32 @@ interface INeevoDriver {
    *   database        =>  database_name,
    *   encoding        =>  utf8
    * );</pre>
-   * @return bool
+   * @return void
    */
   public function connect(array $opts);
 
 
   /**
    * Closes given resource
-   * @param resource $resource
    * @return void
    */
-  public function close($resource);
+  public function close();
 
 
   /**
    * Frees memory used by result
-   * @param resource $result
+   * @param resource $resultSet
    * @return bool
    */
-  public function free($result);
+  public function free($resultSet);
 
 
   /**
    * Executes given SQL query
    * @param string $query_string Query-string.
-   * @param resource Connection resource
    * @return resource
    */
-  public function query($query_string, $resource);
+  public function query($query_string);
 
 
   /**
@@ -79,27 +77,26 @@ interface INeevoDriver {
 
   /**
    * Fetches row from given Query resource as associative array.
-   * @param resource $resource Query resource
+   * @param resource $resultSet Query resource
    * @return array
    */
-  public function fetch($resource);
+  public function fetch($resultSet);
 
 
   /**
    * Move internal result pointer
-   * @param resource $resource Query resource
+   * @param resource $resultSet Query resource
    * @param int $row_number Row number of the new result pointer.
    * @return bool
    */
-  public function seek($resource, $row_number);
+  public function seek($resultSet, $row_number);
 
 
   /**
    * Get the ID generated in the INSERT query
-   * @param resource $resource Query resource
    * @return int
    */
-  public function insertId($resource);
+  public function insertId();
 
 
   /**
@@ -111,11 +108,18 @@ interface INeevoDriver {
 
 
   /**
-   * Number of affected rows for INSERT/UPDATE/DELETE queries and number of rows in result for SELECT queries
-   * @param NeevoQuery $query NeevoQuery instance
-   * @return int|FALSE Number of rows (int) or FALSE
+   * Number of rows in result set.
+   * @param resource $resultSet
+   * @return int|FALSE
    */
-  public function rows(NeevoQuery $query);
+  public function rows($resultSet);
+
+
+  /**
+   * Number of affected rows in previous operation.
+   * @return int
+   */
+  public function affectedRows();
 
 
   /**
