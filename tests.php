@@ -30,7 +30,7 @@ include "neevo.php";
 
 
 // Initialize Neevo and set driver to MySQL
-$sql = new Neevo('MySQL', new NeevoCacheSession);
+$sql = new Neevo('MySQL');
 
 
 // Set Neevo error reporting level

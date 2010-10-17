@@ -62,7 +62,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.4dev";
-  const REVISION = 138;
+  const REVISION = 139;
 
   // Data types
   const BOOL = 30;
@@ -74,14 +74,15 @@ class Neevo{
 
   /**
    * Neevo
-   * @param string $driver Name of driver to use
+   * @param string $driver Name of driver to use.
+   * @param INeevoCache|bool $cache Cache to use. If not defined, tries to create it automatically. FALSE to disable autocache.
    * @return void
    * @throws NeevoException
    */
-  public function __construct($driver, INeevoCache $cache = null){
+  public function __construct($driver, $cache = null){
     if(!$driver) throw new NeevoException("Driver not defined.");
     $this->setDriver($driver);
-    $this->cache = $cache;
+    $this->setCache($cache);
   }
 
 
@@ -200,6 +201,51 @@ class Neevo{
   /** @internal */
   private function isDriver($class){
     return (class_exists($class, false) && in_array("INeevoDriver", class_implements($class, false)) && in_array("NeevoDriver", class_parents($class, false)));
+  }
+
+
+  /**
+   * Sets Neevo cache. If not defined, tries to create cache automatically.
+   * @param INeevoCache|FALSE $cache FALSE to disable autocache.
+   * @return void
+   * @internal
+   */
+  private function setCache($cache = null){
+    // FALSE passed = disable autocache.
+    if($cache === false)
+      return;
+
+    // Try to create cache automatically
+    elseif($cache === null){
+      // Session cache
+      if(session_id() !== ''){
+        $this->cache = new NeevoCacheSession;
+      }
+
+      // APC cache
+      elseif(function_exists('apc_store') && function_exists('apc_fetch')){
+        $this->cache = new NeevoCacheAPC;
+      }
+
+      // Memcache cache
+      elseif(class_exists('Memcache')){
+        $this->cache = new NeevoCacheMemcache(new Memcache);
+      }
+
+      // File cache
+      else{
+        $this->cache = new NeevoCacheFile('neevo.cache');
+      }
+    }
+
+    // INeevoCache object passed
+    elseif(is_object($cache) && in_array("INeevoCache", class_implements($cache, false)))
+      $this->cache = $cache;
+
+    // Not proper value passed
+    else
+      throw new NeevoException('Argument 2 passed to Neevo::__construct() must be boolean or implement interface INeevoCache');
+
   }
   
   

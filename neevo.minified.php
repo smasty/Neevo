@@ -355,6 +355,24 @@ load($key){if(!isset($this->data[$key]))return
 null;return$this->data[$key];}public
 function
 save($key,$value){$this->data[$key]=$value;file_put_contents($this->filename,serialize($this->data),LOCK_EX);}}class
+NeevoCacheMemcache
+implements
+INeevoCache{private$memcache;public
+function
+__construct(Memcache$memcache){$this->memcache=$memcache;}public
+function
+load($key){$value=$this->memcache->get("NeevoCache.$key");if($value===false)return
+null;return$value;}public
+function
+save($key,$value){$this->memcache->set("NeevoCache.$key",$value);}}class
+NeevoCacheAPC
+implements
+INeevoCache{public
+function
+load($key){$value=apc_fetch("NeevoCache.$key",$success);if(!$success)return
+null;return$value;}public
+function
+save($key,$value){apc_store("NeevoCache.$key",$value);}}class
 Neevo{private$connection,$driver,$cache,$error_handler,$last,$queries,$error_reporting;public
 static$ignore_deprecated=false;public
 static$highlight_colors=array('columns'=>'#00f','chars'=>'#000','keywords'=>'#008000','joins'=>'#555','functions'=>'#008000','constants'=>'#f00');const
@@ -362,16 +380,16 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.4dev";const
-REVISION=138;const
+REVISION=139;const
 BOOL=30;const
 TEXT=33;const
 BINARY=34;const
 DATETIME=36;const
 DATE=37;public
 function
-__construct($driver,INeevoCache$cache=null){if(!$driver)throw
+__construct($driver,$cache=null){if(!$driver)throw
 new
-NeevoException("Driver not defined.");$this->setDriver($driver);$this->cache=$cache;}public
+NeevoException("Driver not defined.");$this->setDriver($driver);$this->setCache($cache);}public
 function
 __destruct(){$this->driver()->close();}public
 function
@@ -396,7 +414,17 @@ dirname(__FILE__).'/neevo/drivers/'.strtolower($driver).'.php';if(!$this->isDriv
 new
 NeevoException("Unable to create instance of Neevo driver '$driver' - corresponding class not found or not matching criteria.");}$this->driver=new$class($this);}private
 function
-isDriver($class){return(class_exists($class,false)&&in_array("INeevoDriver",class_implements($class,false))&&in_array("NeevoDriver",class_parents($class,false)));}public
+isDriver($class){return(class_exists($class,false)&&in_array("INeevoDriver",class_implements($class,false))&&in_array("NeevoDriver",class_parents($class,false)));}private
+function
+setCache($cache=null){if($cache===false)return;elseif($cache===null){if(session_id()!==''){$this->cache=new
+NeevoCacheSession;}elseif(function_exists('apc_store')&&function_exists('apc_fetch')){$this->cache=new
+NeevoCacheAPC;}elseif(class_exists('Memcache')){$this->cache=new
+NeevoCacheMemcache(new
+Memcache);}else{$this->cache=new
+NeevoCacheFile('neevo.cache');}}elseif(is_object($cache)&&in_array("INeevoCache",class_implements($cache,false)))$this->cache=$cache;else
+throw
+new
+NeevoException('Argument 2 passed to Neevo::__construct() must be boolean or implement interface INeevoCache');}public
 function
 cache(){return$this->cache;}public
 function

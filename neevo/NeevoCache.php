@@ -88,4 +88,53 @@ class NeevoCacheFile implements INeevoCache {
   }
 
 }
+
+
+/**
+ * Neevo Memcache cache
+ * @package NeevoCache
+ */
+class NeevoCacheMemcache implements INeevoCache {
+
+  private $memcache;
+
+  public function __construct(Memcache $memcache){
+    $this->memcache = $memcache;
+  }
+
+  public function load($key){
+    $value = $this->memcache->get("NeevoCache.$key");
+    if($value === false)
+      return null;
+    return $value;
+  }
+
+
+  public function save($key, $value){
+    $this->memcache->set("NeevoCache.$key", $value);
+  }
+
+}
+
+
+/**
+ * Neevo APC cache
+ * @package NeevoCache
+ */
+class NeevoCacheAPC implements INeevoCache {
+
+
+  public function load($key){
+    $value = apc_fetch("NeevoCache.$key", $success);
+    if(!$success)
+      return null;
+    return $value;
+  }
+
+
+  public function save($key, $value){
+    apc_store("NeevoCache.$key", $value);
+  }
+
+}
 ?>
