@@ -15,15 +15,15 @@
  */if(version_compare(PHP_VERSION,'5.1.0','<')){if(version_compare(PHP_VERSION,'5.0.0','>='))throw
 new
 Exception('Neevo requires PHP version 5.1.0 or newer');if(version_compare(PHP_VERSION,'5.0.0','<'))trigger_error('Neevo requires PHP version 5.1.0 or newer',E_USER_ERROR);exit;}class
-NeevoConnection{private$neevo,$driver,$username,$password,$host,$database,$encoding,$table_prefix;public
+NeevoConnection{private$neevo,$driver,$options;public
 function
-__construct(Neevo$neevo,INeevoDriver$driver,$user,$pswd=null,$host,$database,$encoding=null,$table_prefix=null){$this->neevo=$neevo;$this->driver=$driver;$this->username=$user;$this->password=$pswd;$this->host=$host;$this->database=$database;$this->encoding=$encoding;$this->table_prefix=$table_prefix;$this->driver()->connect($this->getVars());}private
+__construct(Neevo$neevo,INeevoDriver$driver,array$options){$this->neevo=$neevo;$this->driver=$driver;$this->options=$options;$this->driver()->connect($this->options);}private
 function
 driver(){return$this->driver;}public
 function
-getVars(){$options=get_object_vars($this);unset($options['neevo'],$options['driver'],$options['resource']);return$options;}public
+getVars(){return$this->options;}public
 function
-prefix(){return$this->table_prefix;}public
+prefix(){return$this->options['table_prefix'];}public
 function
 info($hide_password=true){$info=$this->getVars();if($hide_password)$info['password']='*****';$info['driver']=str_replace('NeevoDriver','',get_class($this->driver));return$info;}}interface
 INeevoDriver{public
@@ -355,16 +355,6 @@ load($key){if(!isset($this->data[$key]))return
 null;return$this->data[$key];}public
 function
 save($key,$value){$this->data[$key]=$value;file_put_contents($this->filename,serialize($this->data),LOCK_EX);}}class
-NeevoCacheMemcache
-implements
-INeevoCache{private$memcache;public
-function
-__construct(Memcache$memcache){$this->memcache=$memcache;}public
-function
-load($key){$value=$this->memcache->get("NeevoCache.$key");if($value===false)return
-null;return$value;}public
-function
-save($key,$value){$this->memcache->set("NeevoCache.$key",$value);}}class
 NeevoCacheAPC
 implements
 INeevoCache{public
@@ -380,7 +370,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.4dev";const
-REVISION=139;const
+REVISION=141;const
 BOOL=30;const
 TEXT=33;const
 BINARY=34;const
@@ -399,7 +389,7 @@ connection(){return$this->connection;}public
 function
 createConnection(array$opts){return
 new
-NeevoConnection($this,$this->driver(),$opts['username'],$opts['password'],$opts['host'],$opts['database'],$opts['encoding'],$opts['table_prefix']);}public
+NeevoConnection($this,$this->driver(),$opts);}public
 function
 useConnection(NeevoConnection$connection){$this->setConnection($connection);return$this;}private
 function
@@ -418,9 +408,7 @@ isDriver($class){return(class_exists($class,false)&&in_array("INeevoDriver",clas
 function
 setCache($cache=null){if($cache===false)return;elseif($cache===null){if(session_id()!==''){$this->cache=new
 NeevoCacheSession;}elseif(function_exists('apc_store')&&function_exists('apc_fetch')){$this->cache=new
-NeevoCacheAPC;}elseif(class_exists('Memcache')){$this->cache=new
-NeevoCacheMemcache(new
-Memcache);}else{$this->cache=new
+NeevoCacheAPC;}else{$this->cache=new
 NeevoCacheFile('neevo.cache');}}elseif(is_object($cache)&&in_array("INeevoCache",class_implements($cache,false)))$this->cache=$cache;else
 throw
 new

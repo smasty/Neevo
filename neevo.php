@@ -62,7 +62,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.4dev";
-  const REVISION = 139;
+  const REVISION = 141;
 
   // Data types
   const BOOL = 30;
@@ -132,7 +132,7 @@ class Neevo{
    * @internal
    */
   public function createConnection(array $opts){
-    return new NeevoConnection($this, $this->driver(), $opts['username'], $opts['password'], $opts['host'], $opts['database'], $opts['encoding'], $opts['table_prefix']);
+    return new NeevoConnection($this, $this->driver(), $opts);
   }
 
 
@@ -227,10 +227,10 @@ class Neevo{
         $this->cache = new NeevoCacheAPC;
       }
 
-      // Memcache cache
+      /* Memcache cache
       elseif(class_exists('Memcache')){
         $this->cache = new NeevoCacheMemcache(new Memcache);
-      }
+      }*/
 
       // File cache
       else{

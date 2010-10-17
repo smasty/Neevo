@@ -94,7 +94,7 @@ class NeevoCacheFile implements INeevoCache {
  * Neevo Memcache cache
  * @package NeevoCache
  */
-class NeevoCacheMemcache implements INeevoCache {
+/*class NeevoCacheMemcache implements INeevoCache {
 
   private $memcache;
 
@@ -114,7 +114,7 @@ class NeevoCacheMemcache implements INeevoCache {
     $this->memcache->set("NeevoCache.$key", $value);
   }
 
-}
+}*/
 
 
 /**
