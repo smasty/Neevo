@@ -66,32 +66,26 @@ Supported drivers
 Todo
 ====
 
- - Better site and Public API documentation ;-)
+ - Better site ;-)
 
- - PostgreSQL driver
- - SQLite driver
- - Show database and table structure (probably not)
+ - PDO driver
  - MySQLi driver
 
 
 Compiler
 ========
 
-Neevo comes with what I call "compiler" - PHP CLI (command-line interface) script
-which simplifies some boring work for me: Minifies source to one file without
-comments and whitespace, regenerates PHPDoc and increments revision number.
+Neevo comes with a "compiler" - PHP CLI script shrinking whole Neevo to one PHP file.
+Included drivers can also be specified.
 
 Usage:
-  $ php compiler.php [options]
+  $ php compiler.php [-d=<drivers>] -h
 
 Options:
 
-  -f=<filename>  File to compile. Defaults to neevo.php
-  -r             Increments REVISION in <filename>
-  -m             Minifies source code of <filename>
-  -h             Displays help
-  -q             Script produces no output
+  -d=<drivers>  Comma-separated list of drivers to include. Defaults to all drivers.
+  -h            Displays help.
 
-Minification part is made up from functions written by Jakub Vrana (http://php.vrana.cz)
-for his Adminer "Compact MySQL management" (http://adminer.org) licensed under
-Apache license 2.0 and are used with his permission.
+
+Minification functions are written by Jakub Vrana (http://php.vrana.cz) for his
+Adminer (http://adminer.org) licensed under Apache license 2.0 and are used with his permission.
