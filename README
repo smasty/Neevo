@@ -89,7 +89,6 @@ Options:
   -f=<filename>  File to compile. Defaults to neevo.php
   -r             Increments REVISION in <filename>
   -m             Minifies source code of <filename>
-  -d=<file>      Runs Apigen with <file> configuration. Defaults to neevo
   -h             Displays help
   -q             Script produces no output
 

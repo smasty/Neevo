@@ -1,20 +1,19 @@
 #!/usr/bin/php
 <?php
-if(!$_SERVER['SHELL']) trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
+if(!$_SERVER['SHELL'])
+  trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
 
 
 // Defaults
 define("DEFAULT_FILE", "neevo.php");
-define("APIGEN_PATH", "http://localhost/tools/apigen/apigen.php?s=../../projects/Neevo&d=../../projects/Neevo/doc&c=%CONFIG%");
-define("DEFAULT_APIGEN_CONFIG", "neevo");
 define("LAST_INCLUDE", "include_once dirname(__FILE__). '/neevo/INeevoDriver.php';");
 define("DRIVERS_PATH", "/neevo/drivers/");
 
-$args = getopt('hrd::mqf::');
+$args = getopt('hrmqf::');
 
 $nooutput = isset($args['q']);
 
-if(count($args) < 1){
+if(empty($args)){
   out("\nError: No arguments passed.\n\n");
   help();
   exit;
@@ -54,17 +53,6 @@ if(isset($args['r']))
 if(isset($args['m']))
   out(minify($file));
 
-// -d=<config>: Generate documentation
-if(isset($args['d'])){
-
-  $config = ($args['d'] !== false) ? str_replace(array('=', '.neon'), '', $args['d']) : DEFAULT_APIGEN_CONFIG;
-  $config .= '.neon';
-
-  out("Using Apigen configuration '$config'\n");
-  
-  out(apigen($config));
-}
-
 
 out("\n");
 
@@ -73,18 +61,6 @@ out("\n");
 
 /* ******* Functions ******* */
 
-
-
-function apigen($config){
-  recursive_remove_directory("./doc");
-  $path = str_replace("%CONFIG%", $config, APIGEN_PATH);
-  $response = file_get_contents($path);
-  if(strstr($response, "Done. Total time:"))
-    $response = "Success: Documentation generated";
-  else $response = "Error: Documentation generation failed";
-
-  return "$response\n";
-}
 
 
 function revision($file){
@@ -144,7 +120,6 @@ Options:
   -f=<filename>  File to compile. Defaults to ".DEFAULT_FILE."
   -r             Increments REVISION in <filename>
   -m             Minifies source code of <filename>
-  -d=<file>      Runs Apigen with <file> configuration. Defaults to ".DEFAULT_APIGEN_CONFIG."
   -h             Displays help
   -q             Script produces no output
 ");
@@ -267,30 +242,3 @@ function php_shrink($input, $shorted) {
   }
   return $output;
 }
-
-function recursive_remove_directory($directory, $empty = false){
-  if(substr($directory,-1) == '/')
-    $directory = substr($directory,0,-1);
-  if(!file_exists($directory) || !is_dir($directory))
-    return false;
-  elseif(is_readable($directory)){
-    $handle = opendir($directory);
-    while (FALSE !== ($item = readdir($handle))){
-      if($item != '.' && $item != '..'){
-        $path = $directory.'/'.$item;
-        if(is_dir($path)) 
-          recursive_remove_directory($path);
-        else
-          unlink($path);
-      }
-    }
-    closedir($handle);
-    if($empty == FALSE){
-      if(!rmdir($directory)){
-        return FALSE;
-      }
-    }
-  }
-  return TRUE;
-}
-?>
