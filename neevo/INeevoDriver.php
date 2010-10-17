@@ -71,7 +71,7 @@ interface INeevoDriver {
   /**
    * Error message with driver-specific additions
    * @param string $neevo_msg Error message
-   * @return string
+   * @return array Format: array($message, $err_number)
    */
   public function error($neevo_msg);
 

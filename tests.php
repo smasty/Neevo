@@ -34,7 +34,7 @@ $sql = new Neevo('MySQL');
 
 
 // Set Neevo error reporting level
-$sql->setErrorReporting(Neevo::E_STRICT);
+$sql->setErrorReporting(Neevo::E_HANDLE);
 
 
 // Create connection to a database server

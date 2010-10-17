@@ -69,14 +69,14 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
 
 
   public function error($neevo_msg){
-    $mysql_msg = mysql_error();
+    $mysql_msg = mysql_error($this->resource);
     $mysql_msg = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $mysql_msg);
 
     $msg = $neevo_msg.".";
     if($mysql_msg)
       $msg .= " ".$mysql_msg;
 
-    return $msg;
+    return array($msg, mysql_errno($this->resource));
   }
 
 

@@ -62,7 +62,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.4dev";
-  const REVISION = 143;
+  const REVISION = 144;
 
   // Data types
   const BOOL = 30;
@@ -437,7 +437,7 @@ class Neevo{
 
   /**
    * If error_reporting is E_STRICT, throws NeevoException available to catch.
-   * Otherwise, sends NeevoException instance to defined handler.
+   * Sends NeevoException instance to defined handler if E_HANDLE, does nothing if E_NONE.
    * @param string $neevo_msg Error message
    * @return false
    * @throws NeevoException
@@ -446,8 +446,8 @@ class Neevo{
     $level = $this->errorReporting();
 
     if($level != Neevo::E_NONE){
-      $msg = $this->driver()->error($neevo_msg);
-      $exception = new NeevoException($msg);
+      $err = $this->driver()->error($neevo_msg);
+      $exception = new NeevoException($err[0], $err[1]);
 
       if($level == Neevo::E_HANDLE)
         call_user_func($this->errorHandler(), $exception);
@@ -479,10 +479,12 @@ class Neevo{
       $path = $exception->getFile();
       $act = "thrown";
     }
+
+    $code = is_numeric($exception->getCode()) ? ' #'.$exception->getCode() : '';
     $file = basename($path);
     $path = str_replace($file, "<strong>$file</strong>", $path);
 
-    echo "<p><strong>Neevo exception</strong> $act in <em>$path</em> on <strong>line $line</strong>: $message</p>\n";
+    echo "<p><strong>Neevo exception$code</strong> $act in <em>$path</em> on <strong>line $line</strong>: $message</p>\n";
   }
 
 

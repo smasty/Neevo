@@ -75,7 +75,8 @@ free($resultSet){return@mysql_free_result($resultSet);}public
 function
 query($query_string){return@mysql_query($query_string,$this->resource);}public
 function
-error($neevo_msg){$mysql_msg=mysql_error();$mysql_msg=str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use','Syntax error',$mysql_msg);$msg=$neevo_msg.".";if($mysql_msg)$msg.=" ".$mysql_msg;return$msg;}public
+error($neevo_msg){$mysql_msg=mysql_error($this->resource);$mysql_msg=str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use','Syntax error',$mysql_msg);$msg=$neevo_msg.".";if($mysql_msg)$msg.=" ".$mysql_msg;return
+array($msg,mysql_errno($this->resource));}public
 function
 fetch($resultSet){return@mysql_fetch_assoc($resultSet);}public
 function
@@ -373,7 +374,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.4dev";const
-REVISION=143;const
+REVISION=144;const
 BOOL=30;const
 TEXT=33;const
 BINARY=34;const
@@ -456,12 +457,12 @@ errorHandler(){$func=$this->error_handler;if((is_array($func)&&!method_exists($f
 function
 setErrorHandler($handler_function){if(function_exists($handler_function))$this->error_handler=$handler_function;else$this->error_handler=array('Neevo','defaultErrorHandler');}public
 function
-error($neevo_msg){$level=$this->errorReporting();if($level!=Neevo::E_NONE){$msg=$this->driver()->error($neevo_msg);$exception=new
-NeevoException($msg);if($level==Neevo::E_HANDLE)call_user_func($this->errorHandler(),$exception);if($level==Neevo::E_STRICT)throw$exception;}return
+error($neevo_msg){$level=$this->errorReporting();if($level!=Neevo::E_NONE){$err=$this->driver()->error($neevo_msg);$exception=new
+NeevoException($err[0],$err[1]);if($level==Neevo::E_HANDLE)call_user_func($this->errorHandler(),$exception);if($level==Neevo::E_STRICT)throw$exception;}return
 false;}public
 static
 function
-defaultErrorHandler(NeevoException$exception){$message=$exception->getMessage();$trace=$exception->getTrace();if(!empty($trace)){$last=$trace[count($trace)-1];$line=$last['line'];$path=$last['file'];$act="occured";}else{$line=$exception->getLine();$path=$exception->getFile();$act="thrown";}$file=basename($path);$path=str_replace($file,"<strong>$file</strong>",$path);echo"<p><strong>Neevo exception</strong> $act in <em>$path</em> on <strong>line $line</strong>: $message</p>\n";}public
+defaultErrorHandler(NeevoException$exception){$message=$exception->getMessage();$trace=$exception->getTrace();if(!empty($trace)){$last=$trace[count($trace)-1];$line=$last['line'];$path=$last['file'];$act="occured";}else{$line=$exception->getLine();$path=$exception->getFile();$act="thrown";}$code=is_numeric($exception->getCode())?' #'.$exception->getCode():'';$file=basename($path);$path=str_replace($file,"<strong>$file</strong>",$path);echo"<p><strong>Neevo exception$code</strong> $act in <em>$path</em> on <strong>line $line</strong>: $message</p>\n";}public
 function
 version($string=true){if($string)$return='Neevo '.self::VERSION.' (revision '.self::REVISION.').';else$return=array('version'=>self::VERSION,'revision'=>self::REVISION);return$return;}public
 function
