@@ -109,25 +109,28 @@ neevo(){return$this->neevo;}}class
 NeevoDriver{protected
 function
 buildWhere(NeevoQuery$query){$conds=$query->getWhere();unset($conds[count($conds)-1][3]);foreach($conds
-as&$cond){$cond[0]=$this->buildColName($cond[0]);if($cond[2]===true){unset($cond[1],$cond[2]);}elseif($cond[2]===false){$x=$cond[0];$cond[0]='NOT';$cond[1]=$cond[0];unset($cond[2]);}elseif(is_array($cond[2]))$cond[2]='('.join(', ',$this->_escapeArray($cond[2])).')';elseif($cond[2]!=='NULL')$cond[2]=$this->_escapeString($cond[2]);$cond=join(' ',$cond);}return' WHERE '.join(' ',$conds);}protected
+as&$cond){$cond[0]=$this->buildColName($cond[0]);if($cond[2]===true){unset($cond[1],$cond[2]);}elseif($cond[2]===false){$x=$cond[0];$cond[0]='NOT';$cond[1]=$cond[0];unset($cond[2]);}elseif(is_array($cond[2]))$cond[2]='('.join(', ',$this->_escapeArray($cond[2])).')';elseif($cond[2]instanceof
+NeevoLiteral)$cond[2]=$cond[2]->value;elseif($cond[2]!=='NULL')$cond[2]=$this->_escapeString($cond[2]);$cond=join(' ',$cond);}return' WHERE '.join(' ',$conds);}protected
 function
-buildInsertData(NeevoQuery$query){foreach($this->_escapeArray($query->getData())as$col=>$value){$cols[]=$col;$values[]=$value;}return' ('.join(', ',$cols).') VALUES ('.join(', ',$values).')';}protected
+buildInsertData(NeevoQuery$query){foreach($this->_escapeArray($query->getData())as$col=>$value){$cols[]=$this->buildColName($col);$values[]=$value;}return' ('.join(', ',$cols).') VALUES ('.join(', ',$values).')';}protected
 function
-buildUpdateData(NeevoQuery$query){foreach($this->_escapeArray($query->getData())as$col=>$value){$update[]=$col.' = '.$value;}return' SET '.join(', ',$update);}protected
+buildUpdateData(NeevoQuery$query){foreach($this->_escapeArray($query->getData())as$col=>$value){$update[]=$this->buildColName($col).' = '.$value;}return' SET '.join(', ',$update);}protected
 function
 buildOrder(NeevoQuery$query){return' ORDER BY '.join(', ',$query->getOrder());}protected
 function
 buildSelectCols(NeevoQuery$query){foreach($query->getCols()as$col){$cols[]=$this->buildColName($col);}return
 join(', ',$cols);}protected
 function
-buildColName($col){$col=trim($col);$prefix=$this->neevo()->connection()->prefix();if(preg_match('#([^.]+)(\.)([^.]+)#',$col))return$prefix.$col;return$col;}protected
+buildColName($col){if($col
+instanceof
+NeevoLiteral)$col=$col->value;$col=trim($col);$prefix=$this->neevo()->connection()->prefix();if(preg_match('#([^.]+)(\.)([^.]+)#',$col))return$prefix.$col;return$col;}protected
 function
 _escapeArray(array$array,$sql_funcs=false){foreach($array
 as&$value){if(is_bool($value))$value=$this->escape($value,Neevo::BOOL);elseif(is_numeric($value)){if(is_int($value))$value=intval($value);elseif(is_float($value))$value=floatval($value);else$value=$this->_escapeString($value,$sql_funcs);}elseif(is_string($value))$value=$this->_escapeString($value);elseif($value
 instanceof
 DateTime)$value=$this->escape($value,Neevo::DATETIME);elseif($value
 instanceof
-NeevoLiteral)$value=(string)$value;else$value=$this->_escapeString((string)$value);}return$array;}protected
+NeevoLiteral)$value=$value->value;else$value=$this->_escapeString((string)$value);}return$array;}protected
 function
 _escapeString($string,$sql_funcs=false){if(get_magic_quotes_gpc())$string=stripslashes($string);return$this->escape($string,Neevo::TEXT);}}class
 NeevoQuery{private$table,$type,$limit,$offset,$neevo,$resultSet,$time,$sql,$performed,$numRows,$affectedRows;private$where=array(),$order=array(),$columns=array(),$data=array();public
@@ -370,7 +373,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.4dev";const
-REVISION=142;const
+REVISION=143;const
 BOOL=30;const
 TEXT=33;const
 BINARY=34;const
@@ -469,5 +472,7 @@ Exception{};class
 NeevoLiteral{private$value;public
 function
 __construct($value){$this->value=$value;}public
+function
+__get($name){return$this->value;}public
 function
 __toString(){return$this->value;}}

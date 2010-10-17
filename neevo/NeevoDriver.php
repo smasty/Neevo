@@ -45,6 +45,8 @@ class NeevoDriver{
       }
       elseif(is_array($cond[2]))
         $cond[2] = '(' . join(', ', $this->_escapeArray($cond[2])) . ')';
+      elseif($cond[2] instanceof NeevoLiteral)
+        $cond[2] = $cond[2]->value;
       elseif($cond[2] !== 'NULL')
         $cond[2] = $this->_escapeString($cond[2]);
 
@@ -62,7 +64,7 @@ class NeevoDriver{
    */
   protected function buildInsertData(NeevoQuery $query){
     foreach($this->_escapeArray($query->getData()) as $col => $value){
-      $cols[] = $col;
+      $cols[] = $this->buildColName($col);
       $values[] = $value;
     }
     return ' (' . join(', ',$cols) . ') VALUES (' . join(', ',$values). ')';
@@ -76,7 +78,7 @@ class NeevoDriver{
    */
   protected function buildUpdateData(NeevoQuery $query){
     foreach($this->_escapeArray($query->getData()) as $col => $value){
-      $update[] = $col . ' = ' . $value;
+      $update[] = $this->buildColName($col) . ' = ' . $value;
     }
     return ' SET ' . join(', ', $update);
   }
@@ -109,6 +111,8 @@ class NeevoDriver{
 
 
   protected function buildColName($col){
+    if($col instanceof NeevoLiteral)
+      $col = $col->value;
     $col = trim($col);
     $prefix = $this->neevo()->connection()->prefix();
     if(preg_match('#([^.]+)(\.)([^.]+)#', $col))
@@ -145,7 +149,7 @@ class NeevoDriver{
         $value = $this->escape($value, Neevo::DATETIME);
 
       elseif($value instanceof NeevoLiteral)
-        $value = (string) $value;
+        $value = $value->value;
 
       else $value = $this->_escapeString((string) $value);
     }

@@ -62,7 +62,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.4dev";
-  const REVISION = 142;
+  const REVISION = 143;
 
   // Data types
   const BOOL = 30;
@@ -544,6 +544,15 @@ class NeevoLiteral {
 	public function __construct($value) {
 		$this->value = $value;
 	}
+
+
+  /**
+   * Literal value
+   * @return string
+   */
+  public function __get($name){
+    return $this->value;
+  }
 
 
   /**
