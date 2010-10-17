@@ -108,7 +108,7 @@ $delete->dump();
 $pairs = $sql->select('mail')->from('client')->limit(5)->fetchPairs('id', 'name');
 Debug::dump($pairs);
 
-$assoc = $sql->select('name, mail, city, friends')->from('client')->limit(5)->fetchAssoc('id');
+$assoc = $sql->select('name, mail, city, friends')->from('client')->limit(5)->fetchAssoc('id', true);
 
 Debug::dump($assoc);
 

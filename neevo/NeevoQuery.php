@@ -263,12 +263,11 @@ class NeevoQuery {
 
 
   /**
-   * Fetches all data from given Query resource.
-   *
-   * Returns **NeevoResult** instance with rows represented as **NeevoRow** instances or FALSE.
-   * @return NeevoResult|FALSE
+   * Base fetcher - fetches data as array.
+   * @return array|FALSE
+   * @internal
    */
-  public function fetch(){
+  private function fetchPlain(){
     $rows = array();
     if(!in_array($this->getType(), array('select', 'sql')))
       return $this->neevo()->error('Cannot fetch on this kind of query');
@@ -278,14 +277,32 @@ class NeevoQuery {
     if(!is_resource($resultSet)) // Error
       return $this->neevo()->error('Fetching result data failed');
 
-    while($tmp_rows = $this->neevo()->driver()->fetch($resultSet))
-      $rows[] = new NeevoRow($tmp_rows, $this);
+    while($row = $this->neevo()->driver()->fetch($resultSet))
+      $rows[] = $row;
 
     $this->free();
 
     if(empty($rows)) // Empty
       return false;
 
+    return $rows;
+  }
+
+
+  /**
+   * Fetches all data from given Query resource.
+   *
+   * Returns **NeevoResult** instance with rows represented as **NeevoRow** instances or FALSE.
+   * @return NeevoResult|FALSE
+   */
+  public function fetch(){
+    $result = $this->fetchPlain();
+    if($result === false)
+      return false;
+    $rows = array();
+    foreach($result as $row)
+      $rows[] = new NeevoRow($row, $this);
+    unset($result);
     return new NeevoResult($rows, $this);
   }
 
@@ -295,13 +312,13 @@ class NeevoQuery {
    * @return NeevoRow|mixed|FALSE
    */
   public function fetchSingle(){
-    $result = $this->fetch();
-    if($result instanceof NeevoResult){
-      if(count($result) > 1) // Return first row
-        return $result[0];
-      return $result[0]->getSingle(); // Return the only value
-    }
-    return false;
+    $result = $this->fetchPlain();
+    if($result === false)
+      return false;
+
+    if(count($result) > 1) // Return first row
+      return new NeevoRow($result[0], $this);
+    return $result[0][max(array_keys($result[0]))]; // Return the only value
   }
 
 
@@ -319,15 +336,15 @@ class NeevoQuery {
       $this->columns = array($key, $value);
       $this->performed = false; // If query was executed without needed columns, force execution.
     }
-    $result = $this->fetch();
-    if($result instanceof NeevoResult){
-      $rows = array();
-      foreach($result as $row)
-        $rows[$row[$key]] = $row[$value];
-      unset($result);
-      return $rows;
-    }
-    return false;
+    $result = $this->fetchPlain();
+    if($result === false)
+      return false;
+
+    $rows = array();
+    foreach($result as $row)
+      $rows[$row[$key]] = $row[$value];
+    unset($result);
+    return $rows;
   }
 
 
@@ -336,20 +353,12 @@ class NeevoQuery {
    * @return array|FALSE
    */
   public function fetchArray(){
-    $result = $this->fetch();
-    if($result instanceof NeevoResult){
-      $rows = array();
-      foreach($result as $row)
-        $rows[] = $row->toArray();
-      unset($result);
-      return $rows;
-    }
-    return false;
+    return $this->fetchPlain();
   }
 
 
   /**
-   * Fetches all data as associative arrays $column as key.
+   * Fetches all data as associative arrays with $column as a 'key' to row.
    * @param string $column Column to use as key for row
    * @param bool $as_array Rows are arrays instead of NeevoRow instances.
    * @return array|FALSE
@@ -359,17 +368,18 @@ class NeevoQuery {
       $this->columns[] = $column;
       $this->performed = false; // If query was executed without needed column, force execution.
     }
-    $result = $this->fetch();
-    if($result instanceof NeevoResult){
-      $rows = array();
-      foreach($result as $row){
-        if($as_array) $row = $row->toArray(); // Rows as arrays.
-        $rows[$row[$column]] = $row;
-      }
-      unset($result);
-      return $rows;
+    $result = $this->fetchPlain();
+    if($result === false)
+      return false;
+
+    $rows = array();
+    foreach($result as $row){
+      if(!$as_array)
+        $row = new NeevoRow($row, $this); // Rows as NeevoRow.
+      $rows[$row[$column]] = $row;
     }
-    return false;
+    unset($result);
+    return $rows;
   }
 
 
@@ -608,7 +618,7 @@ class NeevoQuery {
 
     if(is_null($cached_primary)){
       $q = $this->neevo()->sql('SHOW FULL COLUMNS FROM '. $table);
-      foreach($q->fetch(Neevo::MULTIPLE) as $col){
+      foreach($q->fetchArray() as $col){
         if($col['Key'] === 'PRI' && !isset($return))
           $return = $col['Field'];
       }

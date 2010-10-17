@@ -165,36 +165,33 @@ function
 dump($color=true,$return_string=false){$code=$color?self::_highlightSql($this->build()):$this->build();if(!$return_string)echo$code;return$return_string?$code:$this;}public
 function
 run(){$start=explode(' ',microtime());$query=$this->neevo()->driver()->query($this->build());if($query===false){$this->neevo()->error('Query failed');return
-false;}$this->neevo()->incrementQueries();$this->neevo()->setLast($this);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->setTime($time);$this->performed=true;if(is_resource($query)){$this->resultSet=$query;$this->numRows=$this->neevo()->driver()->rows($query);}else$this->affectedRows=$this->neevo()->driver()->affectedRows();return$query;}public
+false;}$this->neevo()->incrementQueries();$this->neevo()->setLast($this);$end=explode(" ",microtime());$time=round(max(0,$end[0]-$start[0]+$end[1]-$start[1]),4);$this->setTime($time);$this->performed=true;if(is_resource($query)){$this->resultSet=$query;$this->numRows=$this->neevo()->driver()->rows($query);}else$this->affectedRows=$this->neevo()->driver()->affectedRows();return$query;}private
 function
-fetch(){$rows=array();if(!in_array($this->getType(),array('select','sql')))return$this->neevo()->error('Cannot fetch on this kind of query');$resultSet=$this->isPerformed()?$this->resultSet():$this->run();if(!is_resource($resultSet))return$this->neevo()->error('Fetching result data failed');while($tmp_rows=$this->neevo()->driver()->fetch($resultSet))$rows[]=new
-NeevoRow($tmp_rows,$this);$this->free();if(empty($rows))return
-false;return
+fetchPlain(){$rows=array();if(!in_array($this->getType(),array('select','sql')))return$this->neevo()->error('Cannot fetch on this kind of query');$resultSet=$this->isPerformed()?$this->resultSet():$this->run();if(!is_resource($resultSet))return$this->neevo()->error('Fetching result data failed');while($row=$this->neevo()->driver()->fetch($resultSet))$rows[]=$row;$this->free();if(empty($rows))return
+false;return$rows;}public
+function
+fetch(){$result=$this->fetchPlain();if($result===false)return
+false;$rows=array();foreach($result
+as$row)$rows[]=new
+NeevoRow($row,$this);unset($result);return
 new
 NeevoResult($rows,$this);}public
 function
-fetchSingle(){$result=$this->fetch();if($result
-instanceof
-NeevoResult){if(count($result)>1)return$result[0];return$result[0]->getSingle();}return
-false;}public
+fetchSingle(){$result=$this->fetchPlain();if($result===false)return
+false;if(count($result)>1)return
+new
+NeevoRow($result[0],$this);return$result[0][max(array_keys($result[0]))];}public
 function
-fetchPairs($key,$value){if(!in_array($key,$this->columns)||!in_array($value,$this->columns)||!in_array('*',$this->columns)){$this->columns=array($key,$value);$this->performed=false;}$result=$this->fetch();if($result
-instanceof
-NeevoResult){$rows=array();foreach($result
-as$row)$rows[$row[$key]]=$row[$value];unset($result);return$rows;}return
-false;}public
+fetchPairs($key,$value){if(!in_array($key,$this->columns)||!in_array($value,$this->columns)||!in_array('*',$this->columns)){$this->columns=array($key,$value);$this->performed=false;}$result=$this->fetchPlain();if($result===false)return
+false;$rows=array();foreach($result
+as$row)$rows[$row[$key]]=$row[$value];unset($result);return$rows;}public
 function
-fetchArray(){$result=$this->fetch();if($result
-instanceof
-NeevoResult){$rows=array();foreach($result
-as$row)$rows[]=$row->toArray();unset($result);return$rows;}return
-false;}public
+fetchArray(){return$this->fetchPlain();}public
 function
-fetchAssoc($column,$as_array=false){if(!in_array($column,$this->columns)||!in_array('*',$this->columns)){$this->columns[]=$column;$this->performed=false;}$result=$this->fetch();if($result
-instanceof
-NeevoResult){$rows=array();foreach($result
-as$row){if($as_array)$row=$row->toArray();$rows[$row[$column]]=$row;}unset($result);return$rows;}return
-false;}private
+fetchAssoc($column,$as_array=false){if(!in_array($column,$this->columns)||!in_array('*',$this->columns)){$this->columns[]=$column;$this->performed=false;}$result=$this->fetchPlain();if($result===false)return
+false;$rows=array();foreach($result
+as$row){if(!$as_array)$row=new
+NeevoRow($row,$this);$rows[$row[$column]]=$row;}unset($result);return$rows;}private
 function
 free(){$this->neevo()->driver()->free($this->resultSet);$this->resultSet=null;}public
 function
@@ -243,7 +240,7 @@ getCols(){return$this->columns;}public
 function
 getData(){return$this->data;}public
 function
-getPrimary(){$return=null;$table=preg_replace('#[^0-9a-z_.]#i','',$this->getTable());$cached_primary=$this->neevo()->cacheLoad('table_'.$table.'_primary');if(is_null($cached_primary)){$q=$this->neevo()->sql('SHOW FULL COLUMNS FROM '.$table);foreach($q->fetch(Neevo::MULTIPLE)as$col){if($col['Key']==='PRI'&&!isset($return))$return=$col['Field'];}$this->neevo()->cacheSave('table_'.$table.'_primary',$return);return$return;}return$cached_primary;}private
+getPrimary(){$return=null;$table=preg_replace('#[^0-9a-z_.]#i','',$this->getTable());$cached_primary=$this->neevo()->cacheLoad('table_'.$table.'_primary');if(is_null($cached_primary)){$q=$this->neevo()->sql('SHOW FULL COLUMNS FROM '.$table);foreach($q->fetchArray()as$col){if($col['Key']==='PRI'&&!isset($return))$return=$col['Field'];}$this->neevo()->cacheSave('table_'.$table.'_primary',$return);return$return;}return$cached_primary;}private
 static
 function
 _highlightSql($sql){$color_codes=array('chars'=>'chars','keywords'=>'kwords','joins'=>'joins','functions'=>'funcs','constants'=>'consts');$colors=Neevo::$highlight_colors;unset($colors['columns']);$words=array('keywords'=>array('SELECT','UPDATE','INSERT','DELETE','REPLACE','INTO','CREATE','ALTER','TABLE','DROP','TRUNCATE','FROM','ADD','CHANGE','COLUMN','KEY','WHERE','ON','CASE','WHEN','THEN','END','ELSE','AS','USING','USE','INDEX','CONSTRAINT','REFERENCES','DUPLICATE','LIMIT','OFFSET','SET','SHOW','STATUS','BETWEEN','AND','IS','NOT','OR','XOR','INTERVAL','TOP','GROUP BY','ORDER BY','DESC','ASC','COLLATE','NAMES','UTF8','DISTINCT','DATABASE','CALC_FOUND_ROWS','SQL_NO_CACHE','MATCH','AGAINST','LIKE','REGEXP','RLIKE','PRIMARY','AUTO_INCREMENT','DEFAULT','IDENTITY','VALUES','PROCEDURE','FUNCTION','TRAN','TRANSACTION','COMMIT','ROLLBACK','SAVEPOINT','TRIGGER','CASCADE','DECLARE','CURSOR','FOR','DEALLOCATE'),'joins'=>array('JOIN','INNER','OUTER','FULL','NATURAL','LEFT','RIGHT'),'functions'=>array('MIN','MAX','SUM','COUNT','AVG','CAST','COALESCE','CHAR_LENGTH','LENGTH','SUBSTRING','DAY','MONTH','YEAR','DATE_FORMAT','CRC32','CURDATE','SYSDATE','NOW','GETDATE','FROM_UNIXTIME','FROM_DAYS','TO_DAYS','HOUR','IFNULL','ISNULL','NVL','NVL2','INET_ATON','INET_NTOA','INSTR','FOUND_ROWS','LAST_INSERT_ID','LCASE','LOWER','UCASE','UPPER','LPAD','RPAD','RTRIM','LTRIM','MD5','MINUTE','ROUND','SECOND','SHA1','STDDEV','STR_TO_DATE','WEEK','RAND'),'chars'=>'/([\\.,!\\(\\)<>:=`]+)/i','constants'=>'/(\'[^\']*\'|[0-9]+)/i');$sql=str_replace('\\\'','\\&#039;',$sql);foreach($color_codes
@@ -365,7 +362,7 @@ E_NONE=11;const
 E_HANDLE=12;const
 E_STRICT=13;const
 VERSION="0.4dev";const
-REVISION=137;const
+REVISION=138;const
 BOOL=30;const
 TEXT=33;const
 BINARY=34;const
