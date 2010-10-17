@@ -112,11 +112,10 @@ class NeevoDriver{
 
   protected function buildColName($col){
     if($col instanceof NeevoLiteral)
-      $col = $col->value;
+      return $col->value;
     $col = trim($col);
-    $prefix = $this->neevo()->connection()->prefix();
     if(preg_match('#([^.]+)(\.)([^.]+)#', $col))
-      return $prefix.$col;
+      return $this->neevo()->connection()->prefix() . $col;
     return $col;
   }
 
