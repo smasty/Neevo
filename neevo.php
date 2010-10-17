@@ -30,7 +30,7 @@ include_once dirname(__FILE__). '/neevo/NeevoResult.php';
 include_once dirname(__FILE__). '/neevo/NeevoCache.php';
 
 /**
- * Main Neevo layer class
+ * Main Neevo layer class.
  * @package Neevo
  */
 class Neevo{
@@ -62,7 +62,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.4dev";
-  const REVISION = 141;
+  const REVISION = 142;
 
   // Data types
   const BOOL = 30;
@@ -97,15 +97,15 @@ class Neevo{
 
   /**
    * Creates and uses a new connection to a server.
-   * @param array $opts Array of options in following format:
-   * <pre>Array(
-   *   host            =>  localhost,
-   *   username        =>  username,
-   *   password        =>  password,
-   *   database        =>  database_name,
-   *   encoding        =>  utf8,
-   *   table_prefix    =>  prefix_
-   * );</pre>
+   *
+   * Format of options array: <pre>
+   *   host            =>  localhost,<br>
+   *   username        =>  username,<br>
+   *   password        =>  password,<br>
+   *   database        =>  database_name,<br>
+   *   encoding        =>  utf8,<br>
+   *   table_prefix    =>  prefix_</pre>
+   * @param array $opts Array of options
    * @return bool
    */
   public function connect(array $opts){
@@ -129,7 +129,6 @@ class Neevo{
    * @param array $opts Array of connection options, see Neevo->connect()
    * @see Neevo->connect()
    * @return NeevoConnection
-   * @internal
    */
   public function createConnection(array $opts){
     return new NeevoConnection($this, $this->driver(), $opts);
@@ -531,7 +530,7 @@ class NeevoException extends Exception{};
 
 
 /**
- * SQL literal value
+ * Class for object representing SQL literal value.
  * @package Neevo
  */
 class NeevoLiteral {

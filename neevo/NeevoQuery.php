@@ -15,7 +15,7 @@
  */
 
 /**
- * Neevo class for SQL query abstraction
+ * Class for SQL query abstraction. Represents SQL query and provides fluent interface.
  * @package Neevo
  */
 class NeevoQuery {

@@ -15,7 +15,7 @@
  */
 
 /**
- * Neevo driver class
+ * Class with predefined methods for driver classes.
  * @package Neevo
  */
 class NeevoDriver{

@@ -15,7 +15,7 @@
  */
 
 /**
- * Neevo cache interface
+ * Interface for NeevoCache classes.
  * @package NeevoCache
  */
 interface INeevoCache {

@@ -15,7 +15,7 @@
  */
 
 /**
- * Neevo Driver interface
+ * Interface implemented by all Neevo drivers.
  * @package NeevoDrivers
  */
 interface INeevoDriver {
@@ -31,14 +31,15 @@ interface INeevoDriver {
 
   /**
    * Connects to database server, selects database and sets encoding (if defined)
-   * @param array $opts Array of options in following format:
-   * <pre>Array(
-   *   host            =>  localhost,
-   *   username        =>  username,
-   *   password        =>  password,
-   *   database        =>  database_name,
-   *   encoding        =>  utf8
-   * );</pre>
+   *
+   * Format of options array: <pre>
+   *   host            =>  localhost,<br>
+   *   username        =>  username,<br>
+   *   password        =>  password,<br>
+   *   database        =>  database_name,<br>
+   *   encoding        =>  utf8,<br>
+   *   table_prefix    =>  prefix_</pre>
+   * @param array $opts Array of connection options
    * @return void
    */
   public function connect(array $opts);

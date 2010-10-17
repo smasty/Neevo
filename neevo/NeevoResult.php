@@ -15,7 +15,7 @@
  */
 
 /**
- * Neevo result class
+ * Class representing result with one or more rows.
  * @package Neevo
  */
 class NeevoResult implements ArrayAccess, Countable, IteratorAggregate {
@@ -158,7 +158,7 @@ class NeevoResult implements ArrayAccess, Countable, IteratorAggregate {
 }
 
 /**
- * Neevo row class
+ * Class representing a row in result.
  * @package Neevo
  */
 class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializable {

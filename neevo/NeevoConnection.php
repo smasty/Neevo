@@ -15,7 +15,8 @@
  */
 
 /**
- * Neevo connection class
+ * Internal class to represent connection to database server.
+ * Can be created by calling Neevo->createConnection().
  * @package Neevo
  */
 class NeevoConnection{
