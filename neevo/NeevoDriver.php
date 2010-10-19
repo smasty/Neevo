@@ -114,6 +114,8 @@ class NeevoDriver{
     if($col instanceof NeevoLiteral)
       return $col->value;
     $col = trim($col);
+    $col = preg_replace('#(\S+)\s+(as)\s+(\S+)#i', '$1 AS $3',  $col);
+
     if(preg_match('#([^.]+)(\.)([^.]+)#', $col))
       return $this->neevo()->connection()->prefix() . $col;
     return $col;

@@ -218,15 +218,15 @@ class NeevoQuery {
 
 
   /**
-   * Prints consequential Query (highlighted by default)
-   * @param bool $color Highlight query or not (default: yes)
-   * @param bool $return_string Return the string or not (default: no)
-   * @return NeevoQuery|void
+   * Prints out syntax highlighted query.
+   * @param bool $return Return output instead of printing it?
+   * @return string|NeevoQuery fluent interface
    */
-  public function dump($color = true, $return_string = false){
-    $code = $color ? self::_highlightSql($this->build()) : $this->build();
-    if(!$return_string) echo $code;
-    return $return_string ? $code : $this;
+  public function dump($return = false){
+    $code = self::_highlightSql($this->build());
+    if(!$return)
+      echo $code;
+    return $return ? $code : $this;
   }
 
 
@@ -308,7 +308,7 @@ class NeevoQuery {
 
 
   /**
-   * Fetches 1st row in result as **NeevoRow** or the only value if only one row with one value was fetched.
+   * Fetches 1st row in result as **NeevoRow** or the only value if one row was fetched.
    * @return NeevoRow|mixed|FALSE
    */
   public function fetchSingle(){
@@ -327,8 +327,8 @@ class NeevoQuery {
    *
    * If $key and $value columns are not defined in SELECT statement, they will
    * be automatically added to statement and others will be removed.
-   * @param string $key Column to use as array key.
-   * @param string $value Column to use as array value.
+   * @param string $key Column to use as an array key.
+   * @param string $value Column to use as an array value.
    * @return array|FALSE
    */
   public function fetchPairs($key, $value){
@@ -360,7 +360,7 @@ class NeevoQuery {
   /**
    * Fetches all data as associative arrays with $column as a 'key' to row.
    * @param string $column Column to use as key for row
-   * @param bool $as_array Rows are arrays instead of NeevoRow instances.
+   * @param bool $as_array Rows are returned as arrays instead of NeevoRow instances.
    * @return array|FALSE
    */
   public function fetchAssoc($column, $as_array = false){
@@ -599,8 +599,9 @@ class NeevoQuery {
 
   /**
    * Query values fraction for INSERT/UPDATE queries
-   * ([INSERT INTO] (col1,, col2, ...) VALUES (val1, val2, ...) or
-   *  [UPDATE tbl] SET col1 = val1,  col2 = val2, ...)
+   *
+   * [INSERT INTO tbl] (col1, col2, ...) VALUES (val1, val2, ...) or
+   * [UPDATE tbl] SET col1 = val1,  col2 = val2, ...
    * @return array
    */
   public function getData(){
@@ -614,15 +615,15 @@ class NeevoQuery {
   public function getPrimary(){
     $return = null;
     $table = preg_replace('#[^0-9a-z_.]#i', '', $this->getTable());
-    $cached_primary = $this->neevo()->cacheLoad('table_'.$table.'_primary');
+    $cached_primary = $this->neevo()->cacheLoad($table.'_primaryKey');
 
     if(is_null($cached_primary)){
       $q = $this->neevo()->sql('SHOW FULL COLUMNS FROM '. $table);
-      foreach($q->fetchArray() as $col){
+      foreach($q->fetchPlain() as $col){
         if($col['Key'] === 'PRI' && !isset($return))
           $return = $col['Field'];
       }
-      $this->neevo()->cacheSave('table_'.$table.'_primary', $return);
+      $this->neevo()->cacheSave($table.'_primaryKey', $return);
       return $return;
     }
     return $cached_primary;
@@ -639,27 +640,29 @@ class NeevoQuery {
    * @internal
    */
   private static function _highlightSql($sql){
-    $color_codes = array('chars'=>'chars','keywords'=>'kwords','joins'=>'joins','functions'=>'funcs','constants'=>'consts');
-    $colors = Neevo::$highlight_colors;
-    unset($colors['columns']);
+    $keywords1 = 'SELECT|UPDATE|INSERT\s+INTO|DELETE|FROM|VALUES|SET|WHERE|HAVING|GROUP\s+BY|ORDER\s+BY|LIMIT|OFFSET|LEFT\s+JOIN|INNER\s+JOIN';
+    $keywords2 = 'ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
 
-    $words = array(
-      'keywords'  => array('SELECT', 'UPDATE', 'INSERT', 'DELETE', 'REPLACE', 'INTO', 'CREATE', 'ALTER', 'TABLE', 'DROP', 'TRUNCATE', 'FROM', 'ADD', 'CHANGE', 'COLUMN', 'KEY', 'WHERE', 'ON', 'CASE', 'WHEN', 'THEN', 'END', 'ELSE', 'AS', 'USING', 'USE', 'INDEX', 'CONSTRAINT', 'REFERENCES', 'DUPLICATE', 'LIMIT', 'OFFSET', 'SET', 'SHOW', 'STATUS', 'BETWEEN', 'AND', 'IS', 'NOT', 'OR', 'XOR', 'INTERVAL', 'TOP', 'GROUP BY', 'ORDER BY', 'DESC', 'ASC', 'COLLATE', 'NAMES', 'UTF8', 'DISTINCT', 'DATABASE', 'CALC_FOUND_ROWS', 'SQL_NO_CACHE', 'MATCH', 'AGAINST', 'LIKE', 'REGEXP', 'RLIKE', 'PRIMARY', 'AUTO_INCREMENT', 'DEFAULT', 'IDENTITY', 'VALUES', 'PROCEDURE', 'FUNCTION', 'TRAN', 'TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRIGGER', 'CASCADE', 'DECLARE', 'CURSOR', 'FOR', 'DEALLOCATE'),
-      'joins'     => array('JOIN', 'INNER', 'OUTER', 'FULL', 'NATURAL', 'LEFT', 'RIGHT'),
-      'functions' => array('MIN', 'MAX', 'SUM', 'COUNT', 'AVG', 'CAST', 'COALESCE', 'CHAR_LENGTH', 'LENGTH', 'SUBSTRING', 'DAY', 'MONTH', 'YEAR', 'DATE_FORMAT', 'CRC32', 'CURDATE', 'SYSDATE', 'NOW', 'GETDATE', 'FROM_UNIXTIME', 'FROM_DAYS', 'TO_DAYS', 'HOUR', 'IFNULL', 'ISNULL', 'NVL', 'NVL2', 'INET_ATON', 'INET_NTOA', 'INSTR', 'FOUND_ROWS', 'LAST_INSERT_ID', 'LCASE', 'LOWER', 'UCASE', 'UPPER', 'LPAD', 'RPAD', 'RTRIM', 'LTRIM', 'MD5', 'MINUTE', 'ROUND', 'SECOND', 'SHA1', 'STDDEV', 'STR_TO_DATE', 'WEEK', 'RAND'),
-      'chars'     => '/([\\.,!\\(\\)<>:=`]+)/i',
-      'constants' => '/(\'[^\']*\'|[0-9]+)/i'
-    );
+    $sql = str_replace("\\'", '\\&#39;', $sql);
+    $sql = preg_replace_callback("~($keywords1)|($keywords2)|('[^']+'|[0-9]+)|(/\*.*\*/)|(--\s?[^;]+)|(#[^;]+)~", array('NeevoQuery', 'highlightCallback'), $sql);
+    $sql = str_replace('\\&#39;', "\\'", $sql);
+    echo '<code style="color:#555" class="sql-dump">', $sql, "</code>\n";
+  }
 
-    $sql=str_replace('\\\'','\\&#039;', $sql);
 
-    foreach($color_codes as $key => $code){
-      $regexp = in_array( $key, array('constants', 'chars')) ? $words[$key] : '/\\b(' .join("|", $words[$key]) .')\\b/i';
-      $sql = preg_replace($regexp, "<span style=\"color:$code\">$1</span>", $sql);
-    }
-
-    $sql = str_replace($color_codes, $colors, $sql);
-    return '<code style="color:' . Neevo::$highlight_colors['columns'] . '">' . $sql . '</code>' . PHP_EOL;
+  private static function highlightCallback($match){
+    if(!empty($match[1])) // Basic keywords
+      return '<strong style="color:#e71818">'.$match[1].'</strong>';
+    if(!empty($match[2])) // Other keywords
+      return '<strong style="color:#d59401">'.$match[2].'</strong>';
+    if(!empty($match[3])) // Values
+      return '<var style="color:#008000">'.$match[3].'</var>';
+    if(!empty($match[4])) // C-style comment
+      return '<em style="color:#999">'.$match[4].'</em>';
+    if(!empty($match[5])) // Dash-dash comment
+      return '<em style="color:#999">'.$match[5].'</em>';
+    if(!empty($match[6])) // hash comment
+      return '<em style="color:#999">'.$match[6].'</em>';
   }
 
 }

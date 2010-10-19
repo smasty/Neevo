@@ -53,10 +53,9 @@ $s = $sql->select("client.id")->from('neevo_demo.client')
          ->where("client.id", null, "or")
          ->where("client.name", array("John Doe", "Melyssa Huff", "Paula Harris"))
          ->limit(5)->dump()->fetch();
-
 $s->dump();
 
-// Data for Insert query demos
+// Data for Insert
 $insert_data = array(
   'name'  => 'John-Doe',
   'mail' => 'john.doe@example.com',
@@ -65,7 +64,7 @@ $insert_data = array(
   'friends'  => 23
 );
 
-// Data for Update query demos
+// Data for Update
 $update_data = array(
   'name'  => 'John Doe',
   'mail' => 'john@doe.name',
@@ -73,44 +72,23 @@ $update_data = array(
 );
 
 // INSERT QUERY
-$insert = $sql->insertInto('neevo_demo.client')->values($insert_data);
-
-// Echo highlighted query
-$insert->dump();
-
-// Run query;
-$insert_id = $insert->insertId();
-echo " LAST_INSERT_ID: $insert_id\n\n";
-
+$insert = $sql->insertInto('neevo_demo.client')
+              ->values($insert_data)->dump();
+echo ' Last insert ID: ', $insert->insertId(), "\n\n";
 
 // UPDATE QUERY
 $update = $sql->update('client')->set($update_data)
               ->where('name', 'John-Doe')
               ->where('id !=', 101)
-              ->order('id DESC');
-
-$update_resource = $update->run();
-
-$update->dump();
-
+              ->order('id DESC')->dump();
 echo ' Affected: ', $update->affectedRows(), "\n\n";
 
 // DELETE QUERY
 $delete = $sql->delete('client')
               ->where('mail', 'john@doe.name')
               ->order('id DESC')
-              ->limit(1);
-
-$delete_resource = $delete->run();
-
-$delete->dump();
-
-$pairs = $sql->select('mail')->from('client')->limit(5)->fetchPairs('id', 'name');
-Debug::dump($pairs);
-
-$assoc = $sql->select('name, mail, city, friends')->from('client')->limit(5)->fetchAssoc('id', true);
-
-Debug::dump($assoc);
+              ->limit(1)->dump();
+echo ' Affected: ', $delete->affectedRows(), "\n\n";
 
 // SELECT ONE VALUE
 $select_one = $sql->select('name')->from('client')
@@ -131,16 +109,12 @@ $select = $sql->select('id, name, mail, city, MD5(mail) as mail_hash')
 $select->seek(2);
 
 $select->getPrimary();
-// Fetch results
+
 $select_result = $select->fetch();
 
 $select->dump();
 
 echo ' Fetched: ', $select->rows(), "\n";
-
-$row = $select_result[0];
-$row['name'] = "XYZ ABC";
-//$row->update();
 
 ?>
 

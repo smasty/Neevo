@@ -38,22 +38,9 @@ class Neevo{
   // Fields
   private $connection, $driver, $cache, $error_handler, $last, $queries, $error_reporting;
 
-  /**
-   * @var bool Ignore warning when using deprecated methods.
-   */
+  /** @var bool Ignore warning when using deprecated methods.*/
   public static $ignore_deprecated = false;
 
-  /**
-   * @var array Default colors for query highlighter.
-   */
-  public static $highlight_colors = array(
-    'columns'    => '#00f',
-    'chars'      => '#000',
-    'keywords'   => '#008000',
-    'joins'      => '#555',
-    'functions'  => '#008000',
-    'constants'  => '#f00'
-  );
 
   // Error-reporting levels
   const E_NONE    = 11;
