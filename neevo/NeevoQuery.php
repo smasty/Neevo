@@ -177,7 +177,7 @@ class NeevoQuery {
    * @return NeevoQuery fluent interface
    */
   public function orderBy($rules){
-    return $this->order($rule);
+    return $this->order($rules);
   }
 
 
@@ -223,7 +223,7 @@ class NeevoQuery {
    * @return string|NeevoQuery fluent interface
    */
   public function dump($return = false){
-    $code = self::_highlightSql($this->build());
+    $code = (PHP_SAPI === 'cli') ? $this->build() : self::_highlightSql($this->build());
     if(!$return) echo $code;
     return $return ? $code : $this;
   }

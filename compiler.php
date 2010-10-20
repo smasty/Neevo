@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 if(!$_SERVER['SHELL'])
   trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);

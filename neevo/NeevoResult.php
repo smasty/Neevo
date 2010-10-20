@@ -245,6 +245,12 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
   }
 
 
+  /**
+   * **Experimental** Update row data
+   *
+   * After changing values in the NeevoRow instance, sends update query to server.
+   * @return int Number of affected rows
+   */
   public function update(){
     if(!empty($this->modified) && $this->modified !== $this->data){
       $q = $this->query();
@@ -252,18 +258,22 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
       if(!$this->data[$primary])
         return $this->query()->neevo()->error('Cannot get primary_key value');
 
-      return $q->neevo()->update($q->getTable())->set($this->modified)->where($primary, $this->data[$primary])->limit(1)->run();
+      return $q->neevo()->update($q->getTable())->set($this->modified)->where($primary, $this->data[$primary])->limit(1)->affectedRows();
     }
   }
 
 
+  /**
+   * **Experimental** Deletes row
+   * @return int Number of affected rows
+   */
   public function delete(){
     $q = $this->query();
     $primary = $q->getPrimary();
     if($primary === null)
       return $this->query()->neevo()->error('Cannot get primary_key value');
 
-    return $q->neevo()->delete($q->getTable())->where($primary, $this->data[$primary])->limit(1)->run();
+    return $q->neevo()->delete($q->getTable())->where($primary, $this->data[$primary])->limit(1)->affectedRows();
   }
 
 

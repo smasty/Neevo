@@ -432,14 +432,14 @@ class Neevo{
   public function error($neevo_msg){
     $level = $this->errorReporting();
 
-    if($level != Neevo::E_NONE){
+    if($level !== Neevo::E_NONE){
       $err = $this->driver()->error($neevo_msg);
       $exception = new NeevoException($err[0], $err[1]);
 
-      if($level == Neevo::E_HANDLE)
-        call_user_func($this->errorHandler(), $exception);
-      if($level == Neevo::E_STRICT)
+      if($level === Neevo::E_STRICT)
         throw $exception;
+      elseif($level === Neevo::E_HANDLE)
+        call_user_func($this->errorHandler(), $exception);
     }
 
     return false;
