@@ -41,7 +41,6 @@ $sql->setErrorReporting(Neevo::E_HANDLE);
 $sql->connect(array(
   'host'         => 'localhost',
   'username'     => 'root',
-  'password'     => '',
   'database'     => 'neevo_demo',
   'encoding'     => 'utf8',
   'table_prefix' => 'dp_'

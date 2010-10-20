@@ -224,8 +224,7 @@ class NeevoQuery {
    */
   public function dump($return = false){
     $code = self::_highlightSql($this->build());
-    if(!$return)
-      echo $code;
+    if(!$return) echo $code;
     return $return ? $code : $this;
   }
 
@@ -459,7 +458,7 @@ class NeevoQuery {
       'type' => $this->getType(),
       'table' => $this->getTable(),
       'executed' => (bool) $this->isPerformed(),
-      'query_string' => $this->dump(false, true)
+      'query_string' => $this->dump(true)
     );
 
     if($exclude_connection == true)
@@ -646,7 +645,7 @@ class NeevoQuery {
     $sql = str_replace("\\'", '\\&#39;', $sql);
     $sql = preg_replace_callback("~($keywords1)|($keywords2)|('[^']+'|[0-9]+)|(/\*.*\*/)|(--\s?[^;]+)|(#[^;]+)~", array('NeevoQuery', 'highlightCallback'), $sql);
     $sql = str_replace('\\&#39;', "\\'", $sql);
-    echo '<code style="color:#555" class="sql-dump">', $sql, "</code>\n";
+    return '<code style="color:#555" class="sql-dump">' . $sql . "</code>\n";
   }
 
 
