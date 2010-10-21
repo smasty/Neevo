@@ -6,8 +6,8 @@ Info
 
 - Available under MIT license (http://www.opensource.org/licenses/mit-license.php)
 - Author: Martin Srank - Smasty (http://smasty.net)
-- Website (temporary): http://neevo.smasty.net
-- Public API (temporary): http://neevo.smasty.net/doc/
+- Website: http://neevo.smasty.net
+- Public API: http://neevo.smasty.net/doc/
 
 
 About Neevo
