@@ -1,4 +1,4 @@
-Neevo - Tiny open-source database abstraction layer for PHP
+Neevo - Tiny open-source database layer for PHP
 
 
 Info
