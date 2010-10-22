@@ -52,7 +52,9 @@ class NeevoConnection{
 
 
   public function prefix(){
-    return $this->options['table_prefix'];
+    if(isset($this->options['table_prefix']))
+      return $this->options['table_prefix'];
+    return '';
   }
 
 
