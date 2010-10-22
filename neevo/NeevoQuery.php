@@ -177,7 +177,7 @@ class NeevoQuery {
    * @return NeevoQuery fluent interface
    */
   public function orderBy($rules){
-    return $this->order($rules);
+    return call_user_func_array(array(__CLASS__, 'order'), func_get_args());
   }
 
 

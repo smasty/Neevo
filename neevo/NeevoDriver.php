@@ -125,11 +125,10 @@ class NeevoDriver{
   /**
    * Escapes whole array for use in SQL
    * @param array $array
-   * @param bool $sql_funcs Consider SQL functions
    * @return array
    * @internal
    */
-  protected function _escapeArray(array $array, $sql_funcs = false){
+  protected function _escapeArray(array $array){
     foreach($array as &$value){
       if(is_bool($value))
         $value = $this->escape($value, Neevo::BOOL);
@@ -141,7 +140,7 @@ class NeevoDriver{
         elseif(is_float($value))
           $value = floatval($value);
 
-        else $value = $this->_escapeString($value, $sql_funcs);
+        else $value = $value;
       }
       elseif(is_string($value))
         $value = $this->_escapeString($value);
