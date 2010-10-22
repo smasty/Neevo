@@ -8,19 +8,26 @@ $result = db()->select('*')->from('software')->where('aid', $author)->orderBy('i
 
 $row = $result[0];
 $row->slogan = 'Tiny database abstraction layer '.rand(0, 999);
-$affected = $row->update();
-
-$current = db()->select('slogan')
-               ->from('software')
-               ->where('slogan LIKE', 'Tiny database abstraction layer%')
-               ->rows();
 
 echo "Selected ".count($result)." rows.\n";
-echo "Updated $affected rows.\n";
-echo "Selected: $current\n";
 
+
+// Only if driver supports this
+if(in_array(driver(), array('mysql'))){
+  $affected = $row->update();
+
+  $current = db()->select('slogan')
+                 ->from('software')
+                 ->where('slogan LIKE', 'Tiny database abstraction layer%')
+                 ->rows();
+
+  echo "Updated $affected rows.\n";
+  echo "Selected: $current.\n";
+}
 ?>
 --RESULT
 Selected 2 rows.
+<?php if(in_array(driver(), array('mysql'))){ ?>
 Updated 1 rows.
-Selected: 1
+Selected: 1.
+<?php } ?>

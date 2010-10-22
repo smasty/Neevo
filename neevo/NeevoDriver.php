@@ -33,20 +33,24 @@ class NeevoDriver{
 
     foreach($conds as &$cond){
       $cond[0] = $this->buildColName($cond[0]);
-
+      // col = true
       if($cond[2] === true){
         unset($cond[1], $cond[2]);
       }
+      // col = false
       elseif($cond[2] === false){
         $x = $cond[0];
         $cond[0] = 'NOT';
         $cond[1] = $cond[0];
         unset($cond[2]);
       }
+      // col IN(...)
       elseif(is_array($cond[2]))
         $cond[2] = '(' . join(', ', $this->_escapeArray($cond[2])) . ')';
+      // col = sql literal
       elseif($cond[2] instanceof NeevoLiteral)
         $cond[2] = $cond[2]->value;
+      // col IS NULL
       elseif($cond[2] !== 'NULL')
         $cond[2] = $this->_escapeString($cond[2]);
 
@@ -159,13 +163,12 @@ class NeevoDriver{
   /**
    * Escapes given string for use in SQL
    * @param string $string
-   * @param bool $sql_funcs Consider SQL functions
    * @return string
    * @internal
    */
-  protected function _escapeString($string, $sql_funcs = false){
+  protected function _escapeString($string){
     if(get_magic_quotes_gpc()) $string = stripslashes($string);
-    return $this->escape($string, Neevo::TEXT);
+    return is_numeric($string) ? $string : $this->escape($string, Neevo::TEXT);
   }
   
 }

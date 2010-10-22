@@ -27,7 +27,7 @@ foreach($tests as $test){
     echo "$file failed - $matches[1]\n";
 
   if(DEBUG)
-    echo $matches[2], "\n------\n", $matches[3];
+    echo $matches[2], "\n------\n", $matches[3], "\n------\n";
 }
 
 echo "\n";

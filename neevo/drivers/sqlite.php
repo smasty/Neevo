@@ -15,12 +15,12 @@
  */
 
 /**
- * Neevo MySQL driver class
+ * Neevo SQLite driver class
  * @package NeevoDrivers
  */
-class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
+class NeevoDriverSQLite extends NeevoDriver implements INeevoDriver{
 
-  private $neevo, $resource;
+  private $neevo, $resource, $last_error;
 
 
   /**
@@ -30,97 +30,75 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
    * @return void
    */
   public function  __construct(Neevo $neevo){
-    if(!extension_loaded("mysql")) throw new NeevoException("PHP extension 'mysql' not loaded.");
+    if(!extension_loaded("sqlite")) throw new NeevoException("PHP extension 'sqlite' not loaded.");
     $this->neevo = $neevo;
   }
 
 
   public function connect(array $opts){
-    $connection = @mysql_connect($opts['host'], $opts['username'], $opts['password']);
-    if(!is_resource($connection)) $this->neevo()->error("Connection to host '".$opts['host']."' failed");
-    if($opts['database']){
-      $db = mysql_select_db($opts['database']);
-      if(!$db) $this->neevo()->error("Could not select database '{$opts['database']}'");
-    }
-
-    if($opts['encoding'] && is_resource($connection)){
-      if (function_exists('mysql_set_charset'))
-				$ok = @mysql_set_charset($opts['encoding'], $connection);
-			if (!$ok)
-				$this->neevo()->sql("SET NAMES ".$opts['encoding'])->run();
-    }
+    $connection = sqlite_open($opts['database'], 0666, $error);
+    if(!is_resource($connection))
+      $this->neevo()->error("Connection to database '".$opts['database']." failed");
     $this->resource = $connection;
   }
 
 
   public function close(){
-    @mysql_close($this->resource);
+    @sqlite_close($this->resource);
   }
 
 
   public function free($resultSet){
-    return @mysql_free_result($resultSet);
+    return true;
   }
 
 
   public function query($query_string){
-    return @mysql_query($query_string, $this->resource);
+    $this->last_error = '';
+    $q = sqlite_query($this->resource, $query_string, null, $error);
+    $this->last_error = $error;
+    return $q;
   }
 
 
   public function error($neevo_msg){
-    $mysql_msg = @mysql_error($this->resource);
-    $mysql_msg = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $mysql_msg);
-
-    $msg = $neevo_msg.".";
-    if($mysql_msg)
-      $msg .= " ".$mysql_msg;
-
-    return array($msg, @mysql_errno($this->resource));
+    $no = sqlite_last_error($this->resource);
+    $msg = $neevo_msg. '. ' . ucfirst($this->last_error);
+    return array($msg, $no);
   }
 
 
   public function fetch($resultSet){
-    return @mysql_fetch_assoc($resultSet);
+    return @sqlite_fetch_array($resultSet, SQLITE_ASSOC);
   }
 
 
   public function seek($resultSet, $row_number){
-    return @mysql_data_seek($resultSet, $row_number);
+    return @sqlite_seek($resultSet, $row_number);
   }
 
 
   public function insertId(){
-    return @mysql_insert_id($this->resource);
+    return @sqlite_last_insert_rowid($this->resource);
   }
 
 
   public function rand(NeevoQuery $query){
-    $query->order('RAND()');
+    $query->order('RANDOM()');
   }
 
 
   public function rows($resultSet){
-    return @mysql_num_rows($resultSet);
+    return @sqlite_num_rows($resultSet);
   }
 
 
   public function affectedRows(){
-    return @mysql_affected_rows($this->resource);
+    return @sqlite_changes($this->resource);
   }
 
-
   public function getPrimaryKey($table){
-    $return = null;
-    $arr = array();
-    $q = $this->query('SHOW FULL COLUMNS FROM '. $table);
-    while($row = $this->fetch($q))
-      $arr[] = $row;
-    foreach($arr as $col){
-      if($col['Key'] === 'PRI' && !isset($return))
-        $return = $col['Field'];
-    }
-    return $return;
+    return null;
   }
 
 
@@ -157,11 +135,11 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
 
     elseif($query->getType() == 'update' && $query->getData()){
       $update_data = $this->buildUpdateData($query);
-      $q .= "UPDATE $table$update_data$where$order$limit";
+      $q .= "UPDATE $table$update_data$where";
     }
 
     elseif($query->getType() == 'delete')
-      $q .= "DELETE FROM $table$where$order$limit";
+      $q .= "DELETE FROM $table$where";
 
     return $q.';';
   }
@@ -173,12 +151,9 @@ class NeevoDriverMySQL extends NeevoDriver implements INeevoDriver{
         return $value ? 1 :0;
 
       case Neevo::TEXT:
-        return "'". mysql_real_escape_string($value) ."'";
-        break;
-
       case Neevo::BINARY:
-        return "_binary'". mysql_real_escape_string($value) ."'";
-
+        return "'". sqlite_escape_string($value) ."'";
+      
       case Neevo::DATETIME:
         return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
 

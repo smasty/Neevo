@@ -36,6 +36,11 @@ class NeevoQuery {
   }
 
 
+  public function  __destruct(){
+    $this->free();
+  }
+
+
   /**
    * Creates SELECT query.
    * @param string|array $cols Columns to select (array or comma-separated list)
@@ -250,12 +255,9 @@ class NeevoQuery {
     $this->setTime($time);
 
     $this->performed = true;
-    if(is_resource($query)){
-      $this->resultSet = $query;
-      $this->numRows = $this->neevo()->driver()->rows($query);
-    }
-    else
-      $this->affectedRows = $this->neevo()->driver()->affectedRows();
+    $this->resultSet = is_resource($query) ? $query : null;
+    $this->numRows = is_resource($query) ? $this->neevo()->driver()->rows($query) : null;
+    $this->affectedRows = $this->neevo()->driver()->affectedRows();
 
     return $query;
   }
@@ -617,11 +619,7 @@ class NeevoQuery {
     $cached_primary = $this->neevo()->cacheLoad($table.'_primaryKey');
 
     if(is_null($cached_primary)){
-      $q = $this->neevo()->sql('SHOW FULL COLUMNS FROM '. $table);
-      foreach($q->fetchPlain() as $col){
-        if($col['Key'] === 'PRI' && !isset($return))
-          $return = $col['Field'];
-      }
+      $return = $this->neevo->driver()->getPrimaryKey($table);
       $this->neevo()->cacheSave($table.'_primaryKey', $return);
       return $return;
     }
@@ -640,7 +638,7 @@ class NeevoQuery {
    */
   private static function _highlightSql($sql){
     $keywords1 = 'SELECT|UPDATE|INSERT\s+INTO|DELETE|FROM|VALUES|SET|WHERE|HAVING|GROUP\s+BY|ORDER\s+BY|LIMIT|OFFSET|LEFT\s+JOIN|INNER\s+JOIN';
-    $keywords2 = 'ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
+    $keywords2 = 'RANDOM|RAND|ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
 
     $sql = str_replace("\\'", '\\&#39;', $sql);
     $sql = preg_replace_callback("~($keywords1)|($keywords2)|('[^']+'|[0-9]+)|(/\*.*\*/)|(--\s?[^;]+)|(#[^;]+)~", array('NeevoQuery', 'highlightCallback'), $sql);
@@ -655,7 +653,7 @@ class NeevoQuery {
     if(!empty($match[2])) // Other keywords
       return '<strong style="color:#d59401">'.$match[2].'</strong>';
     if(!empty($match[3])) // Values
-      return '<var style="color:#008000">'.$match[3].'</var>';
+      return '<em style="color:#008000">'.$match[3].'</em>';
     if(!empty($match[4])) // C-style comment
       return '<em style="color:#999">'.$match[4].'</em>';
     if(!empty($match[5])) // Dash-dash comment

@@ -22,9 +22,9 @@ Neevo allows you to easily write SQL queries for different SQL drivers
 in unified syntax with the use of Object-oriented PHP and fluent interfaces.
 Of course, Neevo automatically escapes all code to avoid SQL Injection attacs, etc.
 
-Neevo currently supports only one SQL driver - MySQL (through PHP extension 'mysql')
-but more drivers are being prepared: PostgreSQL and SQLite for now. Neevo also offers
-an Interface and Public API for other programmers, so new drivers can be easily added.
+Neevo currently supports two SQL drivers - MySQL (through PHP extension 'mysql')
+and SQLite. Neevo also offers an Interface and Public API for other programmers,
+so new drivers can be easily added.
 
 
 Features
@@ -61,6 +61,7 @@ Supported drivers
 =================
 
  - MySQL (PHP extension 'mysql')
+ - SQLite - partially (PHP extension 'sqlite')
 
 
 Todo
