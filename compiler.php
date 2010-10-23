@@ -48,7 +48,7 @@ else $drivers = null;
 
 
 // Minify source
-out(minify($file, $drivers));
+out(minify($file));
 
 out("\n");
 
@@ -119,10 +119,21 @@ function list_drivers(){
 }
 
 
+function drivers_path(){
+  global $drivers;
+
+  if(is_array($drivers)){
+    sort($drivers);
+    return join('-', $drivers) . '.';
+  }
+  return '';
+}
+
+
 function minify($file){
   $path = pathinfo($file);
   // Create name for minified file
-  $result_file = $path['dirname']."/".$path['filename'].".min.".$path['extension'];
+  $result_file = $path['dirname']."/".$path['filename'].".min.".drivers_path().$path['extension'];
 
   // Create include statements for drivers
   $file = drivers($file);
