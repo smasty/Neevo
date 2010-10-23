@@ -30,15 +30,7 @@ interface INeevoDriver {
   public function  __construct(Neevo $neevo);
 
   /**
-   * Connects to database server, selects database and sets encoding (if defined)
-   *
-   * Format of options array: <pre>
-   *   host            =>  localhost,<br>
-   *   username        =>  username,<br>
-   *   password        =>  password,<br>
-   *   database        =>  database_name,<br>
-   *   encoding        =>  utf8,<br>
-   *   table_prefix    =>  prefix_</pre>
+   * Creates connection to database
    * @param array $opts Array of connection options
    * @return void
    */
@@ -46,7 +38,7 @@ interface INeevoDriver {
 
 
   /**
-   * Closes given resource
+   * Closes connection
    * @return void
    */
   public function close();
@@ -63,7 +55,7 @@ interface INeevoDriver {
   /**
    * Executes given SQL query
    * @param string $query_string Query-string.
-   * @return resource
+   * @return resource|bool
    */
   public function query($query_string);
 
@@ -71,7 +63,7 @@ interface INeevoDriver {
   /**
    * Error message with driver-specific additions
    * @param string $neevo_msg Error message
-   * @return array Format: array($message, $err_number)
+   * @return array Format: array($error_message, $error_number)
    */
   public function error($neevo_msg);
 
@@ -121,6 +113,14 @@ interface INeevoDriver {
    * @return int
    */
   public function affectedRows();
+
+
+  /**
+   * Name of PRIMARY KEY column for table
+   * @param string $table
+   * @return string|null
+   */
+  public function getPrimaryKey($table);
 
 
   /**

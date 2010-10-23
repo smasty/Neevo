@@ -254,7 +254,11 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
   public function update(){
     if(!empty($this->modified) && $this->modified !== $this->data){
       $q = $this->query();
-      $primary = $q->getPrimary();
+      try{
+        $primary = $q->getPrimary();
+      } catch(NotImplementedException $e){
+        return $this->query()->neevo()->error('Functionality not implemented in this driver.');
+      }
       if(!$this->data[$primary])
         return $this->query()->neevo()->error('Cannot get primary_key value');
 
@@ -269,7 +273,12 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
    */
   public function delete(){
     $q = $this->query();
-    $primary = $q->getPrimary();
+    try{
+      $primary = $q->getPrimary();
+    } catch(NotImplementedException $e){
+      return $this->query()->neevo()->error('Functionality not implemented in this driver.');
+    }
+
     if($primary === null)
       return $this->query()->neevo()->error('Cannot get primary_key value');
 

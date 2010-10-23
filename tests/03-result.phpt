@@ -13,7 +13,7 @@ echo "Selected ".count($result)." rows.\n";
 
 
 // Only if driver supports this
-if(in_array(driver(), array('mysql'))){
+if(in_array(driver(), array('mysql', 'mysqli'))){
   $affected = $row->update();
 
   $current = db()->select('slogan')
@@ -27,7 +27,7 @@ if(in_array(driver(), array('mysql'))){
 ?>
 --RESULT
 Selected 2 rows.
-<?php if(in_array(driver(), array('mysql'))){ ?>
+<?php if(in_array(driver(), array('mysql', 'mysqli'))){ ?>
 Updated 1 rows.
 Selected: 1.
 <?php } ?>

@@ -49,7 +49,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = "0.4dev";
-  const REVISION = 151;
+  const REVISION = 162;
 
   // Data types
   const BOOL = 30;
@@ -85,14 +85,8 @@ class Neevo{
   /**
    * Creates and uses a new connection to a server.
    *
-   * Format of options array: <pre>
-   *   host            =>  localhost,<br>
-   *   username        =>  username,<br>
-   *   password        =>  password,<br>
-   *   database        =>  database_name,<br>
-   *   encoding        =>  utf8,<br>
-   *   table_prefix    =>  prefix_</pre>
-   * @param array $opts Array of options
+   * Options for connecting are different for each driver - see an API for your driver.
+   * @param array $opts Array of driver-specific options
    * @return bool
    */
   public function connect(array $opts){
@@ -112,10 +106,12 @@ class Neevo{
 
 
   /**
-   * Creates new NeevoConnection instance from given associative array
-   * @param array $opts Array of connection options, see Neevo->connect()
-   * @see Neevo->connect()
+   * Creates new NeevoConnection instance
+   *
+   * Options for connecting are different for each driver - see an API for your driver.
+   * @param array $opts Array of connection options
    * @return NeevoConnection
+   * @internal
    */
   public function createConnection(array $opts){
     return new NeevoConnection($this, $this->driver(), $opts);
@@ -516,6 +512,8 @@ class Neevo{
  * @package Neevo
  */
 class NeevoException extends Exception{};
+
+class NotImplementedException extends Exception{};
 
 
 /**

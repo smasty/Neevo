@@ -242,7 +242,7 @@ class NeevoQuery {
     $start = explode(' ', microtime());
     $query = $this->neevo()->driver()->query($this->build());
 
-    if($query === false){
+    if(!$query){
       $this->neevo()->error('Query failed');
       return false;
     }
@@ -255,8 +255,8 @@ class NeevoQuery {
     $this->setTime($time);
 
     $this->performed = true;
-    $this->resultSet = is_resource($query) ? $query : null;
-    $this->numRows = is_resource($query) ? $this->neevo()->driver()->rows($query) : null;
+    $this->resultSet = $query;
+    $this->numRows = $this->neevo()->driver()->rows($query);
     $this->affectedRows = $this->neevo()->driver()->affectedRows();
 
     return $query;
@@ -275,7 +275,7 @@ class NeevoQuery {
 
     $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
 
-    if(!is_resource($resultSet)) // Error
+    if(!$resultSet) // Error
       return $this->neevo()->error('Fetching result data failed');
 
     while($row = $this->neevo()->driver()->fetch($resultSet))

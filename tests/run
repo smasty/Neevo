@@ -1,4 +1,7 @@
 <?php
+
+error_reporting(E_ALL);
+
 $start = microtime(true);
 
 $opts = getopt('d');

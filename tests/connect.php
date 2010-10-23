@@ -8,18 +8,33 @@ $mysql->connect(array(
   'host' => 'localhost',
   'database' => 'neevo',
   'username' => 'root',
-  'encoding' => 'utf8'
+  'charset' => 'utf8'
 ));
 $mysql->setErrorReporting(Neevo::E_STRICT);
 
+
 // SQLite
 $sqlite = new Neevo('SQLite', false);
-$sqlite->connect(array('database' => '../neevo.sqlite'));
+$sqlite->connect(array('file' => 'neevo.sqlite'));
+$sqlite->setErrorReporting(Neevo::E_STRICT);
+
+// MySQLi
+$mysqli = new Neevo('MySQLi', false);
+$mysqli->connect(array(
+  'host' => 'localhost',
+  'database' => 'neevo',
+  'username' => 'root',
+  'charset' => 'utf8'
+));
+$mysqli->setErrorReporting(Neevo::E_STRICT);
+
+
 
 /** @return Neevo */
 function db(){
-  global $mysql;
-  return $mysql;
+  global $mysql, $sqlite, $mysqli;
+  
+  return $sqlite;
 }
 
 function driver(){

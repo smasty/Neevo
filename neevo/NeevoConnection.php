@@ -27,9 +27,17 @@ class NeevoConnection{
   public function __construct(Neevo $neevo, INeevoDriver $driver, array $options){
     $this->neevo = $neevo;
     $this->driver = $driver;
+
+    self::alias($options, 'username', 'user');
+    self::alias($options, 'password', 'pass');
+    self::alias($options, 'password', 'pswd');
+    self::alias($options, 'host', 'hostname');
+    self::alias($options, 'database', 'db');
+    self::alias($options, 'database', 'dbname');
+
     $this->options = $options;
     
-    $this->driver()->connect($this->options );
+    $this->driver()->connect($this->options);
   }
 
 
@@ -68,6 +76,19 @@ class NeevoConnection{
     if($hide_password) $info['password'] = '*****';
     $info['driver'] = str_replace('NeevoDriver', '', get_class($this->driver));
     return $info;
+  }
+
+
+  /**
+   * Create alias for configuration value
+   * @param array $opts
+   * @param string $key
+   * @param string $alias Alias of $key
+   * @return void
+   */
+  public static function alias(&$opts, $key, $alias){
+    if(isset($opts[$alias]) && !isset($opts[$key]))
+      $opts[$key] = $opts[$alias];
   }
 
 }
