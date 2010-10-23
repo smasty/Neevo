@@ -18,17 +18,18 @@
  * Neevo MySQLi driver (PHP extension 'mysqli')
  *
  * Driver connect options:
- *  - host => MySQL server name or address
- *  - port => MySQL server port
- *  - socket
- *  - username (or user)
- *  - password (or pass, pswd)
- *  - database (or db, dbname) => database to select
- *  - charset => Character encoding to set (defaults to utf8)
+ * - host => MySQL server name or address
+ * - port => MySQL server port
+ * - socket
+ * - username (or user)
+ * - password (or pass, pswd)
+ * - database (or db, dbname) => database to select
+ * - charset => Character encoding to set (defaults to utf8)
  *
+ * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverMySQLi extends NeevoDriver implements INeevoDriver{
+class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
 
   private $neevo, $resource;
 

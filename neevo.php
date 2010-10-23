@@ -18,13 +18,13 @@ if(version_compare(PHP_VERSION, '5.1.0', '<')){
   if(version_compare(PHP_VERSION, '5.0.0', '>='))
     throw new Exception('Neevo requires PHP version 5.1.0 or newer');
   if(version_compare(PHP_VERSION, '5.0.0', '<'))
-    trigger_error ('Neevo requires PHP version 5.1.0 or newer', E_USER_ERROR);
+    trigger_error('Neevo requires PHP version 5.1.0 or newer', E_USER_ERROR);
   exit;
 }
 
 include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
 include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
-include_once dirname(__FILE__). '/neevo/NeevoDriver.php';
+include_once dirname(__FILE__). '/neevo/NeevoQueryBuilder.php';
 include_once dirname(__FILE__). '/neevo/NeevoQuery.php';
 include_once dirname(__FILE__). '/neevo/NeevoResult.php';
 include_once dirname(__FILE__). '/neevo/NeevoCache.php';
@@ -86,10 +86,10 @@ class Neevo{
    * Creates and uses a new connection to a server.
    *
    * Options for connecting are different for each driver - see an API for your driver.
-   * @param array $opts Array of driver-specific options
+   * @param array|string|Traversable $opts Driver-specific connect options (array, parsable string or traversable object)
    * @return bool
    */
-  public function connect(array $opts){
+  public function connect($opts){
     $connection = $this->createConnection($opts);
     $this->setConnection($connection);
     return (bool) $connection;
@@ -109,11 +109,11 @@ class Neevo{
    * Creates new NeevoConnection instance
    *
    * Options for connecting are different for each driver - see an API for your driver.
-   * @param array $opts Array of connection options
+   * @param array|string|Traversable $opts Driver-specific connect options (array, parsable string or traversable object)
    * @return NeevoConnection
    * @internal
    */
-  public function createConnection(array $opts){
+  public function createConnection($opts){
     return new NeevoConnection($this, $this->driver(), $opts);
   }
 
@@ -182,7 +182,10 @@ class Neevo{
 
   /** @internal */
   private function isDriver($class){
-    return (class_exists($class, false) && in_array("INeevoDriver", class_implements($class, false)) && in_array("NeevoDriver", class_parents($class, false)));
+    return (class_exists($class, false) &&
+            in_array('INeevoDriver', class_implements($class, false)) &&
+            in_array('NeevoQueryBuilder', class_parents($class, false))
+           );
   }
 
 
@@ -234,7 +237,6 @@ class Neevo{
   /**
    * Neevo cache object
    * @return INeevoCache|null
-   * @internal
    */
   public function cache(){
     return $this->cache;

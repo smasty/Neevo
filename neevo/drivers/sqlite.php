@@ -18,13 +18,14 @@
  * Neevo SQLite driver (PHP extension 'sqlite')
  *
  * Driver connect options:
- *  - database (or file, db, dbname) => database to select
- *  - charset => Character encoding to set (defaults to utf-8)
- *  - dbcharset => Database character encoding (will be converted to 'charset')
- *
+ * - database (or file, db, dbname) => database to select
+ * - charset => Character encoding to set (defaults to utf-8)
+ * - dbcharset => Database character encoding (will be converted to 'charset')
+ * 
+ * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverSQLite extends NeevoDriver implements INeevoDriver{
+class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   private $neevo, $resource, $last_error, $dbCharset, $charset;
 

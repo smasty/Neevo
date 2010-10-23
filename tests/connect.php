@@ -18,6 +18,7 @@ $sqlite = new Neevo('SQLite', false);
 $sqlite->connect(array('file' => 'neevo.sqlite'));
 $sqlite->setErrorReporting(Neevo::E_STRICT);
 
+
 // MySQLi
 $mysqli = new Neevo('MySQLi', false);
 $mysqli->connect(array(

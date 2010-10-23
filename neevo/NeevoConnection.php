@@ -24,9 +24,20 @@ class NeevoConnection{
   private $neevo, $driver, $options;
 
 
-  public function __construct(Neevo $neevo, INeevoDriver $driver, array $options){
+  public function __construct(Neevo $neevo, INeevoDriver $driver, $options){
     $this->neevo = $neevo;
     $this->driver = $driver;
+
+    if(is_string($options))
+      parse_str($options, $options);
+    elseif($options instanceof Traversable){
+      $tmp = array();
+      foreach($options as $key=>$val)
+        $tmp[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
+      $options = $tmp;
+    }
+    elseif(!is_array($options))
+      throw new InvalidArgumentException('Options must be array, string or object.');
 
     self::alias($options, 'username', 'user');
     self::alias($options, 'password', 'pass');
@@ -60,9 +71,7 @@ class NeevoConnection{
 
 
   public function prefix(){
-    if(isset($this->options['table_prefix']))
-      return $this->options['table_prefix'];
-    return '';
+    return isset($this->options['table_prefix']) ? $this->options['table_prefix'] : '';
   }
 
 

@@ -15,10 +15,10 @@
  */
 
 /**
- * Class with predefined methods for driver classes.
+ * Building SQL string from NeevoQuery instance.
  * @package Neevo
  */
-class NeevoDriver{
+class NeevoQueryBuilder{
 
 
   /**
