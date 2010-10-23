@@ -1,5 +1,5 @@
 --TEST
-Fetch, FetchAssoc, FetchSingle
+Fetch, FetchAssoc, FetchSingle, FetchRow
 --CODE
 <?php
 
@@ -25,6 +25,11 @@ echo "\n";
 $single = db()->select('name')->from('author')->where('id', 11)->fetchSingle();
 echo "$single\n";
 
+// First row fetch
+$row = db()->select('id, title, web')->from('software')->where('title', 'Neevo')->fetchRow();
+
+echo "$row->id: $row->title ($row->web)\n";
+
 ?>
 --RESULT
 11: Martin Srank
@@ -34,3 +39,4 @@ Martin Srank (11): http://smasty.net
 Linus Torvalds (12): http://torvalds-family.blogspot.com
 
 Martin Srank
+1: Neevo (http://neevo.smasty.net)
