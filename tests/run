@@ -1,20 +1,27 @@
 <?php
 
-error_reporting(E_ALL);
+error_reporting(E_ALL | E_STRICT);
 
 $start = microtime(true);
 
-$opts = getopt('d');
+$opts = getopt('bd::');
 
-if(isset($opts['d']))
+if(isset($opts['d'])){
+  if(is_string($opts['d']))
+    $driver = strtolower(str_replace('=', '', $opts['d']));
+  else $driver = 'mysql';
+} else $driver = 'mysql';
+
+if(isset($opts['b']))
   define('DEBUG', true);
 else define('DEBUG', false);
+
 
 include_once dirname(__FILE__) . '/connect.php';
 
 $tests = glob(dirname(__FILE__).'/*.phpt');
 
-echo "\n";
+echo 'Using driver ', driver(), "...\n";
 
 foreach($tests as $test){
 

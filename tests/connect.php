@@ -33,9 +33,10 @@ $mysqli->setErrorReporting(Neevo::E_STRICT);
 
 /** @return Neevo */
 function db(){
+  global $driver;
   global $mysql, $sqlite, $mysqli;
   
-  return $sqlite;
+  return $$driver;
 }
 
 function driver(){

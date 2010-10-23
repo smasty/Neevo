@@ -270,8 +270,6 @@ class NeevoQuery {
    */
   private function fetchPlain(){
     $rows = array();
-    if(!in_array($this->getType(), array('select', 'sql')))
-      return $this->neevo()->error('Cannot fetch on this kind of query');
 
     $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
 
@@ -309,17 +307,34 @@ class NeevoQuery {
 
 
   /**
-   * Fetches 1st row in result as **NeevoRow** or the only value if one row was fetched.
-   * @return NeevoRow|mixed|FALSE
+   * Fetches the first row in result set.
+   * @param bool $array Return as array instead of NeevoRow instance.
+   * @return NeevoRow|array|false
    */
-  public function fetchSingle(){
-    $result = $this->fetchPlain();
+  public function fetchRow($array = false){
+    $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
+    if(!$resultSet) // Error
+      return $this->neevo()->error('Fetching result data failed');
+
+    $result = $this->neevo()->driver()->fetch($resultSet);
+    $this->free();
     if($result === false)
       return false;
+    return $array ? $result : new NeevoRow($result, $this);
+  }
 
-    if(count($result) > 1) // Return first row
-      return new NeevoRow($result[0], $this);
-    return $result[0][max(array_keys($result[0]))]; // Return the only value
+
+  /**
+   * Fetches the only value in result set.
+   * @return mixed|FALSE
+   */
+  public function fetchSingle(){
+    $result = $this->fetchRow();
+    if($result === false)
+      return false;
+    if($result->isSingle())
+      return $result->getSingle();
+    else $this->neevo()->error('More than one columns in the row, cannot fetch single');
   }
 
 
@@ -361,10 +376,10 @@ class NeevoQuery {
   /**
    * Fetches all data as associative arrays with $column as a 'key' to row.
    * @param string $column Column to use as key for row
-   * @param bool $as_array Rows are returned as arrays instead of NeevoRow instances.
+   * @param bool $array Rows are returned as arrays instead of NeevoRow instances.
    * @return array|FALSE
    */
-  public function fetchAssoc($column, $as_array = false){
+  public function fetchAssoc($column, $array = false){
     if(!in_array($column, $this->columns) || !in_array('*', $this->columns)){
       $this->columns[] = $column;
       $this->performed = false; // If query was executed without needed column, force execution.
@@ -375,7 +390,7 @@ class NeevoQuery {
 
     $rows = array();
     foreach($result as $row){
-      if(!$as_array)
+      if(!$array)
         $row = new NeevoRow($row, $this); // Rows as NeevoRow.
       $rows[$row[$column]] = $row;
     }
