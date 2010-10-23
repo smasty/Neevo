@@ -46,7 +46,7 @@ class NeevoQuery {
    * @param string|array $cols Columns to select (array or comma-separated list)
    * @return NeevoQuery fluent interface
    */
-  public function select($cols){
+  public function select($cols = '*'){
     $this->setType('select');
     $this->columns = is_string($cols) ? explode(',', $cols) : $cols;
     return $this;
@@ -110,7 +110,8 @@ class NeevoQuery {
 
   /**
    * Sets values for INSERT query.
-   * @param array $data Values.
+   * @param array $data Values to insert.
+   * @param array $data Values to insert.
    * @return NeevoQuery fluent interface
    */
   public function values(array $data){

@@ -309,22 +309,30 @@ class Neevo{
   /**
    * Creates SELECT query.
    * @param string|array $columns Columns to select (array or comma-separated list)
+   * @param string $table Table name. Can be set by calling NeevoQuery->from()
    * @return NeevoQuery fluent interface
    */
-  public function select($columns){
+  public function select($columns = '*', $table = null){
     $q = new NeevoQuery($this);
-    return $q->select($columns);
+    $q->select($columns);
+    if(isset($table))
+      $q->from($table);
+    return $q;
   }
 
 
   /**
    * Creates INSERT query.
    * @param string $table Table name
+   * @param array $values Values to insert. Can be set by calling NeevoQuery->values()
    * @return NeevoQuery fluent interface
    */
-  public function insert($table){
+  public function insert($table, array $values = null){
     $q = new NeevoQuery($this);
-    return $q->insert($table);
+    $q->insert($table);
+    if(isset($values))
+      $q->values($values);
+    return $q;
   }
 
 
@@ -332,25 +340,29 @@ class Neevo{
    * Alias for Neevo::insert().
    * @return NeevoQuery fluent interface
    */
-  public function insertInto($table){
-    return $this->insert($table);
+  public function insertInto($table, array $values = null){
+    return $this->insert($table, $values);
   }
 
 
   /**
    * Creates UPDATE query.
    * @param string $table Table name.
+   * @param array $data Data to update. Can be set by calling NeevoQuery->set()
    * @return NeevoQuery fluent interface
    */
-  public function update($table){
+  public function update($table, array $data = null){
     $q = new NeevoQuery($this);
-    return $q->update($table);
+    $q->update($table);
+    if(isset($data))
+      $q->set($data);
+    return $q;
   }
 
 
   /**
    * Creates DELETE query.
-   * @param string $table Table name. Optional, can be set by from() method.
+   * @param string $table Table name. Can be set by calling NeevoQuery->from()
    * @return NeevoQuery fluent interface
    */
   public function delete($table = null){
