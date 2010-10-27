@@ -23,6 +23,21 @@
  *
  * If something is not supported in the driver, the method **must** throw NotImplementedException.
  * The exception will be catched and Neevo will decide, what to do next.
+ *
+ * When the driver needs to rewrite default output for query clauses,
+ * following methods can be declared:
+ * - **buildColName()** - Column names, including table.column syntax
+ * - **buildSelectCols()** - [SELECT] "col1, table.col2" ...
+ * - **buildInsertData()** - [INSERT INTO] "(col1, col2) VALUES (val1, val2)" ...
+ * - **buildUpdateData()** - [UPDATE table] "SET col1 = val1, col2 = val2 ..."
+ * - **buildWhere()** - WHERE clause
+ * - **buildOrder()** - ORDER BY clause
+ * 
+ * For proper use, see source of **NeevoQueryBuilder** class.
+ *
+ * Other parts (LIMIT, OFFSET) and the whole query structure can be changed in **build()** method.
+ * For proper use, see source of **build()** method in one of existing drivers.
+ *
  * @package NeevoDrivers
  */
 interface INeevoDriver {
