@@ -113,7 +113,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
       $query_string = iconv($this->charset, $this->dbCharset . '//IGNORE', $query_string);
 
     $this->last_error = '';
-    $q = $this->resource->query($query_string, null, $error);
+    $q = @$this->resource->query($query_string, null, $error);
     $this->last_error = $error;
     return $q;
   }
@@ -125,7 +125,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * @return array Format: array($error_message, $error_number)
    */
   public function error($neevo_msg){
-    $no = $this->resource->lastError();
+    $no = @$this->resource->lastError();
     $msg = $neevo_msg. '. ' . ucfirst($this->last_error);
     return array($msg, $no);
   }
@@ -137,7 +137,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * @return array
    */
   public function fetch($resultSet){
-    $row = $resultSet->fetch(SQLITE_ASSOC);
+    $row = @$resultSet->fetch(SQLITE_ASSOC);
     $charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
 
     if($row && $charset){
@@ -159,7 +159,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * @return array
    */
   public function fetchAll($resultSet){
-    $result = $resultSet->fetchAll(SQLITE_ASSOC);
+    $result = @$resultSet->fetchAll(SQLITE_ASSOC);
     $charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
     
     if($result && $charset){
@@ -187,7 +187,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * @return bool
    */
   public function seek($resultSet, $row_number){
-    return $resultSet->seek($row_number);
+    return @$resultSet->seek($row_number);
   }
 
 
@@ -196,7 +196,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * @return int
    */
   public function insertId(){
-    return $this->resource->lastInsertRowid();
+    return @$this->resource->lastInsertRowid();
   }
 
 
@@ -216,7 +216,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * @return int|FALSE
    */
   public function rows($resultSet){
-    return $resultSet->numRows();
+    return @$resultSet->numRows();
   }
 
 
@@ -225,7 +225,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * @return int
    */
   public function affectedRows(){
-    return $this->resource->changes();
+    return @$this->resource->changes();
   }
 
 

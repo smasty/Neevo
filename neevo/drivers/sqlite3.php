@@ -15,27 +15,32 @@
  */
 
 /**
- * Neevo MySQLi driver (PHP extension 'mysqli')
+ * Neevo SQLite 3 driver (PHP extension 'sqlite')
  *
  * Driver connect options:
- * - host => MySQL server name or address
- * - port => MySQL server port
- * - socket
- * - username (or user)
- * - password (or pass, pswd)
- * - database (or db, dbname) => database to select
- * - charset => Character encoding to set (defaults to utf8)
- * - resource (instance of mysqli) => Existing MySQLi connection
- *
+ * - database (or file, db, dbname) => database to select
+ * - charset => Character encoding to set (defaults to utf-8)
+ * - dbcharset => Database character encoding (will be converted to 'charset')
+ * - resource (instance of SQLite3) => Existing SQLite 3 resource
+ * 
  * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
+class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
 
   /** @var Neevo */
   private $neevo;
+  
+  /** @var string */
+  private $last_error;
 
-  /** @var mysqli */
+  /** @var string */
+  private $dbCharset;
+
+  /** @var string */
+  private $charset;
+
+  /** @var SQLite3 */
   private $resource;
 
 
@@ -46,7 +51,7 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
    * @return void
    */
   public function  __construct(Neevo $neevo){
-    if(!extension_loaded("mysqli")) throw new NeevoException("PHP extension 'mysqli' not loaded.");
+    if(!extension_loaded("sqlite3")) throw new NeevoException("PHP extension 'sqlite3' not loaded.");
     $this->neevo = $neevo;
   }
 
@@ -57,39 +62,31 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
    * @return void
    */
   public function connect(array $config){
+    NeevoConnection::alias($config, 'database', 'file');
 
-    // Defaults
     if(!isset($config['resource'])) $config['resource'] = null;
-    if(!isset($config['charset'])) $config['encodng'] = 'utf8';
-    if(!isset($config['username'])) $config['username'] = ini_get('mysqli.default_user');
-    if(!isset($config['password'])) $config['password'] = ini_get('mysqli.default_pw');
-    if(!isset($config['socket'])) $config['socket'] = ini_get('mysqli.default_socket');
-    if(!isset($config['port'])) $config['port'] = null;
-    if(!isset($config['host'])){
-      $host = ini_get('mysqli.default_host');
-      if($host){
-        $config['host'] = $host;
-        $config['port'] = ini_get('mysqli.default_port');
-      } else $config['host'] = $config['port'] = null;
-    }
 
     // Connect
-    if(!($config['resource']) instanceof mysqli)
-      $this->resource = new mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
-    else
-      $this->resource = $config['resource'];
-
-    if($this->resource->connect_errno){
-      $this->neevo->error($this->resource->connect_error);
+    if(!($config['resource'] instanceof SQLite3)){
+      try{
+        $connection = new SQLite3($config['database']);
+      } catch(Exception $e){
+          $this->neevo->error($e->getMessage());
+      }
     }
+    else
+      $connection = $config['resource'];
+
+    if(!($connection instanceof SQLite3))
+      $this->neevo->error("Opening database file '".$config['database']." failed");
+    
+    $this->resource = $connection;
 
     // Set charset
-    if($config['charset'] && $this->resource instanceof mysqli){
-      $ok = @$this->resource->set_charset($config['charset']);
-
-      if(!$ok) $this->query("SET NAMES ".$config['charset']);
-    }
-
+    $this->dbCharset = empty($config['dbcharset']) ? 'UTF-8' : $config['dbcharset'];
+    $this->charset = empty($config['charset']) ? 'UTF-8' : $config['charset'];
+    if(strcasecmp($this->dbCharset, $this->charset) === 0)
+      $this->dbCharset = $this->charset = null;
   }
 
 
@@ -104,18 +101,24 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Frees memory used by result
-   * @param mysqli_result $resultSet
+   * @param SQLite3Result $resultSet
    * @return bool
    */
-  public function free($resultSet){}
+  public function free($resultSet){
+    return true;
+  }
 
 
   /**
    * Executes given SQL query
    * @param string $query_string Query-string.
-   * @return mysqli_result|bool
+   * @return SQLite3Result|bool
    */
   public function query($query_string){
+
+    if($this->dbCharset !== null)
+      $query_string = iconv($this->charset, $this->dbCharset . '//IGNORE', $query_string);
+
     return @$this->resource->query($query_string);
   }
 
@@ -126,45 +129,53 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
    * @return array Format: array($error_message, $error_number)
    */
   public function error($neevo_msg){
-    $mysql_msg = $this->resource->error;
-    $mysql_msg = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $mysql_msg);
-
-    $msg = $neevo_msg.".";
-    if($mysql_msg)
-      $msg .= " ".$mysql_msg;
-
-    return array($msg, $this->resource->errno);
+    $no = $this->resource->lastErrorCode();
+    $msg = $neevo_msg. '. ' . $this->resource->lastErrorMsg();
+    return array($msg, $no);
   }
 
 
   /**
    * Fetches row from given Query result set as associative array.
-   * @param mysqli_result $resultSet Result set
+   * @param SQLite3Result $resultSet Result set
    * @return array
    */
   public function fetch($resultSet){
-    return @$resultSet->fetch_assoc();
+    $row = $resultSet->fetchArray(SQLITE3_ASSOC);
+    $charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
+
+    if($row && $charset){
+      $fields = array();
+      foreach($row as $key=>$val){
+        if($charset !== null && is_string($val))
+          $val = iconv($this->dbcharset, $charset, $val);
+        $fields[str_replace(array('[', ']'), '', $key)] = $val;
+      }
+      return $fileds;
+    }
+    return $row;
   }
 
 
   /**
    * Fetches all rows from given result set as associative arrays.
-   * @param mysqli_result $resultSet Result set
+   * @param SQLite3Result $resultSet Result set
    * @return array
    */
   public function fetchAll($resultSet){
-    return @$resultSet->fetch_all(MYSQLI_ASSOC);
+    throw new NotImplementedException();
   }
 
 
   /**
    * Move internal result pointer
-   * @param mysqli_result $resultSet Query resource
+   * @param SQLite3Result $resultSet Query resource
    * @param int $row_number Row number of the new result pointer.
    * @return bool
+   * @throws NotImplementedException
    */
   public function seek($resultSet, $row_number){
-    return @$resultSet->data_seek($row_number);
+    throw new NotImplementedException();
   }
 
 
@@ -173,7 +184,7 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
    * @return int
    */
   public function insertId(){
-    return $this->resource->insert_id;
+    return $this->resource->lastInsertRowID();
   }
 
 
@@ -183,19 +194,18 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
    * @return NeevoQuery
    */
   public function rand(NeevoQuery $query){
-    $query->order('RAND()');
+    $query->order('RANDOM()');
   }
 
 
   /**
    * Number of rows in result set.
-   * @param mysqli_result $resultSet
+   * @param SQLite3Result $resultSet
    * @return int|FALSE
+   * @throws NotImplementedException
    */
   public function rows($resultSet){
-    if($resultSet instanceof mysqli_result)
-      return $resultSet->num_rows;
-    return false;
+    throw new NotImplementedException();
   }
 
 
@@ -204,24 +214,18 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
    * @return int
    */
   public function affectedRows(){
-    return $this->resource->affected_rows;
+    return $this->resource->changes();
   }
 
 
   /**
    * Name of PRIMARY KEY column for table
    * @param string $table
-   * @return string|null
+   * @return void
+   * @throws NotImplementedException
    */
   public function getPrimaryKey($table){
-    $return = null;
-    $q = $this->query('SHOW FULL COLUMNS FROM '. $table);
-    $arr = $this->fetchAll($q);
-    foreach($arr as $col){
-      if($col['Key'] === 'PRI' && !isset($return))
-        $return = $col['Field'];
-    }
-    return $return;
+    throw new NotImplementedException();
   }
 
 
@@ -263,11 +267,11 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
 
     elseif($query->getType() == 'update' && $query->getData()){
       $update_data = $this->buildUpdateData($query);
-      $q .= "UPDATE $table$update_data$where$order$limit";
+      $q .= "UPDATE $table$update_data$where";
     }
 
     elseif($query->getType() == 'delete')
-      $q .= "DELETE FROM $table$where$order$limit";
+      $q .= "DELETE FROM $table$where";
 
     return $q.';';
   }
@@ -285,12 +289,11 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
         return $value ? 1 :0;
 
       case Neevo::TEXT:
-        return "'". $this->resource->real_escape_string($value) ."'";
-        break;
+        return "'". $this->resource->escapeString($value) ."'";
 
       case Neevo::BINARY:
-        return "_binary'". $this->resource->real_escape_string($value) ."'";
-
+        return "X'" . bin2hex((string) $value) . "'";
+      
       case Neevo::DATETIME:
         return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
 
