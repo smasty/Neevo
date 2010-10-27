@@ -4,7 +4,7 @@ Fetch, FetchAssoc, FetchSingle, FetchRow
 <?php
 
 // Base fetch
-$fetch = db()->select('id, name, web')->from('author')->orderBy('id ASC')->limit(2)->fetch();
+$fetch = db()->select('id, name, web', 'author')->orderBy('id ASC')->limit(2)->fetch();
 if($fetch instanceof NeevoResult){
   foreach($fetch as $row){
     echo "$row->id: {$row['name']}\n";
@@ -14,7 +14,7 @@ if($fetch instanceof NeevoResult){
 echo "\n";
 
 // Associated fetch
-$fetchAssoc = db()->select('name, web')->from('author')->orderBy('id ASC')->fetchAssoc('id');
+$fetchAssoc = db()->select('name, web', 'author')->orderBy('id ASC')->fetchAssoc('id');
 foreach($fetchAssoc as $key=>$val){
   echo "$val->name ($key): $val->web\n";
 }
@@ -22,11 +22,11 @@ foreach($fetchAssoc as $key=>$val){
 echo "\n";
 
 // Single fetch
-$single = db()->select('name')->from('author')->where('id', 11)->fetchSingle();
+$single = db()->select('name', 'author')->where('id', 11)->fetchSingle();
 echo "$single\n";
 
 // First row fetch
-$row = db()->select('id, title, web')->from('software')->where('title', 'Neevo')->fetchRow();
+$row = db()->select('id, title, web', 'software')->where('title', 'Neevo')->fetchRow();
 
 echo "$row->id: $row->title ($row->web)\n";
 

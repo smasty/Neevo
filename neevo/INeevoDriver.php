@@ -16,6 +16,13 @@
 
 /**
  * Interface implemented by all Neevo drivers.
+ *
+ * All Neevo drivers **must** implement this interface, not only reproduce all it's
+ * methods.
+ * They also **must** extend NeevoQueryBuilder.
+ *
+ * If something is not supported in the driver, the method **must** throw NotImplementedException.
+ * The exception will be catched and Neevo will decide, what to do next.
  * @package NeevoDrivers
  */
 interface INeevoDriver {
@@ -31,10 +38,10 @@ interface INeevoDriver {
 
   /**
    * Creates connection to database
-   * @param array $opts Array of connection options
+   * @param array $config Configuration options
    * @return void
    */
-  public function connect(array $opts);
+  public function connect(array $config);
 
 
   /**
@@ -69,11 +76,19 @@ interface INeevoDriver {
 
 
   /**
-   * Fetches row from given Query resource as associative array.
-   * @param resource $resultSet Query resource
+   * Fetches row from given Query result set as associative array.
+   * @param resource $resultSet Result set
    * @return array
    */
   public function fetch($resultSet);
+
+
+  /**
+   * Fetches all rows from given result set as associative arrays.
+   * @param resource $resultSet Result set
+   * @return array
+   */
+  public function fetchAll($resultSet);
 
 
   /**
@@ -138,11 +153,5 @@ interface INeevoDriver {
    * @return mixed
    */
   public function escape($value, $type);
-
-
-  /**
-   * Return Neevo class instance
-   * @return Neevo
-   */
-  public function neevo();
+  
 }

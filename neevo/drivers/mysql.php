@@ -24,13 +24,18 @@
  * - password (or pass, pswd)
  * - database (or db, dbname) => database to select
  * - charset => Character encoding to set (defaults to utf8)
+ * - resource (type resource) => Existing MySQL connection (created by mysql_connect)
  *
  * @author Martin Srank
  * @package NeevoDrivers
  */
 class NeevoDriverMySQL extends NeevoQueryBuilder implements INeevoDriver{
 
-  private $neevo, $resource;
+  /** @var Neevo */
+  private $neevo;
+
+  /** @var resource */
+  private $resource;
 
 
   /**
@@ -47,48 +52,52 @@ class NeevoDriverMySQL extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Creates connection to database
-   * @param array $opts Array of connection options
+   * @param array $config Configuration options
    * @return void
    */
-  public function connect(array $opts){
+  public function connect(array $config){
 
     // Defaults
-    if(!isset($opts['charset'])) $opts['charset'] = 'utf8';
-    if(!isset($opts['username'])) $opts['username'] = ini_get('mysql.default_user');
-    if(!isset($opts['password'])) $opts['password'] = ini_get('mysql.default_password');
-    if(!isset($opts['host'])){
+    if(!isset($config['resource'])) $config['resource'] = null;
+    if(!isset($config['charset'])) $config['charset'] = 'utf8';
+    if(!isset($config['username'])) $config['username'] = ini_get('mysql.default_user');
+    if(!isset($config['password'])) $config['password'] = ini_get('mysql.default_password');
+    if(!isset($config['host'])){
       $host = ini_get('mysql.default_host');
       if($host){
-        $opts['host'] = $host;
-        $opts['port'] = ini_get('mysql.default_port');
+        $config['host'] = $host;
+        $config['port'] = ini_get('mysql.default_port');
       }
-      else $opts['host'] = null;
+      else $config['host'] = null;
     }
 
-    if(isset($opts['port']))
-      $host = $opts['host'] .':'. $opts['port'];
-    else $host = $opts['host'];
+    if(isset($config['port']))
+      $host = $config['host'] .':'. $config['port'];
+    else $host = $config['host'];
 
     // Connect
-    $connection = @mysql_connect($host, $opts['username'], $opts['password']);
+    if(!is_resource($config['resource']))
+      $connection = @mysql_connect($host, $config['username'], $config['password']);
+    else
+      $connection = $config['resource'];
 
     if(!is_resource($connection))
-      $this->neevo()->error("Connection to host '".$opts['host']."' failed");
+      $this->neevo->error("Connection to host '".$config['host']."' failed");
 
     // Select DB
-    if($opts['database']){
-      $db = mysql_select_db($opts['database']);
-      if(!$db) $this->neevo()->error("Could not select database '{$opts['database']}'");
+    if($config['database']){
+      $db = mysql_select_db($config['database']);
+      if(!$db) $this->neevo->error("Could not select database '{$config['database']}'");
     }
 
     $this->resource = $connection;
 
     //Set charset
-    if($opts['charset'] && is_resource($connection)){
+    if($config['charset'] && is_resource($connection)){
       if(function_exists('mysql_set_charset'))
-				$ok = @mysql_set_charset($opts['charset'], $connection);
+				$ok = @mysql_set_charset($config['charset'], $connection);
 
-      if(!$ok) $this->neevo()->sql("SET NAMES ".$opts['charset'])->run();
+      if(!$ok) $this->query("SET NAMES ".$config['charset']);
     }
   }
 
@@ -140,12 +149,22 @@ class NeevoDriverMySQL extends NeevoQueryBuilder implements INeevoDriver{
 
 
   /**
-   * Fetches row from given Query resource as associative array.
-   * @param resource $resultSet Query resource
+   * Fetches row from given Query result set as associative array.
+   * @param resource $resultSet Result set
    * @return array
    */
   public function fetch($resultSet){
     return @mysql_fetch_assoc($resultSet);
+  }
+
+
+  /**
+   * Fetches all rows from given result set as associative arrays.
+   * @param resource $resultSet Result set
+   * @throws NotImplementedException
+   */
+  public function fetchAll($resultSet){
+    throw new NotImplementedException();
   }
 
 
@@ -290,18 +309,9 @@ class NeevoDriverMySQL extends NeevoQueryBuilder implements INeevoDriver{
         return ($value instanceof DateTime) ? $value->format("'Y-m-d'") : date("'Y-m-d'", $value);
         
       default:
-        $this->neevo()->error('Unsupported data type');
+        $this->neevo->error('Unsupported data type');
         break;
     }
-  }
-
-
-  /**
-   * Return Neevo class instance
-   * @return Neevo
-   */
-  public function neevo(){
-    return $this->neevo;
   }
 
 }

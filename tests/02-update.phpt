@@ -3,8 +3,7 @@ Insert, Update, Delete
 --CODE
 <?php
 
-$insert = db()->insertInto('software')
-              ->values(array(
+$insert = db()->insertInto('software', array(
                 'id' => 5,
                 'aid' => 13,
                 'title' => 'Debian',
@@ -13,8 +12,7 @@ $insert = db()->insertInto('software')
 
 echo "Insert: affected $insert rows.\n";
 
-$update = db()->update('software')
-              ->set(array(
+$update = db()->update('software', array(
                 'slogan' => 'Stupid content tracker '.rand(0,999)))
               ->where('title', 'Git')->affectedRows();
 
@@ -25,7 +23,7 @@ $delete = db()->delete('software')
 
 echo "Delete: affected $delete rows.\n";
 
-$select = db()->select('*')->from('software')->where('id', 5)->rows();
+$select = db()->select('*', 'software')->where('id', 5)->rows();
 
 echo "Select: $select rows found.\n";
 ?>

@@ -35,9 +35,28 @@ include_once dirname(__FILE__). '/neevo/NeevoCache.php';
  */
 class Neevo{
 
-  // Fields
-  private $connection, $driver, $cache, $error_handler, $last, $queries, $error_reporting;
+  /** @var NeevoConnection */
+  private $connection;
+  
+  /** @var INeevoDriver */
+  private $driver;
 
+  /** @var INeevoCache */
+  private $cache;
+  
+  /** @var callback */
+  private $error_handler;
+
+  /** @var NeevoQuery */
+  private $last;
+
+  /** @var int */
+  private $queries;
+
+  /** @var int */
+  private $error_reporting;
+
+  
   /** @var bool Ignore warning when using deprecated methods.*/
   public static $ignore_deprecated = false;
 
@@ -48,8 +67,8 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const VERSION = "0.4dev";
-  const REVISION = 164;
+  const VERSION = '0.5';
+  const REVISION = 170;
 
   // Data types
   const BOOL = 30;
@@ -62,7 +81,7 @@ class Neevo{
   /**
    * Neevo
    * @param string $driver Name of driver to use.
-   * @param INeevoCache|bool $cache Cache to use. If not defined, tries to create it automatically. FALSE to disable autocache.
+   * @param INeevoCache|bool $cache Cache to use. NULL for no cache.
    * @return void
    * @throws NeevoException
    */
@@ -78,21 +97,23 @@ class Neevo{
    * @return void
    */
   public function  __destruct(){
-    $this->driver()->close();
+    try{
+      $this->driver->close();
+    } catch(NotImplementedException $e){}
   }
 
 
   /**
    * Creates and uses a new connection to a server.
    *
-   * Options for connecting are different for each driver - see an API for your driver.
-   * @param array|string|Traversable $opts Driver-specific connect options (array, parsable string or traversable object)
-   * @return bool
+   * Configuration is different for each driver - see the API for your driver.
+   * @param array|string|Traversable $config Driver-specific configuration (array, parsable string or traversable object)
+   * @return Neevo fluent interface
    */
-  public function connect($opts){
-    $connection = $this->createConnection($opts);
+  public function connect($config){
+    $connection = $this->createConnection($config);
     $this->setConnection($connection);
-    return (bool) $connection;
+    return $this;
   }
 
 
@@ -109,23 +130,17 @@ class Neevo{
    * Creates new NeevoConnection instance
    *
    * Options for connecting are different for each driver - see an API for your driver.
-   * @param array|string|Traversable $opts Driver-specific connect options (array, parsable string or traversable object)
+   * @param array|string|Traversable $config Driver-specific configuration (array, parsable string or traversable object)
    * @return NeevoConnection
    * @internal
    */
-  public function createConnection($opts){
-    return new NeevoConnection($this, $this->driver(), $opts);
-  }
-
-
-  /**
-   * Uses given NeevoConnection instance
-   * @param NeevoConnection $connection
-   * @return Neevo
-   */
-  public function useConnection(NeevoConnection $connection){
-    $this->setConnection($connection);
-    return $this;
+  public function createConnection($config){
+    try{
+      return new NeevoConnection($this->driver, $config);
+    }
+    catch(NotImplementedException $e){
+      throw new NeevoException("Cannot connect: Used driver is not matching criteria.");
+    }
   }
 
 
@@ -196,32 +211,9 @@ class Neevo{
    * @internal
    */
   private function setCache($cache = null){
-    // FALSE passed = disable autocache.
-    if($cache === false)
+    // Disable cache.
+    if($cache === false | $cache === null)
       return;
-
-    // Try to create cache automatically
-    elseif($cache === null){
-      // Session cache
-      if(session_id() !== ''){
-        $this->cache = new NeevoCacheSession;
-      }
-
-      // APC cache
-      elseif(function_exists('apc_store') && function_exists('apc_fetch')){
-        $this->cache = new NeevoCacheAPC;
-      }
-
-      /* Memcache cache
-      elseif(class_exists('Memcache')){
-        $this->cache = new NeevoCacheMemcache(new Memcache);
-      }*/
-
-      // File cache
-      else{
-        $this->cache = new NeevoCacheFile('neevo.cache');
-      }
-    }
 
     // INeevoCache object passed
     elseif(is_object($cache) && in_array("INeevoCache", class_implements($cache, false)))
@@ -307,32 +299,26 @@ class Neevo{
 
 
   /**
-   * Creates SELECT query.
-   * @param string|array $columns Columns to select (array or comma-separated list)
-   * @param string $table Table name. Can be set by calling NeevoQuery->from()
+   * Creates SELECT query
+   * @param string|array $cols Columns to select (array or comma-separated list)
+   * @param string $table Table name
    * @return NeevoQuery fluent interface
    */
-  public function select($columns = '*', $table = null){
+  public function select($columns = '*', $table){
     $q = new NeevoQuery($this);
-    $q->select($columns);
-    if(isset($table))
-      $q->from($table);
-    return $q;
+    return $q->select($columns, $table);
   }
 
 
   /**
-   * Creates INSERT query.
+   * Creates INSERT query
    * @param string $table Table name
-   * @param array $values Values to insert. Can be set by calling NeevoQuery->values()
+   * @param array $values Values to insert
    * @return NeevoQuery fluent interface
    */
-  public function insert($table, array $values = null){
+  public function insert($table, array $values){
     $q = new NeevoQuery($this);
-    $q->insert($table);
-    if(isset($values))
-      $q->values($values);
-    return $q;
+    return $q->insert($table, $values);
   }
 
 
@@ -340,39 +326,36 @@ class Neevo{
    * Alias for Neevo::insert().
    * @return NeevoQuery fluent interface
    */
-  public function insertInto($table, array $values = null){
+  public function insertInto($table, array $values){
     return $this->insert($table, $values);
   }
 
 
   /**
-   * Creates UPDATE query.
-   * @param string $table Table name.
-   * @param array $data Data to update. Can be set by calling NeevoQuery->set()
+   * Creates UPDATE query
+   * @param string $table Table name
+   * @param array $data Data to update
    * @return NeevoQuery fluent interface
    */
-  public function update($table, array $data = null){
+  public function update($table, array $data){
     $q = new NeevoQuery($this);
-    $q->update($table);
-    if(isset($data))
-      $q->set($data);
-    return $q;
+    return $q->update($table, $data);
   }
 
 
   /**
-   * Creates DELETE query.
-   * @param string $table Table name. Can be set by calling NeevoQuery->from()
+   * Creates DELETE query
+   * @param string $table Table name
    * @return NeevoQuery fluent interface
    */
-  public function delete($table = null){
+  public function delete($table){
     $q = new NeevoQuery($this);
     return $q->delete($table);
   }
 
 
   /**
-   * Creates query with direct SQL.
+   * Creates query with direct SQL
    * @param string $sql SQL code
    * @return NeevoQuery fluent interface
    */
@@ -387,23 +370,24 @@ class Neevo{
    * @return int
    */
   public function errorReporting(){
-    if(!isset($this->error_reporting)) $this->error_reporting = self::E_HANDLE;
+    if(!isset($this->error_reporting)) $this->error_reporting = self::E_STRICT;
     return $this->error_reporting;
   }
 
 
   /**
    * Sets error-reporting level
-   * @param int $value Error-reporting level.
+   *
    * Possible values:
-   * <ul><li>Neevo::E_NONE: Turns Neevo error-reporting off</li>
-   * <li>Neevo::E_HANDLE: Neevo exceptions are sent to defined handler</li>
-   * <li>Neevo::E_STRICT: Throws all Neevo exceptions</li></ul>
+   * - Neevo::E_NONE: Turns Neevo error-reporting off
+   * - Neevo::E_HANDLE: Neevo exceptions are sent to defined handler
+   * - Neevo::E_STRICT: Throws all Neevo exceptions (default)
+   * @param int $value Error-reporting level.
    * @return void
    */
   public function setErrorReporting($value){
     $this->error_reporting = $value;
-    if(!isset($this->error_reporting)) $this->error_reporting = self::E_HANDLE;
+    if(!isset($this->error_reporting)) $this->error_reporting = self::E_STRICT;
   }
 
 
@@ -422,12 +406,12 @@ class Neevo{
 
   /**
    * Sets error-handler function
-   * @param string $handler_function Name of error-handler function
+   * @param callback $callback Name of error-handler function
    * @return void
    */
-  public function setErrorHandler($handler_function){
-    if(function_exists($handler_function))
-      $this->error_handler = $handler_function;
+  public function setErrorHandler($callback){
+    if(function_exists($callback))
+      $this->error_handler = $callback;
     else $this->error_handler = array('Neevo', 'defaultErrorHandler');
   }
 
@@ -443,7 +427,12 @@ class Neevo{
     $level = $this->errorReporting();
 
     if($level !== Neevo::E_NONE){
-      $err = $this->driver()->error($neevo_msg);
+      try{
+        $err = $this->driver->error($neevo_msg);
+      }
+      catch(NotImplementedException $e){
+        $err = $neevo_msg;
+      }
       $exception = new NeevoException($err[0], $err[1]);
 
       if($level === Neevo::E_STRICT)
@@ -527,7 +516,8 @@ class Neevo{
  */
 class NeevoException extends Exception{};
 
-class NotImplementedException extends Exception{};
+/** @package internal */
+class NotImplementedException extends NeevoException{};
 
 
 /**
@@ -536,15 +526,16 @@ class NotImplementedException extends Exception{};
  */
 class NeevoLiteral {
 
-	private $value;
+  /** @var string */
+  private $value;
 
-	/**
+  /**
    * Creates literal value.
    * @param string $value
    */
-	public function __construct($value) {
-		$this->value = $value;
-	}
+  public function __construct($value) {
+    $this->value = $value;
+  }
 
 
   /**
@@ -554,13 +545,5 @@ class NeevoLiteral {
   public function __get($name){
     return $this->value;
   }
-
-
-  /**
-   * Literal value
-   * @return string
-   */
-  public function __toString(){
-    return $this->value;
-  }
+  
 }

@@ -20,8 +20,50 @@
  */
 class NeevoQuery {
 
-  private  $table, $type, $limit, $offset, $neevo, $resultSet, $time, $sql, $performed, $numRows, $affectedRows;
-  private  $where = array(), $order = array(), $columns = array(), $data = array();
+  /** @var string */
+  private $table;
+
+  /** @var string */
+  private $type;
+
+  /** @var int */
+  private $limit;
+  
+  /** @var int */
+  private $offset;
+  
+  /** @var Neevo */
+  private $neevo;
+
+  /** @var mixed */
+  private $resultSet;
+  
+  /** @var int */
+  private $time;
+
+  /** @var string */
+  private $sql;
+  
+  /** @var bool */
+  private $performed;
+
+  /** @var int */
+  private $numRows;
+  
+  /** @var int */
+  private $affectedRows;
+
+  /** @var array */
+  private  $where = array();
+  
+  /** @var array */
+  private $order = array();
+  
+  /** @var array */
+  private $columns = array();
+
+  /** @var array */
+  private $data = array();
 
 
   /**
@@ -42,93 +84,76 @@ class NeevoQuery {
 
 
   /**
-   * Creates SELECT query.
+   * Creates SELECT query
    * @param string|array $cols Columns to select (array or comma-separated list)
+   * @param string $table Table name
    * @return NeevoQuery fluent interface
    */
-  public function select($cols = '*'){
+  public function select($cols = '*', $table){
     $this->setType('select');
     $this->columns = is_string($cols) ? explode(',', $cols) : $cols;
-    return $this;
-  }
-
-
-  /**
-   * Sets table for SELECT and DELETE queries.
-   * @param string $table
-   * @return NeevoQuery fluent interface
-   */
-  public function from($table){
     $this->setTable($table);
     return $this;
   }
 
 
   /**
-   * Creates UPDATE query.
+   * Creates UPDATE query
    * @param string $table Table name
+   * @param array $data Data to update
    * @return NeevoQuery fluent interface
    */
-  public function update($table){
+  public function update($table, array $data){
     $this->setType('update');
     $this->setTable($table);
-    return $this;
-  }
-
-
-  /**
-   * Sets data for UPDATE query.
-   * @param array $data Data to update.
-   * @return NeevoQuery
-   */
-  public function set(array $data){
     $this->data = $data;
     return $this;
   }
 
 
   /**
-   * Creates INSERT query.
+   * Creates INSERT query
+   * @param string $table Table name
+   * @param array $values Values to insert
+   * @return NeevoQuery fluent interface
+   */
+  public function insert($table, array $values){
+    $this->setType('insert');
+    $this->setTable($table);
+    $this->data = $values;
+    return $this;
+  }
+
+
+  /**
+   * Alias for NeevoQuery::insert()
+   * @return NeevoQuery fluent interface
+   */
+  public function insertInto($table, array $values){
+    return $this->insert($table, $values);
+  }
+
+
+  /**
+   * Creates DELETE query
    * @param string $table Table name
    * @return NeevoQuery fluent interface
    */
-  public function insert($table){
-    $this->setType('insert');
+  public function delete($table){
+    $this->setType('delete');
     $this->setTable($table);
     return $this;
   }
 
 
   /**
-   * Alias for NeevoQuery::insert().
+   * Creates query with direct SQL
+   * @param string $sql SQL code
    * @return NeevoQuery fluent interface
    */
-  public function insertInto($table){
-    return $this->insert($table);
-  }
-
-
-  /**
-   * Sets values for INSERT query.
-   * @param array $data Values to insert.
-   * @param array $data Values to insert.
-   * @return NeevoQuery fluent interface
-   */
-  public function values(array $data){
-    $this->data = $data;
-    return $this;
-  }
-
-
-  /**
-   * Creates DELETE query.
-   * @param string $table Table name. Optional, can be set by from() method.
-   * @return NeevoQuery fluent interface
-   */
-  public function delete($table = null){
-    $this->setType('delete');
-    if(isset($table))
-      $this->setTable($table);
+  public function sql($sql){
+    $this->sql = $sql;
+    $this->setType('sql');
     return $this;
   }
 
@@ -137,10 +162,9 @@ class NeevoQuery {
    * Sets WHERE condition. More calls appends conditions.
    * @param string $where Column to use and optionaly operator: "email", "email LIKE", "email !=", etc.
    * @param string|array $value Value to search for: "string", "%patten%", array, boolean or NULL.
-   * @param string $glue Glue (AND/OR) to use betweet this and next WHERE condition.
    * @return NeevoQuery fluent interface
    */
-  public function where($condition, $value = true, $glue = 'AND'){
+  public function where($condition, $value = true){
     $condition = trim($condition);
     $column = strstr($condition, ' ') ? substr($condition, 0, strpos($condition, ' ')) : $condition;
     $operator = strstr($condition, ' ') ? substr($condition, strpos($condition, ' ')+1) : null;
@@ -162,7 +186,22 @@ class NeevoQuery {
 
     if(!isset($operator)) $operator = '=';
 
-    $this->where[] = array($column, $operator, $value, strtoupper($glue));
+    $this->where[] = array($column, $operator, $value, 'AND');
+    return $this;
+  }
+
+
+  /**
+   * Sets AND/OR glue for WHERE conditions
+   *
+   * Use as regular method: $query->where('id', 5)->or()->where()...
+   * @return NeevoQuery
+   */
+  public function  __call($name, $arguments){
+    if(in_array(strtolower($name), array('and', 'or'))){
+      $this->where[max(array_keys($this->where))][3] = strtoupper($name);
+      return $this;
+    }
     return $this;
   }
 
@@ -206,19 +245,12 @@ class NeevoQuery {
    * @return NeevoQuery fluent interface
    */
   public function rand(){
-    $this->neevo()->driver()->rand($this);
-    return $this;
-  }
-
-
-  /**
-   * Creates query with direct SQL.
-   * @param string $sql SQL code
-   * @return NeevoQuery fluent interface
-   */
-  public function sql($sql){
-    $this->sql = $sql;
-    $this->setType('sql');
+    try{
+      $this->neevo->driver()->rand($this);
+    }
+    catch(NotImplementedException $e){
+      return $this;
+    }
     return $this;
   }
 
@@ -241,15 +273,21 @@ class NeevoQuery {
    */
   public function run(){
     $start = explode(' ', microtime());
-    $query = $this->neevo()->driver()->query($this->build());
-
-    if(!$query){
-      $this->neevo()->error('Query failed');
+    try{
+      $query = $this->neevo->driver()->query($this->build());
+    }
+    catch(NotImplementedException $e){
+      $query = null;
       return false;
     }
 
-    $this->neevo()->incrementQueries();
-    $this->neevo()->setLast($this);
+    if(!$query){
+      $this->neevo->error('Query failed');
+      return false;
+    }
+
+    $this->neevo->incrementQueries();
+    $this->neevo->setLast($this);
 
     $end = explode(" ", microtime());
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
@@ -257,8 +295,19 @@ class NeevoQuery {
 
     $this->performed = true;
     $this->resultSet = $query;
-    $this->numRows = $this->neevo()->driver()->rows($query);
-    $this->affectedRows = $this->neevo()->driver()->affectedRows();
+
+    try{
+      $this->numRows = $this->neevo->driver()->rows($query);
+    }
+    catch(NotImplementedException $e){
+      $this->numRows = 0;
+    }
+    try{
+      $this->affectedRows = $this->neevo->driver()->affectedRows();
+    }
+    catch(NotImplementedException $e){
+      $this->affectedRows = 0;
+    }
 
     return $query;
   }
@@ -275,10 +324,20 @@ class NeevoQuery {
     $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
 
     if(!$resultSet) // Error
-      return $this->neevo()->error('Fetching result data failed');
+      return $this->neevo->error('Fetching result data failed');
 
-    while($row = $this->neevo()->driver()->fetch($resultSet))
-      $rows[] = $row;
+    try{
+      $rows = $this->neevo->driver()->fetchAll($resultSet);
+    }
+    catch(NotImplementedException $e){
+      try{
+        while($row = $this->neevo->driver()->fetch($resultSet))
+          $rows[] = $row;
+      }
+      catch(NotImplementedException $e){
+        return false;
+      }
+    }
 
     $this->free();
 
@@ -315,9 +374,15 @@ class NeevoQuery {
   public function fetchRow($array = false){
     $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
     if(!$resultSet) // Error
-      return $this->neevo()->error('Fetching result data failed');
+      return $this->neevo->error('Fetching result data failed');
 
-    $result = $this->neevo()->driver()->fetch($resultSet);
+    try{
+      $result = $this->neevo->driver()->fetch($resultSet);
+    }
+    catch(NotImplementedException $e){
+      return false;
+    }
+    
     $this->free();
     if($result === false)
       return false;
@@ -335,7 +400,7 @@ class NeevoQuery {
       return false;
     if($result->isSingle())
       return $result->getSingle();
-    else $this->neevo()->error('More than one columns in the row, cannot fetch single');
+    else $this->neevo->error('More than one columns in the row, cannot fetch single');
   }
 
 
@@ -404,7 +469,9 @@ class NeevoQuery {
    * Free result set resource.
    */
   private function free(){
-    $this->neevo()->driver()->free($this->resultSet);
+    try{
+      $this->neevo->driver()->free($this->resultSet);
+    }  catch(NotImplementedException $e){}
     $this->resultSet = null;
   }
 
@@ -417,8 +484,13 @@ class NeevoQuery {
   public function seek($row_number){
     if(!$this->isPerformed()) $this->run();
 
-    $seek = $this->neevo()->driver()->seek($this->resultSet(), $row_number);
-    return $seek ? $seek : $this->neevo()->error("Cannot seek to row $row_number");
+    try{
+      $seek = $this->neevo->driver()->seek($this->resultSet(), $row_number);
+    }
+    catch(NotImplementedException $e){
+      $seek = false;
+    }
+    return $seek ? $seek : $this->neevo->error("Cannot seek to row $row_number");
   }
 
 
@@ -429,7 +501,12 @@ class NeevoQuery {
   public function insertId(){
     if(!$this->isPerformed()) $this->run();
 
-    return $this->neevo()->driver()->insertId();
+    try{
+      return $this->neevo->driver()->insertId();
+    }
+    catch(NotImplementedException $e){
+      return 0;
+    }
   }
 
 
@@ -460,7 +537,12 @@ class NeevoQuery {
    */
   public function build(){
 
-    return $this->neevo()->driver()->build($this);
+    try{
+      return $this->neevo->driver()->build($this);
+    }
+    catch(NotImplementedException $e){
+      return '';
+    }
 
   }
 
@@ -480,7 +562,7 @@ class NeevoQuery {
     );
 
     if($exclude_connection == true)
-      $this->neevo()->connection()->info($hide_password);
+      $this->neevo->connection()->info($hide_password);
 
     if($this->isPerformed()){
       $info['time'] = $this->time();
@@ -552,7 +634,7 @@ class NeevoQuery {
    */
   public function getTable(){
     $table = $this->table;
-    $prefix = $this->neevo()->connection()->prefix();
+    $prefix = $this->neevo->connection()->prefix();
     if(preg_match('#([^.]+)(\.)([^.]+)#', $table))
       return str_replace('.', ".$prefix", $table);
     return $prefix.$table;
@@ -632,11 +714,11 @@ class NeevoQuery {
   public function getPrimary(){
     $return = null;
     $table = preg_replace('#[^0-9a-z_.]#i', '', $this->getTable());
-    $cached_primary = $this->neevo()->cacheLoad($table.'_primaryKey');
+    $cached_primary = $this->neevo->cacheLoad($table.'_primaryKey');
 
     if(is_null($cached_primary)){
       $return = $this->neevo->driver()->getPrimaryKey($table);
-      $this->neevo()->cacheSave($table.'_primaryKey', $return);
+      $this->neevo->cacheSave($table.'_primaryKey', $return);
       return $return;
     }
     return $cached_primary;

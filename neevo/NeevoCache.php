@@ -67,7 +67,11 @@ class NeevoCacheSession implements INeevoCache {
  */
 class NeevoCacheFile implements INeevoCache {
 
-  private $filename, $data = array();
+  /** @var string */
+  private $filename;
+
+  /** @var array */
+  private $data = array();
 
   public function __construct($filename){
     $this->filename = $filename;
@@ -96,6 +100,7 @@ class NeevoCacheFile implements INeevoCache {
  */
 /*class NeevoCacheMemcache implements INeevoCache {
 
+  /** @var Memcache *//*
   private $memcache;
 
   public function __construct(Memcache $memcache){

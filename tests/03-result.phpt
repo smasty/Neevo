@@ -3,8 +3,8 @@ Result manipulating
 --CODE
 <?php
 
-$author = db()->select('id')->from('author')->where('name', 'Martin Srank')->fetchSingle();
-$result = db()->select('*')->from('software')->where('aid', $author)->orderBy('id ASC')->fetch();
+$author = db()->select('id', 'author')->where('name', 'Martin Srank')->fetchSingle();
+$result = db()->select('*', 'software')->where('aid', $author)->orderBy('id ASC')->fetch();
 
 $row = $result[0];
 $row->slogan = 'Tiny database abstraction layer '.rand(0, 999);
@@ -16,8 +16,7 @@ echo "Selected ".count($result)." rows.\n";
 if(in_array(driver(), array('mysql', 'mysqli'))){
   $affected = $row->update();
 
-  $current = db()->select('slogan')
-                 ->from('software')
+  $current = db()->select('slogan', 'software')
                  ->where('slogan LIKE', 'Tiny database abstraction layer%')
                  ->rows();
 

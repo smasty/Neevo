@@ -20,35 +20,38 @@
  * @package Neevo
  */
 class NeevoConnection{
+  
+  /** @var INeevoDriver */
+  private $driver;
 
-  private $neevo, $driver, $options;
+  /** @var array */
+  private $config;
 
 
-  public function __construct(Neevo $neevo, INeevoDriver $driver, $options){
-    $this->neevo = $neevo;
+  public function __construct(INeevoDriver $driver, $config){
     $this->driver = $driver;
 
-    if(is_string($options))
-      parse_str($options, $options);
-    elseif($options instanceof Traversable){
+    if(is_string($config))
+      parse_str($config, $config);
+    elseif($config instanceof Traversable){
       $tmp = array();
-      foreach($options as $key=>$val)
+      foreach($config as $key=>$val)
         $tmp[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
-      $options = $tmp;
+      $config = $tmp;
     }
-    elseif(!is_array($options))
+    elseif(!is_array($config))
       throw new InvalidArgumentException('Options must be array, string or object.');
 
-    self::alias($options, 'username', 'user');
-    self::alias($options, 'password', 'pass');
-    self::alias($options, 'password', 'pswd');
-    self::alias($options, 'host', 'hostname');
-    self::alias($options, 'database', 'db');
-    self::alias($options, 'database', 'dbname');
+    self::alias($config, 'username', 'user');
+    self::alias($config, 'password', 'pass');
+    self::alias($config, 'password', 'pswd');
+    self::alias($config, 'host', 'hostname');
+    self::alias($config, 'database', 'db');
+    self::alias($config, 'database', 'dbname');
 
-    $this->options = $options;
+    $this->config = $config;
     
-    $this->driver()->connect($this->options);
+    $this->driver()->connect($this->config);
   }
 
 
@@ -66,12 +69,12 @@ class NeevoConnection{
    * @return array
    */
   public function getVars(){
-    return $this->options;
+    return $this->config;
   }
 
 
   public function prefix(){
-    return isset($this->options['table_prefix']) ? $this->options['table_prefix'] : '';
+    return isset($this->config['table_prefix']) ? $this->config['table_prefix'] : '';
   }
 
 

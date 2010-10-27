@@ -15,7 +15,7 @@ $mysql->setErrorReporting(Neevo::E_STRICT);
 
 // SQLite
 $sqlite = new Neevo('SQLite', false);
-$sqlite->connect(array('file' => 'neevo.sqlite'));
+$sqlite->connect(array('file' => 'tests/neevo.sqlite'));
 $sqlite->setErrorReporting(Neevo::E_STRICT);
 
 

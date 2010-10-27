@@ -20,7 +20,10 @@
  */
 class NeevoResult implements ArrayAccess, Countable, IteratorAggregate {
 
+  /** @var array */
   private $data = array();
+
+  /**  @var NeevoQuery */
   private $query;
 
 
@@ -28,15 +31,6 @@ class NeevoResult implements ArrayAccess, Countable, IteratorAggregate {
     $this->query = $query;
     foreach($data as $key => $value)
       is_array($value) ? $this->data[$key] = new NeevoRow($value, $this->query()) : $this->data[$key] = $value;
-  }
-  
-  
-  /**
-   * NeevoQuery instance which created this result
-   * @return NeevoQuery
-   */
-  public function query(){
-    return $this->query;
   }
 
 
@@ -112,50 +106,9 @@ class NeevoResult implements ArrayAccess, Countable, IteratorAggregate {
     return new ArrayIterator($this->data);
   }
 
-
-  /**
-   * Dumps result
-   * @param bool $return_string Return or output?
-   * @return string
-   */
-  public function dump($return_dump = false){
-    $return = '';
-    if(!empty($this->data)){
-      $count = count($this->data);
-      foreach($this->data as $key => $value){
-        $return .= '  '.$key.' => ';
-        $len = strlen($value);
-
-        if(is_bool($value))
-          $return .= $value ? "(bool) <strong>TRUE</strong>" : "(bool) <strong>FALSE</strong>";
-
-        elseif(is_int($value))
-          $return .= "(int:$len) <strong>$value</strong>";
-
-        elseif(is_float($value))
-          $return .= "(float:$len) <strong>$value</strong>";
-
-        elseif(is_numeric($value))
-          $return .= "(int:$len) <strong>$value</strong>";
-
-        elseif(is_string($value))
-          $return .= "(string:$len) \"<strong>$value</strong>\"";
-
-        elseif(is_object($value))
-          $return .= str_replace(array("\n", '<pre class="dump">', '</pre>'), "\n    ", $value->dump(true));
-
-        else $return .= "(unknown type) \"<strong>".(string) $value."</strong>\"";
-
-        $return .= "\n";
-      }
-      $return = "<pre class=\"dump\">\n<strong>NeevoResult</strong> ($count) {\n$return}</pre>";
-    }
-    else $return = '<pre class="dump">\n<strong>NeevoResult</strong> (empty)</pre>';
-
-    if($return_dump) return $return;
-    echo $return;
-  }
 }
+
+
 
 /**
  * Class representing a row in result.
@@ -163,7 +116,17 @@ class NeevoResult implements ArrayAccess, Countable, IteratorAggregate {
  */
 class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializable {
 
-  private $data = array(), $modified = array(), $query, $single = false;
+  /** @var array */
+  private $data = array();
+  
+  /** @var array */
+  private $modified = array();
+  
+  /** @var NeevoQuery */
+  private $query;
+
+  /** @var bool */
+  private $single = false;
 
 
   public function __construct($data, NeevoQuery $query){
@@ -237,15 +200,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
 
 
   /**
-   * NeevoQuery instance which created this result
-   * @return NeevoQuery
-   */
-  public function query(){
-    return $this->query;
-  }
-
-
-  /**
    * **Experimental** Update row data
    *
    * After changing values in the NeevoRow instance, sends update query to server.
@@ -253,16 +207,16 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
    */
   public function update(){
     if(!empty($this->modified) && $this->modified !== $this->data){
-      $q = $this->query();
+      $q = $this->query;
       try{
         $primary = $q->getPrimary();
       } catch(NotImplementedException $e){
-        return $this->query()->neevo()->error('Functionality not implemented in this driver.');
+        return $this->query->neevo()->error('Functionality not implemented in this driver.');
       }
       if(!$this->data[$primary])
-        return $this->query()->neevo()->error('Cannot get primary_key value');
+        return $this->query->neevo()->error('Cannot get primary_key value');
 
-      return $q->neevo()->update($q->getTable())->set($this->modified)->where($primary, $this->data[$primary])->limit(1)->affectedRows();
+      return $q->neevo()->update($q->getTable(), $this->modified)->where($primary, $this->data[$primary])->limit(1)->affectedRows();
     }
   }
 
@@ -272,15 +226,15 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
    * @return int Number of affected rows
    */
   public function delete(){
-    $q = $this->query();
+    $q = $this->query;
     try{
       $primary = $q->getPrimary();
     } catch(NotImplementedException $e){
-      return $this->query()->neevo()->error('Functionality not implemented in this driver.');
+      return $this->query->neevo()->error('Functionality not implemented in this driver.');
     }
 
     if($primary === null)
-      return $this->query()->neevo()->error('Cannot get primary_key value');
+      return $this->query->neevo()->error('Cannot get primary_key value');
 
     return $q->neevo()->delete($q->getTable())->where($primary, $this->data[$primary])->limit(1)->affectedRows();
   }
@@ -340,53 +294,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
   /** @internal */
   public function unserialize($serialized){
     $this->data = unserialize($serialized);
-  }
-
-
-  /**
-   * Dumps row
-   * @param bool $return_dump Return or output?
-   * @return string
-   */
-  public function dump($return_dump = false){
-    $return = '';
-    if($this->single)
-      $return = "(NeevoRow-single:".strlen($this->data).") \"<strong>$this->data</strong>\"";
-    
-    else{
-      if(!empty($this->data)){
-        $count = count($this->data);
-        foreach($this->data as $key => $value){
-          $return .= "  [$key] => ";
-          $len = strlen($value);
-          $value = htmlspecialchars($value);
-
-          if(is_bool($value))
-            $return .= $value ? "(bool) <strong>TRUE</strong>" : "(bool) <strong>FALSE</strong>";
-
-          elseif(is_int($value))
-            $return .= "(int:$len) <strong>$value</strong>";
-
-          elseif(is_float($value))
-            $return .= "(float:$len) <strong>$value</strong>";
-
-          elseif(is_numeric($value))
-            $return .= "(num:$len) <strong>$value</strong>";
-
-          elseif(is_string($value))
-            $return .= "(string:$len) \"<strong>$value</strong>\"";
-
-          else $return .= "(unknown type) \"<strong>".(string) $value."</strong>\"";
-
-          $return .= "\n";
-        }
-        $return = "<pre class=\"dump\">\n<strong>NeevoRow</strong> ($count) {\n$return}</pre>";
-      }
-      else $return = '<pre class="dump">\n<strong>NeevoRow</strong> (empty)</pre>';
-    }
-
-    if($return_dump) return $return;
-    echo $return;
   }
 
 }

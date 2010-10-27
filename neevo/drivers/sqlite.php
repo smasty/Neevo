@@ -21,13 +21,27 @@
  * - database (or file, db, dbname) => database to select
  * - charset => Character encoding to set (defaults to utf-8)
  * - dbcharset => Database character encoding (will be converted to 'charset')
+ * - resource (instance of SQLiteDatabase) => Existing SQLite resource
  * 
  * @author Martin Srank
  * @package NeevoDrivers
  */
 class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
-  private $neevo, $resource, $last_error, $dbCharset, $charset;
+  /** @var Neevo */
+  private $neevo;
+  
+  /** @var string */
+  private $last_error;
+
+  /** @var string */
+  private $dbCharset;
+
+  /** @var string */
+  private $charset;
+
+  /** @var SQLiteDatabase */
+  private $resource;
 
 
   /**
@@ -44,21 +58,28 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Creates connection to database
-   * @param array $opts Array of connection options
+   * @param array $config Configuration options
    * @return void
    */
-  public function connect(array $opts){
-    NeevoConnection::alias($opts, 'database', 'file');
+  public function connect(array $config){
+    NeevoConnection::alias($config, 'database', 'file');
+
+    if(!isset($config['resource'])) $config['resource'] = null;
 
     // Connect
-    $connection = sqlite_open($opts['database'], 0666, $error);
-    if(!is_resource($connection))
-      $this->neevo()->error("Connection to database '".$opts['database']." failed");
+    if(!($config['resource'] instanceof SQLiteDatabase))
+      $connection = new SQLiteDatabase($config['database'], 0666, $error);
+    else
+      $connection = $config['resource'];
+
+    if(!($connection instanceof SQLiteDatabase))
+      $this->neevo->error("Opening database file '".$config['database']." failed");
+    
     $this->resource = $connection;
 
     // Set charset
-    $this->dbCharset = empty($opts['dbcharset']) ? 'UTF-8' : $opts['dbcharset'];
-    $this->charset = empty($opts['charset']) ? 'UTF-8' : $opts['charset'];
+    $this->dbCharset = empty($config['dbcharset']) ? 'UTF-8' : $config['dbcharset'];
+    $this->charset = empty($config['charset']) ? 'UTF-8' : $config['charset'];
     if(strcasecmp($this->dbCharset, $this->charset) === 0)
       $this->dbCharset = $this->charset = null;
   }
@@ -68,14 +89,12 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * Closes connection
    * @return void
    */
-  public function close(){
-    @sqlite_close($this->resource);
-  }
+  public function close(){}
 
 
   /**
    * Frees memory used by result
-   * @param resource $resultSet
+   * @param SQLiteResult $resultSet
    * @return bool
    */
   public function free($resultSet){
@@ -86,7 +105,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
   /**
    * Executes given SQL query
    * @param string $query_string Query-string.
-   * @return resource|bool
+   * @return SQLiteResult|bool
    */
   public function query($query_string){
 
@@ -94,7 +113,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
       $query_string = iconv($this->charset, $this->dbCharset . '//IGNORE', $query_string);
 
     $this->last_error = '';
-    $q = sqlite_query($this->resource, $query_string, null, $error);
+    $q = $this->resource->query($query_string, null, $error);
     $this->last_error = $error;
     return $q;
   }
@@ -106,20 +125,21 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * @return array Format: array($error_message, $error_number)
    */
   public function error($neevo_msg){
-    $no = sqlite_last_error($this->resource);
+    $no = $this->resource->lastError();
     $msg = $neevo_msg. '. ' . ucfirst($this->last_error);
     return array($msg, $no);
   }
 
 
   /**
-   * Fetches row from given Query resource as associative array.
-   * @param resource $resultSet Query resource
+   * Fetches row from given Query result set as associative array.
+   * @param SQLiteResult $resultSet Result set
    * @return array
    */
   public function fetch($resultSet){
-    $row = @sqlite_fetch_array($resultSet, SQLITE_ASSOC);
+    $row = $resultSet->fetch(SQLITE_ASSOC);
     $charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
+
     if($row && $charset){
       $fields = array();
       foreach($row as $key=>$val){
@@ -134,13 +154,40 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
 
   /**
+   * Fetches all rows from given result set as associative arrays.
+   * @param SQLiteResult $resultSet Result set
+   * @return array
+   */
+  public function fetchAll($resultSet){
+    $result = $resultSet->fetchAll(SQLITE_ASSOC);
+    $charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
+    
+    if($result && $charset){
+      $rows = array();
+      foreach($result as $row){
+        $fields = array();
+        foreach($row as $key=>$val){
+          if($charset !== null && is_string($val))
+            $val = iconv($this->dbcharset, $charset, $val);
+          $fields[str_replace(array('[', ']'), '', $key)] = $val;
+        }
+        $rows[] = $fileds;
+        unset($fields);
+      }
+      return $rows;
+    }
+    return $result;
+  }
+
+
+  /**
    * Move internal result pointer
-   * @param resource $resultSet Query resource
+   * @param SQLiteResult $resultSet Query resource
    * @param int $row_number Row number of the new result pointer.
    * @return bool
    */
   public function seek($resultSet, $row_number){
-    return @sqlite_seek($resultSet, $row_number);
+    return $resultSet->seek($row_number);
   }
 
 
@@ -149,7 +196,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * @return int
    */
   public function insertId(){
-    return @sqlite_last_insert_rowid($this->resource);
+    return $this->resource->lastInsertRowid();
   }
 
 
@@ -165,11 +212,11 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Number of rows in result set.
-   * @param resource $resultSet
+   * @param SQLiteResult $resultSet
    * @return int|FALSE
    */
   public function rows($resultSet){
-    return @sqlite_num_rows($resultSet);
+    return $resultSet->numRows();
   }
 
 
@@ -178,19 +225,18 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
    * @return int
    */
   public function affectedRows(){
-    return @sqlite_changes($this->resource);
+    return $this->resource->changes();
   }
 
 
   /**
    * Name of PRIMARY KEY column for table
    * @param string $table
-   * @return null
+   * @return void
    * @throws NotImplementedException
    */
   public function getPrimaryKey($table){
     throw new NotImplementedException();
-    return null;
   }
 
 
@@ -264,18 +310,9 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
         return ($value instanceof DateTime) ? $value->format("'Y-m-d'") : date("'Y-m-d'", $value);
         
       default:
-        $this->neevo()->error('Unsupported data type');
+        $this->neevo->error('Unsupported data type');
         break;
     }
-  }
-
-
-  /**
-   * Return Neevo class instance
-   * @return Neevo
-   */
-  public function neevo(){
-    return $this->neevo;
   }
 
 }
