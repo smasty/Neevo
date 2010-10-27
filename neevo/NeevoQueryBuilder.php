@@ -40,8 +40,8 @@ class NeevoQueryBuilder{
       // col = false
       elseif($cond[2] === false){
         $x = $cond[0];
-        $cond[0] = 'NOT';
         $cond[1] = $cond[0];
+        $cond[0] = 'NOT';
         unset($cond[2]);
       }
       // col IN(...)
