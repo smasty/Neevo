@@ -516,9 +516,9 @@ class Neevo{
  */
 class NeevoException extends Exception{};
 
-/** @package internal */
-class NotImplementedException extends NeevoException{};
-
+if(!class_exists('NotImplementedException', false)){
+  class NotImplementedException extends Exception{};
+}
 
 /**
  * Class for object representing SQL literal value.

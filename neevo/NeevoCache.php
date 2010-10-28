@@ -75,7 +75,12 @@ class NeevoCacheFile implements INeevoCache {
 
   public function __construct($filename){
     $this->filename = $filename;
-    $this->data = unserialize(@file_get_contents($filename)); // @ - file can not exist
+    $this->data = unserialize(@file_get_contents($filename));
+  }
+
+
+  public function __destruct(){
+    @file_put_contents($this->filename, serialize($this->data), LOCK_EX);
   }
 
 
@@ -88,7 +93,6 @@ class NeevoCacheFile implements INeevoCache {
 
   public function save($key, $value){
     $this->data[$key] = $value;
-    file_put_contents($this->filename, serialize($this->data), LOCK_EX);
   }
 
 }
