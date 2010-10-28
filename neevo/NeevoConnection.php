@@ -8,9 +8,8 @@
  * with this package in the file license.txt.
  *
  * @author   Martin Srank (http://smasty.net)
- * @license  http://www.opensource.org/licenses/mit-license.php  MIT license
+ * @license  http://neevo.smasty.net/license  MIT license
  * @link     http://neevo.smasty.net/
- * @package  Neevo
  *
  */
 
@@ -46,8 +45,10 @@ class NeevoConnection{
     self::alias($config, 'password', 'pass');
     self::alias($config, 'password', 'pswd');
     self::alias($config, 'host', 'hostname');
+    self::alias($config, 'host', 'server');
     self::alias($config, 'database', 'db');
     self::alias($config, 'database', 'dbname');
+    self::alias($config, 'table_prefix', 'prefix');
 
     $this->config = $config;
     

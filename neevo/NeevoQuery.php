@@ -8,9 +8,8 @@
  * with this package in the file license.txt.
  *
  * @author   Martin Srank (http://smasty.net)
- * @license  http://www.opensource.org/licenses/mit-license.php  MIT license
- * @link     http://neevo.smasty.net
- * @package  Neevo
+ * @license  http://neevo.smasty.net/license  MIT license
+ * @link     http://neevo.smasty.net/
  *
  */
 

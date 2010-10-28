@@ -8,17 +8,17 @@
  * with this package in the file license.txt.
  *
  * @author   Martin Srank (http://smasty.net)
- * @license  http://www.opensource.org/licenses/mit-license.php  MIT license
- * @link     http://neevo.smasty.net
- * @package  Neevo
+ * @license  http://neevo.smasty.net/license  MIT license
+ * @link     http://neevo.smasty.net/
  *
  */
 
 /**
  * Neevo SQLite 3 driver (PHP extension 'sqlite')
  *
- * Driver connect options:
+ * Driver configuration:
  * - database (or file, db, dbname) => database to select
+ * - table_prefix (or prefix) => prefix for table names
  * - charset => Character encoding to set (defaults to utf-8)
  * - dbcharset => Database character encoding (will be converted to 'charset')
  * - resource (instance of SQLite3) => Existing SQLite 3 resource
@@ -30,9 +30,6 @@ class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
 
   /** @var Neevo */
   private $neevo;
-  
-  /** @var string */
-  private $last_error;
 
   /** @var string */
   private $dbCharset;

@@ -8,22 +8,22 @@
  * with this package in the file license.txt.
  *
  * @author   Martin Srank (http://smasty.net)
- * @license  http://www.opensource.org/licenses/mit-license.php  MIT license
- * @link     http://neevo.smasty.net
- * @package  Neevo
+ * @license  http://neevo.smasty.net/license  MIT license
+ * @link     http://neevo.smasty.net/
  *
  */
 
 /**
  * Neevo MySQLi driver (PHP extension 'mysqli')
  *
- * Driver connect options:
- * - host => MySQL server name or address
+ * Driver configuration:
+ * - host (or hostname, server) => MySQL server name or address
  * - port => MySQL server port
  * - socket
  * - username (or user)
  * - password (or pass, pswd)
  * - database (or db, dbname) => database to select
+ * - table_prefix (or prefix) => prefix for table names
  * - charset => Character encoding to set (defaults to utf8)
  * - resource (instance of mysqli) => Existing MySQLi connection
  *

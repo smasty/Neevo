@@ -36,7 +36,7 @@ if(isset($args['r']))
   out(revision($file));
 
 
-// Include only few drivers
+// Include only specified drivers
 if(isset($args['d'])){
   $drivers = explode(',', str_replace('=', '', $args['d'])); // PHP < 5.3 compatibility
 
@@ -132,7 +132,7 @@ function drivers_path(){
 
 function add_license($content){
   $license = file('license.txt');
-  $replace = " * @package  Neevo\n";
+  $replace = " * @link     http://neevo.smasty.net/\n";
   $license_text = $replace . " *\n * The MIT license:\n *\n";
   foreach($license as $l){
     $license_text .= ' * '. $l;
