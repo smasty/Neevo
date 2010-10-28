@@ -133,7 +133,7 @@ function drivers_path(){
 function add_license($content){
   $license = file('license.txt');
   $replace = " * @package  Neevo\n";
-  $license_text = $replace . " *\n * MIT License:\n *\n";
+  $license_text = $replace . " *\n * The MIT license:\n *\n";
   foreach($license as $l){
     $license_text .= ' * '. $l;
   }
