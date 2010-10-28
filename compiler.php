@@ -124,16 +124,27 @@ function drivers_path(){
 
   if(is_array($drivers)){
     sort($drivers);
-    return join('-', $drivers) . '.';
+    return '.' . join('-', $drivers);
   }
   return '';
 }
 
 
+function add_license($content){
+  $license = file('license.txt');
+  $replace = " * @package  Neevo\n";
+  $license_text = $replace . " *\n * MIT License:\n *\n";
+  foreach($license as $l){
+    $license_text .= ' * '. $l;
+  }
+  return str_replace($replace, "$license_text\n", $content);
+}
+
+
 function minify($file){
   $path = pathinfo($file);
-  // Create name for minified file
-  $result_file = $path['dirname']."/".$path['filename'].".min.".drivers_path().$path['extension'];
+  // Generate name for minified file
+  $result_file = $path['dirname'].'/'.$path['filename'].drivers_path().'.min.'.$path['extension'];
 
   // Create include statements for drivers
   $file = drivers($file);
@@ -143,15 +154,18 @@ function minify($file){
   $source = preg_replace_callback("~include '([^']+)';~", 'include_file', $source);
 
   // Remove all <?php tags
-  $source = str_replace(array("<?php", "?>"), "", $source);
+  $source = str_replace(array('<?php', '?>'), '', $source);
   $source = "<?php\n$source\n";
 
   // Minify file
   $result = php_shrink($source);
 
+  // Include license
+  $result = add_license($result);
+
   // Save to file
   return  file_put_contents($result_file, $result) ?
-    "Source minified" : "Error: Minification failed";
+    'Source minified' : 'Error: Minification failed';
 }
 
 
@@ -161,17 +175,6 @@ function include_file($match) {
   $token = end(token_get_all($file));
   $php = (is_array($token) && in_array($token[0], array(T_CLOSE_TAG, T_INLINE_HTML)));
   return "?>\n$file" . ($php ? "<?php" : "");
-}
-
-
-/**  @copyright Jakub Vrana, http://php.vrana.cz. Used with permission. */
-function short_identifier($number, $chars) {
-  $return = '';
-  while ($number >= 0) {
-    $return .= $chars{$number % strlen($chars)};
-    $number = floor($number / strlen($chars)) - 1;
-  }
-  return $return;
 }
 
 
