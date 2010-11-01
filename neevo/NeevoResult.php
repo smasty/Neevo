@@ -240,7 +240,7 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
    */
   public function limit($limit, $offset = null){
     $this->limit = $limit;
-    if(isset($offset) && $this->type() == 'select')
+    if(isset($offset) && $this->type == 'select')
       $this->offset = $offset;
     return $this;
   }

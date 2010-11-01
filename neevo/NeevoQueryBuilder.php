@@ -54,8 +54,8 @@ class NeevoQueryBuilder{
     if($query->getOrdering())
       $order = $this->buildOrder($query);
 
-    if($query->getLimit()) $limit = " LIMIT " .$query->getLimit();
-    if($query->getOffset()) $limit .= " OFFSET " .$query->getOffset();
+    if($query->getLimit()) $limit = ' LIMIT ' .$query->getLimit();
+    if($query->getOffset()) $limit .= ' OFFSET ' .$query->getOffset();
 
     if($query->getType() == 'select'){
       $cols = $this->buildSelectCols($query);
