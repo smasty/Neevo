@@ -30,7 +30,7 @@
  * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
+class NeevoDriverMySQLi implements INeevoDriver{
 
   /** @var Neevo */
   private $neevo;
@@ -60,7 +60,7 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
 
     // Defaults
     if(!isset($config['resource'])) $config['resource'] = null;
-    if(!isset($config['charset'])) $config['encodng'] = 'utf8';
+    if(!isset($config['charset'])) $config['charset'] = 'utf8';
     if(!isset($config['username'])) $config['username'] = ini_get('mysqli.default_user');
     if(!isset($config['password'])) $config['password'] = ini_get('mysqli.default_pw');
     if(!isset($config['socket'])) $config['socket'] = ini_get('mysqli.default_socket');
@@ -84,7 +84,7 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
     }
 
     // Set charset
-    if($config['charset'] && $this->resource instanceof mysqli){
+    if($this->resource instanceof mysqli){
       $ok = @$this->resource->set_charset($config['charset']);
 
       if(!$ok) $this->query("SET NAMES ".$config['charset']);
@@ -222,54 +222,6 @@ class NeevoDriverMySQLi extends NeevoQueryBuilder implements INeevoDriver{
         $return = $col['Field'];
     }
     return $return;
-  }
-
-
-  /**
-   * Builds Query from NeevoResult instance
-   * @param NeevoResult $query NeevoResult instance
-   * @return string the Query
-   */
-  public function build(NeevoResult $query){
-
-    $where = '';
-    $order = '';
-    $limit = '';
-    $q = '';
-
-    if($query->getSql())
-      return $query->getSql().';';
-
-    $table = $query->getTable();
-
-    if($query->getConditions())
-      $where = $this->buildWhere($query);
-
-    if($query->getOrdering())
-      $order = $this->buildOrder($query);
-
-    if($query->getLimit()) $limit = " LIMIT " .$query->getLimit();
-    if($query->getOffset()) $limit .= " OFFSET " .$query->getOffset();
-
-    if($query->getType() == 'select'){
-      $cols = $this->buildSelectCols($query);
-      $q .= "SELECT $cols FROM $table$where$order$limit";
-    }
-
-    elseif($query->getType() == 'insert' && $query->getValues()){
-      $insert_data = $this->buildInsertData($query);
-      $q .= "INSERT INTO $table$insert_data";
-    }
-
-    elseif($query->getType() == 'update' && $query->getValues()){
-      $update_data = $this->buildUpdateData($query);
-      $q .= "UPDATE $table$update_data$where$order$limit";
-    }
-
-    elseif($query->getType() == 'delete')
-      $q .= "DELETE FROM $table$where$order$limit";
-
-    return $q.';';
   }
 
 

@@ -29,7 +29,7 @@
 class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
 
   /** @var Neevo */
-  private $neevo;
+  protected $neevo;
 
   /** @var string */
   private $dbCharset;

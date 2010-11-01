@@ -545,7 +545,7 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
   public function build(){
 
     try{
-      return $this->neevo->driver()->build($this);
+      return $this->neevo->queryBuilder()->build($this);
     }
     catch(NotImplementedException $e){
       return '';

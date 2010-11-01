@@ -42,6 +42,9 @@ class Neevo{
 
   /** @var INeevoCache */
   private $cache;
+
+  /** @var NeevoQueryBuilder */
+  private $queryBuilder;
   
   /** @var callback */
   private $error_handler;
@@ -66,8 +69,8 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const VERSION = '0.5';
-  const REVISION = 175;
+  const VERSION = '0.6';
+  const REVISION = 180;
 
   // Data types
   const BOOL = 30;
@@ -191,15 +194,30 @@ class Neevo{
     }
 
     $this->driver = new $class($this);
+
+    // Set queryBuilder
+    if(in_array('NeevoQueryBuilder', class_parents($class, false)))
+      $this->queryBuilder = $this->driver;
+    else
+      $this->queryBuilder = new NeevoQueryBuilder($this);
   }
 
 
   /** @internal */
   private function isDriver($class){
     return (class_exists($class, false) &&
-            in_array('INeevoDriver', class_implements($class, false)) &&
-            in_array('NeevoQueryBuilder', class_parents($class, false))
+            in_array('INeevoDriver', class_implements($class, false))
            );
+  }
+
+
+  /**
+   * Query-builder class
+   * @return NeevoQueryBuilder
+   * @internal
+   */
+  public function queryBuilder(){
+    return $this->queryBuilder;
   }
 
 

@@ -19,6 +19,65 @@
  */
 class NeevoQueryBuilder{
 
+  /** @var Neevo */
+  protected $neevo;
+
+  /**
+   * Instantiate QueryBuilder
+   * @param Neevo $neevo
+   */
+  public function  __construct(Neevo $neevo){
+    $this->neevo = $neevo;
+  }
+
+
+  /**
+   * Builds Query from NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
+   * @return string the Query
+   */
+  public function build(NeevoResult $query){
+
+    $where = '';
+    $order = '';
+    $limit = '';
+    $q = '';
+
+    if($query->getSql())
+      return $query->getSql().';';
+
+    $table = $query->getTable();
+
+    if($query->getConditions())
+      $where = $this->buildWhere($query);
+
+    if($query->getOrdering())
+      $order = $this->buildOrder($query);
+
+    if($query->getLimit()) $limit = " LIMIT " .$query->getLimit();
+    if($query->getOffset()) $limit .= " OFFSET " .$query->getOffset();
+
+    if($query->getType() == 'select'){
+      $cols = $this->buildSelectCols($query);
+      $q .= "SELECT $cols FROM $table$where$order$limit";
+    }
+
+    elseif($query->getType() == 'insert' && $query->getValues()){
+      $insert_data = $this->buildInsertData($query);
+      $q .= "INSERT INTO $table$insert_data";
+    }
+
+    elseif($query->getType() == 'update' && $query->getValues()){
+      $update_data = $this->buildUpdateData($query);
+      $q .= "UPDATE $table$update_data$where$order$limit";
+    }
+
+    elseif($query->getType() == 'delete')
+      $q .= "DELETE FROM $table$where$order$limit";
+
+    return $q.';';
+  }
+  
 
   /**
    * Builds WHERE statement for queries
@@ -134,7 +193,7 @@ class NeevoQueryBuilder{
   protected function _escapeArray(array $array){
     foreach($array as &$value){
       if(is_bool($value))
-        $value = $this->escape($value, Neevo::BOOL);
+        $value = $this->neevo->driver()->escape($value, Neevo::BOOL);
 
       elseif(is_numeric($value)){
         if(is_int($value))
@@ -149,7 +208,7 @@ class NeevoQueryBuilder{
         $value = $this->_escapeString($value);
 
       elseif($value instanceof DateTime)
-        $value = $this->escape($value, Neevo::DATETIME);
+        $value = $this->neevo->driver()->escape($value, Neevo::DATETIME);
 
       elseif($value instanceof NeevoLiteral)
         $value = $value->value;
@@ -167,7 +226,7 @@ class NeevoQueryBuilder{
    */
   protected function _escapeString($string){
     if(get_magic_quotes_gpc()) $string = stripslashes($string);
-    return is_numeric($string) ? $string : $this->escape($string, Neevo::TEXT);
+    return is_numeric($string) ? $string : $this->neevo->driver()->escape($string, Neevo::TEXT);
   }
   
 }

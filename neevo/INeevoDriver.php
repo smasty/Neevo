@@ -17,14 +17,15 @@
  * Interface implemented by all Neevo drivers.
  *
  * All Neevo drivers **must** implement this interface, not only reproduce all it's
- * methods.
- * They also **must** extend NeevoQueryBuilder.
+ * methods, or they won't be recognised as valid driver classes.
  *
  * If something is not supported in the driver, the method **must** throw NotImplementedException.
  * The exception will be catched and Neevo will decide, what to do next.
  *
- * When the driver needs to rewrite default output for query clauses,
- * following methods can be declared:
+ * When the driver needs to rewrite default output for SQL commands, it **must**
+ * extend **NeevoQueryBuilder** class.
+ * Then following methods can be declared to rewrite SQL command output:
+ * - **build()** - Base structure of SQL command. **Must be declared** when some of following method are beeing declared.
  * - **buildColName()** - Column names, including table.column syntax
  * - **buildSelectCols()** - `[SELECT] "col1, table.col2" ...`
  * - **buildInsertData()** - `[INSERT INTO] "(col1, col2) VALUES (val1, val2)" ...`
@@ -33,9 +34,6 @@
  * - **buildOrder()** - ORDER BY clause
  * 
  * For proper use, see "source of **NeevoQueryBuilder** class":./source-neevo.NeevoQueryBuilder.php.html.
- *
- * Other parts (LIMIT, OFFSET) and the whole query structure can be changed in **build()** method.
- * For proper use, "see source of **build()** method":./source-neevo.drivers.mysql.php.html#239 in one of existing drivers.
  *
  * @package NeevoDrivers
  */
@@ -150,14 +148,6 @@ interface INeevoDriver {
    * @return string|null
    */
   public function getPrimaryKey($table);
-
-
-  /**
-   * Builds Query from NeevoResult instance
-   * @param NeevoResult $query NeevoResult instance
-   * @return string the Query
-   */
-  public function build(NeevoResult $query);
 
 
   /**
