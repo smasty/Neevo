@@ -59,7 +59,7 @@ class Neevo{
   private $error_reporting;
 
   
-  /** @var bool Ignore warning when using deprecated methods.*/
+  /** @var bool Ignore warning when using deprecated Neevo methods.*/
   public static $ignore_deprecated = false;
 
 
@@ -70,7 +70,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = '0.6';
-  const REVISION = 180;
+  const REVISION = 181;
 
   // Data types
   const BOOL = 30;
