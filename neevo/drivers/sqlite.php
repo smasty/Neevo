@@ -202,10 +202,10 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoQuery $query NeevoQuery instance
-   * @return NeevoQuery
+   * @param NeevoResult $query NeevoResult instance
+   * @return NeevoResult
    */
-  public function rand(NeevoQuery $query){
+  public function rand(NeevoResult $query){
     $query->order('RANDOM()');
   }
 
@@ -241,11 +241,11 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
 
   /**
-   * Builds Query from NeevoQuery instance
-   * @param NeevoQuery $query NeevoQuery instance
+   * Builds Query from NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string the Query
    */
-  public function build(NeevoQuery $query){
+  public function build(NeevoResult $query){
 
     $where = '';
     $order = '';
@@ -257,10 +257,10 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
     $table = $query->getTable();
 
-    if($query->getWhere())
+    if($query->getConditions())
       $where = $this->buildWhere($query);
 
-    if($query->getOrder())
+    if($query->getOrdering())
       $order = $this->buildOrder($query);
 
     if($query->getLimit()) $limit = " LIMIT " .$query->getLimit();
@@ -271,12 +271,12 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
       $q .= "SELECT $cols FROM $table$where$order$limit";
     }
 
-    elseif($query->getType() == 'insert' && $query->getData()){
+    elseif($query->getType() == 'insert' && $query->getValues()){
       $insert_data = $this->buildInsertData($query);
       $q .= "INSERT INTO $table$insert_data";
     }
 
-    elseif($query->getType() == 'update' && $query->getData()){
+    elseif($query->getType() == 'update' && $query->getValues()){
       $update_data = $this->buildUpdateData($query);
       $q .= "UPDATE $table$update_data$where";
     }

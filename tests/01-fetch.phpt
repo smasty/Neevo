@@ -4,11 +4,9 @@ Fetch, FetchAssoc, FetchSingle, FetchRow
 <?php
 
 // Base fetch
-$fetch = db()->select('id, name, web', 'author')->orderBy('id ASC')->limit(2)->fetch();
-if($fetch instanceof NeevoResult){
-  foreach($fetch as $row){
-    echo "$row->id: {$row['name']}\n";
-  }
+$fetch = db()->select('id, name, web', 'author')->orderBy('id ASC')->limit(2);
+foreach($fetch as $row){
+  echo "$row->id: {$row['name']}\n";
 }
 
 echo "\n";

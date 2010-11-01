@@ -46,7 +46,7 @@ class Neevo{
   /** @var callback */
   private $error_handler;
 
-  /** @var NeevoQuery */
+  /** @var NeevoResult */
   private $last;
 
   /** @var int */
@@ -259,8 +259,8 @@ class Neevo{
 
   /**
    * Last executed query
-   * @param NeevoQuery $last Last executed query
-   * @return NeevoQuery
+   * @param NeevoResult $last Last executed query
+   * @return NeevoResult
    */
   public function last(){
     return $this->last;
@@ -269,11 +269,11 @@ class Neevo{
 
   /**
    * Sets last executed query
-   * @param NeevoQuery $last Last executed query
+   * @param Neevoresult $last Last executed query
    * @return void
    * @internal
    */
-  public function setLast(NeevoQuery $last){
+  public function setLast(NeevoResult $last){
     $this->last = $last;
   }
 
@@ -293,7 +293,7 @@ class Neevo{
    * @internal
    */
   public function incrementQueries(){
-    $this->queries++;
+    ++$this->queries;
   }
 
 
@@ -301,10 +301,10 @@ class Neevo{
    * Creates SELECT query
    * @param string|array $cols Columns to select (array or comma-separated list)
    * @param string $table Table name
-   * @return NeevoQuery fluent interface
+   * @return NeevoResult fluent interface
    */
   public function select($columns = '*', $table){
-    $q = new NeevoQuery($this);
+    $q = new NeevoResult($this);
     return $q->select($columns, $table);
   }
 
@@ -313,17 +313,17 @@ class Neevo{
    * Creates INSERT query
    * @param string $table Table name
    * @param array $values Values to insert
-   * @return NeevoQuery fluent interface
+   * @return Neevoresult fluent interface
    */
   public function insert($table, array $values){
-    $q = new NeevoQuery($this);
+    $q = new NeevoResult($this);
     return $q->insert($table, $values);
   }
 
 
   /**
    * Alias for Neevo::insert().
-   * @return NeevoQuery fluent interface
+   * @return NeevoResult fluent interface
    */
   public function insertInto($table, array $values){
     return $this->insert($table, $values);
@@ -334,10 +334,10 @@ class Neevo{
    * Creates UPDATE query
    * @param string $table Table name
    * @param array $data Data to update
-   * @return NeevoQuery fluent interface
+   * @return NeevoResult fluent interface
    */
   public function update($table, array $data){
-    $q = new NeevoQuery($this);
+    $q = new NeevoResult($this);
     return $q->update($table, $data);
   }
 
@@ -345,10 +345,10 @@ class Neevo{
   /**
    * Creates DELETE query
    * @param string $table Table name
-   * @return NeevoQuery fluent interface
+   * @return NeevoResult fluent interface
    */
   public function delete($table){
-    $q = new NeevoQuery($this);
+    $q = new NeevoResult($this);
     return $q->delete($table);
   }
 
@@ -356,10 +356,10 @@ class Neevo{
   /**
    * Creates query with direct SQL
    * @param string $sql SQL code
-   * @return NeevoQuery fluent interface
+   * @return NeevoResult fluent interface
    */
   public function sql($sql){
-    $q = new NeevoQuery($this);
+    $q = new NeevoResult($this);
     return $q->sql($sql);
   }
 
@@ -520,7 +520,7 @@ if(!class_exists('NotImplementedException', false)){
 }
 
 /**
- * Class for object representing SQL literal value.
+ * Object representing SQL literal value.
  * @package Neevo
  */
 class NeevoLiteral {

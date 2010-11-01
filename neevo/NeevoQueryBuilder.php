@@ -14,7 +14,7 @@
  */
 
 /**
- * Building SQL string from NeevoQuery instance.
+ * Building SQL string from NeevoResult instance.
  * @package Neevo
  */
 class NeevoQueryBuilder{
@@ -22,11 +22,11 @@ class NeevoQueryBuilder{
 
   /**
    * Builds WHERE statement for queries
-   * @param NeevoQuery $query NeevoQuery instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
-  protected function buildWhere(NeevoQuery $query){
-    $conds = $query->getWhere();
+  protected function buildWhere(NeevoResult $query){
+    $conds = $query->getConditions();
 
     unset($conds[count($conds)-1][3]);
 
@@ -62,11 +62,11 @@ class NeevoQueryBuilder{
 
   /**
    * Builds data part for INSERT queries ([INSERT INTO] (...) VALUES (...) )
-   * @param NeevoQuery $query NeevoQuery instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
-  protected function buildInsertData(NeevoQuery $query){
-    foreach($this->_escapeArray($query->getData()) as $col => $value){
+  protected function buildInsertData(NeevoResult $query){
+    foreach($this->_escapeArray($query->getValues()) as $col => $value){
       $cols[] = $this->buildColName($col);
       $values[] = $value;
     }
@@ -76,11 +76,11 @@ class NeevoQueryBuilder{
 
   /**
    * Builds data part for UPDATE queries ([UPDATE ...] SET ...)
-   * @param NeevoQuery $query NeevoQuery instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
-  protected function buildUpdateData(NeevoQuery $query){
-    foreach($this->_escapeArray($query->getData()) as $col => $value){
+  protected function buildUpdateData(NeevoResult $query){
+    foreach($this->_escapeArray($query->getValues()) as $col => $value){
       $update[] = $this->buildColName($col) . ' = ' . $value;
     }
     return ' SET ' . join(', ', $update);
@@ -89,21 +89,21 @@ class NeevoQueryBuilder{
 
   /**
    * Builds ORDER BY statement for queries
-   * @param NeevoQuery $query NeevoQuery instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
-  protected function buildOrder(NeevoQuery $query){
-    return ' ORDER BY ' . join(', ', $query->getOrder());
+  protected function buildOrder(NeevoResult $query){
+    return ' ORDER BY ' . join(', ', $query->getOrdering());
   }
 
 
   /**
    * Builds columns part for SELECT queries
-   * @param NeevoQuery $query NeevoQuery instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
-  protected function buildSelectCols(NeevoQuery $query){
-    foreach ($query->getCols() as $col) { // For each col
+  protected function buildSelectCols(NeevoResult $query){
+    foreach ($query->getColumns() as $col) { // For each col
       $cols[] = $this->buildColName($col);
     }
     return join(', ', $cols);
