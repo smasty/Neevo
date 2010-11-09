@@ -17,7 +17,7 @@
  * Represents result. Can be iterated and provides fluent interface.
  * @package Neevo
  */
-class NeevoResult implements ArrayAccess, Countable, Iterator {
+class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /** @var string */
   private $tableName;
@@ -66,9 +66,6 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
 
   /** @var array */
   private $data;
-
-  /** @var array */
-  private $keys;
 
 
   /**
@@ -368,8 +365,8 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
     foreach($result as $row)
       $rows[] = new NeevoRow($row, $this);
     unset($result);
-    $this->data = $rows;
-    return $rows;
+    $this->data  = $rows;
+    return $this->data;
   }
 
 
@@ -538,6 +535,16 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
 
 
   /**
+   * Implementation of Countable
+   * @return int
+   */
+  public function count(){
+    if(!$this->isPerformed()) $this->run();
+    return $this->numRows;
+  }
+
+
+  /**
    * Builds Query from NeevoResult instance
    * @return string The Query in SQL dialect
    * @internal
@@ -604,7 +611,6 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
     return $this->neevo;
   }
 
-
   /** @internal */
   public function resultSet(){
     return $this->resultSet;
@@ -616,6 +622,12 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
    */
   public function isPerformed(){
     return $this->performed;
+  }
+
+
+  /** @internal */
+  public function reinit(){
+    $this->performed = false;
   }
 
   /**
@@ -777,44 +789,11 @@ class NeevoResult implements ArrayAccess, Countable, Iterator {
   }
 
 
-  /* Implementation of Countable */
+  /* Implementation of IteratorAggregate */
 
-  public function count(){
-    return count($this->data);
+  /** @return NeevoResultIterator */
+  public function getIterator(){
+    return new NeevoResultIterator($this);
   }
-
-
-  /* Implementation of iterator */
-
-  /** @internal */
-  public function rewind() {
-		$this->fetch();
-		$this->keys = array_keys($this->data);
-		reset($this->keys);
-	}
-
-
-  /** @internal */
-  public function current() {
-		return $this->data[current($this->keys)];
-	}
-
-
-  /** @internal */
-	public function key() {
-		return current($this->keys);
-	}
-
-
-  /** @internal */
-	public function next() {
-		next($this->keys);
-	}
-
-
-  /** @internal */
-	public function valid() {
-		return current($this->keys) !== false;
-	}
 
 }
