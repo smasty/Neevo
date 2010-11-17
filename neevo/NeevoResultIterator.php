@@ -17,19 +17,21 @@
  * NeevoResult Iterator
  * @package Neevo
  */
-class NeevoResultIterator implements Iterator, Countable {
+class NeevoResultIterator implements Iterator, Countable, SeekableIterator, ArrayAccess {
 
   /** @var NeevoResult */
   private $result;
 
-  /** @var array */
-  private $keys;
+  /** @var int */
+  private $position;
 
   /** @var array */
   private $data;
 
   public function __construct(NeevoResult $result){
     $this->result = $result;
+    if($this->result->isPerformed())
+      $this->data = $this->result->getData();
   }
   
   
@@ -38,11 +40,10 @@ class NeevoResultIterator implements Iterator, Countable {
    * @return void
    */
   public function rewind(){
-    if(!empty($this->keys)) // Force execution for future loops
+    if(!empty($this->data)) // Force execution for future loops
       $this->result->reinit();
     $this->data = $this->result->fetch();
-    $this->keys = array_keys($this->data);
-		reset($this->keys);
+    $this->position = 0;
   }
   
   
@@ -51,7 +52,7 @@ class NeevoResultIterator implements Iterator, Countable {
    * @return int
    */
   public function key(){
-    return current($this->keys);
+    return $this->position;
   }
 
 
@@ -60,7 +61,7 @@ class NeevoResultIterator implements Iterator, Countable {
    * @return void
    */
   public function next(){
-    next($this->keys);
+    $this->position++;
   }
   
   
@@ -69,7 +70,7 @@ class NeevoResultIterator implements Iterator, Countable {
    * @return NeevoRow
    */
   public function current(){
-    return $this->data[current($this->keys)];
+    return $this->data[$this->position];
   }
   
   
@@ -78,7 +79,7 @@ class NeevoResultIterator implements Iterator, Countable {
    * @return bool
    */
   public function valid(){
-    return current($this->keys) !== false;
+    return (!empty($this->data[$this->position]));
   }
   
   
@@ -89,5 +90,42 @@ class NeevoResultIterator implements Iterator, Countable {
   public function count(){
     return count($this->data);
   }
+
+
+  /**
+   * Implementation of SeekableIterator
+   * @return int
+   */
+  public function seek($position){
+    $this->position = $position;
+  }
+
+
+  /* Implementation of Array Access */
+
+  /** @internal */
+  public function offsetSet($offset, $value){
+    if(isset($this->data[$offset]))
+      $this->data[$offset] = $value;
+  }
+
+
+  /** @internal */
+  public function offsetExists($offset){
+    return isset($this->data[$offset]);
+  }
+
+
+  /** @internal */
+  public function offsetUnset($offset){
+    unset($this->data[$offset]);
+  }
+
+
+  /** @internal */
+  public function offsetGet($offset){
+    return isset($this->data[$offset]) ? $this->data[$offset] : null;
+  }
+
 
 }

@@ -162,8 +162,21 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Sets WHERE condition. More calls appends conditions.
-   * @param string $where Column to use and optionaly operator: "email", "email LIKE", "email !=", etc.
-   * @param string|array $value Value to search for: "string", "%patten%", array, boolean or NULL.
+   *
+   * Possible combinations for where conditions:
+   * | Condition  | SQL code
+   * |-----------------------
+   * | `where('field', 'x')`             | `field = 'x'`
+   * | `where('field !=', 'x')`          | `filed != 'x'`
+   * | `where('field LIKE', '%x%')`      | `field LIKE '%x%'`
+   * | `where('field', true)`            | `field`
+   * | `where('field', false)`           | `NOT field`
+   * | `where('field', null)`            | `field IS NULL`
+   * | `where('field', array(1, 2))`     | `field IN(1, 2)`
+   * | `where('field NOT', array(1, 2))` | `field NOT IN(1,2)`
+   * | `where('field', new NeevoLiteral('NOW()'))`  | `field = NOW()`
+   * @param string $where 
+   * @param string|array|bool|null $value
    * @return NeevoResult fluent interface
    */
   public function where($condition, $value = true){
@@ -196,8 +209,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   /**
    * Sets AND/OR glue for WHERE conditions
    *
-   * Use as regular method: $query->where('id', 5)->or()->where()...
-   * @return NeevoResult
+   * Use as regular method: $query->where('id', 5)->**or()**->where()...
+   * @return NeevoResult fluent interface
    */
   public function  __call($name, $arguments){
     if(in_array(strtolower($name), array('and', 'or'))){
@@ -281,12 +294,11 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     }
     catch(NotImplementedException $e){
       $query = null;
-      return false;
+      return $this->neevo->error('Driver lacks support for executing queries');
     }
 
     if(!$query){
-      $this->neevo->error('Query failed');
-      return false;
+      return $this->neevo->error('Query failed');
     }
 
     $this->neevo->incrementQueries();
@@ -630,6 +642,12 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     $this->performed = false;
   }
 
+
+  /** @internal */
+  public function getData(){
+    return $this->data;
+  }
+
   /**
    * Full table name (with prefix)
    * @return string
@@ -773,6 +791,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /** @internal */
   public function offsetExists($offset){
+    if(!$this->isPerformed())
+      $this->fetch();
     return isset($this->data[$offset]);
   }
 
@@ -785,6 +805,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /** @internal */
   public function offsetGet($offset){
+    if(!$this->isPerformed())
+      $this->fetch();
     return isset($this->data[$offset]) ? $this->data[$offset] : null;
   }
 

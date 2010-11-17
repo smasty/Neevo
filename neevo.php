@@ -71,7 +71,7 @@ class Neevo{
 
   // Neevo version
   const VERSION = '0.6';
-  const REVISION = 183;
+  const REVISION = 185;
 
   // Data types
   const BOOL = 30;
@@ -388,7 +388,8 @@ class Neevo{
    * @return int
    */
   public function errorReporting(){
-    if(!isset($this->error_reporting)) $this->error_reporting = self::E_STRICT;
+    if(!isset($this->error_reporting))
+      $this->error_reporting = self::E_STRICT;
     return $this->error_reporting;
   }
 
