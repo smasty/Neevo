@@ -261,12 +261,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function rand(){
-    try{
-      $this->neevo->driver()->rand($this);
-    }
-    catch(NotImplementedException $e){
-      return $this;
-    }
+    $this->neevo->driver()->rand($this);
     return $this;
   }
 
@@ -289,13 +284,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function run(){
     $start = explode(' ', microtime());
-    try{
-      $query = $this->neevo->driver()->query($this->build());
-    }
-    catch(NotImplementedException $e){
-      $query = null;
-      return $this->neevo->error('Driver lacks support for executing queries');
-    }
+
+    $query = $this->neevo->driver()->query($this->build());
 
     if(!$query){
       return $this->neevo->error('Query failed');
@@ -313,16 +303,14 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
     try{
       $this->numRows = $this->neevo->driver()->rows($query);
-    }
-    catch(NotImplementedException $e){
-      $this->numRows = 0;
-    }
+    } catch(NotImplementedException $e){
+        $this->numRows = false;
+      }
     try{
       $this->affectedRows = $this->neevo->driver()->affectedRows();
-    }
-    catch(NotImplementedException $e){
-      $this->affectedRows = 0;
-    }
+    } catch(NotImplementedException $e){
+        $this->affectedRows = false;
+      }
 
     return $query;
   }
@@ -339,20 +327,14 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
 
     if(!$resultSet) // Error
-      return $this->neevo->error('Fetching result data failed');
+      return $this->neevo->error('Fetching data failed');
 
     try{
       $rows = $this->neevo->driver()->fetchAll($resultSet);
-    }
-    catch(NotImplementedException $e){
-      try{
-        while($row = $this->neevo->driver()->fetch($resultSet))
-          $rows[] = $row;
+    } catch(NotImplementedException $e){
+          while($row = $this->neevo->driver()->fetch($resultSet))
+            $rows[] = $row;
       }
-      catch(NotImplementedException $e){
-        return false;
-      }
-    }
 
     $this->free();
 
@@ -385,19 +367,14 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   /**
    * Fetches the first row in result set.
    * @param bool $array Return as array instead of NeevoRow instance.
-   * @return NeevoRow|array|false
+   * @return NeevoRow|array|FALSE
    */
   public function fetchRow($array = false){
     $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
     if(!$resultSet) // Error
-      return $this->neevo->error('Fetching result data failed');
+      return $this->neevo->error('Fetching data failed');
 
-    try{
-      $result = $this->neevo->driver()->fetch($resultSet);
-    }
-    catch(NotImplementedException $e){
-      return false;
-    }
+    $result = $this->neevo->driver()->fetch($resultSet);
     
     $this->free();
     if($result === false)
@@ -487,7 +464,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   private function free(){
     try{
       $this->neevo->driver()->free($this->resultSet);
-    }  catch(NotImplementedException $e){}
+    } catch(NotImplementedException $e){}
     $this->resultSet = null;
   }
 
@@ -499,13 +476,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function seek($offset){
     if(!$this->isPerformed()) $this->run();
-
-    try{
-      $seek = $this->neevo->driver()->seek($this->resultSet(), $offset);
-    }
-    catch(NotImplementedException $e){
-      $seek = false;
-    }
+    $seek = $this->neevo->driver()->seek($this->resultSet(), $offset);
     return $seek ? $seek : $this->neevo->error("Cannot seek to offset $offset");
   }
 
@@ -517,12 +488,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   public function insertId(){
     if(!$this->isPerformed()) $this->run();
 
-    try{
-      return $this->neevo->driver()->insertId();
-    }
-    catch(NotImplementedException $e){
-      return false;
-    }
+    return $this->neevo->driver()->insertId();
   }
 
 
@@ -532,6 +498,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function rows(){
     if(!$this->isPerformed()) $this->run();
+    if($this->numRows === false)
+      throw new NotImplementedException;
     return $this->numRows;
   }
 
@@ -542,6 +510,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function affectedRows(){
     if(!$this->isPerformed()) $this->run();
+    if($this->affectedRows === false)
+      throw new NotImplementedException;
     return $this->affectedRows;
   }
 
@@ -565,10 +535,9 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
     try{
       return $this->neevo->queryBuilder()->build($this);
-    }
-    catch(NotImplementedException $e){
-      return '';
-    }
+    } catch(NotImplementedException $e){
+        return '';
+      }
 
   }
 
@@ -592,9 +561,9 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
     if($this->isPerformed()){
       $info['time'] = $this->time;
-      if(isset($this->numRows))
+      if(is_int($this->numRows))
         $info['rows'] = $this->numRows;
-      if(isset($this->affectedRows))
+      if(is_int($this->affectedRows))
         $info['affected_rows'] = $this->affectedRows;
       if($this->type == 'insert')
         $info['last_insert_id'] = $this->insertId();

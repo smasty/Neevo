@@ -138,12 +138,7 @@ class Neevo{
    * @internal
    */
   public function createConnection($config){
-    try{
-      return new NeevoConnection($this->driver, $config);
-    }
-    catch(NotImplementedException $e){
-      throw new NeevoException("Cannot connect: Used driver is not matching criteria.");
-    }
+    return new NeevoConnection($this->driver, $config);
   }
 
 
@@ -206,9 +201,7 @@ class Neevo{
 
   /** @internal */
   private function isDriver($class){
-    return (class_exists($class, false) &&
-            in_array('INeevoDriver', class_implements($class, false))
-           );
+    return (class_exists($class, false) && in_array('INeevoDriver', class_implements($class, false)));
   }
 
 
@@ -448,10 +441,9 @@ class Neevo{
     if($level !== Neevo::E_NONE){
       try{
         $err = $this->driver->error($neevo_msg);
-      }
-      catch(NotImplementedException $e){
-        $err = $neevo_msg;
-      }
+      } catch(NotImplementedException $e){
+          $err = $neevo_msg;
+        }
       $exception = new NeevoException($err[0], $err[1]);
 
       if($level === Neevo::E_STRICT)
@@ -536,7 +528,13 @@ class Neevo{
 class NeevoException extends Exception{};
 
 if(!class_exists('NotImplementedException', false)){
-  class NotImplementedException extends Exception{};
+
+  class NotImplementedException extends Exception{
+
+    public function getMessage(){
+      return 'Not implemented by this driver';
+    }
+  }
 }
 
 /**
