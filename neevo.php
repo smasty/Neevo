@@ -73,7 +73,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const REVISION = 188;
+  const REVISION = 189;
 
   // Data types
   const BOOL = 30;
@@ -274,9 +274,8 @@ class Neevo{
 
 
   /**
-   * Last executed query
-   * @param NeevoResult $last Last executed query
-   * @return NeevoResult
+   * Last executed command info
+   * @return array
    */
   public function last(){
     return $this->last;
@@ -285,11 +284,11 @@ class Neevo{
 
   /**
    * Sets last executed query
-   * @param Neevoresult $last Last executed query
+   * @param array $last Last executed query
    * @return void
    * @internal
    */
-  public function setLast(NeevoResult $last){
+  public function setLast(array $last){
     $this->last = $last;
   }
 

@@ -292,7 +292,6 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     }
 
     $this->neevo->incrementQueries();
-    $this->neevo->setLast($this);
 
     $end = explode(" ", microtime());
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
@@ -306,11 +305,16 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     } catch(NotImplementedException $e){
         $this->numRows = false;
       }
-    try{
-      $this->affectedRows = $this->neevo->driver()->affectedRows();
-    } catch(NotImplementedException $e){
-        $this->affectedRows = false;
-      }
+
+    if(!in_array($this->type, array('select', 'sql'))){
+      try{
+        $this->affectedRows = $this->neevo->driver()->affectedRows();
+      } catch(NotImplementedException $e){
+          $this->affectedRows = false;
+        }
+    } else $this->affectedRows = 0;
+
+    $this->neevo->setLast($this->info());
 
     return $query;
   }
@@ -522,7 +526,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function count(){
     if(!$this->isPerformed()) $this->run();
-    return $this->numRows;
+    return (int) $this->numRows;
   }
 
 
@@ -553,7 +557,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
       'type' => $this->type,
       'table' => $this->getTable(),
       'executed' => (bool) $this->isPerformed(),
-      'query_string' => $this->dump(true)
+      'query_string' => substr(strip_tags($this->dump(true)), 0, -1)
     );
 
     if($exclude_connection == true)
