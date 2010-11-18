@@ -63,6 +63,7 @@ class Neevo{
   /** @var bool Ignore warning when using deprecated Neevo methods.*/
   public static $ignoreDeprecated = false;
 
+  /** @var string Default Neevo driver */
   public static $defaultDriver = 'mysql';
 
 
@@ -72,7 +73,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const REVISION = 187;
+  const REVISION = 188;
 
   // Data types
   const BOOL = 30;
@@ -531,13 +532,7 @@ class Neevo{
 class NeevoException extends Exception{};
 
 if(!class_exists('NotImplementedException', false)){
-
-  class NotImplementedException extends Exception{
-
-    public function getMessage(){
-      return 'Not implemented by this driver';
-    }
-  }
+  class NotImplementedException extends Exception{};
 }
 
 /**
