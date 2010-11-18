@@ -48,7 +48,7 @@ class Neevo{
   private $queryBuilder;
   
   /** @var callback */
-  private $error_handler;
+  private $errorHandler;
 
   /** @var NeevoResult */
   private $last;
@@ -57,11 +57,13 @@ class Neevo{
   private $queries;
 
   /** @var int */
-  private $error_reporting;
+  private $errorReporting;
 
   
   /** @var bool Ignore warning when using deprecated Neevo methods.*/
-  public static $ignore_deprecated = false;
+  public static $ignoreDeprecated = false;
+
+  public static $defaultDriver = 'mysql';
 
 
   // Error-reporting levels
@@ -70,7 +72,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const REVISION = 186;
+  const REVISION = 187;
 
   // Data types
   const BOOL = 30;
@@ -87,8 +89,10 @@ class Neevo{
    * @return void
    * @throws NeevoException
    */
-  public function __construct($driver, $cache = null){
-    if(!$driver) throw new NeevoException("Driver not defined.");
+  public function __construct($driver = null, $cache = null){
+    if(!$driver)
+      $driver = self::$defaultDriver;
+    
     $this->setDriver($driver);
     $this->setCache($cache);
   }
@@ -380,9 +384,9 @@ class Neevo{
    * @return int
    */
   public function errorReporting(){
-    if(!isset($this->error_reporting))
-      $this->error_reporting = self::E_STRICT;
-    return $this->error_reporting;
+    if(!isset($this->errorReporting))
+      $this->errorReporting = self::E_STRICT;
+    return $this->errorReporting;
   }
 
 
@@ -397,8 +401,8 @@ class Neevo{
    * @return void
    */
   public function setErrorReporting($value){
-    $this->error_reporting = $value;
-    if(!isset($this->error_reporting)) $this->error_reporting = self::E_STRICT;
+    $this->errorReporting = $value;
+    if(!isset($this->errorReporting)) $this->errorReporting = self::E_STRICT;
   }
 
 
@@ -408,10 +412,10 @@ class Neevo{
    * @return string
    */
   public function errorHandler(){
-    $func = $this->error_handler;
+    $func = $this->errorHandler;
     if( (is_array($func) && !method_exists($func[0], $func[1]) ) || ( !is_array($func) && !function_exists($func) ) )
-      $this->error_handler = array('Neevo', 'defaultErrorHandler');
-    return $this->error_handler;
+      $this->errorHandler = array('Neevo', 'defaultErrorHandler');
+    return $this->errorHandler;
   }
 
 
@@ -422,8 +426,8 @@ class Neevo{
    */
   public function setErrorHandler($callback){
     if(function_exists($callback))
-      $this->error_handler = $callback;
-    else $this->error_handler = array('Neevo', 'defaultErrorHandler');
+      $this->errorHandler = $callback;
+    else $this->errorHandler = array('Neevo', 'defaultErrorHandler');
   }
 
 
