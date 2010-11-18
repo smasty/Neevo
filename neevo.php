@@ -70,8 +70,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const VERSION = '0.6';
-  const REVISION = 185;
+  const REVISION = 186;
 
   // Data types
   const BOOL = 30;
@@ -486,21 +485,21 @@ class Neevo{
 
 
   /**
-   * Neevo version and revision
-   * @param bool $string Return as a string, not array
-   * @return string|array
+   * Neevo revision
+   * @return int
    */
-  public function version($string = true){
-    if($string)
-      $return = 'Neevo '.self::VERSION.' (revision '.self::REVISION.').';
-    else
-      $return = array(
-        'version'  => self::VERSION,
-        'revision' => self::REVISION
-      );
-    return $return;
+  public function revision(){
+    return self::REVISION;
   }
 
+
+  /**
+   * Alias for revision()
+   * @return int
+   */
+  public function version(){
+    return self::REVISION;
+  }
 
   /**
    * Basic information about library
