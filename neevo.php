@@ -73,7 +73,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const REVISION = 189;
+  const REVISION = 190;
 
   // Data types
   const BOOL = 30;
@@ -289,6 +289,7 @@ class Neevo{
    * @internal
    */
   public function setLast(array $last){
+    $this->queries++;
     $this->last = $last;
   }
 
@@ -299,16 +300,6 @@ class Neevo{
    */
   public function queries(){
     return $this->queries;
-  }
-
-
-  /**
-   * Increments queries counter
-   * @return void
-   * @internal
-   */
-  public function incrementQueries(){
-    ++$this->queries;
   }
 
 
@@ -328,7 +319,7 @@ class Neevo{
    * Creates INSERT query
    * @param string $table Table name
    * @param array $values Values to insert
-   * @return Neevoresult fluent interface
+   * @return NeevoResult fluent interface
    */
   public function insert($table, array $values){
     $q = new NeevoResult($this);

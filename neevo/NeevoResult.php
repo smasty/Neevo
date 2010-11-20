@@ -291,8 +291,6 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
       return $this->neevo->error('Query failed');
     }
 
-    $this->neevo->incrementQueries();
-
     $end = explode(" ", microtime());
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
     $this->time = $time;
