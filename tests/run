@@ -14,7 +14,8 @@ if(isset($opts['d'])){
 
 if(isset($opts['b']))
   define('DEBUG', true);
-else define('DEBUG', false);
+else
+  define('DEBUG', false);
 
 
 include_once dirname(__FILE__) . '/connect.php';
@@ -30,7 +31,7 @@ foreach($tests as $test){
   $file = basename($test);
 
   $result = ob_get_clean();
-  if(!preg_match("~^--TEST\n(.*)\n--CODE\n(.*)--RESULT\n(.*)~s", $result, $matches))
+  if(!preg_match("~^--TEST--\n(.*)\n--FILE--\n(.*)--EXPECT--\n(.*)~s", $result, $matches))
     echo "Invalid $file\n";
 
   elseif($matches[2] !== $matches[3])

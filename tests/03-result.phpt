@@ -1,6 +1,6 @@
---TEST
+--TEST--
 Result manipulating
---CODE
+--FILE--
 <?php
 
 $author = db()->select('id', 'author')->where('name', 'Martin Srank')->fetchSingle();
@@ -24,7 +24,7 @@ if(in_array(driver(), array('mysql', 'mysqli'))){
   echo "Selected: $current.\n";
 }
 ?>
---RESULT
+--EXPECT--
 Selected 2 rows.
 <?php if(in_array(driver(), array('mysql', 'mysqli'))){ ?>
 Updated 1 rows.

@@ -1,6 +1,6 @@
---TEST
+--TEST--
 Insert, Update, Delete
---CODE
+--FILE--
 <?php
 
 $insert = db()->insertInto('software', array(
@@ -27,7 +27,7 @@ $select = db()->select('*', 'software')->where('id', 5)->rows();
 
 echo "Select: $select rows found.\n";
 ?>
---RESULT
+--EXPECT--
 Insert: affected 1 rows.
 Update: affected 1 rows.
 Delete: affected 1 rows.
