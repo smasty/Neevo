@@ -73,7 +73,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const REVISION = 191;
+  const REVISION = 192;
 
   // Data types
   const BOOL = 30;

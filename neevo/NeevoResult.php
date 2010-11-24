@@ -381,7 +381,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * Fetches the first row in result set.
    *
    * Format can be:
-   * - NeevoResult::OBJECT - returned as NeevoRow instance
+   * - NeevoResult::OBJECT - returned as NeevoRow instance (**default**)
    * - NeevoResult::ASSOC - returned as associative array
    * @param int $format Return format
    * @return NeevoRow|array|FALSE
@@ -456,12 +456,12 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    *
    * Format can be:
    * - NeevoResult::OBJECT - returned as NeevoRow instance
-   * - NeevoResult::SSOC - returned as associative array
+   * - NeevoResult::ASSOC - returned as associative array (**default**)
    * @param string $column Column to use as key for row
    * @param int $format Return format
    * @return array|FALSE
    */
-  public function fetchAssoc($column, $format = self::OBJECT){
+  public function fetchAssoc($column, $format = self::ASSOC){
     if(!in_array($column, $this->columns) || !in_array('*', $this->columns)){
       $this->columns[] = $column;
       $this->performed = false; // If query was executed without needed column, force execution.
