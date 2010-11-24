@@ -251,14 +251,8 @@ class NeevoDriverMySQL implements INeevoDriver{
         return "'". mysql_real_escape_string($value, $this->resource) ."'";
         break;
 
-      case Neevo::BINARY:
-        return "_binary'". mysql_real_escape_string($value, $this->resource) ."'";
-
       case Neevo::DATETIME:
         return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
-
-      case Neevo::DATE:
-        return ($value instanceof DateTime) ? $value->format("'Y-m-d'") : date("'Y-m-d'", $value);
         
       default:
         $this->neevo->error('Unsupported data type');

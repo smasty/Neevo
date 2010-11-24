@@ -57,22 +57,22 @@ class NeevoQueryBuilder{
     if($query->getLimit()) $limit = ' LIMIT ' .$query->getLimit();
     if($query->getOffset()) $limit .= ' OFFSET ' .$query->getOffset();
 
-    if($query->getType() == 'select'){
+    if($query->getType() == NeevoResult::TYPE_SELECT){
       $cols = $this->buildSelectCols($query);
       $q .= "SELECT $cols FROM $table$where$order$limit";
     }
 
-    elseif($query->getType() == 'insert' && $query->getValues()){
+    elseif($query->getType() == NeevoResult::TYPE_INSERT && $query->getValues()){
       $insert_data = $this->buildInsertData($query);
       $q .= "INSERT INTO $table$insert_data";
     }
 
-    elseif($query->getType() == 'update' && $query->getValues()){
+    elseif($query->getType() == NeevoResult::TYPE_UPDATE && $query->getValues()){
       $update_data = $this->buildUpdateData($query);
       $q .= "UPDATE $table$update_data$where$order$limit";
     }
 
-    elseif($query->getType() == 'delete')
+    elseif($query->getType() == NeevoResult::TYPE_DELETE)
       $q .= "DELETE FROM $table$where$order$limit";
 
     return $q.';';
@@ -202,7 +202,7 @@ class NeevoQueryBuilder{
         elseif(is_float($value))
           $value = floatval($value);
 
-        else $value = $value;
+        else $value = intval($value);
       }
       elseif(is_string($value))
         $value = $this->_escapeString($value);
@@ -226,7 +226,7 @@ class NeevoQueryBuilder{
    */
   protected function _escapeString($string){
     if(get_magic_quotes_gpc()) $string = stripslashes($string);
-    return is_numeric($string) ? $string : $this->neevo->driver()->escape($string, Neevo::TEXT);
+    return $this->neevo->driver()->escape($string, Neevo::TEXT);
   }
   
 }

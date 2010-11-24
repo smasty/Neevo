@@ -67,6 +67,17 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   /** @var array */
   private $data;
 
+  // Query types
+  const TYPE_SELECT = 'type_select';
+  const TYPE_INSERT = 'type_insert';
+  const TYPE_UPDATE = 'type_update';
+  const TYPE_DELETE = 'type_delete';
+  const TYPE_SQL = 'type_sql';
+
+
+  const OBJECT = 1;
+  const ASSOC = 2;
+
 
   /**
    * Query base constructor
@@ -92,7 +103,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function select($cols = '*', $table){
-    $this->type = 'select';
+    $this->type = self::TYPE_SELECT;
     $this->columns = is_string($cols) ? explode(',', $cols) : $cols;
     $this->tableName = $table;
     return $this;
@@ -106,7 +117,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function update($table, array $data){
-    $this->type = 'update';
+    $this->type = self::TYPE_UPDATE;
     $this->tableName = $table;
     $this->values = $data;
     return $this;
@@ -120,7 +131,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function insert($table, array $values){
-    $this->type = 'insert';
+    $this->type = self::TYPE_INSERT;
     $this->tableName = $table;
     $this->values = $values;
     return $this;
@@ -142,7 +153,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function delete($table){
-    $this->type = 'delete';
+    $this->type = self::TYPE_DELETE;
     $this->tableName = $table;
     return $this;
   }
@@ -154,8 +165,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function sql($sql){
+    $this->type = self::TYPE_SQL;
     $this->sql = $sql;
-    $this->type = 'sql';
     return $this;
   }
 
@@ -250,7 +261,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function limit($limit, $offset = null){
     $this->limit = $limit;
-    if(isset($offset) && $this->type == 'select')
+    if(isset($offset) && $this->type == self::TYPE_SELECT)
       $this->offset = $offset;
     return $this;
   }
@@ -304,7 +315,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
         $this->numRows = false;
       }
 
-    if(!in_array($this->type, array('select', 'sql'))){
+    if(!in_array($this->type, array(self::TYPE_SELECT, self::TYPE_SQL))){
       try{
         $this->affectedRows = $this->neevo->driver()->affectedRows();
       } catch(NotImplementedException $e){
@@ -368,10 +379,14 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Fetches the first row in result set.
-   * @param bool $array Return as array instead of NeevoRow instance.
+   *
+   * Format can be:
+   * - NeevoResult::OBJECT - returned as NeevoRow instance
+   * - NeevoResult::ASSOC - returned as associative array
+   * @param int $format Return format
    * @return NeevoRow|array|FALSE
    */
-  public function fetchRow($array = false){
+  public function fetchRow($format = self::OBJECT){
     $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
     if(!$resultSet) // Error
       return $this->neevo->error('Fetching data failed');
@@ -381,7 +396,9 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     $this->free();
     if($result === false)
       return false;
-    return $array ? $result : new NeevoRow($result, $this);
+    if($format == self::OBJECT)
+      $result = new NeevoRow($result, $this);
+    return $result;
   }
 
 
@@ -411,7 +428,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   public function fetchPairs($key, $value){
     if(!in_array($key, $this->columns) || !in_array($value, $this->columns) || !in_array('*', $this->columns)){
       $this->columns = array($key, $value);
-      $this->performed = false; // If query was executed without needed columns, force execution.
+      $this->performed = false; // If query was executed without needed columns, force execution (with them only).
     }
     $result = $this->fetchPlain();
     if($result === false)
@@ -426,7 +443,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Fetches all data as **indexed array** with rows represented as **associative arrays**.
+   * Fetches all data as array with rows as associative arrays.
    * @return array|FALSE
    */
   public function fetchArray(){
@@ -436,11 +453,15 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Fetches all data as associative arrays with $column as a 'key' to row.
+   *
+   * Format can be:
+   * - NeevoResult::OBJECT - returned as NeevoRow instance
+   * - NeevoResult::SSOC - returned as associative array
    * @param string $column Column to use as key for row
-   * @param bool $array Rows are returned as arrays instead of NeevoRow instances.
+   * @param int $format Return format
    * @return array|FALSE
    */
-  public function fetchAssoc($column, $array = false){
+  public function fetchAssoc($column, $format = self::OBJECT){
     if(!in_array($column, $this->columns) || !in_array('*', $this->columns)){
       $this->columns[] = $column;
       $this->performed = false; // If query was executed without needed column, force execution.
@@ -451,7 +472,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
     $rows = array();
     foreach($result as $row){
-      if(!$array)
+      if($format == self::OBJECT)
         $row = new NeevoRow($row, $this); // Rows as NeevoRow.
       $rows[$row[$column]] = $row;
     }
@@ -500,9 +521,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function rows(){
     if(!$this->isPerformed()) $this->run();
-    if($this->numRows === false)
-      throw new NotImplementedException;
-    return $this->numRows;
+    return intval($this->numRows);
   }
 
 
@@ -552,7 +571,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function info($hide_password = true, $exclude_connection = false){
     $info = array(
-      'type' => $this->type,
+      'type' => substr($this->type, 5),
       'table' => $this->getTable(),
       'executed' => (bool) $this->isPerformed(),
       'query_string' => substr(strip_tags($this->dump(true)), 0, -1)

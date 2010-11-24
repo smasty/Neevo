@@ -252,22 +252,22 @@ class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
     if($query->getLimit()) $limit = " LIMIT " .$query->getLimit();
     if($query->getOffset()) $limit .= " OFFSET " .$query->getOffset();
 
-    if($query->getType() == 'select'){
+    if($query->getType() == NeevoResult::TYPE_SELECT){
       $cols = $this->buildSelectCols($query);
       $q .= "SELECT $cols FROM $table$where$order$limit";
     }
 
-    elseif($query->getType() == 'insert' && $query->getValues()){
+    elseif($query->getType() == NeevoResult::TYPE_INSERT && $query->getValues()){
       $insert_data = $this->buildInsertData($query);
       $q .= "INSERT INTO $table$insert_data";
     }
 
-    elseif($query->getType() == 'update' && $query->getValues()){
+    elseif($query->getType() == NeevoResult::TYPE_UPDATE && $query->getValues()){
       $update_data = $this->buildUpdateData($query);
       $q .= "UPDATE $table$update_data$where";
     }
 
-    elseif($query->getType() == 'delete')
+    elseif($query->getType() == NeevoResult::TYPE_DELETE)
       $q .= "DELETE FROM $table$where";
 
     return $q.';';
@@ -287,15 +287,9 @@ class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
 
       case Neevo::TEXT:
         return "'". $this->resource->escapeString($value) ."'";
-
-      case Neevo::BINARY:
-        return "X'" . bin2hex((string) $value) . "'";
       
       case Neevo::DATETIME:
         return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
-
-      case Neevo::DATE:
-        return ($value instanceof DateTime) ? $value->format("'Y-m-d'") : date("'Y-m-d'", $value);
         
       default:
         $this->neevo->error('Unsupported data type');
