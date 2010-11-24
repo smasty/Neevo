@@ -57,6 +57,12 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   
   /** @var array */
   private $ordering = array();
+
+  /** @var string */
+  private $grouping;
+
+  /** @var string */
+  private $having = null;
   
   /** @var array */
   private $columns = array();
@@ -103,6 +109,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function select($cols = '*', $table){
+    $this->reinit();
     $this->type = self::TYPE_SELECT;
     $this->columns = is_string($cols) ? explode(',', $cols) : $cols;
     $this->tableName = $table;
@@ -117,6 +124,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function update($table, array $data){
+    $this->reinit();
     $this->type = self::TYPE_UPDATE;
     $this->tableName = $table;
     $this->values = $data;
@@ -131,6 +139,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function insert($table, array $values){
+    $this->reinit();
     $this->type = self::TYPE_INSERT;
     $this->tableName = $table;
     $this->values = $values;
@@ -153,6 +162,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function delete($table){
+    $this->reinit();
     $this->type = self::TYPE_DELETE;
     $this->tableName = $table;
     return $this;
@@ -165,6 +175,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function sql($sql){
+    $this->reinit();
     $this->type = self::TYPE_SQL;
     $this->sql = $sql;
     return $this;
@@ -191,6 +202,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function where($condition, $value = true){
+    $this->reinit();
     $condition = trim($condition);
     $column = strstr($condition, ' ') ? substr($condition, 0, strpos($condition, ' ')) : $condition;
     $operator = strstr($condition, ' ') ? substr($condition, strpos($condition, ' ')+1) : null;
@@ -225,6 +237,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function  __call($name, $arguments){
     if(in_array(strtolower($name), array('and', 'or'))){
+      $this->reinit();
       $this->conditions[max(array_keys($this->conditions))][3] = strtoupper($name);
       return $this;
     }
@@ -233,12 +246,16 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Sets ORDER clauses. Accepts infinite arguments (rules).
-   * @param string $rules Order rules: "column", "col1, col2 DESC", etc.
+   * Sets ORDER clauses. Accepts infinite arguments (rules) or array.
+   * @param string|array $rules Order rules: "column", "col1, col2 DESC", etc.
    * @return NeevoResult fluent interface
    */
   public function order($rules){
-    $this->ordering = func_get_args();
+    $this->reinit();
+    if(is_array($rules))
+      $this->ordering = $rules;
+    else
+      $this->ordering = func_get_args();
     return $this;
   }
 
@@ -248,8 +265,33 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function orderBy($rules){
-    $this->ordering = func_get_args();
+    if(is_array($rules))
+      return $this->order($rules);
+    else return $this->order(func_get_args());
+  }
+
+
+  /**
+   * Sets GROUP BY clause with optional HAVING.
+   * @param string $rule
+   * @param string $having Optional HAVING
+   * @return NeevoResult fluent interface
+   */
+  public function group($rule, $having = null){
+    $this->reinit();
+    $this->grouping = $rule;
+    if(is_string($having))
+      $this->having = $having;
     return $this;
+  }
+
+
+  /**
+   * Alias for NeevoResult::group().
+   * @return NeevoResult fluent interface
+   */
+  public function groupBy($rule, $having = null){
+    return $this->group($rule, $having);
   }
 
 
@@ -260,6 +302,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function limit($limit, $offset = null){
+    $this->reinit();
     $this->limit = $limit;
     if(isset($offset) && $this->type == self::TYPE_SELECT)
       $this->offset = $offset;
@@ -272,6 +315,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return NeevoResult fluent interface
    */
   public function rand(){
+    $this->reinit();
     $this->neevo->driver()->rand($this);
     return $this;
   }
@@ -455,13 +499,13 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * Fetches all data as associative arrays with $column as a 'key' to row.
    *
    * Format can be:
-   * - NeevoResult::OBJECT - returned as NeevoRow instance
-   * - NeevoResult::ASSOC - returned as associative array (**default**)
+   * - NeevoResult::OBJECT - returned as NeevoRow instance (**default**)
+   * - NeevoResult::ASSOC - returned as associative array
    * @param string $column Column to use as key for row
    * @param int $format Return format
    * @return array|FALSE
    */
-  public function fetchAssoc($column, $format = self::ASSOC){
+  public function fetchAssoc($column, $format = self::OBJECT){
     if(!in_array($column, $this->columns) || !in_array('*', $this->columns)){
       $this->columns[] = $column;
       $this->performed = false; // If query was executed without needed column, force execution.
@@ -630,6 +674,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   /** @internal */
   public function reinit(){
     $this->performed = false;
+    $this->data = null;
+    $this->resultSet = null;
   }
 
 
@@ -696,6 +742,22 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function getOrdering(){
     return $this->ordering;
+  }
+
+  /**
+   * Query GROUP BY fraction
+   * @return string
+   */
+  public function getGrouping(){
+    return $this->grouping;
+  }
+
+  /**
+   * Query HAVING fraction
+   * @return string
+   */
+  public function getHaving(){
+    return $this->having;
   }
 
   /**

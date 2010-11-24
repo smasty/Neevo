@@ -40,6 +40,7 @@ class NeevoQueryBuilder{
 
     $where = '';
     $order = '';
+    $group = '';
     $limit = '';
     $q = '';
 
@@ -52,14 +53,17 @@ class NeevoQueryBuilder{
       $where = $this->buildWhere($query);
 
     if($query->getOrdering())
-      $order = $this->buildOrder($query);
+      $order = $this->buildOrdering($query);
+
+    if($query->getGrouping())
+      $group = $this->buildGrouping($query);
 
     if($query->getLimit()) $limit = ' LIMIT ' .$query->getLimit();
     if($query->getOffset()) $limit .= ' OFFSET ' .$query->getOffset();
 
     if($query->getType() == NeevoResult::TYPE_SELECT){
       $cols = $this->buildSelectCols($query);
-      $q .= "SELECT $cols FROM $table$where$order$limit";
+      $q .= "SELECT $cols FROM $table$where$group$order$limit";
     }
 
     elseif($query->getType() == NeevoResult::TYPE_INSERT && $query->getValues()){
@@ -151,8 +155,19 @@ class NeevoQueryBuilder{
    * @param NeevoResult $query NeevoResult instance
    * @return string
    */
-  protected function buildOrder(NeevoResult $query){
+  protected function buildOrdering(NeevoResult $query){
     return ' ORDER BY ' . join(', ', $query->getOrdering());
+  }
+
+
+  /**
+   * Builds GROUP BY statement for queries
+   * @param NeevoResult $query NeevoResult instance
+   * @return string
+   */
+  protected function buildGrouping(NeevoResult $query){
+    $having = $query->getHaving() ? ' HAVING ' . (string) $query->getHaving() : '';
+    return ' GROUP BY ' . $query->getGrouping() . $having;
   }
 
 

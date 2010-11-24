@@ -235,6 +235,7 @@ class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
 
     $where = '';
     $order = '';
+    $group = '';
     $limit = '';
     $q = '';
 
@@ -247,14 +248,17 @@ class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
       $where = $this->buildWhere($query);
 
     if($query->getOrdering())
-      $order = $this->buildOrder($query);
+      $order = $this->buildOrdering($query);
+
+    if($query->getGrouping())
+      $group = $this->buildGrouping($query);
 
     if($query->getLimit()) $limit = " LIMIT " .$query->getLimit();
     if($query->getOffset()) $limit .= " OFFSET " .$query->getOffset();
 
     if($query->getType() == NeevoResult::TYPE_SELECT){
       $cols = $this->buildSelectCols($query);
-      $q .= "SELECT $cols FROM $table$where$order$limit";
+      $q .= "SELECT $cols FROM $table$where$group$order$limit";
     }
 
     elseif($query->getType() == NeevoResult::TYPE_INSERT && $query->getValues()){
