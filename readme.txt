@@ -69,7 +69,9 @@ Supported drivers
 Todo
 ====
 
- - Better site ;-)
+ - WHERE, ORDER BY test coverage
+ - NeevoCache test coverage
+ - Neevo class test coverage
 
  - PDO driver
 
@@ -85,9 +87,10 @@ Usage:
 
 Options:
 
-  -d=<drivers>  Comma-separated list of drivers to include. Defaults to all drivers.
+  -d=<drivers>  Comma-separated list of drivers to include. Defaults to all drivers. (No space between!)
   -h            Displays help.
 
 
 Minification functions are written by Jakub Vrana (http://php.vrana.cz) for his
-Adminer (http://adminer.org) licensed under Apache license 2.0 and are used with his permission.
+Adminer (http://adminer.org) licensed under Apache license 2.0 and are used with
+his kind permission.
