@@ -4,6 +4,7 @@ error_reporting(E_ALL | E_STRICT);
 
 $start = microtime(true);
 
+// CLI options
 $opts = getopt('bd::');
 
 if(isset($opts['d'])){
@@ -12,17 +13,13 @@ if(isset($opts['d'])){
   else $driver = 'mysql';
 } else $driver = 'mysql';
 
-if(isset($opts['b']))
-  define('DEBUG', true);
-else
-  define('DEBUG', false);
 
-
+// Testing interface
 include_once dirname(__FILE__) . '/connect.php';
 
 $tests = glob(dirname(__FILE__).'/*.phpt');
 
-echo 'Using driver ', driver(), "...\n";
+echo 'Driver: ', driver(), "\n";
 
 foreach($tests as $test){
 
@@ -30,15 +27,16 @@ foreach($tests as $test){
   include $test;
   $file = basename($test);
 
-  $result = ob_get_clean();
-  if(!preg_match("~^--TEST--\n(.*)\n--FILE--\n(.*)--EXPECT--\n(.*)~s", $result, $matches))
+  if(!preg_match("~^--TEST--\n(.*)\n--FILE--\n(.*)--EXPECT--\n(.*)~s", ob_get_clean(), $matches))
     echo "Invalid $file\n";
 
   elseif($matches[2] !== $matches[3])
     echo "$file failed - $matches[1]\n";
 
-  if(DEBUG)
-    echo $matches[2], "\n------\n", $matches[3], "\n------\n";
+  // Debug mode (-b option)
+  if(isset($opts['b'])){
+    echo "$file\nEXPECT:\n$matches[3]\n-\nRESULT:\n$matches[3]\n-\n\n";
+  }
 }
 
 echo "\n";

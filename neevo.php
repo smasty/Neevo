@@ -73,12 +73,16 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const REVISION = 195;
+  const REVISION = 196;
 
   // Data types
   const BOOL = 30;
   const TEXT = 33;
   const DATETIME = 36;
+
+  // Fetch formats
+  const OBJECT = 1;
+  const ASSOC = 2;
 
 
   /**

@@ -81,10 +81,6 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   const TYPE_SQL = 'type_sql';
 
 
-  const OBJECT = 1;
-  const ASSOC = 2;
-
-
   /**
    * Query base constructor
    * @param array $object Reference to instance of Neevo class which initialized Query
@@ -425,12 +421,12 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * Fetches the first row in result set.
    *
    * Format can be:
-   * - NeevoResult::OBJECT - returned as NeevoRow instance (**default**)
-   * - NeevoResult::ASSOC - returned as associative array
+   * - Neevo::OBJECT - returned as NeevoRow instance (**default**)
+   * - Neevo::ASSOC - returned as associative array
    * @param int $format Return format
    * @return NeevoRow|array|FALSE
    */
-  public function fetchRow($format = self::OBJECT){
+  public function fetchRow($format = Neevo::OBJECT){
     $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
     if(!$resultSet) // Error
       return $this->neevo->error('Fetching data failed');
@@ -440,7 +436,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     $this->free();
     if($result === false)
       return false;
-    if($format == self::OBJECT)
+    if($format == Neevo::OBJECT)
       $result = new NeevoRow($result, $this);
     return $result;
   }
@@ -451,11 +447,13 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @return mixed|FALSE
    */
   public function fetchSingle(){
-    $result = $this->fetchRow();
-    if($result === false)
+    $result = $this->fetchRow(Neevo::ASSOC);
+    if($result === false || $result === null)
       return false;
-    if($result->isSingle())
-      return $result->getSingle();
+
+    if(count($result) == 1)
+      return reset($result);
+
     else $this->neevo->error('More than one columns in the row, cannot fetch single');
   }
 
@@ -463,7 +461,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   /**
    * Fetches data as $key=>$value pairs.
    *
-   * If $key and $value columns are not defined in SELECT statement, they will
+   * If $key and $value columns are not defined in the statement, they will
    * be automatically added to statement and others will be removed.
    * @param string $key Column to use as an array key.
    * @param string $value Column to use as an array value.
@@ -499,13 +497,13 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * Fetches all data as associative arrays with $column as a 'key' to row.
    *
    * Format can be:
-   * - NeevoResult::OBJECT - returned as NeevoRow instance (**default**)
-   * - NeevoResult::ASSOC - returned as associative array
+   * - Neevo::OBJECT - returned as NeevoRow instance (**default**)
+   * - Neevo::ASSOC - returned as associative array
    * @param string $column Column to use as key for row
    * @param int $format Return format
    * @return array|FALSE
    */
-  public function fetchAssoc($column, $format = self::OBJECT){
+  public function fetchAssoc($column, $format = Neevo::OBJECT){
     if(!in_array($column, $this->columns) || !in_array('*', $this->columns)){
       $this->columns[] = $column;
       $this->performed = false; // If query was executed without needed column, force execution.
@@ -516,7 +514,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
     $rows = array();
     foreach($result as $row){
-      if($format == self::OBJECT)
+      if($format == Neevo::OBJECT)
         $row = new NeevoRow($row, $this); // Rows as NeevoRow.
       $rows[$row[$column]] = $row;
     }
