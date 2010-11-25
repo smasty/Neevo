@@ -35,7 +35,7 @@ foreach($tests as $test){
 
   // Debug mode (-b option)
   if(isset($opts['b'])){
-    echo "$file\nEXPECT:\n$matches[3]\n-\nRESULT:\n$matches[3]\n-\n\n";
+    echo "$file\nEXPECT:\n$matches[3]\n-\nRESULT:\n$matches[2]\n-\n\n";
   }
 }
 

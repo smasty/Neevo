@@ -204,7 +204,9 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     $operator = strstr($condition, ' ') ? substr($condition, strpos($condition, ' ')+1) : null;
 
     if(is_null($value)){
-      $operator = 'IS';
+      if(strtoupper($operator) === 'NOT')
+        $operator = ' NOT';
+      $operator = 'IS' . (string) $operator;
       $value = 'NULL';
     }
     elseif($value === true){

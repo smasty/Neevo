@@ -69,9 +69,7 @@ Supported drivers
 Todo
 ====
 
- - WHERE, ORDER BY test coverage
- - NeevoCache test coverage
- - Neevo class test coverage
+ - better test coverage
 
  - PDO driver
 

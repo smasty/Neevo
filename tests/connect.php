@@ -2,8 +2,11 @@
 
 include_once dirname(__FILE__). '/../neevo.php';
 
+// Cache
+$cache = new NeevoCacheSession;
+
 // MySQL
-$mysql = new Neevo('MySQL', false);
+$mysql = new Neevo('MySQL', $cache);
 $mysql->connect(array(
   'host' => 'localhost',
   'database' => 'neevo',
@@ -14,19 +17,19 @@ $mysql->setErrorReporting(Neevo::E_STRICT);
 
 
 // SQLite
-$sqlite = new Neevo('SQLite', false);
+$sqlite = new Neevo('SQLite', $cache);
 $sqlite->connect(array('file' => 'tests/neevo.sqlite'));
 $sqlite->setErrorReporting(Neevo::E_STRICT);
 
 
 // SQLite 3
-$sqlite3 = new Neevo('SQLite3', false);
+$sqlite3 = new Neevo('SQLite3', $cache);
 $sqlite3->connect(array('file' => 'tests/neevo-sqlite3.sqlite'));
 $sqlite3->setErrorReporting(Neevo::E_STRICT);
 
 
 // MySQLi
-$mysqli = new Neevo('MySQLi', false);
+$mysqli = new Neevo('MySQLi', $cache);
 $mysqli->connect(array(
   'host' => 'localhost',
   'database' => 'neevo',
