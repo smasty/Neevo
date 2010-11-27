@@ -4,7 +4,7 @@ NeevoResult->fetchPairs()
 <?php
 
 // Also check columns auto-adding
-print_r(db()->select('web', 'author')->order('id')->limit(2)->fetchPairs('id', 'name'));
+print_r($db->select('web', 'author')->order('id')->limit(2)->fetchPairs('id', 'name'));
 
 ?>
 --EXPECT--

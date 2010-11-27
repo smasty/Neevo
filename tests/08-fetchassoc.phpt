@@ -3,7 +3,7 @@ NeevoResult->fetchAssoc();
 --FILE--
 <?php
 
-print_r(db()->select('id, title', 'software')->order('id')->limit(3)->fetchAssoc('id', Neevo::ASSOC));
+print_r($db->select('id, title', 'software')->order('id')->limit(3)->fetchAssoc('id', Neevo::ASSOC));
 
 ?>
 --EXPECT--

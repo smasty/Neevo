@@ -3,9 +3,7 @@ GROUP BY testing
 --FILE--
 <?php
 
-$g = db()->select('aid, SUM(id) as sum', 'software')->group('aid')->orderBy('aid ASC');
-
-foreach($g as $r)
+foreach($db->select('aid, SUM(id) as sum', 'software')->group('aid')->orderBy('aid ASC') as $r)
   echo "$r->aid-$r->sum\n";
 
 ?>

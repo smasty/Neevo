@@ -17,11 +17,9 @@ if(isset($opts['d'])){
 // Testing interface
 include_once dirname(__FILE__) . '/connect.php';
 
-$tests = glob(dirname(__FILE__).'/*.phpt');
+echo 'Driver: ', $driver, "\n";
 
-echo 'Driver: ', driver(), "\n";
-
-foreach($tests as $test){
+foreach(glob(dirname(__FILE__).'/*.phpt') as $test){
 
   ob_start();
   include $test;
@@ -30,16 +28,13 @@ foreach($tests as $test){
   if(!preg_match("~^--TEST--\n(.*)\n--FILE--\n(.*)--EXPECT--\n(.*)~s", ob_get_clean(), $matches))
     echo "Invalid $file\n";
 
-  elseif($matches[2] !== $matches[3])
+  elseif($matches[2] !== $matches[3]){
     echo "$file failed - $matches[1]\n";
-
-  // Debug mode (-b option)
-  if(isset($opts['b'])){
-    echo "$file\nEXPECT:\n$matches[3]\n-\nRESULT:\n$matches[2]\n-\n\n";
+    
+    // Debug mode (-b option)
+    if(isset($opts['b']))
+      echo "EXPECT:\n$matches[3]\n-\nRESULT:\n$matches[2]\n-\n\n";
   }
 }
 
-echo "\n";
-printf("%.3F sec, %d KB\n", microtime(true) - $start, memory_get_peak_usage() / 1024);
-
-?>
+printf("\n%.3F sec, %d KB\n", microtime(true) - $start, memory_get_peak_usage() / 1024);

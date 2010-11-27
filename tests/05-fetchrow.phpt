@@ -3,7 +3,7 @@ NeevoResult->fetchRow()
 --FILE--
 <?php
 
-print_r(db()->select('id, name, web', 'author')->order('id')->limit(1)->fetchRow(Neevo::ASSOC));
+print_r($db->select('id, name, web', 'author')->order('id')->limit(1)->fetchRow(Neevo::ASSOC));
 
 ?>
 --EXPECT--

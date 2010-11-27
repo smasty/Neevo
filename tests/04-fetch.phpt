@@ -3,9 +3,7 @@ NeevoResult->fetch() and iterating
 --FILE--
 <?php
 
-$arr = db()->select('id, name', 'author')->order('id')->limit(2);
-
-foreach($arr as $row){
+foreach($db->select('id, name', 'author')->order('id')->limit(2) as $row){
   echo "$row->name ($row->id)\n";
 }
 
