@@ -103,26 +103,22 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator, Arra
 
   /* Implementation of Array Access */
 
-  /** @internal */
   public function offsetSet($offset, $value){
     if(isset($this->data[$offset]))
       $this->data[$offset] = $value;
   }
 
 
-  /** @internal */
   public function offsetExists($offset){
     return isset($this->data[$offset]);
   }
 
 
-  /** @internal */
   public function offsetUnset($offset){
     unset($this->data[$offset]);
   }
 
 
-  /** @internal */
   public function offsetGet($offset){
     return isset($this->data[$offset]) ? $this->data[$offset] : null;
   }

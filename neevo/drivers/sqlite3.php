@@ -22,6 +22,9 @@
  * - charset => Character encoding to set (defaults to utf-8)
  * - dbcharset => Database character encoding (will be converted to 'charset')
  * - resource (instance of SQLite3) => Existing SQLite 3 resource
+ *
+ * Since SQLite 3 only allows unbuffered queries, number of result rows and seeking
+ * is not supported for this driver.
  * 
  * @author Martin Srank
  * @package NeevoDrivers
@@ -98,6 +101,8 @@ class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Frees memory used by result
+   *
+   * NeevoResult automatically NULLs the resource, so this is not necessary.
    * @param SQLite3Result $resultSet
    * @return bool
    */
@@ -166,13 +171,15 @@ class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Move internal result pointer
-   * @param SQLite3Result $resultSet Query resource
-   * @param int $row_number Row number of the new result pointer.
+   *
+   * Not supported because of unbuffered queries.
+   * @param SQLite3Result $resultSet
+   * @param int $row_number
    * @return bool
-   * @throws NotImplementedException
+   * @throws NotSupportedException
    */
   public function seek($resultSet, $row_number){
-    throw new NotImplementedException();
+    throw new NotSupportedException('Not supported on unbuffered queries.');
   }
 
 
@@ -197,12 +204,14 @@ class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Number of rows in result set.
+   *
+   * Not supported because of unbuffered queries.
    * @param SQLite3Result $resultSet
    * @return int|FALSE
-   * @throws NotImplementedException
+   * @throws NotSupportedException
    */
   public function rows($resultSet){
-    throw new NotImplementedException();
+    throw new NotSupportedException('Not supported on unbuffered queries.');
   }
 
 

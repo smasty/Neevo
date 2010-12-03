@@ -73,7 +73,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo version
-  const REVISION = 199;
+  const REVISION = 200;
 
   // Data types
   const BOOL = 30;
@@ -88,7 +88,7 @@ class Neevo{
   /**
    * Neevo
    * @param string $driver Name of driver to use.
-   * @param INeevoCache|bool $cache Cache to use. NULL for no cache.
+   * @param INeevoCache $cache Cache to use. NULL for no cache.
    * @return void
    * @throws NeevoException
    */
@@ -276,7 +276,7 @@ class Neevo{
 
 
   /**
-   * Last executed command info
+   * Last executed query info
    * @return array
    */
   public function last(){
@@ -405,8 +405,7 @@ class Neevo{
    * @return string
    */
   public function errorHandler(){
-    $func = $this->errorHandler;
-    if( (is_array($func) && !method_exists($func[0], $func[1]) ) || ( !is_array($func) && !function_exists($func) ) )
+    if(!is_callable($this->errorHandler))
       $this->errorHandler = array('Neevo', 'defaultErrorHandler');
     return $this->errorHandler;
   }
@@ -418,7 +417,7 @@ class Neevo{
    * @return void
    */
   public function setErrorHandler($callback){
-    if(function_exists($callback))
+    if(is_callable($callback))
       $this->errorHandler = $callback;
     else $this->errorHandler = array('Neevo', 'defaultErrorHandler');
   }
@@ -438,7 +437,7 @@ class Neevo{
       try{
         $err = $this->driver->error($neevo_msg);
       } catch(NotImplementedException $e){
-          $err = $neevo_msg;
+          $err = array($neevo_msg, null);
         }
       $exception = new NeevoException($err[0], $err[1]);
 
@@ -523,9 +522,6 @@ class Neevo{
  */
 class NeevoException extends Exception{};
 
-if(!class_exists('NotImplementedException', false)){
-  class NotImplementedException extends Exception{};
-}
 
 /**
  * Object representing SQL literal value.
@@ -553,4 +549,16 @@ class NeevoLiteral {
     return $this->value;
   }
   
+}
+
+
+
+/* Other exceptions */
+
+if(!class_exists('NotImplementedException', false)){
+  class NotImplementedException extends Exception{};
+}
+
+if(!class_exists('NotSupportedException', false)){
+  class NotSupportedException extends Exception{};
 }
