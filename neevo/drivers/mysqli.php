@@ -41,7 +41,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * If driver extension is loaded, sets Neevo reference, otherwise throw exception
-   * @param Neevo $neevo
+   * @param Neevo
    * @throws NeevoException
    * @return void
    */
@@ -53,7 +53,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Creates connection to database
-   * @param array $config Configuration options
+   * @param array Configuration options
    * @return void
    */
   public function connect(array $config){
@@ -104,7 +104,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Frees memory used by result
-   * @param mysqli_result $resultSet
+   * @param mysqli_result
    * @return bool
    */
   public function free($resultSet){}
@@ -112,7 +112,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Executes given SQL query
-   * @param string $query_string Query-string.
+   * @param string Query-string.
    * @return mysqli_result|bool
    */
   public function query($query_string){
@@ -122,7 +122,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Error message with driver-specific additions
-   * @param string $neevo_msg Error message
+   * @param string Error message
    * @return array Format: array($error_message, $error_number)
    */
   public function error($neevo_msg){
@@ -139,7 +139,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Fetches row from given Query result set as associative array.
-   * @param mysqli_result $resultSet Result set
+   * @param mysqli_result Result set
    * @return array
    */
   public function fetch($resultSet){
@@ -149,7 +149,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Fetches all rows from given result set as associative arrays.
-   * @param mysqli_result $resultSet Result set
+   * @param mysqli_result Result set
    * @return array
    */
   public function fetchAll($resultSet){
@@ -159,8 +159,8 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Move internal result pointer
-   * @param mysqli_result $resultSet Query resource
-   * @param int $row_number Row number of the new result pointer.
+   * @param mysqli_result Query resource
+   * @param int Row number of the new result pointer.
    * @return bool
    */
   public function seek($resultSet, $row_number){
@@ -179,7 +179,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoResult $query NeevoResult instance
+   * @param NeevoResult NeevoResult instance
    * @return NeevoResult
    */
   public function rand(NeevoResult $query){
@@ -189,7 +189,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Number of rows in result set.
-   * @param mysqli_result $resultSet
+   * @param mysqli_result
    * @return int|FALSE
    */
   public function rows($resultSet){
@@ -210,7 +210,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Name of PRIMARY KEY column for table
-   * @param string $table
+   * @param string
    * @return string|null
    */
   public function getPrimaryKey($table){
@@ -227,8 +227,8 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Escapes given value
-   * @param mixed $value
-   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param mixed
+   * @param int Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @return mixed
    */
   public function escape($value, $type){

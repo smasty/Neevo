@@ -22,7 +22,7 @@ interface INeevoCache {
 
   /**
    * Load stored data
-   * @param string $key
+   * @param string
    * @return mixed|null null if not found
    */
   public function load($key);
@@ -30,8 +30,8 @@ interface INeevoCache {
 
   /**
    * Save data
-   * @param string $key
-   * @param mixed $value
+   * @param string
+   * @param mixed
    * @return void
    */
   public function save($key, $value);

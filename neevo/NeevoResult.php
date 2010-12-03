@@ -83,9 +83,9 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Query base constructor
-   * @param array $object Reference to instance of Neevo class which initialized Query
-   * @param string $type Query type. Possible values: select, insert, update, delete
-   * @param string $table Table to interact with
+   * @param array Reference to instance of Neevo class which initialized Query
+   * @param string Query type. Possible values: select, insert, update, delete
+   * @param string Table to interact with
    * @return void
    */
   public function  __construct(Neevo $object){
@@ -100,8 +100,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Creates SELECT query
-   * @param string|array $cols Columns to select (array or comma-separated list)
-   * @param string $table Table name
+   * @param string|array Columns to select (array or comma-separated list)
+   * @param string Table name
    * @return NeevoResult fluent interface
    */
   public function select($cols = '*', $table){
@@ -115,8 +115,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Creates UPDATE query
-   * @param string $table Table name
-   * @param array $data Data to update
+   * @param string Table name
+   * @param array Data to update
    * @return NeevoResult fluent interface
    */
   public function update($table, array $data){
@@ -130,8 +130,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Creates INSERT query
-   * @param string $table Table name
-   * @param array $values Values to insert
+   * @param string Table name
+   * @param array Values to insert
    * @return NeevoResult fluent interface
    */
   public function insert($table, array $values){
@@ -154,7 +154,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Creates DELETE query
-   * @param string $table Table name
+   * @param string Table name
    * @return NeevoResult fluent interface
    */
   public function delete($table){
@@ -167,7 +167,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Creates query with direct SQL
-   * @param string $sql SQL code
+   * @param string SQL code
    * @return NeevoResult fluent interface
    */
   public function sql($sql){
@@ -193,9 +193,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * | `where('field', array(1, 2))`     | `field IN(1, 2)`
    * | `where('field NOT', array(1, 2))` | `field NOT IN(1,2)`
    * | `where('field', new NeevoLiteral('NOW()'))`  | `field = NOW()`
-   * @param string $where 
-   * @param string|array|bool|null $value
-   * @return NeevoResult fluent interface
+   * @param string
+   * @param string|array|bool|null   * @return NeevoResult fluent interface
    */
   public function where($condition, $value = true){
     $this->reinit();
@@ -245,7 +244,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Sets ORDER clauses. Accepts infinite arguments (rules) or array.
-   * @param string|array $rules Order rules: "column", "col1, col2 DESC", etc.
+   * @param string|array Order rules: "column", "col1, col2 DESC", etc.
    * @return NeevoResult fluent interface
    */
   public function order($rules){
@@ -271,8 +270,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Sets GROUP BY clause with optional HAVING.
-   * @param string $rule
-   * @param string $having Optional HAVING
+   * @param string
+   * @param string Optional HAVING
    * @return NeevoResult fluent interface
    */
   public function group($rule, $having = null){
@@ -295,8 +294,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Sets LIMIT and OFFSET clause.
-   * @param int $limit
-   * @param int $offset
+   * @param int
+   * @param int
    * @return NeevoResult fluent interface
    */
   public function limit($limit, $offset = null){
@@ -321,7 +320,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Prints out syntax highlighted query.
-   * @param bool $return Return output instead of printing it?
+   * @param bool Return output instead of printing it?
    * @return string|NeevoResult fluent interface
    */
   public function dump($return = false){
@@ -411,7 +410,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * Format can be:
    * - Neevo::OBJECT - returned as NeevoRow instance (**default**)
    * - Neevo::ASSOC - returned as associative array
-   * @param int $format Return format
+   * @param int Return format
    * @return NeevoRow|array|FALSE
    */
   public function fetchRow($format = Neevo::OBJECT){
@@ -451,8 +450,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    *
    * If $key and $value columns are not defined in the statement, they will
    * be automatically added to statement and others will be removed.
-   * @param string $key Column to use as an array key.
-   * @param string $value Column to use as an array value.
+   * @param string Column to use as an array key.
+   * @param string Column to use as an array value.
    * @return array|FALSE
    */
   public function fetchPairs($key, $value){
@@ -487,8 +486,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * Format can be:
    * - Neevo::OBJECT - returned as NeevoRow instance (**default**)
    * - Neevo::ASSOC - returned as associative array
-   * @param string $column Column to use as key for row
-   * @param int $format Return format
+   * @param string Column to use as key for row
+   * @param int Return format
    * @return array|FALSE
    */
   public function fetchAssoc($column, $format = Neevo::OBJECT){
@@ -524,7 +523,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Move internal result pointer
-   * @param int $offset Row number of the new result pointer.
+   * @param int Row number of the new result pointer.
    * @return bool
    */
   public function seek($offset){
@@ -595,8 +594,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Basic information about query
-   * @param bool $hide_password Password will be replaced by '*****'.
-   * @param bool $exclude_connection Connection info will be excluded.
+   * @param bool Password will be replaced by '*****'.
+   * @param bool Connection info will be excluded.
    * @return array
    */
   public function info($hide_password = true, $exclude_connection = false){
@@ -788,7 +787,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /**
    * Highlights given SQL code
-   * @param string $sql
+   * @param string
    * @return string
    * @internal
    */

@@ -81,7 +81,7 @@ class NeevoConnection{
 
   /**
    * Basic information about current connection
-   * @param bool $hide_password Password will be replaced by '*****'.
+   * @param bool Password will be replaced by '*****'.
    * @return array
    */
   public function info($hide_password = true){
@@ -94,9 +94,9 @@ class NeevoConnection{
 
   /**
    * Create alias for configuration value
-   * @param array $opts
-   * @param string $key
-   * @param string $alias Alias of $key
+   * @param array
+   * @param string
+   * @param string Alias of $key
    * @return void
    */
   public static function alias(&$opts, $key, $alias){

@@ -72,8 +72,8 @@ class Neevo{
   const E_HANDLE  = 12;
   const E_STRICT  = 13;
 
-  // Neevo version
-  const REVISION = 200;
+  // Neevo revision
+  const REVISION = 201;
 
   // Data types
   const BOOL = 30;
@@ -87,12 +87,12 @@ class Neevo{
 
   /**
    * Neevo
-   * @param string $driver Name of driver to use.
-   * @param INeevoCache $cache Cache to use. NULL for no cache.
+   * @param string Name of driver to use.
+   * @param INeevoCache Cache to use. NULL for no cache.
    * @return void
    * @throws NeevoException
    */
-  public function __construct($driver = null, $cache = null){
+  public function __construct($driver = null, INeevoCache $cache = null){
     if(!$driver)
       $driver = self::$defaultDriver;
     
@@ -115,8 +115,8 @@ class Neevo{
   /**
    * Creates and uses a new connection to a server.
    *
-   * Configuration is different for each driver - see the API for your driver.
-   * @param array|string|Traversable $config Driver-specific configuration (array, parsable string or traversable object)
+   * Configuration can be different - see the API for your driver.
+   * @param array|string|Traversable Driver-specific configuration (array, parsable string or traversable object)
    * @return Neevo fluent interface
    */
   public function connect($config){
@@ -139,7 +139,7 @@ class Neevo{
    * Creates new NeevoConnection instance
    *
    * Options for connecting are different for each driver - see an API for your driver.
-   * @param array|string|Traversable $config Driver-specific configuration (array, parsable string or traversable object)
+   * @param array|string|Traversable Driver-specific configuration (array, parsable string or traversable object)
    * @return NeevoConnection
    * @internal
    */
@@ -150,7 +150,7 @@ class Neevo{
 
   /**
    * Sets Neevo Connection to use
-   * @param NeevoConnection $connection Instance to use
+   * @param NeevoConnection Instance to use
    * @internal
    */
   private function setConnection(NeevoConnection $connection){
@@ -169,7 +169,7 @@ class Neevo{
 
   /**
    * Uses given Neevo SQL driver
-   * @param string $driver
+   * @param string
    * @return Neevo
    */
   public function useDriver($driver){
@@ -179,8 +179,8 @@ class Neevo{
 
 
   /**
-   * Sets Neevo SQL driver to use
-   * @param string $driver Driver name
+   * Sets Neevo driver to use
+   * @param string Driver name
    * @throws NeevoException
    * @return void
    * @internal
@@ -222,24 +222,18 @@ class Neevo{
 
 
   /**
-   * Sets Neevo cache. If not defined, tries to create cache automatically.
-   * @param INeevoCache|FALSE $cache FALSE to disable autocache.
+   * Sets Neevo cache.
+   * @param INeevoCache
    * @return void
    * @internal
    */
-  private function setCache($cache = null){
+  private function setCache(INeevoCache $cache = null){
     // Disable cache.
-    if($cache === false | $cache === null)
+    if($cache === false || $cache === null)
       return;
 
     // INeevoCache object passed
-    elseif(is_object($cache) && in_array("INeevoCache", class_implements($cache, false)))
-      $this->cache = $cache;
-
-    // Not proper value passed
-    else
-      throw new NeevoException('Argument 2 passed to Neevo::__construct() must be boolean or implement interface INeevoCache');
-
+    $this->cache = $cache;
   }
   
   
@@ -254,7 +248,7 @@ class Neevo{
 
   /**
    * Load stored data
-   * @param string $key
+   * @param string
    * @return mixed|null null if not found
    */
   public function cacheLoad($key){
@@ -265,8 +259,8 @@ class Neevo{
 
   /**
    * Save data
-   * @param string $key
-   * @param mixed $value
+   * @param string
+   * @param mixed
    * @return void
    */
   public function cacheSave($key, $value){
@@ -286,7 +280,7 @@ class Neevo{
 
   /**
    * Sets last executed query
-   * @param array $last Last executed query
+   * @param array Last executed query
    * @return void
    * @internal
    */
@@ -307,8 +301,8 @@ class Neevo{
 
   /**
    * Creates SELECT query
-   * @param string|array $cols Columns to select (array or comma-separated list)
-   * @param string $table Table name
+   * @param string|array Columns to select (array or comma-separated list)
+   * @param string Table name
    * @return NeevoResult fluent interface
    */
   public function select($columns = '*', $table){
@@ -319,8 +313,8 @@ class Neevo{
 
   /**
    * Creates INSERT query
-   * @param string $table Table name
-   * @param array $values Values to insert
+   * @param string Table name
+   * @param array Values to insert
    * @return NeevoResult fluent interface
    */
   public function insert($table, array $values){
@@ -340,8 +334,8 @@ class Neevo{
 
   /**
    * Creates UPDATE query
-   * @param string $table Table name
-   * @param array $data Data to update
+   * @param string Table name
+   * @param array Data to update
    * @return NeevoResult fluent interface
    */
   public function update($table, array $data){
@@ -352,7 +346,7 @@ class Neevo{
 
   /**
    * Creates DELETE query
-   * @param string $table Table name
+   * @param string Table name
    * @return NeevoResult fluent interface
    */
   public function delete($table){
@@ -363,7 +357,7 @@ class Neevo{
 
   /**
    * Creates query with direct SQL
-   * @param string $sql SQL code
+   * @param string SQL code
    * @return NeevoResult fluent interface
    */
   public function sql($sql){
@@ -390,7 +384,7 @@ class Neevo{
    * - Neevo::E_NONE: Turns Neevo error-reporting off
    * - Neevo::E_HANDLE: Neevo exceptions are sent to defined handler
    * - Neevo::E_STRICT: Throws all Neevo exceptions (default)
-   * @param int $value Error-reporting level.
+   * @param int Error-reporting level.
    * @return void
    */
   public function setErrorReporting($value){
@@ -401,7 +395,6 @@ class Neevo{
 
   /**
    * Error-handler function name
-   * @param string $handler_function Name of error-handler function
    * @return string
    */
   public function errorHandler(){
@@ -413,7 +406,7 @@ class Neevo{
 
   /**
    * Sets error-handler function
-   * @param callback $callback Name of error-handler function
+   * @param callback Name of error-handler function
    * @return void
    */
   public function setErrorHandler($callback){
@@ -426,7 +419,7 @@ class Neevo{
   /**
    * If error_reporting is E_STRICT, throws NeevoException available to catch.
    * Sends NeevoException instance to defined handler if E_HANDLE, does nothing if E_NONE.
-   * @param string $neevo_msg Error message
+   * @param string Error message
    * @return false
    * @throws NeevoException
    */
@@ -453,7 +446,7 @@ class Neevo{
 
   /**
    * Neevo's default error handler function
-   * @param NeevoException $exception
+   * @param NeevoException
    * @return void
    * @internal
    */
@@ -499,7 +492,7 @@ class Neevo{
 
   /**
    * Basic information about library
-   * @param bool $hide_password Password will be replaced by '*****'.
+   * @param bool Password will be replaced by '*****'.
    * @return array
    */
   public function info($hide_password = true){
@@ -534,7 +527,7 @@ class NeevoLiteral {
 
   /**
    * Creates literal value.
-   * @param string $value
+   * @param string
    */
   public function __construct($value) {
     $this->value = $value;

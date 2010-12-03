@@ -46,7 +46,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * If driver extension is loaded, sets Neevo reference, otherwise throw exception
-   * @param Neevo $neevo
+   * @param Neevo
    * @throws NeevoException
    * @return void
    */
@@ -58,7 +58,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Creates connection to database
-   * @param array $config Configuration options
+   * @param array Configuration options
    * @return void
    */
   public function connect(array $config){
@@ -94,7 +94,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Frees memory used by result
-   * @param SQLiteResult $resultSet
+   * @param SQLiteResult
    * @return bool
    */
   public function free($resultSet){
@@ -104,7 +104,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Executes given SQL query
-   * @param string $query_string Query-string.
+   * @param string Query-string.
    * @return SQLiteResult|bool
    */
   public function query($query_string){
@@ -121,7 +121,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Error message with driver-specific additions
-   * @param string $neevo_msg Error message
+   * @param string Error message
    * @return array Format: array($error_message, $error_number)
    */
   public function error($neevo_msg){
@@ -133,7 +133,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Fetches row from given Query result set as associative array.
-   * @param SQLiteResult $resultSet Result set
+   * @param SQLiteResult Result set
    * @return array
    */
   public function fetch($resultSet){
@@ -155,7 +155,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Fetches all rows from given result set as associative arrays.
-   * @param SQLiteResult $resultSet Result set
+   * @param SQLiteResult Result set
    * @return array
    */
   public function fetchAll($resultSet){
@@ -182,8 +182,8 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Move internal result pointer
-   * @param SQLiteResult $resultSet Query resource
-   * @param int $row_number Row number of the new result pointer.
+   * @param SQLiteResult Query resource
+   * @param int Row number of the new result pointer.
    * @return bool
    */
   public function seek($resultSet, $row_number){
@@ -202,7 +202,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoResult $query NeevoResult instance
+   * @param NeevoResult NeevoResult instance
    * @return NeevoResult
    */
   public function rand(NeevoResult $query){
@@ -212,7 +212,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Number of rows in result set.
-   * @param SQLiteResult $resultSet
+   * @param SQLiteResult
    * @return int|FALSE
    */
   public function rows($resultSet){
@@ -231,7 +231,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Name of PRIMARY KEY column for table
-   * @param string $table
+   * @param string
    * @return void
    * @throws NotImplementedException
    */
@@ -242,7 +242,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Builds Query from NeevoResult instance
-   * @param NeevoResult $query NeevoResult instance
+   * @param NeevoResult NeevoResult instance
    * @return string the Query
    */
   public function build(NeevoResult $query){
@@ -294,8 +294,8 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Escapes given value
-   * @param mixed $value
-   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param mixed
+   * @param int Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @return mixed
    */
   public function escape($value, $type){
