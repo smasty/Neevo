@@ -73,7 +73,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 201;
+  const REVISION = 202;
 
   // Data types
   const BOOL = 30;
@@ -300,7 +300,7 @@ class Neevo{
 
 
   /**
-   * Creates SELECT query
+   * SELECT query factory
    * @param string|array Columns to select (array or comma-separated list)
    * @param string Table name
    * @return NeevoResult fluent interface
@@ -312,7 +312,7 @@ class Neevo{
 
 
   /**
-   * Creates INSERT query
+   * INSERT query factory
    * @param string Table name
    * @param array Values to insert
    * @return NeevoResult fluent interface
@@ -333,7 +333,7 @@ class Neevo{
 
 
   /**
-   * Creates UPDATE query
+   * UPDATE query factory
    * @param string Table name
    * @param array Data to update
    * @return NeevoResult fluent interface
@@ -345,7 +345,7 @@ class Neevo{
 
 
   /**
-   * Creates DELETE query
+   * DELETE query factory
    * @param string Table name
    * @return NeevoResult fluent interface
    */
@@ -356,7 +356,7 @@ class Neevo{
 
 
   /**
-   * Creates query with direct SQL
+   * Direct SQL query factory
    * @param string SQL code
    * @return NeevoResult fluent interface
    */
