@@ -207,7 +207,10 @@ class NeevoQueryBuilder{
    */
   protected function _escapeArray(array $array){
     foreach($array as &$value){
-      if(is_bool($value))
+      if(is_null($value))
+        $value = 'NULL';
+
+      elseif(is_bool($value))
         $value = $this->neevo->driver()->escape($value, Neevo::BOOL);
 
       elseif(is_numeric($value)){
