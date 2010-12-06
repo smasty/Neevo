@@ -32,13 +32,16 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
   /** @var bool */
   private $single = false;
 
+  /** @var mixed */
+  private $singleValue;
+
 
   public function __construct($data, NeevoResult $result){
     $this->data = $data;
     if(count($data) === 1){
       $this->single = true;
       $keys = array_keys($this->data);
-      $this->data = $this->data[$keys[0]];
+      $this->singleValue = $this->data[$keys[0]];
     }
     $this->result = $result;
   }
@@ -46,6 +49,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
 
   /** @internal */
   public function __get($name){
+    if($this->isSingle())
+      return $this->singleValue;
     return $this->data[$name];
   }
 
@@ -70,7 +75,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
 
   /** @internal */
   public function __toString(){
-    if($this->single === true) return (string) $this->data;
+    if($this->single === true)
+      return (string) $this->singleValue;
     return '';
   }
 
@@ -90,7 +96,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
    */
   public function getSingle(){
     if($this->isSingle())
-      return $this->data;
+      return $this->singleValue;
   }
 
 
