@@ -22,12 +22,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
 
   /** @var array */
   private $data = array();
-  
-  /** @var array */
-  private $modified = array();
-  
-  /** @var NeevoResult */
-  private $result;
 
   /** @var bool */
   private $single = false;
@@ -36,14 +30,13 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
   private $singleValue;
 
 
-  public function __construct($data, NeevoResult $result){
+  public function __construct($data){
     $this->data = $data;
     if(count($data) === 1){
       $this->single = true;
       $keys = array_keys($this->data);
       $this->singleValue = $this->data[$keys[0]];
     }
-    $this->result = $result;
   }
 
 
@@ -106,47 +99,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
    */
   public function toArray(){
     return $this->data;
-  }
-
-
-  /**
-   * **Experimental** Update row data
-   *
-   * After changing values in the NeevoRow instance, sends update query to server.
-   * @return int Number of affected rows
-   */
-  public function update(){
-    if(!empty($this->modified) && $this->modified !== $this->data){
-      $q = $this->result;
-      try{
-        $primary = $q->getPrimary();
-      } catch(NotImplementedException $e){
-        return $this->result->neevo()->error('Functionality not implemented in this driver.');
-      }
-      if(!$this->data[$primary])
-        return $this->result->neevo()->error('Cannot get primary_key value');
-
-      return $q->neevo()->update($q->getTable(), $this->modified)->where($primary, $this->data[$primary])->limit(1)->affectedRows();
-    }
-  }
-
-
-  /**
-   * **Experimental** Deletes row
-   * @return int Number of affected rows
-   */
-  public function delete(){
-    $q = $this->result;
-    try{
-      $primary = $q->getPrimary();
-    } catch(NotImplementedException $e){
-      return $this->result->neevo()->error('Functionality not implemented in this driver.');
-    }
-
-    if($primary === null)
-      return $this->result->neevo()->error('Cannot get primary_key value');
-
-    return $q->neevo()->delete($q->getTable())->where($primary, $this->data[$primary])->limit(1)->affectedRows();
   }
 
 
