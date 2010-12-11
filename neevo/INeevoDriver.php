@@ -17,14 +17,17 @@
  * Interface implemented by all Neevo drivers.
  *
  * All Neevo drivers **must** implement this interface, not only reproduce all it's
- * methods, or they won't be recognised as valid driver classes.
+ * methods, or they won't be recognised as valid drivers.
  *
- * If something is not supported in the driver, the method **must** throw NotImplementedException.
+ * If something is not implemented, the method **must** throw NotImplementedException.
  * The exception will be catched and Neevo will decide, what to do next.
+ *
+ * If something is not supported by the driver (e.g. number of result rows on unbuffered queries)
+ * it's a good thing to throw NotSupportedException.
  *
  * When the driver needs to rewrite default output for SQL commands, it **must**
  * extend **NeevoQueryBuilder** class.
- * Then following methods can be declared to rewrite SQL command output:
+ * Then following methods can than be used to rewrite SQL command output:
  * - **build()**           - Base structure of SQL command. **Must be declared** when some of following method are beeing declared.
  * - **buildColName()**    - Column names, including table.column syntax
  * - **buildSelectCols()** - `[SELECT] "col1, table.col2" ...`
@@ -141,14 +144,6 @@ interface INeevoDriver {
    * @return int
    */
   public function affectedRows();
-
-
-  /**
-   * Name of PRIMARY KEY column for table
-   * @param string $table
-   * @return string|null
-   */
-  public function getPrimaryKey($table);
 
 
   /**

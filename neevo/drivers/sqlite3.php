@@ -225,17 +225,6 @@ class NeevoDriverSQLite3 extends NeevoQueryBuilder implements INeevoDriver{
 
 
   /**
-   * Name of PRIMARY KEY column for table
-   * @param string $table
-   * @return void
-   * @throws NotImplementedException
-   */
-  public function getPrimaryKey($table){
-    throw new NotImplementedException();
-  }
-
-
-  /**
    * Builds Query from NeevoResult instance
    * @param NeevoResult $query NeevoResult instance
    * @return string the Query

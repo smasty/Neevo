@@ -211,23 +211,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Name of PRIMARY KEY column for table
-   * @param string $table
-   * @return string|null
-   */
-  public function getPrimaryKey($table){
-    $return = null;
-    $q = $this->query('SHOW FULL COLUMNS FROM '. $table);
-    $arr = $this->fetchAll($q);
-    foreach($arr as $col){
-      if($col['Key'] === 'PRI' && !isset($return))
-        $return = $col['Field'];
-    }
-    return $return;
-  }
-
-
-  /**
    * Escapes given value
    * @param mixed $value
    * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
