@@ -46,7 +46,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * If driver extension is loaded, sets Neevo reference, otherwise throw exception
-   * @param Neevo
+   * @param Neevo $neevo
    * @throws NeevoException
    * @return void
    */
@@ -58,7 +58,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Creates connection to database
-   * @param array Configuration options
+   * @param array $config Configuration options
    * @return void
    */
   public function connect(array $config){
@@ -94,7 +94,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Frees memory used by result
-   * @param SQLiteResult
+   * @param SQLiteResult $resultSet
    * @return bool
    */
   public function free($resultSet){
@@ -104,16 +104,16 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Executes given SQL query
-   * @param string Query-string.
+   * @param string $queryString Query-string.
    * @return SQLiteResult|bool
    */
-  public function query($query_string){
+  public function query($queryString){
 
     if($this->dbCharset !== null)
-      $query_string = iconv($this->charset, $this->dbCharset . '//IGNORE', $query_string);
+      $queryString = iconv($this->charset, $this->dbCharset . '//IGNORE', $queryString);
 
     $this->last_error = '';
-    $q = @$this->resource->query($query_string, null, $error);
+    $q = @$this->resource->query($queryString, null, $error);
     $this->last_error = $error;
     return $q;
   }
@@ -121,19 +121,19 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Error message with driver-specific additions
-   * @param string Error message
+   * @param string $message Error message
    * @return array Format: array($error_message, $error_number)
    */
-  public function error($neevo_msg){
+  public function error($message){
     $no = @$this->resource->lastError();
-    $msg = $neevo_msg. '. ' . ucfirst($this->last_error);
+    $msg = $message. '. ' . ucfirst($this->last_error);
     return array($msg, $no);
   }
 
 
   /**
    * Fetches row from given Query result set as associative array.
-   * @param SQLiteResult Result set
+   * @param SQLiteResult $resultSet Result set
    * @return array
    */
   public function fetch($resultSet){
@@ -155,7 +155,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Fetches all rows from given result set as associative arrays.
-   * @param SQLiteResult Result set
+   * @param SQLiteResult $resultSet Result set
    * @return array
    */
   public function fetchAll($resultSet){
@@ -182,12 +182,12 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Move internal result pointer
-   * @param SQLiteResult Query resource
-   * @param int Row number of the new result pointer.
+   * @param SQLiteResult $resultSet
+   * @param int $offset
    * @return bool
    */
-  public function seek($resultSet, $row_number){
-    return @$resultSet->seek($row_number);
+  public function seek($resultSet, $offset){
+    return @$resultSet->seek($offset);
   }
 
 
@@ -202,7 +202,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return NeevoResult
    */
   public function rand(NeevoResult $query){
@@ -212,7 +212,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Number of rows in result set.
-   * @param SQLiteResult
+   * @param SQLiteResult $resultSet
    * @return int|FALSE
    */
   public function rows($resultSet){
@@ -231,7 +231,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Name of PRIMARY KEY column for table
-   * @param string
+   * @param string $table
    * @return void
    * @throws NotImplementedException
    */
@@ -242,7 +242,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Builds Query from NeevoResult instance
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string the Query
    */
   public function build(NeevoResult $query){
@@ -294,8 +294,8 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Escapes given value
-   * @param mixed
-   * @param int Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param mixed $value
+   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @return mixed
    */
   public function escape($value, $type){

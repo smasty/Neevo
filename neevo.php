@@ -10,6 +10,7 @@
  * @author   Martin Srank (http://smasty.net)
  * @license  http://neevo.smasty.net/license  MIT license
  * @link     http://neevo.smasty.net/
+ * @todo Neevo::connect to accept driver
  *
  */
 
@@ -73,7 +74,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 204;
+  const REVISION = 205;
 
   // Data types
   const BOOL = 30;
@@ -87,8 +88,8 @@ class Neevo{
 
   /**
    * Neevo
-   * @param string Name of driver to use.
-   * @param INeevoCache Cache to use. NULL for no cache.
+   * @param string $driver Name of driver to use.
+   * @param INeevoCache $cache Cache to use. NULL for no cache.
    * @return void
    * @throws NeevoException
    */
@@ -116,7 +117,7 @@ class Neevo{
    * Creates and uses a new connection to a server.
    *
    * Configuration can be different - see the API for your driver.
-   * @param array|string|Traversable Driver-specific configuration (array, parsable string or traversable object)
+   * @param array|string|Traversable $config Driver-specific configuration (array, parsable string or traversable object)
    * @return Neevo fluent interface
    */
   public function connect($config){
@@ -139,7 +140,7 @@ class Neevo{
    * Creates new NeevoConnection instance
    *
    * Options for connecting are different for each driver - see an API for your driver.
-   * @param array|string|Traversable Driver-specific configuration (array, parsable string or traversable object)
+   * @param array|string|Traversable $config Driver-specific configuration (array, parsable string or traversable object)
    * @return NeevoConnection
    * @internal
    */
@@ -150,7 +151,7 @@ class Neevo{
 
   /**
    * Sets Neevo Connection to use
-   * @param NeevoConnection Instance to use
+   * @param NeevoConnection $connection Instance to use
    * @internal
    */
   private function setConnection(NeevoConnection $connection){
@@ -169,7 +170,7 @@ class Neevo{
 
   /**
    * Uses given Neevo SQL driver
-   * @param string
+   * @param string $driver
    * @return Neevo
    */
   public function useDriver($driver){
@@ -180,7 +181,7 @@ class Neevo{
 
   /**
    * Sets Neevo driver to use
-   * @param string Driver name
+   * @param string $driver Driver name
    * @throws NeevoException
    * @return void
    * @internal
@@ -223,7 +224,7 @@ class Neevo{
 
   /**
    * Sets Neevo cache.
-   * @param INeevoCache
+   * @param INeevoCache $cache
    * @return void
    * @internal
    */
@@ -248,7 +249,7 @@ class Neevo{
 
   /**
    * Load stored data
-   * @param string
+   * @param string $key
    * @return mixed|null null if not found
    */
   public function cacheLoad($key){
@@ -259,8 +260,8 @@ class Neevo{
 
   /**
    * Save data
-   * @param string
-   * @param mixed
+   * @param string $key
+   * @param mixed $value
    * @return void
    */
   public function cacheSave($key, $value){
@@ -280,7 +281,7 @@ class Neevo{
 
   /**
    * Sets last executed query
-   * @param array Last executed query
+   * @param array $last Last executed query
    * @return void
    * @internal
    */
@@ -301,8 +302,8 @@ class Neevo{
 
   /**
    * SELECT query factory
-   * @param string|array Columns to select (array or comma-separated list)
-   * @param string Table name
+   * @param string|array $columns Columns to select (array or comma-separated list)
+   * @param string $table Table name
    * @return NeevoResult fluent interface
    */
   public function select($columns = '*', $table){
@@ -313,8 +314,8 @@ class Neevo{
 
   /**
    * INSERT query factory
-   * @param string Table name
-   * @param array Values to insert
+   * @param string $table Table name
+   * @param array $values Values to insert
    * @return NeevoResult fluent interface
    */
   public function insert($table, array $values){
@@ -334,8 +335,8 @@ class Neevo{
 
   /**
    * UPDATE query factory
-   * @param string Table name
-   * @param array Data to update
+   * @param string $table Table name
+   * @param array $data Data to update
    * @return NeevoResult fluent interface
    */
   public function update($table, array $data){
@@ -346,7 +347,7 @@ class Neevo{
 
   /**
    * DELETE query factory
-   * @param string Table name
+   * @param string $table Table name
    * @return NeevoResult fluent interface
    */
   public function delete($table){
@@ -357,7 +358,7 @@ class Neevo{
 
   /**
    * Direct SQL query factory
-   * @param string SQL code
+   * @param string $sql SQL code
    * @return NeevoResult fluent interface
    */
   public function sql($sql){
@@ -384,7 +385,7 @@ class Neevo{
    * - Neevo::E_NONE: Turns Neevo error-reporting off
    * - Neevo::E_HANDLE: Neevo exceptions are sent to defined handler
    * - Neevo::E_STRICT: Throws all Neevo exceptions (default)
-   * @param int Error-reporting level.
+   * @param int $value Error-reporting level.
    * @return void
    */
   public function setErrorReporting($value){
@@ -406,7 +407,7 @@ class Neevo{
 
   /**
    * Sets error-handler function
-   * @param callback Name of error-handler function
+   * @param callback $callback Name of error-handler function
    * @return void
    */
   public function setErrorHandler($callback){
@@ -419,7 +420,7 @@ class Neevo{
   /**
    * If error_reporting is E_STRICT, throws NeevoException available to catch.
    * Sends NeevoException instance to defined handler if E_HANDLE, does nothing if E_NONE.
-   * @param string Error message
+   * @param string $neevo_msg Error message
    * @return false
    * @throws NeevoException
    */
@@ -446,7 +447,7 @@ class Neevo{
 
   /**
    * Neevo's default error handler function
-   * @param NeevoException
+   * @param NeevoException $exception
    * @return void
    * @internal
    */
@@ -492,7 +493,7 @@ class Neevo{
 
   /**
    * Basic information about library
-   * @param bool Password will be replaced by '*****'.
+   * @param bool $hide_password Password will be replaced by '*****'.
    * @return array
    */
   public function info($hide_password = true){
@@ -527,7 +528,7 @@ class NeevoLiteral {
 
   /**
    * Creates literal value.
-   * @param string
+   * @param string $value
    */
   public function __construct($value) {
     $this->value = $value;

@@ -49,6 +49,7 @@ class NeevoConnection{
     self::alias($config, 'database', 'db');
     self::alias($config, 'database', 'dbname');
     self::alias($config, 'table_prefix', 'prefix');
+    self::alias($config, 'encoding', 'charset');
 
     $this->config = $config;
     
@@ -81,7 +82,7 @@ class NeevoConnection{
 
   /**
    * Basic information about current connection
-   * @param bool Password will be replaced by '*****'.
+   * @param bool $hide_password Password will be replaced by '*****'.
    * @return array
    */
   public function info($hide_password = true){
@@ -94,9 +95,9 @@ class NeevoConnection{
 
   /**
    * Create alias for configuration value
-   * @param array
-   * @param string
-   * @param string Alias of $key
+   * @param array $opts
+   * @param string $key
+   * @param string $alias Alias of $key
    * @return void
    */
   public static function alias(&$opts, $key, $alias){

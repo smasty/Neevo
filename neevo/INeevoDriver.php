@@ -43,7 +43,7 @@ interface INeevoDriver {
 
   /**
    * If driver extension is loaded, sets Neevo reference, otherwise throw exception
-   * @param Neevo
+   * @param Neevo $neev
    * @throws NeevoException
    * @return void
    */
@@ -51,7 +51,7 @@ interface INeevoDriver {
 
   /**
    * Creates connection to database
-   * @param array Configuration options
+   * @param array $config Configuration options
    * @return void
    */
   public function connect(array $config);
@@ -66,7 +66,7 @@ interface INeevoDriver {
 
   /**
    * Frees memory used by result
-   * @param resource
+   * @param resource $resultSet
    * @return bool
    */
   public function free($resultSet);
@@ -74,23 +74,23 @@ interface INeevoDriver {
 
   /**
    * Executes given SQL query
-   * @param string Query-string.
+   * @param string $queryString Query-string.
    * @return resource|bool
    */
-  public function query($query_string);
+  public function query($queryString);
 
 
   /**
    * Error message with driver-specific additions
-   * @param string Error message
+   * @param string $message Error message
    * @return array Format: array($error_message, $error_number)
    */
-  public function error($neevo_msg);
+  public function error($message);
 
 
   /**
    * Fetches row from given Query result set as associative array.
-   * @param resource Result set
+   * @param resource $resultSet Result set
    * @return array
    */
   public function fetch($resultSet);
@@ -98,7 +98,7 @@ interface INeevoDriver {
 
   /**
    * Fetches all rows from given result set as associative arrays.
-   * @param resource Result set
+   * @param resource $resultSet Result set
    * @return array
    */
   public function fetchAll($resultSet);
@@ -106,11 +106,11 @@ interface INeevoDriver {
 
   /**
    * Move internal result pointer
-   * @param resource Query resource
-   * @param int Row number of the new result pointer.
+   * @param resource $resultSet Query resource
+   * @param int $offset
    * @return bool
    */
-  public function seek($resultSet, $row_number);
+  public function seek($resultSet, $offset);
 
 
   /**
@@ -122,7 +122,7 @@ interface INeevoDriver {
 
   /**
    * Randomize result order.
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return NeevoResult
    */
   public function rand(NeevoResult $query);
@@ -130,7 +130,7 @@ interface INeevoDriver {
 
   /**
    * Number of rows in result set.
-   * @param resource
+   * @param resource $resultSet
    * @return int|FALSE
    */
   public function rows($resultSet);
@@ -145,7 +145,7 @@ interface INeevoDriver {
 
   /**
    * Name of PRIMARY KEY column for table
-   * @param string
+   * @param string $table
    * @return string|null
    */
   public function getPrimaryKey($table);
@@ -153,8 +153,8 @@ interface INeevoDriver {
 
   /**
    * Escapes given value
-   * @param mixed
-   * @param int Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param mixed $value
+   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @return mixed
    */
   public function escape($value, $type);

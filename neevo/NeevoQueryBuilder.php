@@ -24,7 +24,7 @@ class NeevoQueryBuilder{
 
   /**
    * Instantiate QueryBuilder
-   * @param Neevo
+   * @param Neevo $neevo
    */
   public function  __construct(Neevo $neevo){
     $this->neevo = $neevo;
@@ -33,7 +33,7 @@ class NeevoQueryBuilder{
 
   /**
    * Builds Query from NeevoResult instance
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string the Query
    */
   public function build(NeevoResult $query){
@@ -85,7 +85,7 @@ class NeevoQueryBuilder{
 
   /**
    * Builds WHERE statement for queries
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
   protected function buildWhere(NeevoResult $query){
@@ -125,7 +125,7 @@ class NeevoQueryBuilder{
 
   /**
    * Builds data part for INSERT queries ([INSERT INTO] (...) VALUES (...) )
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
   protected function buildInsertData(NeevoResult $query){
@@ -139,7 +139,7 @@ class NeevoQueryBuilder{
 
   /**
    * Builds data part for UPDATE queries ([UPDATE ...] SET ...)
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
   protected function buildUpdateData(NeevoResult $query){
@@ -152,7 +152,7 @@ class NeevoQueryBuilder{
 
   /**
    * Builds ORDER BY statement for queries
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
   protected function buildOrdering(NeevoResult $query){
@@ -162,7 +162,7 @@ class NeevoQueryBuilder{
 
   /**
    * Builds GROUP BY statement for queries
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
   protected function buildGrouping(NeevoResult $query){
@@ -173,7 +173,7 @@ class NeevoQueryBuilder{
 
   /**
    * Builds columns part for SELECT queries
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return string
    */
   protected function buildSelectCols(NeevoResult $query){
@@ -201,7 +201,7 @@ class NeevoQueryBuilder{
 
   /**
    * Escapes whole array for use in SQL
-   * @param array
+   * @param array $array
    * @return array
    * @internal
    */
@@ -238,7 +238,7 @@ class NeevoQueryBuilder{
 
   /**
    * Escapes given string for use in SQL
-   * @param string
+   * @param string $string
    * @return string
    * @internal
    */

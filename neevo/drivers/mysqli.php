@@ -41,7 +41,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * If driver extension is loaded, sets Neevo reference, otherwise throw exception
-   * @param Neevo
+   * @param Neevo $neevo
    * @throws NeevoException
    * @return void
    */
@@ -53,7 +53,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Creates connection to database
-   * @param array Configuration options
+   * @param array $config Configuration options
    * @return void
    */
   public function connect(array $config){
@@ -98,38 +98,40 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * @return void
    */
   public function close(){
-    $this->resource->close();
+    @$this->resource->close();
   }
 
 
   /**
    * Frees memory used by result
-   * @param mysqli_result
+   * @param mysqli_result $resultSet
    * @return bool
    */
-  public function free($resultSet){}
+  public function free($resultSet){
+    return true;
+  }
 
 
   /**
    * Executes given SQL query
-   * @param string Query-string.
+   * @param string $queryString Query-string.
    * @return mysqli_result|bool
    */
-  public function query($query_string){
-    return @$this->resource->query($query_string);
+  public function query($queryString){
+    return @$this->resource->query($queryString);
   }
 
 
   /**
    * Error message with driver-specific additions
-   * @param string Error message
+   * @param string $message Error message
    * @return array Format: array($error_message, $error_number)
    */
-  public function error($neevo_msg){
+  public function error($message){
     $mysql_msg = $this->resource->error;
     $mysql_msg = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $mysql_msg);
 
-    $msg = $neevo_msg.".";
+    $msg = $message.".";
     if($mysql_msg)
       $msg .= " ".$mysql_msg;
 
@@ -139,7 +141,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Fetches row from given Query result set as associative array.
-   * @param mysqli_result Result set
+   * @param mysqli_result $resultSet Result set
    * @return array
    */
   public function fetch($resultSet){
@@ -149,7 +151,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Fetches all rows from given result set as associative arrays.
-   * @param mysqli_result Result set
+   * @param mysqli_result $resultSet Result set
    * @return array
    */
   public function fetchAll($resultSet){
@@ -159,12 +161,12 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Move internal result pointer
-   * @param mysqli_result Query resource
-   * @param int Row number of the new result pointer.
+   * @param mysqli_result $resultSet
+   * @param int $offset
    * @return bool
    */
-  public function seek($resultSet, $row_number){
-    return @$resultSet->data_seek($row_number);
+  public function seek($resultSet, $offset){
+    return @$resultSet->data_seek($offset);
   }
 
 
@@ -179,7 +181,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return NeevoResult
    */
   public function rand(NeevoResult $query){
@@ -189,7 +191,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Number of rows in result set.
-   * @param mysqli_result
+   * @param mysqli_result $resultSet
    * @return int|FALSE
    */
   public function rows($resultSet){
@@ -210,7 +212,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Name of PRIMARY KEY column for table
-   * @param string
+   * @param string $table
    * @return string|null
    */
   public function getPrimaryKey($table){
@@ -227,8 +229,8 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Escapes given value
-   * @param mixed
-   * @param int Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param mixed $value
+   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @return mixed
    */
   public function escape($value, $type){

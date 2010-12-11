@@ -40,7 +40,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * If driver extension is loaded, sets Neevo reference, otherwise throw exception
-   * @param Neevo
+   * @param Neevo $neevo
    * @throws NeevoException
    * @return void
    */
@@ -52,7 +52,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Creates connection to database
-   * @param array Configuration options
+   * @param array $config Configuration options
    * @return void
    */
   public function connect(array $config){
@@ -113,7 +113,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Frees memory used by result
-   * @param resource
+   * @param resource $resultSet
    * @return bool
    */
   public function free($resultSet){
@@ -123,24 +123,24 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Executes given SQL query
-   * @param string Query-string.
+   * @param string $queryString Query-string.
    * @return resource|bool
    */
-  public function query($query_string){
-    return @mysql_query($query_string, $this->resource);
+  public function query($queryString){
+    return @mysql_query($queryString, $this->resource);
   }
 
 
   /**
    * Error message with driver-specific additions
-   * @param string Error message
+   * @param string $message Error message
    * @return array Format: array($error_message, $error_number)
    */
-  public function error($neevo_msg){
+  public function error($message){
     $mysql_msg = @mysql_error($this->resource);
     $mysql_msg = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $mysql_msg);
 
-    $msg = $neevo_msg.".";
+    $msg = $message.".";
     if($mysql_msg)
       $msg .= " ".$mysql_msg;
 
@@ -150,7 +150,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Fetches row from given Query result set as associative array.
-   * @param resource Result set
+   * @param resource $resultSet Result set
    * @return array
    */
   public function fetch($resultSet){
@@ -160,7 +160,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Fetches all rows from given result set as associative arrays.
-   * @param resource Result set
+   * @param resource $resultSet Result set
    * @throws NotImplementedException
    */
   public function fetchAll($resultSet){
@@ -170,12 +170,12 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Move internal result pointer
-   * @param resource Query resource
-   * @param int Row number of the new result pointer.
+   * @param resource $esultSet
+   * @param int $offset
    * @return bool
    */
-  public function seek($resultSet, $row_number){
-    return @mysql_data_seek($resultSet, $row_number);
+  public function seek($resultSet, $offset){
+    return @mysql_data_seek($resultSet, $offset);
   }
 
 
@@ -190,7 +190,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoResult NeevoResult instance
+   * @param NeevoResult $query NeevoResult instance
    * @return NeevoResult
    */
   public function rand(NeevoResult $query){
@@ -200,7 +200,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Number of rows in result set.
-   * @param resource
+   * @param resource $resultSet
    * @return int|FALSE
    */
   public function rows($resultSet){
@@ -219,7 +219,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Name of PRIMARY KEY column for table
-   * @param string
+   * @param string $table
    * @return string|null
    */
   public function getPrimaryKey($table){
@@ -238,8 +238,8 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Escapes given value
-   * @param mixed
-   * @param int Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param mixed $value
+   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @return mixed
    */
   public function escape($value, $type){
