@@ -72,6 +72,9 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /** @var array */
   private $data;
+
+  /** @var */
+  private $rowClass = 'NeevoRow';
   
 
   // Query types
@@ -364,7 +367,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   private function fetchPlain(){
     $rows = array();
 
-    $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
+    $resultSet = $this->isPerformed() ? $this->resultSet : $this->run();
 
     if(!$resultSet) // Error
       return $this->neevo->error('Fetching data failed');
@@ -397,9 +400,10 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
       return false;
     $rows = array();
     foreach($result as $row)
-      $rows[] = new NeevoRow($row, $this);
+      $rows[] = new $this->rowClass($row);
     unset($result);
     $this->data  = $rows;
+    unset($rows);
     return $this->data;
   }
 
@@ -424,7 +428,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     if($result === false)
       return false;
     if($format == Neevo::OBJECT)
-      $result = new NeevoRow($result, $this);
+      $result = new $this->rowClass($result);
     return $result;
   }
 
@@ -502,7 +506,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     $rows = array();
     foreach($result as $row){
       if($format == Neevo::OBJECT)
-        $row = new NeevoRow($row, $this); // Rows as NeevoRow.
+        $row = new $this->rowClass($row); // Rows as NeevoRow.
       $rows[$row[$column]] = $row;
     }
     unset($result);
@@ -624,6 +628,14 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /*  ******  Setters & Getters  ******  */
+
+
+  public function setRowClass($className){
+    if(!class_exists($className))
+      return $this->neevo->error("Cannot set row class '$className' - class does not exist");
+    $this->rowClass = $className;
+    return $this;
+  }
 
 
   /**

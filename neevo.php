@@ -10,7 +10,6 @@
  * @author   Martin Srank (http://smasty.net)
  * @license  http://neevo.smasty.net/license  MIT license
  * @link     http://neevo.smasty.net/
- * @todo Neevo::connect to accept driver
  *
  */
 
@@ -74,7 +73,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 205;
+  const REVISION = 207;
 
   // Data types
   const BOOL = 30;
@@ -171,7 +170,7 @@ class Neevo{
   /**
    * Uses given Neevo SQL driver
    * @param string $driver
-   * @return Neevo
+   * @return Neevo fluent interface
    */
   public function useDriver($driver){
     $this->setDriver($driver);
@@ -420,18 +419,18 @@ class Neevo{
   /**
    * If error_reporting is E_STRICT, throws NeevoException available to catch.
    * Sends NeevoException instance to defined handler if E_HANDLE, does nothing if E_NONE.
-   * @param string $neevo_msg Error message
+   * @param string $message Error message
    * @return false
    * @throws NeevoException
    */
-  public function error($neevo_msg){
+  public function error($message){
     $level = $this->errorReporting();
 
     if($level !== Neevo::E_NONE){
       try{
-        $err = $this->driver->error($neevo_msg);
+        $err = $this->driver->error($message);
       } catch(NotImplementedException $e){
-          $err = array($neevo_msg, null);
+          $err = array($message, null);
         }
       $exception = new NeevoException($err[0], $err[1]);
 
