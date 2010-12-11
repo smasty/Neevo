@@ -10,6 +10,7 @@
  * @author   Martin Srank (http://smasty.net)
  * @license  http://neevo.smasty.net/license  MIT license
  * @link     http://neevo.smasty.net/
+ * @todo JOIN support
  *
  */
 
@@ -73,7 +74,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 208;
+  const REVISION = 209;
 
   // Data types
   const BOOL = 30;
