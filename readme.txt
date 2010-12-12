@@ -4,7 +4,7 @@ Neevo - Tiny open-source database layer for PHP
 Info
 ====
 
-- Available under MIT license (http://neevo.smasty.net/license)
+- Available under the MIT license (http://neevo.smasty.net/license)
 - Author: Martin Srank - Smasty (http://smasty.net)
 - Website: http://neevo.smasty.net/
 - Public API: http://neevo.smasty.net/doc/
@@ -13,7 +13,7 @@ Info
 About Neevo
 ===========
 
-First of all, thank you for downloading Neevo!
+First of all, thank you for using Neevo!
 
 Neevo is a very small, fully object-oriented database abstraction layer for PHP.
 It's open-source and released under the terms and conditions of the MIT license.
@@ -30,7 +30,7 @@ can be easily added.
 Features
 ========
 
- - SELECT queries (JOINs not supported)
+ - SELECT queries (JOINs are @todo)
  - INSERT queries
  - UPDATE queries
  - DELETE queries
@@ -70,8 +70,10 @@ Todo
 ====
 
  - better test coverage
+ - JOIN support
 
  - PDO driver
+ - PostgreSQL driver
 
 
 Compiler
