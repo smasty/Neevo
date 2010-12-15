@@ -74,7 +74,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 210;
+  const REVISION = 212;
 
   // Data types
   const BOOL = 30;
@@ -301,19 +301,19 @@ class Neevo{
 
 
   /**
-   * SELECT query factory
+   * SELECT query helper.
    * @param string|array $columns Columns to select (array or comma-separated list)
    * @param string $table Table name
    * @return NeevoResult fluent interface
    */
-  public function select($columns = '*', $table){
+  public function select($columns = null, $table = null){
     $q = new NeevoResult($this);
     return $q->select($columns, $table);
   }
 
 
   /**
-   * INSERT query factory
+   * INSERT query helper.
    * @param string $table Table name
    * @param array $values Values to insert
    * @return NeevoResult fluent interface
@@ -334,7 +334,7 @@ class Neevo{
 
 
   /**
-   * UPDATE query factory
+   * UPDATE query helper.
    * @param string $table Table name
    * @param array $data Data to update
    * @return NeevoResult fluent interface
@@ -346,7 +346,7 @@ class Neevo{
 
 
   /**
-   * DELETE query factory
+   * DELETE query helper.
    * @param string $table Table name
    * @return NeevoResult fluent interface
    */
@@ -357,7 +357,7 @@ class Neevo{
 
 
   /**
-   * Direct SQL query factory
+   * Direct SQL query helper.
    * @param string $sql SQL code
    * @return NeevoResult fluent interface
    */

@@ -62,8 +62,8 @@ Supported drivers
 
  - MySQL (PHP extension 'mysql')
  - MySQLi
- - SQLite (Experimental update/delete in NeevoRow not implemented)
- - SQLite 3 (Experimental update/delete in NeevoRow not implemented)
+ - SQLite
+ - SQLite 3
 
 
 Todo

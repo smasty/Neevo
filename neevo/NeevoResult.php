@@ -105,8 +105,15 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    * @param string|array $cols Columns to select (array or comma-separated list)
    * @param string $table Table name
    * @return NeevoResult fluent interface
+   * @throws InvalidArgumentException
    */
-  public function select($cols = '*', $table){
+  public function select($cols = null, $table = null){
+    if($cols == null && $table == null)
+      throw new InvalidArgumentException('Missing argument 1 for '.__METHOD__);
+    if(func_get_arg(1) == null){
+      $cols = '*';
+      $table = func_get_arg(0);
+    }
     $this->reinit();
     $this->type = self::TYPE_SELECT;
     $this->columns = is_string($cols) ? explode(',', $cols) : $cols;
