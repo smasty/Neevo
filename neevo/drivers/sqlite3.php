@@ -18,6 +18,7 @@
  *
  * Driver configuration:
  * - database (or file, db, dbname) => database to select
+ * - update_limit (bool) => Set this to TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
  * - table_prefix (or prefix) => prefix for table names
  * - charset => Character encoding to set (defaults to utf-8)
  * - dbcharset => Database character encoding (will be converted to 'charset')
@@ -39,6 +40,9 @@ class NeevoDriverSQLite3 extends NeevoStatementBuilder implements INeevoDriver{
 
   /** @var string */
   private $charset;
+
+  /** @var bool */
+  private $update_limit;
 
   /** @var SQLite3 */
   private $resource;
@@ -65,6 +69,8 @@ class NeevoDriverSQLite3 extends NeevoStatementBuilder implements INeevoDriver{
     NeevoConnection::alias($config, 'database', 'file');
 
     if(!isset($config['resource'])) $config['resource'] = null;
+    if(!isset($config['update_limit']) || !is_bool($config['update_limit']))
+      $config['update_limit'] = false;
 
     // Connect
     if(!($config['resource'] instanceof SQLite3)){
@@ -81,6 +87,7 @@ class NeevoDriverSQLite3 extends NeevoStatementBuilder implements INeevoDriver{
       $this->neevo->error("Opening database file '".$config['database']." failed");
     
     $this->resource = $connection;
+    $this->update_limit = (bool) $config['update_limit'];
 
     // Set charset
     $this->dbCharset = empty($config['dbcharset']) ? 'UTF-8' : $config['dbcharset'];
@@ -253,21 +260,26 @@ class NeevoDriverSQLite3 extends NeevoStatementBuilder implements INeevoDriver{
 
     if($statement->getType() == Neevo::STMT_SELECT){
       $cols = $this->buildSelectCols($statement);
-      $q .= "SELECT $cols FROM $table$where$group$order$limit";
+      $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
     }
 
     elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
       $insert_data = $this->buildInsertData($statement);
-      $q .= "INSERT INTO $table$insert_data";
+      $q .= 'INSERT INTO ' .$table.$insert_data;
     }
 
     elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
       $update_data = $this->buildUpdateData($statement);
-      $q .= "UPDATE $table$update_data$where";
+      $q .= 'UPDATE ' .$table.$update_data.$where;
+      if($this->update_limit === true)
+        $q .= $order.$limit;
     }
 
-    elseif($statement->getType() == Neevo::STMT_DELETE)
-      $q .= "DELETE FROM $table$where";
+    elseif($statement->getType() == Neevo::STMT_DELETE){
+      $q .= 'DELETE FROM ' .$table.$where;
+      if($this->update_limit === true)
+        $q .= $order.$limit;
+    }
 
     return $q.';';
   }

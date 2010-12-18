@@ -60,21 +60,21 @@ class NeevoStatementBuilder{
 
     if($statement->getType() == Neevo::STMT_SELECT){
       $cols = $this->buildSelectCols($statement);
-      $q .= "SELECT $cols FROM $table$where$group$order$limit";
+      $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
     }
 
     elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
       $insert_data = $this->buildInsertData($statement);
-      $q .= "INSERT INTO $table$insert_data";
+      $q .= 'INSERT INTO ' .$table.$insert_data;
     }
 
     elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
       $update_data = $this->buildUpdateData($statement);
-      $q .= "UPDATE $table$update_data$where$order$limit";
+      $q .= 'UPDATE ' .$table.$update_data.$where.$order.$limit;
     }
 
     elseif($statement->getType() == Neevo::STMT_DELETE)
-      $q .= "DELETE FROM $table$where$order$limit";
+      $q .= 'DELETE FROM ' .$table.$where.$order.$limit;
 
     return $q.';';
   }
