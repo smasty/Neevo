@@ -58,6 +58,9 @@ class Neevo{
   /** @var int */
   private $errorReporting;
 
+  /** @var bool|callback */
+  private $debug;
+
   
   /** @var bool Ignore warning when using deprecated Neevo methods.*/
   public static $ignoreDeprecated = false;
@@ -72,7 +75,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 218;
+  const REVISION = 219;
 
   // Data types
   const BOOL = 30;
@@ -288,6 +291,28 @@ class Neevo{
   public function setLast(array $last){
     $this->queries++;
     $this->last = $last;
+    $this->logQuery($last);
+  }
+
+
+  /** @internal */
+  private function logQuery(array $query){
+    if(!is_callable($this->debug)){
+      fwrite(STDERR, '-- ['.($query['time'] * 1000).'ms] '.$query['query_string']."\n");
+    }
+    else call_user_func($this->debug, $query['query_string'], $query['time'], $query);
+  }
+
+
+  /**
+   * Setup debugging mode
+   * @param bool|callback $debug  TRUE for STD_ERR, FALSE to disable.
+   */
+  public function debug($debug = true){
+    if(is_bool($debug) || is_callable($debug))
+      $this->debug = $debug;
+    else
+      throw new InvalidArgumentException('Argument 1 passed to '.__METHOD__.' must be a valid callback or boolean.');
   }
 
 
