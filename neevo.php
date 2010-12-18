@@ -72,7 +72,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 215;
+  const REVISION = 216;
 
   // Data types
   const BOOL = 30;
@@ -82,6 +82,12 @@ class Neevo{
   // Fetch formats
   const OBJECT = 1;
   const ASSOC = 2;
+
+  // Statement types
+  const STMT_SELECT = 'stmt_select';
+  const STMT_INSERT = 'stmt_insert';
+  const STMT_UPDATE = 'stmt_update';
+  const STMT_DELETE = 'stmt_delete';
 
 
   /**

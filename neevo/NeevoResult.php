@@ -16,6 +16,8 @@
 /**
  * Represents result. Can be iterated and provides fluent interface.
  * @package Neevo
+ * @method NeevoResult and() and( ) Sets AND glue for WHERE conditions, provides fluent interface
+ * @method NeevoResult or() or( ) Sets OR glue for WHERE conditions, provides fluent interface
  */
 class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
@@ -75,13 +77,6 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
   /** @var */
   private $rowClass = 'NeevoRow';
-  
-
-  // Statement types
-  const TYPE_SELECT = 'type_select';
-  const TYPE_INSERT = 'type_insert';
-  const TYPE_UPDATE = 'type_update';
-  const TYPE_DELETE = 'type_delete';
 
 
   /**
@@ -114,7 +109,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
       $table = func_get_arg(0);
     }
     $this->reinit();
-    $this->type = self::TYPE_SELECT;
+    $this->type = Neevo::STMT_SELECT;
     $this->columns = is_string($cols) ? explode(',', $cols) : $cols;
     $this->tableName = $table;
     return $this;
@@ -129,7 +124,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function update($table, array $data){
     $this->reinit();
-    $this->type = self::TYPE_UPDATE;
+    $this->type = Neevo::STMT_UPDATE;
     $this->tableName = $table;
     $this->values = $data;
     return $this;
@@ -144,7 +139,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function insert($table, array $values){
     $this->reinit();
-    $this->type = self::TYPE_INSERT;
+    $this->type = Neevo::STMT_INSERT;
     $this->tableName = $table;
     $this->values = $values;
     return $this;
@@ -167,7 +162,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function delete($table){
     $this->reinit();
-    $this->type = self::TYPE_DELETE;
+    $this->type = Neevo::STMT_DELETE;
     $this->tableName = $table;
     return $this;
   }
@@ -227,6 +222,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    *
    * Use as regular method: $statement->where('id', 5)->**or()**->where()...
    * @return NeevoResult fluent interface
+   * @internal
    */
   public function  __call($name, $arguments){
     if(in_array(strtolower($name), array('and', 'or'))){
@@ -297,7 +293,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   public function limit($limit, $offset = null){
     $this->reinit();
     $this->limit = $limit;
-    if(isset($offset) && $this->type == self::TYPE_SELECT)
+    if(isset($offset) && $this->type == Neevo::STMT_SELECT)
       $this->offset = $offset;
     return $this;
   }
@@ -753,23 +749,6 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function getValues(){
     return $this->values;
-  }
-
-  /**
-   * Name of PRIMARY KEY if defined, NULL otherwise.
-   * @return string
-   */
-  public function getPrimary(){
-    $return = null;
-    $table = preg_replace('#[^0-9a-z_.]#i', '', $this->getTable());
-    $cached_primary = $this->neevo->cacheLoad($table.'_primaryKey');
-
-    if(is_null($cached_primary)){
-      $return = $this->neevo->driver()->getPrimaryKey($table);
-      $this->neevo->cacheSave($table.'_primaryKey', $return);
-      return $return;
-    }
-    return $cached_primary;
   }
 
 

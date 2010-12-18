@@ -256,22 +256,22 @@ class NeevoDriverSQLite extends NeevoStatementBuilder implements INeevoDriver{
     if($statement->getLimit()) $limit = " LIMIT " .$statement->getLimit();
     if($statement->getOffset()) $limit .= " OFFSET " .$statement->getOffset();
 
-    if($statement->getType() == NeevoResult::TYPE_SELECT){
+    if($statement->getType() == Neevo::STMT_SELECT){
       $cols = $this->buildSelectCols($statement);
       $q .= "SELECT $cols FROM $table$where$group$order$limit";
     }
 
-    elseif($statement->getType() == NeevoResult::TYPE_INSERT && $statement->getValues()){
+    elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
       $insert_data = $this->buildInsertData($statement);
       $q .= "INSERT INTO $table$insert_data";
     }
 
-    elseif($statement->getType() == NeevoResult::TYPE_UPDATE && $statement->getValues()){
+    elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
       $update_data = $this->buildUpdateData($statement);
       $q .= "UPDATE $table$update_data$where";
     }
 
-    elseif($statement->getType() == NeevoResult::TYPE_DELETE)
+    elseif($statement->getType() == Neevo::STMT_DELETE)
       $q .= "DELETE FROM $table$where";
 
     return $q.';';
