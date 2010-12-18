@@ -14,11 +14,9 @@
  *
  */
 
+// PHP compatibility
 if(version_compare(PHP_VERSION, '5.1.0', '<')){
-  if(version_compare(PHP_VERSION, '5.0.0', '>='))
-    throw new Exception('Neevo requires PHP version 5.1.0 or newer');
-  if(version_compare(PHP_VERSION, '5.0.0', '<'))
-    trigger_error('Neevo requires PHP version 5.1.0 or newer', E_USER_ERROR);
+  trigger_error('Neevo requires PHP version 5.1.0 or newer', E_USER_ERROR);
   exit;
 }
 
@@ -74,7 +72,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 213;
+  const REVISION = 214;
 
   // Data types
   const BOOL = 30;
@@ -229,11 +227,6 @@ class Neevo{
    * @internal
    */
   private function setCache(INeevoCache $cache = null){
-    // Disable cache.
-    if($cache === false || $cache === null)
-      return;
-
-    // INeevoCache object passed
     $this->cache = $cache;
   }
   
@@ -255,6 +248,7 @@ class Neevo{
   public function cacheLoad($key){
     if(isset($this->cache))
       return $this->cache()->load($key);
+    return null;
   }
 
 
@@ -301,7 +295,7 @@ class Neevo{
 
 
   /**
-   * SELECT query helper.
+   * SELECT query factory.
    * @param string|array $columns Columns to select (array or comma-separated list)
    * @param string $table Table name
    * @return NeevoResult fluent interface
@@ -313,7 +307,7 @@ class Neevo{
 
 
   /**
-   * INSERT query helper.
+   * INSERT query factory.
    * @param string $table Table name
    * @param array $values Values to insert
    * @return NeevoResult fluent interface
@@ -334,7 +328,7 @@ class Neevo{
 
 
   /**
-   * UPDATE query helper.
+   * UPDATE query factory.
    * @param string $table Table name
    * @param array $data Data to update
    * @return NeevoResult fluent interface
@@ -346,7 +340,7 @@ class Neevo{
 
 
   /**
-   * DELETE query helper.
+   * DELETE query factory.
    * @param string $table Table name
    * @return NeevoResult fluent interface
    */
@@ -357,7 +351,7 @@ class Neevo{
 
 
   /**
-   * Direct SQL query helper.
+   * Direct SQL query factory.
    * @param string $sql SQL code
    * @return NeevoResult fluent interface
    */
