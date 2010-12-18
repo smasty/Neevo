@@ -26,7 +26,7 @@
  * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
+class NeevoDriverSQLite extends NeevoStatementBuilder implements INeevoDriver{
 
   /** @var Neevo */
   protected $neevo;
@@ -103,7 +103,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
 
   /**
-   * Executes given SQL query
+   * Executes given SQL statement
    * @param string $queryString Query-string.
    * @return SQLiteResult|bool
    */
@@ -132,7 +132,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
 
   /**
-   * Fetches row from given Query result set as associative array.
+   * Fetches row from given result set as associative array.
    * @param SQLiteResult $resultSet Result set
    * @return array
    */
@@ -192,7 +192,7 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
 
   /**
-   * Get the ID generated in the INSERT query
+   * Get the ID generated in the INSERT statement
    * @return int
    */
   public function insertId(){
@@ -202,11 +202,11 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoResult $query NeevoResult instance
-   * @return NeevoResult
+   * @param NeevoResult $statement NeevoResult instance
+   * @return void
    */
-  public function rand(NeevoResult $query){
-    $query->order('RANDOM()');
+  public function rand(NeevoResult $statement){
+    $statement->order('RANDOM()');
   }
 
 
@@ -230,11 +230,11 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
 
 
   /**
-   * Builds Query from NeevoResult instance
-   * @param NeevoResult $query NeevoResult instance
-   * @return string the Query
+   * Builds statement from NeevoResult instance
+   * @param NeevoResult $statement NeevoResult instance
+   * @return string the statement
    */
-  public function build(NeevoResult $query){
+  public function build(NeevoResult $statement){
 
     $where = '';
     $order = '';
@@ -242,39 +242,36 @@ class NeevoDriverSQLite extends NeevoQueryBuilder implements INeevoDriver{
     $limit = '';
     $q = '';
 
-    if($query->getSql())
-      return $query->getSql().';';
+    $table = $statement->getTable();
 
-    $table = $query->getTable();
+    if($statement->getConditions())
+      $where = $this->buildWhere($statement);
 
-    if($query->getConditions())
-      $where = $this->buildWhere($query);
+    if($statement->getOrdering())
+      $order = $this->buildOrdering($statement);
 
-    if($query->getOrdering())
-      $order = $this->buildOrdering($query);
+    if($statement->getGrouping())
+      $group = $this->buildGrouping($statement);
 
-    if($query->getGrouping())
-      $group = $this->buildGrouping($query);
+    if($statement->getLimit()) $limit = " LIMIT " .$statement->getLimit();
+    if($statement->getOffset()) $limit .= " OFFSET " .$statement->getOffset();
 
-    if($query->getLimit()) $limit = " LIMIT " .$query->getLimit();
-    if($query->getOffset()) $limit .= " OFFSET " .$query->getOffset();
-
-    if($query->getType() == NeevoResult::TYPE_SELECT){
-      $cols = $this->buildSelectCols($query);
+    if($statement->getType() == NeevoResult::TYPE_SELECT){
+      $cols = $this->buildSelectCols($statement);
       $q .= "SELECT $cols FROM $table$where$group$order$limit";
     }
 
-    elseif($query->getType() == NeevoResult::TYPE_INSERT && $query->getValues()){
-      $insert_data = $this->buildInsertData($query);
+    elseif($statement->getType() == NeevoResult::TYPE_INSERT && $statement->getValues()){
+      $insert_data = $this->buildInsertData($statement);
       $q .= "INSERT INTO $table$insert_data";
     }
 
-    elseif($query->getType() == NeevoResult::TYPE_UPDATE && $query->getValues()){
-      $update_data = $this->buildUpdateData($query);
+    elseif($statement->getType() == NeevoResult::TYPE_UPDATE && $statement->getValues()){
+      $update_data = $this->buildUpdateData($statement);
       $q .= "UPDATE $table$update_data$where";
     }
 
-    elseif($query->getType() == NeevoResult::TYPE_DELETE)
+    elseif($statement->getType() == NeevoResult::TYPE_DELETE)
       $q .= "DELETE FROM $table$where";
 
     return $q.';';

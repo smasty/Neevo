@@ -113,7 +113,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Executes given SQL query
+   * Executes given SQL statement
    * @param string $queryString Query-string.
    * @return mysqli_result|bool
    */
@@ -140,7 +140,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Fetches row from given Query result set as associative array.
+   * Fetches row from given result set as associative array.
    * @param mysqli_result $resultSet Result set
    * @return array
    */
@@ -171,7 +171,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Get the ID generated in the INSERT query
+   * Get the ID generated in the INSERT statement
    * @return int
    */
   public function insertId(){
@@ -181,11 +181,11 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoResult $query NeevoResult instance
-   * @return NeevoResult
+   * @param NeevoResult $statement NeevoResult instance
+   * @return void
    */
-  public function rand(NeevoResult $query){
-    $query->order('RAND()');
+  public function rand(NeevoResult $statement){
+    $statement->order('RAND()');
   }
 
 

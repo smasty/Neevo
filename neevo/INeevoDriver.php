@@ -26,7 +26,7 @@
  * it's a good thing to throw NotSupportedException.
  *
  * When the driver needs to rewrite default output for SQL commands, it **must**
- * extend **NeevoQueryBuilder** class.
+ * extend **NeevoStatementBuilder** class.
  * Then following methods can than be used to rewrite SQL command output:
  * - **build()**           - Base structure of SQL command. **Must be declared** when some of following method are beeing declared.
  * - **buildColName()**    - Column names, including table.column syntax
@@ -37,7 +37,7 @@
  * - **buildOrdering()**   - ORDER BY clause
  * - **buildGrouping()**   - GROUP BY clause
  * 
- * For proper use, see "source of **NeevoQueryBuilder** class":./source-neevo.NeevoQueryBuilder.php.html.
+ * For proper use, see "source of **NeevoStatementBuilder** class":./source-neevo.NeevoStatementBuilder.php.html.
  *
  * @package NeevoDrivers
  */
@@ -76,7 +76,7 @@ interface INeevoDriver {
 
 
   /**
-   * Executes given SQL query
+   * Executes given SQL statement
    * @param string $queryString Query-string.
    * @return resource|bool
    */
@@ -92,7 +92,7 @@ interface INeevoDriver {
 
 
   /**
-   * Fetches row from given Query result set as associative array.
+   * Fetches row from given result set as associative array.
    * @param resource $resultSet Result set
    * @return array
    */
@@ -109,7 +109,7 @@ interface INeevoDriver {
 
   /**
    * Move internal result pointer
-   * @param resource $resultSet Query resource
+   * @param resource $resultSet Resource
    * @param int $offset
    * @return bool
    */
@@ -117,7 +117,7 @@ interface INeevoDriver {
 
 
   /**
-   * Get the ID generated in the INSERT query
+   * Get the ID generated in the INSERT statement
    * @return int
    */
   public function insertId();
@@ -125,10 +125,10 @@ interface INeevoDriver {
 
   /**
    * Randomize result order.
-   * @param NeevoResult $query NeevoResult instance
+   * @param NeevoResult $statement NeevoResult instance
    * @return NeevoResult
    */
-  public function rand(NeevoResult $query);
+  public function rand(NeevoResult $statement);
 
 
   /**

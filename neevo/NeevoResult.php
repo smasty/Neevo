@@ -77,17 +77,16 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   private $rowClass = 'NeevoRow';
   
 
-  // Query types
+  // Statement types
   const TYPE_SELECT = 'type_select';
   const TYPE_INSERT = 'type_insert';
   const TYPE_UPDATE = 'type_update';
   const TYPE_DELETE = 'type_delete';
-  const TYPE_SQL = 'type_sql';
 
 
   /**
-   * Query base constructor
-   * @param array $object Reference to instance of Neevo class which initialized Query
+   * Statement base constructor
+   * @param array $object Reference to instance of Neevo class which initialized statement
    * @return void
    */
   public function  __construct(Neevo $object){
@@ -101,7 +100,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Creates SELECT query
+   * Creates SELECT statement
    * @param string|array $cols Columns to select (array or comma-separated list)
    * @param string $table Table name
    * @return NeevoResult fluent interface
@@ -123,7 +122,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Creates UPDATE query
+   * Creates UPDATE statement
    * @param string $table Table name
    * @param array $data Data to update
    * @return NeevoResult fluent interface
@@ -138,7 +137,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Creates INSERT query
+   * Creates INSERT statement
    * @param string $table Table name
    * @param array $values Values to insert
    * @return NeevoResult fluent interface
@@ -162,7 +161,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Creates DELETE query
+   * Creates DELETE statement
    * @param string $table Table name
    * @return NeevoResult fluent interface
    */
@@ -170,19 +169,6 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     $this->reinit();
     $this->type = self::TYPE_DELETE;
     $this->tableName = $table;
-    return $this;
-  }
-
-
-  /**
-   * Creates query with direct SQL
-   * @param string $sql SQL code
-   * @return NeevoResult fluent interface
-   */
-  public function sql($sql){
-    $this->reinit();
-    $this->type = self::TYPE_SQL;
-    $this->sql = $sql;
     return $this;
   }
 
@@ -239,7 +225,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   /**
    * Sets AND/OR glue for WHERE conditions
    *
-   * Use as regular method: $query->where('id', 5)->**or()**->where()...
+   * Use as regular method: $statement->where('id', 5)->**or()**->where()...
    * @return NeevoResult fluent interface
    */
   public function  __call($name, $arguments){
@@ -329,7 +315,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Prints out syntax highlighted query.
+   * Prints out syntax highlighted statement.
    * @param bool $return Return output instead of printing it?
    * @return string|NeevoResult fluent interface
    */
@@ -341,7 +327,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Performs Query
+   * Performs statement
    * @return resource|bool
    */
   public function run(){
@@ -468,7 +454,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   public function fetchPairs($key, $value){
     if(!in_array($key, $this->columns) || !in_array($value, $this->columns) || !in_array('*', $this->columns)){
       $this->columns = array($key, $value);
-      $this->performed = false; // If query was executed without needed columns, force execution (with them only).
+      $this->performed = false; // If statement was executed without needed columns, force execution (with them only).
     }
     $result = $this->fetchPlain();
     if($result === false)
@@ -504,7 +490,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   public function fetchAssoc($column, $format = Neevo::OBJECT){
     if(!in_array($column, $this->columns) || !in_array('*', $this->columns)){
       $this->columns[] = $column;
-      $this->performed = false; // If query was executed without needed column, force execution.
+      $this->performed = false; // If statement was executed without needed column, force execution.
     }
     $result = $this->fetchPlain();
     if($result === false)
@@ -545,7 +531,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Get the ID generated in the INSERT query
+   * Get the ID generated in the INSERT statement
    * @return int|FALSE
    */
   public function insertId(){
@@ -567,7 +553,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Number of rows affected by query
+   * Number of rows affected by statement
    * @return int
    */
   public function affectedRows(){
@@ -588,23 +574,17 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Builds Query from NeevoResult instance
-   * @return string The Query in SQL dialect
+   * Builds statement from NeevoResult instance
+   * @return string The statement in SQL dialect
    * @internal
    */
   public function build(){
-
-    try{
-      return $this->neevo->queryBuilder()->build($this);
-    } catch(NotImplementedException $e){
-        return '';
-      }
-
+    return $this->neevo->statementBuilder()->build($this);
   }
 
 
   /**
-   * Basic information about query
+   * Basic information about statement
    * @param bool $hide_password Password will be replaced by '*****'.
    * @param bool $exclude_connection Connection info will be excluded.
    * @return array
@@ -701,7 +681,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   }
 
   /**
-   * Query type
+   * Statement type
    * @return string
    */
   public function getType(){
@@ -709,7 +689,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   }
 
   /**
-   * Query LIMIT fraction
+   * Statement LIMIT fraction
    * @return int
    */
   public function getLimit(){
@@ -717,7 +697,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   }
 
   /**
-   * Query OFFSET fraction
+   * Statement OFFSET fraction
    * @return int
    */
   public function getOffset(){
@@ -725,15 +705,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   }
 
   /**
-   * Query code for direct queries (type=sql)
-   * @return string
-   */
-  public function getSql(){
-    return $this->sql;
-  }
-
-  /**
-   *Query WHERE conditions
+   * Statement WHERE conditions
    * @return array
    */
   public function getConditions(){
@@ -741,7 +713,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   }
 
   /**
-   * Query ORDER BY fraction
+   * Statement ORDER BY fraction
    * @return array
    */
   public function getOrdering(){
@@ -749,7 +721,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   }
 
   /**
-   * Query GROUP BY fraction
+   * Statement GROUP BY fraction
    * @return string
    */
   public function getGrouping(){
@@ -757,7 +729,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   }
 
   /**
-   * Query HAVING fraction
+   * Statement HAVING fraction
    * @return string
    */
   public function getHaving(){
@@ -765,7 +737,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   }
 
   /**
-   * Query columns fraction for SELECT queries ([SELECT] col1, col2, ...)
+   * Statement columns fraction for SELECT statements ([SELECT] col1, col2, ...)
    * @return array
    */
   public function getColumns(){
@@ -773,7 +745,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   }
 
   /**
-   * Query values fraction for INSERT/UPDATE queries
+   * Statement values fraction for INSERT/UPDATE statements
    *
    * [INSERT INTO tbl] (col1, col2, ...) VALUES (val1, val2, ...) or
    * [UPDATE tbl] SET col1 = val1,  col2 = val2, ...

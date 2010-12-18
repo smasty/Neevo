@@ -22,7 +22,7 @@ if(version_compare(PHP_VERSION, '5.1.0', '<')){
 
 include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
 include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
-include_once dirname(__FILE__). '/neevo/NeevoQueryBuilder.php';
+include_once dirname(__FILE__). '/neevo/NeevoStatementBuilder.php';
 include_once dirname(__FILE__). '/neevo/NeevoResultIterator.php';
 include_once dirname(__FILE__). '/neevo/NeevoResult.php';
 include_once dirname(__FILE__). '/neevo/NeevoRow.php';
@@ -43,8 +43,8 @@ class Neevo{
   /** @var INeevoCache */
   private $cache;
 
-  /** @var NeevoQueryBuilder */
-  private $queryBuilder;
+  /** @var NeevoStatementBuilder */
+  private $statementBuilder;
   
   /** @var callback */
   private $errorHandler;
@@ -72,7 +72,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 214;
+  const REVISION = 215;
 
   // Data types
   const BOOL = 30;
@@ -196,11 +196,11 @@ class Neevo{
 
     $this->driver = new $class($this);
 
-    // Set queryBuilder
-    if(in_array('NeevoQueryBuilder', class_parents($class, false)))
-      $this->queryBuilder = $this->driver;
+    // Set statementBuilder
+    if(in_array('NeevoStatementBuilder', class_parents($class, false)))
+      $this->statementBuilder = $this->driver;
     else
-      $this->queryBuilder = new NeevoQueryBuilder($this);
+      $this->statementBuilder = new NeevoStatementBuilder($this);
   }
 
 
@@ -211,12 +211,12 @@ class Neevo{
 
 
   /**
-   * Query-builder class
-   * @return NeevoQueryBuilder
+   * Statement builder class
+   * @return NeevoStatementBuilder
    * @internal
    */
-  public function queryBuilder(){
-    return $this->queryBuilder;
+  public function statementBuilder(){
+    return $this->statementBuilder;
   }
 
 
@@ -265,7 +265,7 @@ class Neevo{
 
 
   /**
-   * Last executed query info
+   * Last executed statement info
    * @return array
    */
   public function last(){
@@ -274,8 +274,8 @@ class Neevo{
 
 
   /**
-   * Sets last executed query
-   * @param array $last Last executed query
+   * Sets last executed statement
+   * @param array $last Last executed statement
    * @return void
    * @internal
    */
@@ -295,7 +295,7 @@ class Neevo{
 
 
   /**
-   * SELECT query factory.
+   * SELECT statement factory.
    * @param string|array $columns Columns to select (array or comma-separated list)
    * @param string $table Table name
    * @return NeevoResult fluent interface
@@ -307,7 +307,7 @@ class Neevo{
 
 
   /**
-   * INSERT query factory.
+   * INSERT statement factory.
    * @param string $table Table name
    * @param array $values Values to insert
    * @return NeevoResult fluent interface
@@ -328,7 +328,7 @@ class Neevo{
 
 
   /**
-   * UPDATE query factory.
+   * UPDATE statement factory.
    * @param string $table Table name
    * @param array $data Data to update
    * @return NeevoResult fluent interface
@@ -340,24 +340,13 @@ class Neevo{
 
 
   /**
-   * DELETE query factory.
+   * DELETE statement factory.
    * @param string $table Table name
    * @return NeevoResult fluent interface
    */
   public function delete($table){
     $q = new NeevoResult($this);
     return $q->delete($table);
-  }
-
-
-  /**
-   * Direct SQL query factory.
-   * @param string $sql SQL code
-   * @return NeevoResult fluent interface
-   */
-  public function sql($sql){
-    $q = new NeevoResult($this);
-    return $q->sql($sql);
   }
 
 
@@ -493,7 +482,7 @@ class Neevo{
   public function info($hide_password = true){
     $info = array(
       'executed_queries' => $this->queries(),
-      'last_query' => $this->last()->info($hide_password, true),
+      'last_statement' => $this->last()->info($hide_password, true),
       'connection' => $this->connection()->info($hide_password),
       'version' => $this->version(false),
       'error_reporting' => $this->errorReporting()
