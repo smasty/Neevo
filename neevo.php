@@ -15,16 +15,16 @@
  */
 
 // PHP compatibility
-if(version_compare(PHP_VERSION, '5.1.0', '<')){
+if(version_compare(PHP_VERSION, '5.1.0', '<'))
   trigger_error('Neevo requires PHP version 5.1.0 or newer', E_USER_ERROR);
-  exit;
-}
 
 include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
 include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
-include_once dirname(__FILE__). '/neevo/NeevoStatementBuilder.php';
-include_once dirname(__FILE__). '/neevo/NeevoResultIterator.php';
+include_once dirname(__FILE__). '/neevo/NeevoStmtBase.php';
+include_once dirname(__FILE__). '/neevo/NeevoStmtBuilder.php';
+include_once dirname(__FILE__). '/neevo/NeevoStmt.php';
 include_once dirname(__FILE__). '/neevo/NeevoResult.php';
+include_once dirname(__FILE__). '/neevo/NeevoResultIterator.php';
 include_once dirname(__FILE__). '/neevo/NeevoRow.php';
 include_once dirname(__FILE__). '/neevo/NeevoCache.php';
 
@@ -43,8 +43,8 @@ class Neevo{
   /** @var INeevoCache */
   private $cache;
 
-  /** @var NeevoStatementBuilder */
-  private $statementBuilder;
+  /** @var NeevoStmtBuilder */
+  private $stmtBuilder;
   
   /** @var callback */
   private $errorHandler;
@@ -72,7 +72,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 217;
+  const REVISION = 218;
 
   // Data types
   const BOOL = 30;
@@ -202,11 +202,11 @@ class Neevo{
 
     $this->driver = new $class($this);
 
-    // Set statementBuilder
-    if(in_array('NeevoStatementBuilder', class_parents($class, false)))
-      $this->statementBuilder = $this->driver;
+    // Set stmtBuilder
+    if(in_array('NeevoStmtBuilder', class_parents($class, false)))
+      $this->stmtBuilder = $this->driver;
     else
-      $this->statementBuilder = new NeevoStatementBuilder($this);
+      $this->stmtBuilder = new NeevoStmtBuilder($this);
   }
 
 
@@ -218,11 +218,11 @@ class Neevo{
 
   /**
    * Statement builder class
-   * @return NeevoStatementBuilder
+   * @return NeevoStmtBuilder
    * @internal
    */
-  public function statementBuilder(){
-    return $this->statementBuilder;
+  public function stmtBuilder(){
+    return $this->stmtBuilder;
   }
 
 
@@ -307,8 +307,7 @@ class Neevo{
    * @return NeevoResult fluent interface
    */
   public function select($columns = null, $table = null){
-    $q = new NeevoResult($this);
-    return $q->select($columns, $table);
+    return new NeevoResult($this, $columns, $table);
   }
 
 
@@ -316,17 +315,17 @@ class Neevo{
    * INSERT statement factory.
    * @param string $table Table name
    * @param array $values Values to insert
-   * @return NeevoResult fluent interface
+   * @return NeevoStmt fluent interface
    */
   public function insert($table, array $values){
-    $q = new NeevoResult($this);
+    $q = new NeevoStmt($this);
     return $q->insert($table, $values);
   }
 
 
   /**
    * Alias for Neevo::insert().
-   * @return NeevoResult fluent interface
+   * @return NeevoStmt fluent interface
    */
   public function insertInto($table, array $values){
     return $this->insert($table, $values);
@@ -337,10 +336,10 @@ class Neevo{
    * UPDATE statement factory.
    * @param string $table Table name
    * @param array $data Data to update
-   * @return NeevoResult fluent interface
+   * @return NeevoStmt fluent interface
    */
   public function update($table, array $data){
-    $q = new NeevoResult($this);
+    $q = new NeevoStmt($this);
     return $q->update($table, $data);
   }
 
@@ -348,10 +347,10 @@ class Neevo{
   /**
    * DELETE statement factory.
    * @param string $table Table name
-   * @return NeevoResult fluent interface
+   * @return NeevoStmt fluent interface
    */
   public function delete($table){
-    $q = new NeevoResult($this);
+    $q = new NeevoStmt($this);
     return $q->delete($table);
   }
 

@@ -17,7 +17,7 @@
  * Building SQL string from NeevoResult instance.
  * @package Neevo
  */
-class NeevoStatementBuilder{
+class NeevoStmtBuilder{
 
   /** @var Neevo */
   protected $neevo;
@@ -33,10 +33,10 @@ class NeevoStatementBuilder{
 
   /**
    * Builds statement from NeevoResult instance
-   * @param NeevoResult $statement NeevoResult instance
+   * @param NeevoStmtBase $statement
    * @return string the statement
    */
-  public function build(NeevoResult $statement){
+  public function build(NeevoStmtBase $statement){
 
     $where = '';
     $order = '';
@@ -52,7 +52,7 @@ class NeevoStatementBuilder{
     if($statement->getOrdering())
       $order = $this->buildOrdering($statement);
 
-    if($statement->getGrouping())
+    if($statement instanceof NeevoResult && $statement->getGrouping())
       $group = $this->buildGrouping($statement);
 
     if($statement->getLimit()) $limit = ' LIMIT ' .$statement->getLimit();
@@ -82,10 +82,10 @@ class NeevoStatementBuilder{
 
   /**
    * Builds WHERE condition statement
-   * @param NeevoResult $statement NeevoResult instance
+   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildWhere(NeevoResult $statement){
+  protected function buildWhere(NeevoStmtBase $statement){
     $conds = $statement->getConditions();
 
     unset($conds[count($conds)-1][3]);
@@ -122,10 +122,10 @@ class NeevoStatementBuilder{
 
   /**
    * Builds data part for INSERT statements ([INSERT INTO] (...) VALUES (...) )
-   * @param NeevoResult $statement NeevoResult instance
+   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildInsertData(NeevoResult $statement){
+  protected function buildInsertData(NeevoStmtBase $statement){
     foreach($this->_escapeArray($statement->getValues()) as $col => $value){
       $cols[] = $this->buildColName($col);
       $values[] = $value;
@@ -136,10 +136,10 @@ class NeevoStatementBuilder{
 
   /**
    * Builds data part for UPDATE statements ([UPDATE ...] SET ...)
-   * @param NeevoResult $statement NeevoResult instance
+   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildUpdateData(NeevoResult $statement){
+  protected function buildUpdateData(NeevoStmtBase $statement){
     foreach($this->_escapeArray($statement->getValues()) as $col => $value){
       $update[] = $this->buildColName($col) . ' = ' . $value;
     }
@@ -149,20 +149,20 @@ class NeevoStatementBuilder{
 
   /**
    * Builds ORDER BY statement
-   * @param NeevoResult $statement NeevoResult instance
+   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildOrdering(NeevoResult $statement){
+  protected function buildOrdering(NeevoStmtBase $statement){
     return ' ORDER BY ' . join(', ', $statement->getOrdering());
   }
 
 
   /**
    * Builds GROUP BY statement
-   * @param NeevoResult $statement NeevoResult instance
+   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildGrouping(NeevoResult $statement){
+  protected function buildGrouping(NeevoStmtBase $statement){
     $having = $statement->getHaving() ? ' HAVING ' . (string) $statement->getHaving() : '';
     return ' GROUP BY ' . $statement->getGrouping() . $having;
   }
@@ -170,10 +170,10 @@ class NeevoStatementBuilder{
 
   /**
    * Builds columns part for SELECT statements
-   * @param NeevoResult $statement NeevoResult instance
+   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildSelectCols(NeevoResult $statement){
+  protected function buildSelectCols(NeevoStmtBase $statement){
     foreach ($statement->getColumns() as $col) { // For each col
       $cols[] = $this->buildColName($col);
     }

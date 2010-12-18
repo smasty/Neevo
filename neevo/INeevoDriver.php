@@ -26,7 +26,7 @@
  * it's a good thing to throw NotSupportedException.
  *
  * When the driver needs to rewrite default output for SQL commands, it **must**
- * extend **NeevoStatementBuilder** class.
+ * extend **NeevoStmtBuilder** class.
  * Then following methods can than be used to rewrite SQL command output:
  * - **build()**           - Base structure of SQL command. **Must be declared** when some of following method are beeing declared.
  * - **buildColName()**    - Column names, including table.column syntax
@@ -37,7 +37,7 @@
  * - **buildOrdering()**   - ORDER BY clause
  * - **buildGrouping()**   - GROUP BY clause
  * 
- * For proper use, see "source of **NeevoStatementBuilder** class":./source-neevo.NeevoStatementBuilder.php.html.
+ * For proper use, see "source of **NeevoStmtBuilder** class":./source-neevo.NeevoStmtBuilder.php.html.
  *
  * @package NeevoDrivers
  */
@@ -109,7 +109,7 @@ interface INeevoDriver {
 
   /**
    * Move internal result pointer
-   * @param resource $resultSet Resource
+   * @param resource $resultSet
    * @param int $offset
    * @return bool
    */
@@ -125,10 +125,9 @@ interface INeevoDriver {
 
   /**
    * Randomize result order.
-   * @param NeevoResult $statement NeevoResult instance
-   * @return NeevoResult
+   * @param NeevoStmtBase $statement
    */
-  public function rand(NeevoResult $statement);
+  public function rand(NeevoStmtBase $statement);
 
 
   /**

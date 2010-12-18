@@ -27,7 +27,7 @@
  * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverSQLite extends NeevoStatementBuilder implements INeevoDriver{
+class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
   /** @var Neevo */
   protected $neevo;
@@ -209,10 +209,10 @@ class NeevoDriverSQLite extends NeevoStatementBuilder implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoResult $statement NeevoResult instance
+   * @param NeevoStmtBase $statement
    * @return void
    */
-  public function rand(NeevoResult $statement){
+  public function rand(NeevoStmtBase $statement){
     $statement->order('RANDOM()');
   }
 
@@ -238,10 +238,10 @@ class NeevoDriverSQLite extends NeevoStatementBuilder implements INeevoDriver{
 
   /**
    * Builds statement from NeevoResult instance
-   * @param NeevoResult $statement NeevoResult instance
+   * @param NeevoStmtBase $statement
    * @return string the statement
    */
-  public function build(NeevoResult $statement){
+  public function build(NeevoStmtBase $statement){
 
     $where = '';
     $order = '';
@@ -257,7 +257,7 @@ class NeevoDriverSQLite extends NeevoStatementBuilder implements INeevoDriver{
     if($statement->getOrdering())
       $order = $this->buildOrdering($statement);
 
-    if($statement->getGrouping())
+    if($statement instanceof NeevoResult && $statement->getGrouping())
       $group = $this->buildGrouping($statement);
 
     if($statement->getLimit()) $limit = " LIMIT " .$statement->getLimit();

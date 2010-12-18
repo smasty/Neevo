@@ -19,46 +19,14 @@
  * @method NeevoResult and() and( ) Sets AND glue for WHERE conditions, provides fluent interface
  * @method NeevoResult or() or( ) Sets OR glue for WHERE conditions, provides fluent interface
  */
-class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
+class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregate, Countable {
 
-  /** @var string */
-  private $tableName;
-
-  /** @var string */
-  private $type;
-
-  /** @var int */
-  private $limit;
-  
-  /** @var int */
-  private $offset;
-  
-  /** @var Neevo */
-  private $neevo;
 
   /** @var mixed */
-  private $resultSet;
-  
-  /** @var int */
-  private $time;
-
-  /** @var string */
-  private $sql;
-  
-  /** @var bool */
-  private $performed;
+  protected $resultSet;
 
   /** @var int */
-  private $numRows;
-  
-  /** @var int */
-  private $affectedRows;
-
-  /** @var array */
-  private  $conditions = array();
-  
-  /** @var array */
-  private $ordering = array();
+  protected $numRows;
 
   /** @var string */
   private $grouping;
@@ -67,10 +35,7 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   private $having = null;
   
   /** @var array */
-  private $columns = array();
-
-  /** @var array */
-  private $values = array();
+  protected $columns = array();
 
   /** @var array */
   private $data;
@@ -80,183 +45,31 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Statement base constructor
-   * @param array $object Reference to instance of Neevo class which initialized statement
-   * @return void
-   */
-  public function  __construct(Neevo $object){
-    $this->neevo = $object;
-  }
-
-
-  public function  __destruct(){
-    $this->free();
-  }
-
-
-  /**
    * Creates SELECT statement
+   * @param array $object Reference to instance of Neevo class which initialized statement
    * @param string|array $cols Columns to select (array or comma-separated list)
    * @param string $table Table name
-   * @return NeevoResult fluent interface
    * @throws InvalidArgumentException
+   * @return void
    */
-  public function select($cols = null, $table = null){
+  public function  __construct(Neevo $object, $cols = null, $table = null){
+    $this->neevo = $object;
+
     if($cols == null && $table == null)
       throw new InvalidArgumentException('Missing argument 1 for '.__METHOD__);
-    if(func_get_arg(1) == null){
+    if(func_get_arg(2) == null){
       $cols = '*';
-      $table = func_get_arg(0);
+      $table = func_get_arg(1);
     }
     $this->reinit();
     $this->type = Neevo::STMT_SELECT;
     $this->columns = is_string($cols) ? explode(',', $cols) : $cols;
     $this->tableName = $table;
-    return $this;
   }
 
 
-  /**
-   * Creates UPDATE statement
-   * @param string $table Table name
-   * @param array $data Data to update
-   * @return NeevoResult fluent interface
-   */
-  public function update($table, array $data){
-    $this->reinit();
-    $this->type = Neevo::STMT_UPDATE;
-    $this->tableName = $table;
-    $this->values = $data;
-    return $this;
-  }
-
-
-  /**
-   * Creates INSERT statement
-   * @param string $table Table name
-   * @param array $values Values to insert
-   * @return NeevoResult fluent interface
-   */
-  public function insert($table, array $values){
-    $this->reinit();
-    $this->type = Neevo::STMT_INSERT;
-    $this->tableName = $table;
-    $this->values = $values;
-    return $this;
-  }
-
-
-  /**
-   * Alias for NeevoResult::insert()
-   * @return NeevoResult fluent interface
-   */
-  public function insertInto($table, array $values){
-    return $this->insert($table, $values);
-  }
-
-
-  /**
-   * Creates DELETE statement
-   * @param string $table Table name
-   * @return NeevoResult fluent interface
-   */
-  public function delete($table){
-    $this->reinit();
-    $this->type = Neevo::STMT_DELETE;
-    $this->tableName = $table;
-    return $this;
-  }
-
-
-  /**
-   * Sets WHERE condition. More calls appends conditions.
-   *
-   * Possible combinations for where conditions:
-   * | Condition  | SQL code
-   * |-----------------------
-   * | `where('field', 'x')`             | `field = 'x'`
-   * | `where('field !=', 'x')`          | `filed != 'x'`
-   * | `where('field LIKE', '%x%')`      | `field LIKE '%x%'`
-   * | `where('field', true)`            | `field`
-   * | `where('field', false)`           | `NOT field`
-   * | `where('field', null)`            | `field IS NULL`
-   * | `where('field', array(1, 2))`     | `field IN(1, 2)`
-   * | `where('field NOT', array(1, 2))` | `field NOT IN(1,2)`
-   * | `where('field', new NeevoLiteral('NOW()'))`  | `field = NOW()`
-   * @param string $condition
-   * @param string|array|bool|null $value
-   * @return NeevoResult fluent interface
-   */
-  public function where($condition, $value = true){
-    $this->reinit();
-    $condition = trim($condition);
-    $column = strstr($condition, ' ') ? substr($condition, 0, strpos($condition, ' ')) : $condition;
-    $operator = strstr($condition, ' ') ? substr($condition, strpos($condition, ' ')+1) : null;
-
-    if(is_null($value)){
-      if(strtoupper($operator) === 'NOT')
-        $operator = ' NOT';
-      $operator = 'IS' . (string) $operator;
-      $value = 'NULL';
-    }
-    elseif($value === true){
-      $operator = '';
-      $value = true;
-    }
-    elseif($value === false){
-      $operator = '';
-      $value = false;
-    }
-    elseif(is_array($value))
-      $operator = (strtoupper($operator) == 'NOT') ? 'NOT IN' : 'IN';
-
-    if(!isset($operator)) $operator = '=';
-
-    $this->conditions[] = array($column, $operator, $value, 'AND');
-    return $this;
-  }
-
-
-  /**
-   * Sets AND/OR glue for WHERE conditions
-   *
-   * Use as regular method: $statement->where('id', 5)->**or()**->where()...
-   * @return NeevoResult fluent interface
-   * @internal
-   */
-  public function  __call($name, $arguments){
-    if(in_array(strtolower($name), array('and', 'or'))){
-      $this->reinit();
-      $this->conditions[max(array_keys($this->conditions))][3] = strtoupper($name);
-      return $this;
-    }
-    return $this;
-  }
-
-
-  /**
-   * Sets ORDER clauses. Accepts infinite arguments (rules) or array.
-   * @param string|array $rules Order rules: "column", "col1, col2 DESC", etc.
-   * @return NeevoResult fluent interface
-   */
-  public function order($rules){
-    $this->reinit();
-    if(is_array($rules))
-      $this->ordering = $rules;
-    else
-      $this->ordering = func_get_args();
-    return $this;
-  }
-
-
-  /**
-   * Alias for NeevoResult::order().
-   * @return NeevoResult fluent interface
-   */
-  public function orderBy($rules){
-    if(is_array($rules))
-      return $this->order($rules);
-    else return $this->order(func_get_args());
+  public function  __destruct(){
+    $this->free();
   }
 
 
@@ -281,70 +94,6 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
    */
   public function groupBy($rule, $having = null){
     return $this->group($rule, $having);
-  }
-
-
-  /**
-   * Sets LIMIT and OFFSET clause.
-   * @param int $limit
-   * @param int $offset
-   * @return NeevoResult fluent interface
-   */
-  public function limit($limit, $offset = null){
-    $this->reinit();
-    $this->limit = $limit;
-    if(isset($offset) && $this->type == Neevo::STMT_SELECT)
-      $this->offset = $offset;
-    return $this;
-  }
-
-
-  /**
-   * Randomize result order. Removes any other order clause.
-   * @return NeevoResult fluent interface
-   */
-  public function rand(){
-    $this->reinit();
-    $this->neevo->driver()->rand($this);
-    return $this;
-  }
-
-
-  /**
-   * Prints out syntax highlighted statement.
-   * @param bool $return Return output instead of printing it?
-   * @return string|NeevoResult fluent interface
-   */
-  public function dump($return = false){
-    $code = (PHP_SAPI === 'cli') ? $this->build() : self::_highlightSql($this->build());
-    if(!$return) echo $code;
-    return $return ? $code : $this;
-  }
-
-
-  /**
-   * Performs statement
-   * @return resource|bool
-   */
-  public function run(){
-    $start = explode(' ', microtime());
-
-    $query = $this->neevo->driver()->query($this->build());
-
-    if(!$query){
-      return $this->neevo->error('Query failed');
-    }
-
-    $end = explode(" ", microtime());
-    $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
-    $this->time = $time;
-
-    $this->performed = true;
-    $this->resultSet = $query;
-
-    $this->neevo->setLast($this->info());
-
-    return $query;
   }
 
 
@@ -527,17 +276,6 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
 
 
   /**
-   * Get the ID generated in the INSERT statement
-   * @return int|FALSE
-   */
-  public function insertId(){
-    if(!$this->isPerformed()) $this->run();
-
-    return $this->neevo->driver()->insertId();
-  }
-
-
-  /**
    * Number of rows in result set
    * @return int
    */
@@ -545,17 +283,6 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     if(!$this->isPerformed()) $this->run();
     $this->numRows = $this->neevo->driver()->rows($this->resultSet);
     return intval($this->numRows);
-  }
-
-
-  /**
-   * Number of rows affected by statement
-   * @return int
-   */
-  public function affectedRows(){
-    if(!$this->isPerformed()) $this->run();
-    $this->affectedRows = $this->neevo->driver()->affectedRows();
-    return $this->affectedRows;
   }
 
 
@@ -569,50 +296,14 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
   }
 
 
-  /**
-   * Builds statement from NeevoResult instance
-   * @return string The statement in SQL dialect
-   * @internal
-   */
-  public function build(){
-    return $this->neevo->statementBuilder()->build($this);
-  }
-
-
-  /**
-   * Basic information about statement
-   * @param bool $hide_password Password will be replaced by '*****'.
-   * @param bool $exclude_connection Connection info will be excluded.
-   * @return array
-   */
-  public function info($hide_password = true, $exclude_connection = false){
-    $info = array(
-      'type' => substr($this->type, 5),
-      'table' => $this->getTable(),
-      'executed' => (bool) $this->isPerformed(),
-      'query_string' => strip_tags($this->dump(true))
-    );
-
-    if($exclude_connection == true)
-      $this->neevo->connection()->info($hide_password);
-
-    if($this->isPerformed()){
-      $info['time'] = $this->time;
-      if(is_int($this->numRows))
-        $info['rows'] = $this->numRows;
-      if(is_int($this->affectedRows))
-        $info['affected_rows'] = $this->affectedRows;
-      if($this->type == 'insert')
-        $info['last_insert_id'] = $this->insertId();
-    }
-
-    return $info;
-  }
-
-
   /*  ******  Setters & Getters  ******  */
 
 
+  /**
+   * Class to use as a row class
+   * @param string $className
+   * @return NeevoResult fluent interface
+   */
   public function setRowClass($className){
     if(!class_exists($className))
       return $this->neevo->error("Cannot set row class '$className' - class does not exist");
@@ -620,36 +311,10 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     return $this;
   }
 
-
-  /**
-   * Query execution time.
-   * @return int
-   */
-  public function time(){
-    return $this->time;
-  }
-
-  /**
-   * @return Neevo
-   * @internal
-   */
-  public function neevo(){
-    return $this->neevo;
-  }
-
   /** @internal */
   public function resultSet(){
     return $this->resultSet;
   }
-
-  /**
-   * If query was performed, returns true.
-   * @return bool
-   */
-  public function isPerformed(){
-    return $this->performed;
-  }
-
 
   /** @internal */
   public function reinit(){
@@ -658,62 +323,9 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     $this->resultSet = null;
   }
 
-
   /** @internal */
   public function getData(){
     return $this->data;
-  }
-
-  /**
-   * Full table name (with prefix)
-   * @return string
-   */
-  public function getTable(){
-    $table = $this->tableName;
-    $prefix = $this->neevo->connection()->prefix();
-    if(preg_match('#([^.]+)(\.)([^.]+)#', $table))
-      return str_replace('.', ".$prefix", $table);
-    return $prefix.$table;
-  }
-
-  /**
-   * Statement type
-   * @return string
-   */
-  public function getType(){
-    return $this->type;
-  }
-
-  /**
-   * Statement LIMIT fraction
-   * @return int
-   */
-  public function getLimit(){
-    return $this->limit;
-  }
-
-  /**
-   * Statement OFFSET fraction
-   * @return int
-   */
-  public function getOffset(){
-    return $this->offset;
-  }
-
-  /**
-   * Statement WHERE conditions
-   * @return array
-   */
-  public function getConditions(){
-    return $this->conditions;
-  }
-
-  /**
-   * Statement ORDER BY fraction
-   * @return array
-   */
-  public function getOrdering(){
-    return $this->ordering;
   }
 
   /**
@@ -740,52 +352,8 @@ class NeevoResult implements ArrayAccess, IteratorAggregate, Countable {
     return $this->columns;
   }
 
-  /**
-   * Statement values fraction for INSERT/UPDATE statements
-   *
-   * [INSERT INTO tbl] (col1, col2, ...) VALUES (val1, val2, ...) or
-   * [UPDATE tbl] SET col1 = val1,  col2 = val2, ...
-   * @return array
-   */
-  public function getValues(){
-    return $this->values;
-  }
-
 
   /*  ******  Internal methods  ******  */
-
-
-  /**
-   * Highlights given SQL code
-   * @param string $sql
-   * @return string
-   * @internal
-   */
-  private static function _highlightSql($sql){
-    $keywords1 = 'SELECT|UPDATE|INSERT\s+INTO|DELETE|FROM|VALUES|SET|WHERE|HAVING|GROUP\s+BY|ORDER\s+BY|LIMIT|OFFSET|LEFT\s+JOIN|INNER\s+JOIN';
-    $keywords2 = 'RANDOM|RAND|ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
-
-    $sql = str_replace("\\'", '\\&#39;', $sql);
-    $sql = preg_replace_callback("~($keywords1)|($keywords2)|('[^']+'|[0-9]+)|(/\*.*\*/)|(--\s?[^;]+)|(#[^;]+)~", array('NeevoResult', '_highlightCallback'), $sql);
-    $sql = str_replace('\\&#39;', "\\'", $sql);
-    return '<code style="color:#555" class="sql-dump">' . $sql . "</code>\n";
-  }
-
-
-  private static function _highlightCallback($match){
-    if(!empty($match[1])) // Basic keywords
-      return '<strong style="color:#e71818">'.$match[1].'</strong>';
-    if(!empty($match[2])) // Other keywords
-      return '<strong style="color:#d59401">'.$match[2].'</strong>';
-    if(!empty($match[3])) // Values
-      return '<em style="color:#008000">'.$match[3].'</em>';
-    if(!empty($match[4])) // C-style comment
-      return '<em style="color:#999">'.$match[4].'</em>';
-    if(!empty($match[5])) // Dash-dash comment
-      return '<em style="color:#999">'.$match[5].'</em>';
-    if(!empty($match[6])) // hash comment
-      return '<em style="color:#999">'.$match[6].'</em>';
-  }
 
 
   /* Implementation of Array Access */

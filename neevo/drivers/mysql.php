@@ -170,7 +170,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Move internal result pointer
-   * @param resource $esultSet
+   * @param resource $resultSet
    * @param int $offset
    * @return bool
    */
@@ -190,10 +190,10 @@ class NeevoDriverMySQL implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoResult $statement NeevoResult instance
+   * @param NeevoStmtBase $statement
    * @return void
    */
-  public function rand(NeevoResult $statement){
+  public function rand(NeevoStmtBase $statement){
     $statement->order('RAND()');
   }
 
