@@ -2,7 +2,7 @@
 
 include_once dirname(__FILE__). '/../neevo.php';
 
-$db = new Neevo($driver, new NeevoCacheSession);
+$db = new Neevo($driver);
 
 if($driver == 'mysql'){
   $db->connect(array(

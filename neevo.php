@@ -19,14 +19,13 @@ if(version_compare(PHP_VERSION, '5.1.0', '<'))
   trigger_error('Neevo requires PHP version 5.1.0 or newer', E_USER_ERROR);
 
 include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
-include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmtBase.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmtBuilder.php';
-include_once dirname(__FILE__). '/neevo/NeevoStmt.php';
 include_once dirname(__FILE__). '/neevo/NeevoResult.php';
+include_once dirname(__FILE__). '/neevo/NeevoStmt.php';
 include_once dirname(__FILE__). '/neevo/NeevoResultIterator.php';
 include_once dirname(__FILE__). '/neevo/NeevoRow.php';
-include_once dirname(__FILE__). '/neevo/NeevoCache.php';
+include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
 
 /**
  * Main Neevo layer class.
@@ -75,7 +74,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 219;
+  const REVISION = 220;
 
   // Data types
   const BOOL = 30;
@@ -96,16 +95,14 @@ class Neevo{
   /**
    * Neevo
    * @param string $driver Name of driver to use.
-   * @param INeevoCache $cache Cache to use. NULL for no cache.
    * @return void
    * @throws NeevoException
    */
-  public function __construct($driver = null, INeevoCache $cache = null){
+  public function __construct($driver = null){
     if(!$driver)
       $driver = self::$defaultDriver;
     
     $this->setDriver($driver);
-    $this->setCache($cache);
   }
 
 
@@ -230,50 +227,6 @@ class Neevo{
 
 
   /**
-   * Sets Neevo cache.
-   * @param INeevoCache $cache
-   * @return void
-   * @internal
-   */
-  private function setCache(INeevoCache $cache = null){
-    $this->cache = $cache;
-  }
-  
-  
-  /**
-   * Neevo cache object
-   * @return INeevoCache|null
-   */
-  public function cache(){
-    return $this->cache;
-  }
-
-
-  /**
-   * Load stored data
-   * @param string $key
-   * @return mixed|null null if not found
-   */
-  public function cacheLoad($key){
-    if(isset($this->cache))
-      return $this->cache()->load($key);
-    return null;
-  }
-
-
-  /**
-   * Save data
-   * @param string $key
-   * @param mixed $value
-   * @return void
-   */
-  public function cacheSave($key, $value){
-    if(isset($this->cache))
-      $this->cache()->save($key, $value);
-  }
-
-
-  /**
    * Last executed statement info
    * @return array
    */
@@ -297,16 +250,18 @@ class Neevo{
 
   /** @internal */
   private function logQuery(array $query){
-    if(!is_callable($this->debug)){
-      fwrite(STDERR, '-- ['.($query['time'] * 1000).'ms] '.$query['query_string']."\n");
+    if($this->debug){
+      if(!is_callable($this->debug))
+        fwrite(STDERR, '-- ['.($query['time'] * 1000).'ms] '.$query['query_string']."\n");
+      else
+        call_user_func($this->debug, $query['query_string'], $query['time'], $query);
     }
-    else call_user_func($this->debug, $query['query_string'], $query['time'], $query);
   }
 
 
   /**
    * Setup debugging mode
-   * @param bool|callback $debug  TRUE for STD_ERR, FALSE to disable.
+   * @param bool|callback $debug TRUE for STD_ERR, FALSE to disable.
    */
   public function debug($debug = true){
     if(is_bool($debug) || is_callable($debug))
