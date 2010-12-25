@@ -38,6 +38,9 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
   protected $columns = array();
 
   /** @var array */
+  private $join;
+
+  /** @var array */
   private $data;
 
   /** @var */
@@ -98,6 +101,61 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
 
 
   /**
+   * Performs JOIN on tables
+   * @param string $table Join table
+   * @param string $expr Join expression
+   * @return NeevoResult fluent interface
+   */
+  public function join($table, $expr, $type = null){
+    $this->reinit();
+    $prefix = $this->neevo->connection()->prefix();
+
+    if(!in_array($type, array(null, Neevo::JOIN_LEFT, Neevo::JOIN_RIGHT, Neevo::JOIN_INNER)))
+      throw new InvalidArgumentException('Argument 3 passed to '.__METHOD__.' must be valid JOIN type or NULL.');
+    
+    $this->join = array(
+      'type' => $type,
+      'table' => $this->getTable($table),
+      'expr' => preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $expr)
+    );
+    return $this;
+  }
+
+
+  /**
+   * Performs LEFT JOIN on tables
+   * @param string $table Join table
+   * @param string $expr Join expression
+   * @return NeevoResult fluent interface
+   */
+  public function leftJoin($table, $expr){
+    return $this->join($table, $expr, Neevo::JOIN_LEFT);
+  }
+
+
+  /**
+   * Performs RIGHT JOIN on tables
+   * @param string $table Join table
+   * @param string $expr Join expression
+   * @return NeevoResult fluent interface
+   */
+  public function rightJoin($table, $expr){
+    return $this->join($table, $expr, Neevo::JOIN_RIGHT);
+  }
+
+
+  /**
+   * Performs INNER JOIN on tables
+   * @param string $table Join table
+   * @param string $expr Join expression
+   * @return NeevoResult fluent interface
+   */
+  public function innerJoin($table, $expr){
+    return $this->join($table, $expr, Neevo::JOIN_INNER);
+  }
+
+
+  /**
    * Base fetcher - fetches data as array.
    * @return array|FALSE
    * @internal
@@ -113,8 +171,8 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
     try{
       $rows = $this->neevo->driver()->fetchAll($resultSet);
     } catch(NotImplementedException $e){
-          while($row = $this->neevo->driver()->fetch($resultSet))
-            $rows[] = $row;
+      while($row = $this->neevo->driver()->fetch($resultSet))
+        $rows[] = $row;
       }
 
     $this->free();
@@ -127,20 +185,24 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
 
 
   /**
-   * Fetches all data from given result set.
-   *
-   * Returns array with rows as **NeevoRow** instances or FALSE.
+   * Fetches data from given result set.
+   * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC.
    * @return array|FALSE
    */
-  public function fetch(){
+  public function fetch($format = Neevo::OBJECT){
     $result = $this->fetchPlain();
     if($result === false)
       return false;
+    if($format === Neevo::ASSOC){
+      $this->data = $result;
+      unset($result);
+      return $this->data;
+    }
     $rows = array();
     foreach($result as $row)
       $rows[] = new $this->rowClass($row);
     unset($result);
-    $this->data  = $rows;
+    $this->data = $rows;
     unset($rows);
     return $this->data;
   }
@@ -148,11 +210,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
 
   /**
    * Fetches the first row in result set.
-   *
-   * Format can be:
-   * - Neevo::OBJECT - returned as NeevoRow instance (**default**)
-   * - Neevo::ASSOC - returned as associative array
-   * @param int $format Return format
+   * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC.
    * @return NeevoRow|array|FALSE
    */
   public function fetchRow($format = Neevo::OBJECT){
@@ -214,22 +272,9 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
 
 
   /**
-   * Fetches all data as array with rows as associative arrays.
-   * @return array|FALSE
-   */
-  public function fetchArray(){
-    return $this->fetchPlain();
-  }
-
-
-  /**
    * Fetches all data as associative arrays with $column as a 'key' to row.
-   *
-   * Format can be:
-   * - Neevo::OBJECT - returned as NeevoRow instance (**default**)
-   * - Neevo::ASSOC - returned as associative array
    * @param string $column Column to use as key for row
-   * @param int $format Return format
+   * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC.
    * @return array|FALSE
    */
   public function fetchAssoc($column, $format = Neevo::OBJECT){
@@ -249,6 +294,16 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
     }
     unset($result);
     return $rows;
+  }
+
+
+  /**
+   * Deprecated, use fetch(Neevo::ASSOC) instead.
+   * @deprecated
+   */
+  public function fetchArray(){
+    if(Neevo::$ignoreDeprecated) return $this->fetch(Neevo::ASSOC);
+    trigger_error(__METHOD__.' is deprecated, use '.__CLASS__.'::fetch(Neevo::ASSOC) instead', E_USER_DEPRECATED);
   }
 
 
@@ -350,6 +405,16 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
    */
   public function getColumns(){
     return $this->columns;
+  }
+
+  /**
+   * Statement JOIN fraction
+   * @return array|false
+   */
+  public function getJoin(){
+    if(!empty($this->join))
+      return $this->join;
+    return false;
   }
 
 

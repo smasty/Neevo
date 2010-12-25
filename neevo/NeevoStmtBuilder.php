@@ -46,15 +46,23 @@ class NeevoStmtBuilder{
 
     $table = $statement->getTable();
 
+    // JOIN
+    if($statement instanceof NeevoResult && $statement->getJoin())
+      $table = $table .' '. $this->buildJoin($statement);
+
+    // WHERE
     if($statement->getConditions())
       $where = $this->buildWhere($statement);
 
+    // ORDER BY
     if($statement->getOrdering())
       $order = $this->buildOrdering($statement);
 
+    // GROUP BY
     if($statement instanceof NeevoResult && $statement->getGrouping())
       $group = $this->buildGrouping($statement);
 
+    // LIMIT, OFFSET
     if($statement->getLimit()) $limit = ' LIMIT ' .$statement->getLimit();
     if($statement->getOffset()) $limit .= ' OFFSET ' .$statement->getOffset();
 
@@ -78,7 +86,20 @@ class NeevoStmtBuilder{
 
     return $q.';';
   }
-  
+
+
+  /**
+   * Builds JOIN part for SELECT statement
+   * @param NeevoResult $statement
+   * @return string
+   */
+  protected function buildJoin(NeevoResult $statement){
+    $join = $statement->getJoin();
+    $type = strtoupper(substr($join['type'], 5));
+    if($type !== '') $type .= ' ';
+    return $type.'JOIN '.$join['table'].' ON '.$join['expr'];
+  }
+
 
   /**
    * Builds WHERE condition statement

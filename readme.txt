@@ -30,13 +30,13 @@ can be easily added.
 Features
 ========
 
- - SELECT queries (JOINs are @todo)
+ - SELECT queries (JOIN support as well)
  - INSERT queries
  - UPDATE queries
  - DELETE queries
 
- - Multiple drivers support (*)
- - More ways to fetch your data: as objects, indexed/associative arrays, key=>value pairs, single...
+ - Multiple drivers support
+ - More ways to fetch your data: as objects, arrays, key=>value pairs, single row...
  - Affected rows
  - Retrieved rows
  - Seek
@@ -70,7 +70,6 @@ Todo
 ====
 
  - better test coverage
- - JOIN support
 
  - PDO driver
  - PostgreSQL driver

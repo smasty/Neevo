@@ -147,14 +147,17 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     $row = @$resultSet->fetch(SQLITE_ASSOC);
     $charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
 
-    if($row && $charset){
+    if($row){
       $fields = array();
       foreach($row as $key=>$val){
         if($charset !== null && is_string($val))
           $val = iconv($this->dbcharset, $charset, $val);
-        $fields[str_replace(array('[', ']'), '', $key)] = $val;
+        $key = str_replace(array('[', ']'), '', $key);
+        if(strpos($key, '.') !== false)
+          $key = substr($key, strpos($key, '.') + 1);
+        $fields[$key] = $val;
       }
-      return $fileds;
+      return $fields;
     }
     return $row;
   }
@@ -168,17 +171,20 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
   public function fetchAll($resultSet){
     $result = @$resultSet->fetchAll(SQLITE_ASSOC);
     $charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
-    
-    if($result && $charset){
+
+    if($result){
       $rows = array();
       foreach($result as $row){
         $fields = array();
         foreach($row as $key=>$val){
           if($charset !== null && is_string($val))
             $val = iconv($this->dbcharset, $charset, $val);
-          $fields[str_replace(array('[', ']'), '', $key)] = $val;
+          $key = str_replace(array('[', ']'), '', $key);
+          if(strpos($key, '.') !== false)
+            $key = substr($key, strpos($key, '.') + 1);
+          $fields[$key] = $val;
         }
-        $rows[] = $fileds;
+        $rows[] = $fields;
         unset($fields);
       }
       return $rows;
@@ -251,17 +257,25 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
     $table = $statement->getTable();
 
+    // JOIN
+    if($statement instanceof NeevoResult && $statement->getJoin())
+      $table = $table .' '. $this->buildJoin($statement);
+
+    // WHERE
     if($statement->getConditions())
       $where = $this->buildWhere($statement);
 
+    // ORDER BY
     if($statement->getOrdering())
       $order = $this->buildOrdering($statement);
 
+    // GROUP BY
     if($statement instanceof NeevoResult && $statement->getGrouping())
       $group = $this->buildGrouping($statement);
 
-    if($statement->getLimit()) $limit = " LIMIT " .$statement->getLimit();
-    if($statement->getOffset()) $limit .= " OFFSET " .$statement->getOffset();
+    // LIMIT, OFFSET
+    if($statement->getLimit()) $limit = ' LIMIT ' .$statement->getLimit();
+    if($statement->getOffset()) $limit .= ' OFFSET ' .$statement->getOffset();
 
     if($statement->getType() == Neevo::STMT_SELECT){
       $cols = $this->buildSelectCols($statement);

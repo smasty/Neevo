@@ -10,7 +10,6 @@
  * @author   Martin Srank (http://smasty.net)
  * @license  http://neevo.smasty.net/license  MIT license
  * @link     http://neevo.smasty.net/
- * @todo JOIN support
  *
  */
 
@@ -74,7 +73,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 221;
+  const REVISION = 222;
 
   // Data types
   const BOOL = 30;
@@ -91,6 +90,10 @@ class Neevo{
   const STMT_UPDATE = 'stmt_update';
   const STMT_DELETE = 'stmt_delete';
 
+  // JOIN types
+  const JOIN_LEFT = 'join_left';
+  const JOIN_RIGHT = 'join_right';
+  const JOIN_INNER = 'join_inner';
 
   /**
    * Neevo

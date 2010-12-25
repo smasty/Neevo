@@ -282,8 +282,9 @@ abstract class NeevoStmtBase {
    * Full table name (with prefix)
    * @return string
    */
-  public function getTable(){
-    $table = $this->tableName;
+  public function getTable($table = null){
+    if($table === null)
+      $table = $this->tableName;
     $prefix = $this->neevo->connection()->prefix();
     if(preg_match('~([^.]+)(\.)([^.]+)~', $table))
       return str_replace('.', ".$prefix", $table);
@@ -341,7 +342,7 @@ abstract class NeevoStmtBase {
    * @internal
    */
   protected static function _highlightSql($sql){
-    $keywords1 = 'SELECT|UPDATE|INSERT\s+INTO|DELETE|FROM|VALUES|SET|WHERE|HAVING|GROUP\s+BY|ORDER\s+BY|LIMIT|OFFSET|LEFT\s+JOIN|INNER\s+JOIN';
+    $keywords1 = 'SELECT|UPDATE|INSERT\s+INTO|DELETE|FROM|VALUES|SET|WHERE|HAVING|GROUP\s+BY|ORDER\s+BY|LIMIT|OFFSET|(?:LEFT |RIGHT |INNER )?JOIN';
     $keywords2 = 'RANDOM|RAND|ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
 
     $sql = str_replace("\\'", '\\&#39;', $sql);

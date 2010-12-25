@@ -44,7 +44,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
   public function __get($name){
     if($this->isSingle())
       return $this->singleValue;
-    return $this->data[$name];
+    return isset($this->data[$name]) ? $this->data[$name] : null;
   }
 
 
