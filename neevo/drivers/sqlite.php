@@ -47,6 +47,9 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
   /** @var SQLiteDatabase */
   private $resource;
 
+  /** @var string */
+  private $_joinTbl;
+
 
   /**
    * If driver extension is loaded, sets Neevo reference, otherwise throw exception
@@ -257,9 +260,15 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
     $table = $statement->getTable();
 
-    // JOIN
-    if($statement instanceof NeevoResult && $statement->getJoin())
+    // JOIN - Workaround for RIGHT JOIN
+    if($statement instanceof NeevoResult && $statement->getJoin()){
+      $j = $statement->getJoin();
+      if($j['type'] === Neevo::JOIN_RIGHT){
+        $this->_joinTbl = $table;
+        $table = $j['table'];
+      }
       $table = $table .' '. $this->buildJoin($statement);
+    }
 
     // WHERE
     if($statement->getConditions())
@@ -301,6 +310,24 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     }
 
     return $q.';';
+  }
+
+
+  /**
+   * Builds JOIN part for SELECT statement
+   * @param NeevoResult $statement
+   * @return string
+   */
+  protected function buildJoin(NeevoResult $statement){
+    $join = $statement->getJoin();
+    if(isset($this->_joinTbl) && $join['type'] === Neevo::JOIN_RIGHT){
+      $join['table'] = $this->_joinTbl;
+      $join['type'] = Neevo::JOIN_LEFT;
+      unset($this->_joinTbl);
+    }
+    $type = strtoupper(substr($join['type'], 5));
+    if($type !== '') $type .= ' ';
+    return $type.'JOIN '.$join['table'].' ON '.$join['expr'];
   }
 
 
