@@ -73,7 +73,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 226;
+  const REVISION = 227;
 
   // Data types
   const BOOL = 30;
@@ -130,8 +130,9 @@ class Neevo{
    * @return Neevo fluent interface
    */
   public function connect($config){
-    $connection = $this->createConnection($config);
-    $this->setConnection($connection);
+    if(isset($config['driver']))
+      $this->setDriver($config['driver']);
+    $this->setConnection($config);
     return $this;
   }
 
@@ -146,25 +147,12 @@ class Neevo{
 
 
   /**
-   * Creates new NeevoConnection instance
-   *
-   * Options for connecting are different for each driver - see an API for your driver.
-   * @param array|string|Traversable $config Driver-specific configuration (array, parsable string or traversable object)
-   * @return NeevoConnection
-   * @internal
-   */
-  public function createConnection($config){
-    return new NeevoConnection($this->driver, $config);
-  }
-
-
-  /**
    * Sets Neevo Connection to use
-   * @param NeevoConnection $connection Instance to use
+   * @param array|strung|Traversable $config
    * @internal
    */
-  private function setConnection(NeevoConnection $connection){
-    $this->connection = $connection;
+  private function setConnection($config){
+    $this->connection = new NeevoConnection($this->driver, $config);
   }
 
 

@@ -374,6 +374,7 @@ abstract class NeevoStmtBase {
   }
 
 
+  /** @internal */
   protected static function _highlightCallback($match){
     if(!empty($match[1])) // Basic keywords
       return '<strong style="color:#e71818">'.$match[1].'</strong>';

@@ -76,7 +76,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 
   /**
-   *
+   * Updates corresponding database row if available.
+   * @return int Number of affected rows.
    */
   public function update(){
     if(!empty($this->modified) && $this->data != $this->iterable && !$this->freeze){
@@ -92,6 +93,10 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   }
 
 
+  /**
+   * Deletes corresponding database row if available.
+   * @return int Number of affected rows.
+   */
   public function delete(){
     if(!$this->freeze){
       return $this->neevo->delete($this->table)
