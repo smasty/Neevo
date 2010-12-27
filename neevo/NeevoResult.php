@@ -41,7 +41,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   private $join;
 
   /** @var int */
-  private $iteratorKeys;
+  private $iteratorPointer;
 
   /** @var array */
   private $data;
@@ -441,33 +441,32 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
       $this->reinit();
       $this->fetch();
     }
-    $this->iteratorKeys = array_keys($this->data);
-    reset($this->iteratorKeys);
+    $this->iteratorPointer = 0;
   }
 
   /** @internal */
   public function key(){
-    return current($this->iteratorKeys);
+    return $this->iteratorPointer;
   }
 
   /** @internal */
   public function next(){
-    next($this->iteratorKeys);
+    $this->iteratorPointer++;
   }
 
   /** @internal */
   public function current(){
-    $current = $this->data[current($this->iteratorKeys)];
+    $current = $this->data[$this->iteratorPointer];
 
     if($this->dataFormat == Neevo::OBJECT && !($current instanceof $this->rowClass))
-      $current = $this->data[current($this->iteratorKeys)] = new $this->rowClass($current, $this);
+      $current = $this->data[$this->iteratorPointer] = new $this->rowClass($current, $this);
 
     return $current;
   }
 
   /** @internal */
   public function valid(){
-    return current($this->iteratorKeys) !== false;
+    return !empty($this->data[$this->iteratorPointer]);
   }
 
 }
