@@ -42,7 +42,7 @@ class NeevoStmt extends NeevoStmtBase {
    * Creates UPDATE statement
    * @param string $table Table name
    * @param array $data Data to update
-   * @return NeevoResult fluent interface
+   * @return NeevoStmt fluent interface
    */
   public function update($table, array $data){
     $this->reinit();
@@ -57,7 +57,7 @@ class NeevoStmt extends NeevoStmtBase {
    * Creates INSERT statement
    * @param string $table Table name
    * @param array $values Values to insert
-   * @return NeevoResult fluent interface
+   * @return NeevoStmt fluent interface
    */
   public function insert($table, array $values){
     $this->reinit();
@@ -69,8 +69,8 @@ class NeevoStmt extends NeevoStmtBase {
 
 
   /**
-   * Alias for NeevoResult::insert()
-   * @return NeevoResult fluent interface
+   * Alias for NeevoStmt::insert()
+   * @return NeevoStmt fluent interface
    */
   public function insertInto($table, array $values){
     return $this->insert($table, $values);
@@ -80,7 +80,7 @@ class NeevoStmt extends NeevoStmtBase {
   /**
    * Creates DELETE statement
    * @param string $table Table name
-   * @return NeevoResult fluent interface
+   * @return NeevoStmt fluent interface
    */
   public function delete($table){
     $this->reinit();
@@ -117,7 +117,6 @@ class NeevoStmt extends NeevoStmtBase {
   public function reinit(){
     $this->performed = false;
     $this->affectedRows = null;
-    $this->values = array();
   }
 
   /**

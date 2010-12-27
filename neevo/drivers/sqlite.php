@@ -156,8 +156,8 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
         if($charset !== null && is_string($val))
           $val = iconv($this->dbcharset, $charset, $val);
         $key = str_replace(array('[', ']'), '', $key);
-        if(strpos($key, '.') !== false)
-          $key = substr($key, strpos($key, '.') + 1);
+        $pos = strpos($key, '.');
+        if($pos !== false) $key = substr($key, $pos + 1);
         $fields[$key] = $val;
       }
       return $fields;
@@ -183,8 +183,8 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
           if($charset !== null && is_string($val))
             $val = iconv($this->dbcharset, $charset, $val);
           $key = str_replace(array('[', ']'), '', $key);
-          if(strpos($key, '.') !== false)
-            $key = substr($key, strpos($key, '.') + 1);
+          $pos = strpos($key, '.');
+          if($pos !== false) $key = substr($key, $pos + 1);
           $fields[$key] = $val;
         }
         $rows[] = $fields;
@@ -352,6 +352,31 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
         $this->neevo->error('Unsupported data type');
         break;
     }
+  }
+
+
+  /**
+   * Get PRIMARY KEY column for table
+   * @param $table string
+   * @return string
+   */
+  public function getPrimaryKey($table){
+    $key = '';
+    $pos = strpos($table, '.');
+    if($pos !== false) $table = substr($table, $pos + 1);
+    $q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
+    $r = $this->fetch($q);
+    if($r === false)
+      return '';
+
+    $sql = $r['sql'];
+    $sql = explode("\n", $sql);
+    foreach($sql as $field){
+      $field = trim($field);
+      if(stripos($field, 'PRIMARY KEY') !== false && $key === '')
+        $key = preg_replace('~^"(\w+)".*$~i', '$1', $field);
+    }
+    return $key;
   }
 
 }

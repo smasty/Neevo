@@ -342,4 +342,29 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     }
   }
 
+
+  /**
+   * Get PRIMARY KEY column for table
+   * @param $table string
+   * @return string
+   */
+  public function getPrimaryKey($table){
+    $key = '';
+    $pos = strpos($table, '.');
+    if($pos !== false) $table = substr($table, $pos + 1);
+    $q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
+    $r = $this->fetch($q);
+    if($r === false)
+      return '';
+
+    $sql = $r['sql'];
+    $sql = explode("\n", $sql);
+    foreach($sql as $field){
+      $field = trim($field);
+      if(stripos($field, 'PRIMARY KEY') !== false && $key === '')
+        $key = preg_replace('~^"(\w+)".*$~i', '$1', $field);
+    }
+    return $key;
+  }
+
 }

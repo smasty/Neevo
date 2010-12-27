@@ -66,7 +66,7 @@ abstract class NeevoStmtBase {
    * | `where('field', new NeevoLiteral('NOW()'))`  | `field = NOW()`
    * @param string $condition
    * @param string|array|bool|null $value
-   * @return NeevoResult fluent interface
+   * @return NeevoStmtBase fluent interface
    */
   public function where($condition, $value = true){
     $this->reinit();
@@ -100,15 +100,15 @@ abstract class NeevoStmtBase {
 
   /**
    * Sets AND/OR glue for WHERE conditions
-   *
-   * Use as regular method: $statement->where('id', 5)->**or()**->where()...
-   * @return NeevoResult fluent interface
+   * @return NeevoStmtBase fluent interface
    * @internal
    */
-  public function  __call($name, $arguments){
+  public function  __call($name, $args){
     if(in_array(strtolower($name), array('and', 'or'))){
       $this->reinit();
       $this->conditions[max(array_keys($this->conditions))][3] = strtoupper($name);
+      if(count($args) >= 1)
+        $this->where($args[0], isset($args[1]) ? $args[1] : true);
       return $this;
     }
     return $this;
@@ -118,7 +118,7 @@ abstract class NeevoStmtBase {
   /**
    * Sets ORDER clauses. Accepts infinite arguments (rules) or array.
    * @param string|array $rules Order rules: "column", "col1, col2 DESC", etc.
-   * @return NeevoResult fluent interface
+   * @return NeevoStmtBase fluent interface
    */
   public function order($rules){
     $this->reinit();
@@ -131,8 +131,8 @@ abstract class NeevoStmtBase {
 
 
   /**
-   * Alias for NeevoResult::order().
-   * @return NeevoResult fluent interface
+   * Alias for NeevoStmtBase::order().
+   * @return NeevoStmtBase fluent interface
    */
   public function orderBy($rules){
     if(is_array($rules))
@@ -145,7 +145,7 @@ abstract class NeevoStmtBase {
    * Sets LIMIT and OFFSET clause.
    * @param int $limit
    * @param int $offset
-   * @return NeevoResult fluent interface
+   * @return NeevoStmtBase fluent interface
    */
   public function limit($limit, $offset = null){
     $this->reinit();
@@ -157,8 +157,8 @@ abstract class NeevoStmtBase {
 
 
   /**
-   * Randomize result order. Removes any other order clause.
-   * @return NeevoResult fluent interface
+   * Randomize order. Removes any other order clause.
+   * @return NeevoStmtBase fluent interface
    */
   public function rand(){
     $this->reinit();
@@ -170,7 +170,7 @@ abstract class NeevoStmtBase {
   /**
    * Prints out syntax highlighted statement.
    * @param bool $return Return output instead of printing it?
-   * @return string|NeevoResult fluent interface
+   * @return string|NeevoStmtBase fluent interface
    */
   public function dump($return = false){
     $code = (PHP_SAPI === 'cli') ? $this->build() : self::_highlightSql($this->build());
@@ -205,7 +205,7 @@ abstract class NeevoStmtBase {
 
 
   /**
-   * Builds statement from NeevoResult instance
+   * Builds statement from NeevoStmtBase instance
    * @return string The statement in SQL dialect
    * @internal
    */
@@ -329,6 +329,28 @@ abstract class NeevoStmtBase {
    */
   public function getOrdering(){
     return $this->ordering;
+  }
+
+
+  /**
+   * Name of PRIMARY KEY column
+   * @return string|null
+   */
+  public function getPrimaryKey(){
+    $table = $this->getTable();
+    $key = null;
+    $cached = $this->neevo->cacheLoad($table.'_primaryKey');
+
+    if($cached === null){
+      try{
+        $key = $this->neevo->driver()->getPrimaryKey($table);
+      } catch(Exception $e){
+        return null;
+      }
+      $this->neevo->cacheSave($table.'_primaryKey', $key);
+      return $key === '' ? null : $key;
+    }
+    return $cached === '' ? null : $cached;
   }
 
 

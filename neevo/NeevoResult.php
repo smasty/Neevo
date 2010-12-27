@@ -19,7 +19,7 @@
  * @method NeevoResult and() and( ) Sets AND glue for WHERE conditions, provides fluent interface
  * @method NeevoResult or() or( ) Sets OR glue for WHERE conditions, provides fluent interface
  */
-class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregate, Countable {
+class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Countable {
 
 
   /** @var mixed */
@@ -40,10 +40,16 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
   /** @var array */
   private $join;
 
+  /** @var int */
+  private $iteratorKeys;
+
   /** @var array */
   private $data;
 
-  /** @var */
+  /** @var int */
+  private $dataFormat;
+
+  /** @var string */
   private $rowClass = 'NeevoRow';
 
 
@@ -187,24 +193,17 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
   /**
    * Fetches data from given result set.
    * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC.
-   * @return array|FALSE
+   * @return NeevoResult|array|FALSE Iterable result, array or FALSE.
    */
   public function fetch($format = Neevo::OBJECT){
     $result = $this->fetchPlain();
-    if($result === false)
-      return false;
-    if($format === Neevo::ASSOC){
-      $this->data = $result;
-      unset($result);
-      return $this->data;
-    }
-    $rows = array();
-    foreach($result as $row)
-      $rows[] = new $this->rowClass($row);
+    if($result === false) return false;
+
+    $this->data = $result;
+    $this->dataFormat = $format;
     unset($result);
-    $this->data = $rows;
-    unset($rows);
-    return $this->data;
+
+    return $format === Neevo::OBJECT ? $this : $this->data;
   }
 
 
@@ -221,11 +220,8 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
     $result = $this->neevo->driver()->fetch($resultSet);
     
     $this->free();
-    if($result === false)
-      return false;
-    if($format == Neevo::OBJECT)
-      $result = new $this->rowClass($result);
-    return $result;
+    if($result === false) return false;
+    return $format == Neevo::OBJECT ? new $this->rowClass($result, $this) : $result;
   }
 
 
@@ -238,64 +234,50 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
     if($result === false || $result === null)
       return false;
 
-    if(count($result) == 1)
-      return reset($result);
-
+    if(count($result) == 1) return reset($result);
     else $this->neevo->error('More than one columns in the row, cannot fetch single');
   }
 
 
   /**
    * Fetches data as $key=>$value pairs.
-   *
-   * If $key and $value columns are not defined in the statement, they will
-   * be automatically added to statement and others will be removed.
-   * @param string $key Column to use as an array key.
-   * @param string $value Column to use as an array value.
+   * @param string $key Key column
+   * @param string|NULL $value Value column. NULL for all specified columns.
    * @return array|FALSE
    */
-  public function fetchPairs($key, $value){
-    if(!in_array($key, $this->columns) || !in_array($value, $this->columns) || !in_array('*', $this->columns)){
-      $this->columns = array($key, $value);
-      $this->performed = false; // If statement was executed without needed columns, force execution (with them only).
+  public function fetchPairs($key, $value = null){
+    // If executed w/o needed cols, force exec w/ them.
+    if(!in_array('*', $this->columns)){
+      if(!in_array($key, $this->columns)){
+        $this->reinit();
+        $this->columns[] = $key;
+      }
+      if($value !== null && !in_array($value, $this->columns)){
+        $this->reinit();
+        $this->columns[] = $value;
+      }
     }
+
     $result = $this->fetchPlain();
-    if($result === false)
-      return false;
+    if($result === false) return false;
 
     $rows = array();
-    foreach($result as $row)
-      $rows[$row[$key]] = $row[$value];
+    foreach($result as $row){
+      $rows[$row[$key]] = $value === null ? $row : $row[$value];
+    }
     unset($result);
     return $rows;
   }
 
 
   /**
-   * Fetches all data as associative arrays with $column as a 'key' to row.
-   * @param string $column Column to use as key for row
-   * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC.
-   * @return array|FALSE
+   * Deprecated, use fetchPairs($column) instead.
+   * @deprecated
    */
-  public function fetchAssoc($column, $format = Neevo::OBJECT){
-    if(!in_array($column, $this->columns) || !in_array('*', $this->columns)){
-      $this->columns[] = $column;
-      $this->performed = false; // If statement was executed without needed column, force execution.
-    }
-    $result = $this->fetchPlain();
-    if($result === false)
-      return false;
-
-    $rows = array();
-    foreach($result as $row){
-      if($format == Neevo::OBJECT)
-        $row = new $this->rowClass($row); // Rows as NeevoRow.
-      $rows[$row[$column]] = $row;
-    }
-    unset($result);
-    return $rows;
+  public function fetchAssoc($column){
+    if(Neevo::$ignoreDeprecated) return $this->fetchPairs($column);
+    trigger_error(__METHOD__.' is deprecated, use '.__CLASS__.'::fetchPairs($column) instead.', E_USER_DEPRECATED);
   }
-
 
   /**
    * Deprecated, use fetch(Neevo::ASSOC) instead.
@@ -303,7 +285,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
    */
   public function fetchArray(){
     if(Neevo::$ignoreDeprecated) return $this->fetch(Neevo::ASSOC);
-    trigger_error(__METHOD__.' is deprecated, use '.__CLASS__.'::fetch(Neevo::ASSOC) instead', E_USER_DEPRECATED);
+    trigger_error(__METHOD__.' is deprecated, use '.__CLASS__.'::fetch(Neevo::ASSOC) instead.', E_USER_DEPRECATED);
   }
 
 
@@ -346,8 +328,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
    * @return int
    */
   public function count(){
-    if(!$this->isPerformed()) $this->run();
-    return (int) $this->numRows;
+    return (int) $this->rows();
   }
 
 
@@ -378,11 +359,6 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
     $this->resultSet = null;
   }
 
-  /** @internal */
-  public function getData(){
-    return $this->data;
-  }
-
   /**
    * Statement GROUP BY fraction
    * @return string
@@ -400,7 +376,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
   }
 
   /**
-   * Statement columns fraction for SELECT statements ([SELECT] col1, col2, ...)
+   * Statement columns fraction ([SELECT] col1, col2, ...)
    * @return array
    */
   public function getColumns(){
@@ -418,6 +394,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
   }
 
 
+
   /*  ******  Internal methods  ******  */
 
 
@@ -431,8 +408,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
 
   /** @internal */
   public function offsetExists($offset){
-    if(!$this->isPerformed())
-      $this->fetch();
+    if(!$this->isPerformed()) $this->fetch();
     return isset($this->data[$offset]);
   }
 
@@ -445,17 +421,53 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, IteratorAggregat
 
   /** @internal */
   public function offsetGet($offset){
-    if(!$this->isPerformed())
-      $this->fetch();
-    return isset($this->data[$offset]) ? $this->data[$offset] : null;
+    if(!$this->isPerformed()) $this->fetch();
+    if(!isset($this->data[$offset])) return null;
+
+    $current = $this->data[$offset];
+
+    if($this->dataFormat == Neevo::OBJECT && !($current instanceof $this->rowClass))
+      $current = $this->data[$offset] = new $this->rowClass($current, $this);
+
+    return $current;
   }
 
 
-  /* Implementation of IteratorAggregate */
+  /* Implementation of Iterator */
 
-  /** @return NeevoResultIterator */
-  public function getIterator(){
-    return new NeevoResultIterator($this);
+  /** @internal */
+  public function rewind(){
+    if(!empty($this->data) || $this->data === null){ // Force execution for future loops
+      $this->reinit();
+      $this->fetch();
+    }
+    $this->iteratorKeys = array_keys($this->data);
+    reset($this->iteratorKeys);
+  }
+
+  /** @internal */
+  public function key(){
+    return current($this->iteratorKeys);
+  }
+
+  /** @internal */
+  public function next(){
+    next($this->iteratorKeys);
+  }
+
+  /** @internal */
+  public function current(){
+    $current = $this->data[current($this->iteratorKeys)];
+
+    if($this->dataFormat == Neevo::OBJECT && !($current instanceof $this->rowClass))
+      $current = $this->data[current($this->iteratorKeys)] = new $this->rowClass($current, $this);
+
+    return $current;
+  }
+
+  /** @internal */
+  public function valid(){
+    return current($this->iteratorKeys) !== false;
   }
 
 }

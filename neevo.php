@@ -22,8 +22,8 @@ include_once dirname(__FILE__). '/neevo/NeevoStmtBase.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmtBuilder.php';
 include_once dirname(__FILE__). '/neevo/NeevoResult.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmt.php';
-include_once dirname(__FILE__). '/neevo/NeevoResultIterator.php';
 include_once dirname(__FILE__). '/neevo/NeevoRow.php';
+include_once dirname(__FILE__). '/neevo/NeevoCache.php';
 include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
 
 /**
@@ -73,7 +73,7 @@ class Neevo{
   const E_STRICT  = 13;
 
   // Neevo revision
-  const REVISION = 224;
+  const REVISION = 225;
 
   // Data types
   const BOOL = 30;
@@ -98,14 +98,16 @@ class Neevo{
   /**
    * Neevo
    * @param string $driver Name of driver to use.
+   * @param INeevoCache|null $cache Cache to use. NULL for no cache.
    * @return void
    * @throws NeevoException
    */
-  public function __construct($driver = null){
+  public function __construct($driver = null, INeevoCache $cache = null){
     if(!$driver)
       $driver = self::$defaultDriver;
     
     $this->setDriver($driver);
+    $this->setCache($cache);
   }
 
 
@@ -226,6 +228,49 @@ class Neevo{
    */
   public function stmtBuilder(){
     return $this->stmtBuilder;
+  }
+
+
+  /**
+   * Set cache
+   * @param INeevoCache $cache
+   * @return void
+   */
+  private function setCache(INeevoCache $cache = null){
+    $this->cache = $cache;
+  }
+
+
+  /**
+   * Neevo cache object
+   * @return INeevoCache|null
+   */
+  public function cache(){
+    return $this->cache;
+  }
+
+
+  /**
+   * Load stored data
+   * @param string $key
+   * @return mixed|null null if not found
+   */
+  public function cacheLoad($key){
+    if(isset($this->cache))
+      return $this->cache->load($key);
+    return null;
+  }
+
+
+  /**
+   * Save data
+   * @param string $key
+   * @param mixed $value
+   * @return void
+   */
+  public function cacheSave($key, $value){
+    if(isset($this->cache))
+      $this->cache->save($key, $value);
   }
 
 

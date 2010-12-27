@@ -241,4 +241,20 @@ class NeevoDriverMySQL implements INeevoDriver{
     }
   }
 
+
+  /**
+   * Get PRIMARY KEY column for table
+   * @param $table string
+   * @return string
+   */
+  public function getPrimaryKey($table){
+    $key = '';
+    $q = $this->query('SHOW FULL COLUMNS FROM '.$table);
+    while($col = $this->fetch($q)){
+      if(strtolower($col['Key']) === 'pri' && $key === '')
+        $key = $col['Field'];
+    }
+    return $key;
+  }
+
 }

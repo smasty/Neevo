@@ -18,10 +18,25 @@
  * Class representing a row in result.
  * @package Neevo
  */
-class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializable {
+class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
+
+  /** @var bool */
+  private $freeze;
+
+  /** @var string */
+  private $primaryKey;
+
+  /** @var string */
+  private $table;
 
   /** @var array */
   private $data = array();
+
+  /** @var array */
+  private $modified = array();
+
+  /** @var array */
+  private $iterable = array();
 
   /** @var bool */
   private $single = false;
@@ -29,40 +44,65 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
   /** @var mixed */
   private $singleValue;
 
+  /** @var Neevo */
+  private $neevo;
 
-  public function __construct($data){
+
+  /**
+   * Create row instance
+   * @param array $data
+   * @param NeevoResult $result
+   * @return void
+   */
+  public function __construct(array $data, NeevoResult $result){
     $this->data = $data;
+    $this->iterable = $this->data;
+    $this->neevo = $result->neevo();
+    $this->primaryKey = $result->getPrimaryKey();
+    $this->table = $result->getTable();
+
+    if(!isset($this->data[$this->primaryKey])){
+      $this->primaryKey = null;
+      $this->freeze = true;
+    }
+
     if(count($data) === 1){
       $this->single = true;
       $keys = array_keys($this->data);
       $this->singleValue = $this->data[$keys[0]];
+      $this->freeze = true;
     }
   }
 
 
-  /** @internal */
-  public function __get($name){
-    if($this->isSingle())
-      return $this->singleValue;
-    return isset($this->data[$name]) ? $this->data[$name] : null;
+  /**
+   *
+   */
+  public function update(){
+    if(!empty($this->modified) && $this->data != $this->iterable && !$this->freeze){
+      return $this->neevo->update($this->table, $this->modified)
+        ->where($this->primaryKey, $this->data[$this->primaryKey])
+        ->limit(1)->affectedRows();
+    }
+    if($this->freeze){
+      if($this->primaryKey === null)
+        $this->neevo->error('Update disabled - cannot get primary key');
+      else $this->neevo->error('Update disabled - this is a read-only row');
+    }
   }
 
 
-  /** @internal */
-  public function __set($name, $value){
-    $this->modified[$name] = $value;
-  }
-
-
-  /** @internal */
-  public function __isset($name){
-    return isset($this->data[$name]);
-  }
-
-
-  /** @internal */
-  public function __unset($name){
-    unset($this->data[$name]);
+  public function delete(){
+    if(!$this->freeze){
+      return $this->neevo->delete($this->table)
+        ->where($this->primaryKey, $this->data[$this->primaryKey])
+        ->limit(1)->affectedRows();
+    }
+    if($this->freeze){
+      if($this->primaryKey === null)
+        $this->neevo->error('Delete disabled - cannot get primary key');
+      else $this->neevo->error('Delete disabled - this is a read-only row');
+    }
   }
 
 
@@ -98,64 +138,78 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate, Serializabl
    * @return array
    */
   public function toArray(){
-    return $this->data;
+    return $this->iterable;
+  }
+
+
+  /** @internal */
+  public function __get($name){
+    if($this->single)
+      return $this->singleValue;
+    return isset($this->modified[$name]) ? $this->modified[$name] :
+      isset($this->data[$name]) ? $this->data[$name] : null;
+  }
+
+
+  /** @internal */
+  public function __set($name, $value){
+    if(isset($this->data[$name])){
+      $this->modified[$name] = $value;
+      $this->iterable = array_merge($this->data, $this->modified);
+    }
+  }
+
+
+  /** @internal */
+  public function __isset($name){
+    return isset($this->data[$name]);
+  }
+
+
+  /** @internal */
+  public function __unset($name){
+    $this->modified[$offset] = null;
+    $this->iterable = array_merge($this->data, $this->modified);
   }
 
 
   /* Implementation of Array Access */
 
   /** @internal */
+  public function offsetGet($offset){
+    return $this->__get($offset);
+  }
+
+
+  /** @internal */
   public function offsetSet($offset, $value){
-    if(isset($this->data[$offset]))
-      $this->modified[$offset] = $value;
+    $this->__set($offset, $value);
   }
 
 
   /** @internal */
   public function offsetExists($offset){
-    return isset($this->data[$offset]);
+    return $this->__isset($offset);
   }
 
 
   /** @internal */
   public function offsetUnset($offset){
-    unset($this->modified[$offset]);
-  }
-
-
-  /** @internal */
-  public function offsetGet($offset){
-    return isset($this->modified[$offset]) ? $this->modified[$offset] :
-      isset($this->data[$offset]) ? $this->data[$offset] : null;
+    $this->__unset($offset);
   }
 
 
   /* Implementation of Countable */
 
   public function count(){
-    return count($this->data);
+    return count($this->iterable);
   }
 
 
   /* Implementation of IteratorAggregate */
 
-  /** @internal */
   public function getIterator(){
-    return new ArrayIterator($this->data);
-  }
-
-
-  /* Implementation of Serializable */
-
-  /** @internal */
-  public function serialize(){
-    return serialize($this->data);
-  }
-
-  
-  /** @internal */
-  public function unserialize($serialized){
-    $this->data = unserialize($serialized);
+    return new ArrayIterator($this->iterable);
   }
 
 }

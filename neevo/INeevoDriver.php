@@ -153,5 +153,13 @@ interface INeevoDriver {
    * @return mixed
    */
   public function escape($value, $type);
+
+
+  /**
+   * Get PRIMARY KEY column for table
+   * @param $table string
+   * @return string|null
+   */
+  public function getPrimaryKey($table);
   
 }

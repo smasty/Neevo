@@ -25,9 +25,5 @@ elseif($driver == 'sqlite'){
 }
 
 elseif($driver == 'sqlite3'){
-  $db->connect(array('file' => 'tests/neevo-sqlite3.sqlite'));
-}
-
-else{
-  trigger_error('Driver does not exist', E_USER_ERROR);
+  $db->connect(array('file' => 'tests/neevo.sqlite3'));
 }
