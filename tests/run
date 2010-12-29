@@ -7,6 +7,7 @@ $start = microtime(true);
 // CLI options
 $opts = getopt('bd::');
 
+// Default driver
 if(isset($opts['d'])){
   if(is_string($opts['d']))
     $driver = strtolower(str_replace('=', '', $opts['d']));
@@ -17,19 +18,19 @@ if(isset($opts['d'])){
 // Testing interface
 include_once dirname(__FILE__) . '/connect.php';
 
-echo 'Driver: ', $driver, "\n";
+echo "Driver: $driver\n";
 
 foreach(glob(dirname(__FILE__).'/*.phpt') as $test){
 
   ob_start();
-  include $test;
+  include_once $test;
   $file = basename($test);
 
-  if(!preg_match("~^--TEST--\n(.*)\n--FILE--\n(.*)--EXPECT--\n(.*)~s", ob_get_clean(), $matches))
-    echo "Invalid $file\n";
+  if(!preg_match("~^--TEST--\r?\n(.*)\n--FILE--\r?\n(.*)--EXPECTF?--\r?\n(.*)~s", ob_get_clean(), $matches))
+    fwrite(STDERR, "Error: invalid test file $file\n");
 
   elseif($matches[2] !== $matches[3]){
-    echo "$file failed - $matches[1]\n";
+    fwrite(STDERR, "Error: Test $file failed - $matches[1]\n");
     
     // Debug mode (-b option)
     if(isset($opts['b']))

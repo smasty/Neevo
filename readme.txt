@@ -82,12 +82,14 @@ Neevo comes with a "compiler" - PHP CLI script shrinking whole Neevo to one PHP 
 Included drivers can also be specified.
 
 Usage:
-  $ php compiler.php [-d=<drivers>] -h
+  $ php compiler.php [-d=<drivers>] [-h] [-q]
 
 Options:
 
-  -d=<drivers>  Comma-separated list of drivers to include. Defaults to all drivers. (No space between!)
+  -d=<drivers>  Comma-separated list of drivers to include.
+                Defaults to all drivers.
   -h            Displays help.
+  -q            Quiet mode - no output.
 
 
 Minification functions are written by Jakub Vrana (http://php.vrana.cz) for his

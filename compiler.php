@@ -1,40 +1,39 @@
 <?php
-if(!$_SERVER['SHELL'])
+if(PHP_SAPI !== 'cli')
   trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
 
 // Defaults
 $file = 'neevo.php';
-$last_include_line = "include_once dirname(__FILE__). '/neevo/INeevoDriver.php';";
+$last_include = "include_once dirname(__FILE__). '/neevo/INeevoDriver.php';";
 
 
-$args = getopt('d::hqr');
+$args = getopt('d::hq');
 
-$nooutput = isset($args['q']);
-
-
+if(isset($args['q']))
+  ob_start();
 
 /* ******* Actions ******* */
 
 
 // Help
 if(isset($args['h'])){
-  out("Usage:
-  $ php ".basename(__FILE__)." [-d=<drivers>] -h
+  echo "Usage:
+  $ php ".basename(__FILE__)." [-d=<drivers>] [-h] [-q]
 
 Options:
 
-  -d=<drivers>  Comma-separated list of drivers to include. Defaults to all drivers.
+  -d=<drivers>  Comma-separated list of drivers to include.
+                Defaults to all drivers.
   -h            Displays help.
-");
+  -q            Quiet mode - no output.
+";
 
-  exit;
+  exit(0);
 }
 
 
 // Revision number
-if(isset($args['r']))
-  out(revision($file));
-
+echo revision($file);
 
 // Include only specified drivers
 if(isset($args['d'])){
@@ -46,24 +45,25 @@ if(isset($args['d'])){
 // All drivers
 else $drivers = null;
 
-
 // Minify source
-out(minify($file));
+echo minify($file);
+echo "\n";
 
-out("\n");
+if(isset($args['q']))
+  ob_end_clean();
 
 
 /* ******* Functions ******* */
 
 
 function revision($file){
-  $source = file_get_contents($file);
+  $source = @file_get_contents($file);
   global $new_rev;
 
-  $newsource = preg_replace_callback("#const REVISION = (\d+);#", "revision_callback", $source);
+  $newsource = preg_replace_callback('~const REVISION = (\d+);~', 'revision_callback', $source);
   
-  $response = file_put_contents($file, $newsource) ?
-    "Revision changed to $new_rev" : "Error: Revision change failed";
+  $response = @file_put_contents($file, $newsource) ?
+    "Revision changed to $new_rev" : error('Revision change failed');
 
   return "$response\n";
 }
@@ -78,7 +78,7 @@ function revision_callback($n){
 
 
 function drivers($file){
-  global $last_include_line;
+  global $last_include;
 
   // Remove driver autoload from Neevo class
   $content = str_replace("
@@ -87,32 +87,35 @@ function drivers($file){
       if(!\$this->isDriver(\$class))
   ", "\n", @file_get_contents($file));
 
-  $content = str_replace($last_include_line, list_drivers(), $content);
+  $content = str_replace($last_include, list_drivers(), $content);
   return $content;
 }
 
 
 function list_drivers(){
-  global $drivers, $last_include_line;
+  global $drivers;
 
   // Include all
   if($drivers === null)
-    $pattern = glob('./neevo/drivers/*.php');
+    $list = glob('./neevo/drivers/*.php');
   
   // Include only defined
   elseif(is_array($drivers)){
-    $pattern = array();
-    foreach($drivers as $driver)
-      $pattern[] = './neevo/drivers/'.$driver.'.php';
+    $list = array();
+    foreach($drivers as $driver){
+      $path = "./neevo/drivers/$driver.php";
+      if(file_exists($path))
+        $list[] = $path;
+    }
 
-    out('Compiling drivers: '.join(', ', $drivers)."\n");
+    echo 'Compiling drivers: '.join(', ', $drivers)."\n";
   }
 
   // Sort drivers alphabeticaly
-  sort($pattern);
+  sort($list);
 
   // Create include statements
-  foreach($pattern as $filename){
+  foreach($list as $filename){
     $list .= "\ninclude_once dirname(__FILE__). '/neevo/drivers/".basename($filename)."';";
   }
   return $last_include_line.$list;
@@ -164,8 +167,8 @@ function minify($file){
   $result = add_license($result);
 
   // Save to file
-  return  file_put_contents($result_file, $result) ?
-    'Source minified' : 'Error: Minification failed';
+  return  @file_put_contents($result_file, $result) ?
+    'Source minified' : error('Minification failed');
 }
 
 
@@ -216,7 +219,8 @@ function php_shrink($input){
         if($tokens[$i+1][0] === T_ECHO){
           // join two consecutive echos
           next($tokens);
-          $token[1] = ','; // '.' would conflict with "a".1+2 and would use more memory //! remove ',' and "," but not $var","
+          $token[1] = ','; // '.' would conflict with "a".1+2 and would use more memory
+                           //! remove ',' and "," but not $var","
         }
         else{
           $in_echo = false;
@@ -232,9 +236,7 @@ function php_shrink($input){
   return $output;
 }
 
-
-function out($string){
-  global $nooutput;
-  if($nooutput === false)
-    echo $string;
+function error($message){
+  fwrite(STDERR, "Error: $message\n");
+  exit(1);
 }
