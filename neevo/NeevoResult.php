@@ -293,25 +293,6 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Deprecated, use fetchPairs($column) instead.
-   * @deprecated
-   */
-  public function fetchAssoc($column){
-    if(Neevo::$ignoreDeprecated) return $this->fetchPairs($column);
-    trigger_error(__METHOD__.' is deprecated, use '.__CLASS__.'::fetchPairs($column) instead.', E_USER_DEPRECATED);
-  }
-
-  /**
-   * Deprecated, use fetch(Neevo::ASSOC) instead.
-   * @deprecated
-   */
-  public function fetchArray(){
-    if(Neevo::$ignoreDeprecated) return $this->fetch(Neevo::ASSOC);
-    trigger_error(__METHOD__.' is deprecated, use '.__CLASS__.'::fetch(Neevo::ASSOC) instead.', E_USER_DEPRECATED);
-  }
-
-
-  /**
    * Free result set resource.
    */
   private function free(){
