@@ -47,12 +47,6 @@ Features
  - Query and connection info
  - Randomize result order
  - Dump queries
- - Multi-level error-reporting system (based on Exceptions):
-    - E_NONE:   No errors are reported.
-    - E_HANDLE: All errors are made to Exceptions and then sent to defined
-                (or default) error handler. (Exceptions are not thrown!)
-    - E_STRICT: All errors are thrown as Exceptions.
- - Ability to use your own error handler.
  - One-file-only minified version with stripped comments and whitespace
     (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
 

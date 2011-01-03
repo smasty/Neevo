@@ -20,22 +20,28 @@
 class NeevoConnection{
   
   /** @var INeevoDriver */
-  private $driver;
+  public $driver;
+
+  /** @var NeevoStmtBuilder */
+  public $stmtBuilder;
 
   /** @var array */
   private $config;
 
+  /** @var Neevo */
+  private $neevo;
+
 
   /**
    * Instantiate connection
-   * @param INeevoDriver $driver
    * @param array|string|Traversable $config
+   * @param Neevo $neevo
    * @throws InvalidArgumentException
    * @return void
    */
-  public function __construct(INeevoDriver $driver, $config){
-    $this->driver = $driver;
-
+  public function __construct($config, Neevo $neevo, $driverName = null){
+    $this->neevo = $neevo;
+    
     if(is_string($config))
       parse_str($config, $config);
     elseif($config instanceof Traversable){
@@ -45,6 +51,7 @@ class NeevoConnection{
     elseif(!is_array($config))
       throw new InvalidArgumentException('Options must be an array, string or Traversable object.');
 
+    self::alias($config, 'driver', 'extension');
     self::alias($config, 'username', 'user');
     self::alias($config, 'password', 'pass');
     self::alias($config, 'password', 'pswd');
@@ -55,27 +62,49 @@ class NeevoConnection{
     self::alias($config, 'table_prefix', 'prefix');
     self::alias($config, 'encoding', 'charset');
 
+    if(!isset($config['driver'])){
+      if($driverName !== null) // BC
+        $config['driver'] = $driverName;
+      else
+        $config['driver'] = Neevo::$defaultDriver;
+    }
+
+    $this->setDriver($config['driver']);
     $this->config = $config;
-    
-    $this->driver()->connect($this->config);
+    $this->driver->connect($this->config);
   }
 
 
   /**
-   * Current NeevoDriver
-   * @return INeevoDriver
+   * Sets Neevo driver to use
+   * @param string $driver Driver name
+   * @throws NeevoException
+   * @return void
+   * @internal
    */
-  private function driver(){
-    return $this->driver;
+  private function setDriver($driver){
+    $class = "NeevoDriver$driver";
+
+    if(!$this->isDriver($class)){
+      @include_once dirname(__FILE__) . '/drivers/'.strtolower($driver).'.php';
+
+      if(!$this->isDriver($class))
+        throw new NeevoException("Unable to create instance of Neevo driver '$driver' - class not found or not matching criteria.");
+    }
+
+    $this->driver = new $class($this->neevo);
+
+    // Set stmtBuilder
+    if(in_array('NeevoStmtBuilder', class_parents($class, false)))
+      $this->stmtBuilder = $this->driver;
+    else
+      $this->stmtBuilder = new NeevoStmtBuilder($this->neevo);
   }
 
 
-  /**
-   * Object variables as associative array
-   * @return array
-   */
-  public function getVars(){
-    return $this->config;
+  /** @internal */
+  private function isDriver($class){
+    return (class_exists($class, false) && in_array('INeevoDriver', class_implements($class, false)));
   }
 
 
@@ -90,9 +119,8 @@ class NeevoConnection{
    * @return array
    */
   public function info($hide_password = true){
-    $info = $this->getVars();
+    $info = $this->config;
     if($hide_password) $info['password'] = '*****';
-    $info['driver'] = str_replace('NeevoDriver', '', get_class($this->driver));
     return $info;
   }
 

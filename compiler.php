@@ -37,7 +37,7 @@ echo revision($file);
 
 // Include only specified drivers
 if(isset($args['d'])){
-  $drivers = explode(',', str_replace('=', '', $args['d'])); // PHP < 5.3 compatibility
+  $drivers = explode(',', str_replace('=', '', $args['d']));
 
   foreach($drivers as &$d)
     $d = strtolower(trim($d));
@@ -79,21 +79,13 @@ function revision_callback($n){
 
 function drivers($file){
   global $last_include;
-
-  // Remove driver autoload from Neevo class
-  $content = str_replace("
-      @include_once dirname(__FILE__) . '/neevo/drivers/'.strtolower(\$driver).'.php';
-
-      if(!\$this->isDriver(\$class))
-  ", "\n", @file_get_contents($file));
-
-  $content = str_replace($last_include, list_drivers(), $content);
-  return $content;
+  return str_replace($last_include, list_drivers(), @file_get_contents($file));
 }
 
 
 function list_drivers(){
   global $drivers;
+  global $last_include;
 
   // Include all
   if($drivers === null)
@@ -115,10 +107,11 @@ function list_drivers(){
   sort($list);
 
   // Create include statements
+  $includes = '';
   foreach($list as $filename){
-    $list .= "\ninclude_once dirname(__FILE__). '/neevo/drivers/".basename($filename)."';";
+    $includes .= "\ninclude_once dirname(__FILE__). '/neevo/drivers/".basename($filename)."';";
   }
-  return $last_include_line.$list;
+  return $last_include.$includes;
 }
 
 
@@ -126,6 +119,10 @@ function drivers_path(){
   global $drivers;
 
   if(is_array($drivers)){
+    foreach($drivers as $key => $value){
+      if(!file_exists("./neevo/drivers/$value.php"))
+        unset($drivers[$key]);
+    }
     sort($drivers);
     return '.' . join('-', $drivers);
   }
@@ -160,6 +157,13 @@ function minify($file){
   $source = str_replace(array('<?php', '?>'), '', $source);
   $source = "<?php\n$source\n";
 
+  // Remove driver autoload from NeevoConnection
+  $source = str_replace("
+      @include_once dirname(__FILE__) . '/drivers/'.strtolower(\$driver).'.php';
+
+      if(!\$this->isDriver(\$class))
+  ", "\n", $source);
+
   // Minify file
   $result = php_shrink($source);
 
@@ -172,7 +176,8 @@ function minify($file){
 }
 
 
-/** @copyright Jakub Vrana, http://php.vrana.cz. Used with permission. */
+/** @copyright Jakub Vrana, http://php.vrana.cz.
+ * Used with permission. */
 function include_file($match) {
   $file = @file_get_contents($match[1]);
   $token = end(token_get_all($file));
@@ -181,7 +186,8 @@ function include_file($match) {
 }
 
 
-/**  @copyright Jakub Vrana, http://php.vrana.cz. Used with permission. */
+/**  @copyright Jakub Vrana, http://php.vrana.cz.
+ * Used with permission. */
 function php_shrink($input){
   $tokens = token_get_all($input);
 

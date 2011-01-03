@@ -1,33 +1,37 @@
 <?php
 
-include_once dirname(__FILE__). '/../neevo.php';
+include_once dirname(__FILE__). '/../neevo.min.php';
 
 if($driver == 'mysql'){
-  $db = new Neevo('MySQL');
-  $db->connect(array(
+  $db = new Neevo(array(
+    'driver' => 'MySQL',
     'database' => 'neevo',
     'username' => 'root',
-    'charset' => 'utf8'
+    'encoding' => 'utf8'
   ));
 }
 
 elseif($driver == 'mysqli'){
-  $db = new Neevo('MySQLi');
-  $db->connect(array(
+  $db = new Neevo(array(
+    'driver' => 'MySQLi',
     'database' => 'neevo',
     'username' => 'root',
-    'charset' => 'utf8'
+    'encoding' => 'utf8'
   ));
 }
 
 elseif($driver == 'sqlite'){
-  $db = new Neevo('SQLite');
-  $db->connect(array('file' => 'tests/neevo.sqlite'));
+  $db = new Neevo( array(
+    'driver' => 'SQLite',
+    'file' => 'tests/neevo.sqlite'
+  ));
 }
 
 elseif($driver == 'sqlite3'){
-  $db = new Neevo('SQLite3');
-  $db->connect(array('file' => 'tests/neevo.sqlite3'));
+  $db = new Neevo(array(
+    'driver' => 'SQLite3',
+    'file' => 'tests/neevo.sqlite3'
+  ));
 }
 else{
   fwrite(STDERR, "Driver '$driver' is not available.\n");

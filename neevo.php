@@ -34,15 +34,9 @@ class Neevo{
 
   /** @var NeevoConnection */
   private $connection;
-  
-  /** @var INeevoDriver */
-  private $driver;
 
   /** @var INeevoCache */
   private $cache;
-
-  /** @var NeevoStmtBuilder */
-  private $stmtBuilder;
 
   /** @var NeevoResult */
   private $last;
@@ -62,7 +56,7 @@ class Neevo{
 
 
   // Neevo revision
-  const REVISION = 237;
+  const REVISION = 243;
 
   // Data types
   const BOOL = 30;
@@ -86,17 +80,22 @@ class Neevo{
 
   /**
    * Instantiate Neevo.
-   * @param string $driver Name of driver to use.
+   *
+   * Configuration can be different - see the API for your driver.
+   * @param array|string|Traversable $config Driver-specific configuration.
    * @param INeevoCache|null $cache Cache to use. NULL for no cache.
    * @return void
    * @throws NeevoException
    */
-  public function __construct($driver = null, INeevoCache $cache = null){
-    if(!$driver)
-      $driver = self::$defaultDriver;
-    
-    $this->setDriver($driver);
-    $this->setCache($cache);
+  public function __construct($config, INeevoCache $cache = null){
+
+    // Backward compatibility with REV < 238
+    parse_str($config, $arr);
+    if(!reset($arr)) // 1st item empty = driver only
+      $this->_old_driver = $config;
+
+    else $this->connect($config);
+    $this->cache = $cache;
   }
 
 
@@ -106,7 +105,7 @@ class Neevo{
    */
   public function  __destruct(){
     try{
-      $this->driver->close();
+      $this->driver()->close();
     } catch(NotImplementedException $e){}
   }
 
@@ -115,11 +114,11 @@ class Neevo{
    * Creates and uses a new connection to a server.
    *
    * Configuration can be different - see the API for your driver.
-   * @param array|string|Traversable $config Driver-specific configuration (array, parsable string or traversable object)
+   * @param array|string|Traversable $config Driver-specific configuration.
    * @return Neevo fluent interface
    */
   public function connect($config){
-    $this->setConnection($config);
+    $this->connection = new NeevoConnection($config, $this, isset($this->_old_driver) ? $this->_old_driver : null);
     return $this;
   }
 
@@ -134,65 +133,11 @@ class Neevo{
 
 
   /**
-   * Sets Neevo Connection to use
-   * @param array|string|Traversable $config
-   * @internal
-   */
-  private function setConnection($config){
-    $this->connection = new NeevoConnection($this->driver, $config);
-  }
-
-
-  /**
    * Neevo Driver class
    * @return INeevoDriver
    */
   public function driver(){
-    return $this->driver;
-  }
-
-
-  /**
-   * Uses given Neevo SQL driver
-   * @param string $driver
-   * @return Neevo fluent interface
-   */
-  public function useDriver($driver){
-    $this->setDriver($driver);
-    return $this;
-  }
-
-
-  /**
-   * Sets Neevo driver to use
-   * @param string $driver Driver name
-   * @throws NeevoException
-   * @return void
-   * @internal
-   */
-  private function setDriver($driver){
-    $class = "NeevoDriver$driver";
-
-    if(!$this->isDriver($class)){
-      @include_once dirname(__FILE__) . '/neevo/drivers/'.strtolower($driver).'.php';
-
-      if(!$this->isDriver($class))
-        throw new NeevoException("Unable to create instance of Neevo driver '$driver' - class not found or not matching criteria.");
-    }
-
-    $this->driver = new $class($this);
-
-    // Set stmtBuilder
-    if(in_array('NeevoStmtBuilder', class_parents($class, false)))
-      $this->stmtBuilder = $this->driver;
-    else
-      $this->stmtBuilder = new NeevoStmtBuilder($this);
-  }
-
-
-  /** @internal */
-  private function isDriver($class){
-    return (class_exists($class, false) && in_array('INeevoDriver', class_implements($class, false)));
+    return $this->connection->driver;
   }
 
 
@@ -202,17 +147,7 @@ class Neevo{
    * @internal
    */
   public function stmtBuilder(){
-    return $this->stmtBuilder;
-  }
-
-
-  /**
-   * Set cache
-   * @param INeevoCache $cache
-   * @return void
-   */
-  private function setCache(INeevoCache $cache = null){
-    $this->cache = $cache;
+    return $this->connection->stmtBuilder;
   }
 
 
@@ -283,7 +218,7 @@ class Neevo{
 
 
   /**
-   * Setup debugging mode
+   * Setup debug mode
    * @param bool|callback $debug TRUE for STD_ERR, FALSE to disable.
    * @throws InvalidArgumentException
    * @return void
@@ -361,6 +296,22 @@ class Neevo{
 
 
   /**
+   * Basic information about library
+   * @param bool $hide_password Password will be replaced by '*****'.
+   * @return array
+   */
+  public function info($hide_password = true){
+    $info = array(
+      'executed' => $this->queries(),
+      'last' => $this->last()->info($hide_password, true),
+      'connection' => $this->connection()->info($hide_password),
+      'version' => $this->revision(false)
+    );
+    return $info;
+  }
+
+
+  /**
    * Neevo revision
    * @return int
    */
@@ -368,29 +319,9 @@ class Neevo{
     return self::REVISION;
   }
 
-
-  /**
-   * Alias for revision()
-   * @return int
-   */
+  /** @internal */
   public function version(){
     return self::REVISION;
-  }
-
-  /**
-   * Basic information about library
-   * @param bool $hide_password Password will be replaced by '*****'.
-   * @return array
-   */
-  public function info($hide_password = true){
-    $info = array(
-      'executed_queries' => $this->queries(),
-      'last_statement' => $this->last()->info($hide_password, true),
-      'connection' => $this->connection()->info($hide_password),
-      'version' => $this->version(false),
-      'error_reporting' => $this->errorReporting()
-    );
-    return $info;
   }
 
 }
