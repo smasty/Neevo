@@ -187,10 +187,6 @@ abstract class NeevoStmtBase {
     $start = explode(' ', microtime());
     $query = $this->neevo->driver()->query($this->build());
 
-    if(!$query){
-      return $this->neevo->error('Query failed');
-    }
-
     $end = explode(" ", microtime());
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
     $this->time = $time;
@@ -228,7 +224,7 @@ abstract class NeevoStmtBase {
       'query_string' => strip_tags($this->dump(true))
     );
 
-    if($exclude_connection == true)
+    if($exclude_connection)
       $this->neevo->connection()->info($hide_password);
 
     if($this->isPerformed()){
@@ -274,7 +270,7 @@ abstract class NeevoStmtBase {
 
 
   /** @internal */
-  public function reinit(){
+  private function reinit(){
     $this->performed = false;
   }
 

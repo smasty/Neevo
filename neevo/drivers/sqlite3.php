@@ -52,13 +52,14 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * If driver extension is loaded, sets Neevo reference, otherwise throw exception
+   * Check for required PHP extension
    * @param Neevo $neevo
    * @throws NeevoException
    * @return void
    */
   public function  __construct(Neevo $neevo){
-    if(!extension_loaded("sqlite3")) throw new NeevoException("PHP extension 'sqlite3' not loaded.");
+    if(!extension_loaded("sqlite3"))
+      throw new NeevoException("PHP extension 'sqlite3' not loaded.");
     $this->neevo = $neevo;
   }
 
@@ -66,6 +67,7 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   /**
    * Creates connection to database
    * @param array $config Configuration options
+   * @throws NeevoException
    * @return void
    */
   public function connect(array $config){
@@ -80,14 +82,14 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
       try{
         $connection = new SQLite3($config['database']);
       } catch(Exception $e){
-          $this->neevo->error($e->getMessage());
+          throw new NeevoException($e->getMessage(), $e->getCode(), $e);
       }
     }
     else
       $connection = $config['resource'];
 
     if(!($connection instanceof SQLite3))
-      $this->neevo->error("Opening database file '".$config['database']." failed");
+      throw new NeevoException("Opening database file '$config[database]' failed.");
     
     $this->resource = $connection;
     $this->update_limit = (bool) $config['update_limit'];
@@ -124,6 +126,7 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   /**
    * Executes given SQL statement
    * @param string $queryString Query-string.
+   * @throws NeevoException
    * @return SQLite3Result|bool
    */
   public function query($queryString){
@@ -131,19 +134,12 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     if($this->dbCharset !== null)
       $queryString = iconv($this->charset, $this->dbCharset . '//IGNORE', $queryString);
 
-    return @$this->resource->query($queryString);
-  }
+    $result = $this->resource->query($queryString);
 
+    if($result === false)
+      throw new NeevoException($this->resource->lastErrorMsg(), $this->resource->lastErrorCode());
 
-  /**
-   * Error message with driver-specific additions
-   * @param string $message Error message
-   * @return array Format: array($error_message, $error_number)
-   */
-  public function error($message){
-    $no = $this->resource->lastErrorCode();
-    $msg = $message. '. ' . $this->resource->lastErrorMsg();
-    return array($msg, $no);
+    return $result;
   }
 
 
@@ -170,23 +166,13 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Fetches all rows from given result set as associative arrays.
-   * @param SQLite3Result $resultSet Result set
-   * @return array
-   */
-  public function fetchAll($resultSet){
-    throw new NotImplementedException();
-  }
-
-
-  /**
    * Move internal result pointer
    *
    * Not supported because of unbuffered queries.
    * @param SQLite3Result $resultSet
    * @param int $offset
-   * @return bool
    * @throws NotSupportedException
+   * @return bool
    */
   public function seek($resultSet, $offset){
     throw new NotSupportedException('Not supported on unbuffered queries.');
@@ -216,8 +202,8 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
    *
    * Not supported because of unbuffered queries.
    * @param SQLite3Result $resultSet
-   * @return int|FALSE
    * @throws NotSupportedException
+   * @return int|FALSE
    */
   public function rows($resultSet){
     throw new NotSupportedException('Not supported on unbuffered queries.');
@@ -304,6 +290,7 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   /**
    * Builds JOIN part for SELECT statement
    * @param NeevoResult $statement
+   * @throws NeevoException
    * @return string
    */
   protected function buildJoin(NeevoResult $statement){
@@ -315,7 +302,14 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     }
     $type = strtoupper(substr($join['type'], 5));
     if($type !== '') $type .= ' ';
-    return $type.'JOIN '.$join['table'].' ON '.$join['expr'];
+    if($join['operator'] === 'ON'){
+      $expr = ' ON '.$join['expr'];
+    }
+    elseif($join['operator'] === 'USING')
+      $expr = " USING($join[expr])";
+    else throw new NeevoException('JOIN operator not specified.');
+    
+    return $type.'JOIN '.$join['table'].$expr;
   }
 
 
@@ -323,6 +317,7 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
    * Escapes given value
    * @param mixed $value
    * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @throws InvalidArgumentException
    * @return mixed
    */
   public function escape($value, $type){
@@ -337,7 +332,7 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
         return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
         
       default:
-        $this->neevo->error('Unsupported data type');
+        throw new InvalidArgumentException('Unsupported data type');
         break;
     }
   }

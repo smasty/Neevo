@@ -31,9 +31,6 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
   /** @var Neevo */
   protected $neevo;
-  
-  /** @var string */
-  private $last_error;
 
   /** @var string */
   private $dbCharset;
@@ -52,13 +49,14 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * If driver extension is loaded, sets Neevo reference, otherwise throw exception
+   * Check for required PHP extension
    * @param Neevo $neevo
    * @throws NeevoException
    * @return void
    */
   public function  __construct(Neevo $neevo){
-    if(!extension_loaded("sqlite")) throw new NeevoException("PHP extension 'sqlite' not loaded.");
+    if(!extension_loaded("sqlite"))
+      throw new NeevoException("PHP extension 'sqlite' not loaded.");
     $this->neevo = $neevo;
   }
 
@@ -66,6 +64,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
   /**
    * Creates connection to database
    * @param array $config Configuration options
+   * @throws NeevoException
    * @return void
    */
   public function connect(array $config){
@@ -82,7 +81,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
       $connection = $config['resource'];
 
     if(!($connection instanceof SQLiteDatabase))
-      $this->neevo->error("Opening database file '".$config['database']." failed");
+      throw new NeevoException("Opening database file '$config[database]' failed.");
     
     $this->resource = $connection;
     $this->update_limit = (bool) $config['update_limit'];
@@ -115,6 +114,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
   /**
    * Executes given SQL statement
    * @param string $queryString Query-string.
+   * @throws NeevoException
    * @return SQLiteResult|bool
    */
   public function query($queryString){
@@ -122,22 +122,10 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     if($this->dbCharset !== null)
       $queryString = iconv($this->charset, $this->dbCharset . '//IGNORE', $queryString);
 
-    $this->last_error = '';
-    $q = @$this->resource->query($queryString, null, $error);
-    $this->last_error = $error;
-    return $q;
-  }
-
-
-  /**
-   * Error message with driver-specific additions
-   * @param string $message Error message
-   * @return array Format: array($error_message, $error_number)
-   */
-  public function error($message){
-    $no = @$this->resource->lastError();
-    $msg = $message. '. ' . ucfirst($this->last_error);
-    return array($msg, $no);
+    $result = @$this->resource->query($queryString, null, $error);
+    if($error && $result === false)
+      throw new NeevoException("Query failed. $error", $this->resource->lastError());
+    return $result;
   }
 
 
@@ -148,11 +136,11 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    */
   public function fetch($resultSet){
     $row = @$resultSet->fetch(SQLITE_ASSOC);
-    $charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
-
     if($row){
+      $charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
+
       $fields = array();
-      foreach($row as $key=>$val){
+      foreach($row as $key => $val){
         if($charset !== null && is_string($val))
           $val = iconv($this->dbcharset, $charset, $val);
         $key = str_replace(array('[', ']'), '', $key);
@@ -160,39 +148,9 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
         if($pos !== false) $key = substr($key, $pos + 1);
         $fields[$key] = $val;
       }
-      return $fields;
+      $row = $fields;
     }
     return $row;
-  }
-
-
-  /**
-   * Fetches all rows from given result set as associative arrays.
-   * @param SQLiteResult $resultSet Result set
-   * @return array
-   */
-  public function fetchAll($resultSet){
-    $result = @$resultSet->fetchAll(SQLITE_ASSOC);
-    $charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
-
-    if($result){
-      $rows = array();
-      foreach($result as $row){
-        $fields = array();
-        foreach($row as $key=>$val){
-          if($charset !== null && is_string($val))
-            $val = iconv($this->dbcharset, $charset, $val);
-          $key = str_replace(array('[', ']'), '', $key);
-          $pos = strpos($key, '.');
-          if($pos !== false) $key = substr($key, $pos + 1);
-          $fields[$key] = $val;
-        }
-        $rows[] = $fields;
-        unset($fields);
-      }
-      return $rows;
-    }
-    return $result;
   }
 
 
@@ -316,6 +274,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
   /**
    * Builds JOIN part for SELECT statement
    * @param NeevoResult $statement
+   * @throws NeevoException
    * @return string
    */
   protected function buildJoin(NeevoResult $statement){
@@ -327,7 +286,14 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     }
     $type = strtoupper(substr($join['type'], 5));
     if($type !== '') $type .= ' ';
-    return $type.'JOIN '.$join['table'].' ON '.$join['expr'];
+    if($join['operator'] === 'ON'){
+      $expr = ' ON '.$join['expr'];
+    }
+    elseif($join['operator'] === 'USING')
+      $expr = " USING($join[expr])";
+    else throw new NeevoException('JOIN operator not specified.');
+    
+    return $type.'JOIN '.$join['table'].$expr;
   }
 
 
@@ -335,6 +301,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    * Escapes given value
    * @param mixed $value
    * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @throws InvalidArgumentException
    * @return mixed
    */
   public function escape($value, $type){
@@ -349,7 +316,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
         return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
         
       default:
-        $this->neevo->error('Unsupported data type');
+        throw new InvalidArgumentException('Unsupported data type.');
         break;
     }
   }
@@ -377,6 +344,18 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
         $key = preg_replace('~^"(\w+)".*$~i', '$1', $field);
     }
     return $key;
+  }
+
+
+  /**
+   * Encodes result from database to specified charset.
+   * @param array $row
+   * @return array
+   * @internal
+   */
+  private function encodeResultRow($row){
+    
+    return $fields;
   }
 
 }

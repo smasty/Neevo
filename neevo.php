@@ -43,18 +43,12 @@ class Neevo{
 
   /** @var NeevoStmtBuilder */
   private $stmtBuilder;
-  
-  /** @var callback */
-  private $errorHandler;
 
   /** @var NeevoResult */
   private $last;
 
   /** @var int */
   private $queries;
-
-  /** @var int */
-  private $errorReporting;
 
   /** @var bool|callback */
   private $debug;
@@ -67,13 +61,8 @@ class Neevo{
   public static $defaultDriver = 'mysql';
 
 
-  // Error-reporting levels
-  const E_NONE    = 11;
-  const E_HANDLE  = 12;
-  const E_STRICT  = 13;
-
   // Neevo revision
-  const REVISION = 227;
+  const REVISION = 236;
 
   // Data types
   const BOOL = 30;
@@ -96,7 +85,7 @@ class Neevo{
   const JOIN_INNER = 'join_inner';
 
   /**
-   * Neevo
+   * Instantiate Neevo.
    * @param string $driver Name of driver to use.
    * @param INeevoCache|null $cache Cache to use. NULL for no cache.
    * @return void
@@ -130,8 +119,6 @@ class Neevo{
    * @return Neevo fluent interface
    */
   public function connect($config){
-    if(isset($config['driver']))
-      $this->setDriver($config['driver']);
     $this->setConnection($config);
     return $this;
   }
@@ -148,7 +135,7 @@ class Neevo{
 
   /**
    * Sets Neevo Connection to use
-   * @param array|strung|Traversable $config
+   * @param array|string|Traversable $config
    * @internal
    */
   private function setConnection($config){
@@ -190,7 +177,7 @@ class Neevo{
       @include_once dirname(__FILE__) . '/neevo/drivers/'.strtolower($driver).'.php';
 
       if(!$this->isDriver($class))
-        throw new NeevoException("Unable to create instance of Neevo driver '$driver' - corresponding class not found or not matching criteria.");
+        throw new NeevoException("Unable to create instance of Neevo driver '$driver' - class not found or not matching criteria.");
     }
 
     $this->driver = new $class($this);
@@ -288,7 +275,7 @@ class Neevo{
   private function logQuery(array $query){
     if($this->debug){
       if(!is_callable($this->debug))
-        fwrite(STDERR, '-- ['.($query['time'] * 1000).'ms] '.$query['query_string']."\n");
+        fwrite(STDERR, '-- ['.($query['time'] * 1000).'ms] '."$query[query_string]\n");
       else
         call_user_func($this->debug, $query['query_string'], $query['time'], $query);
     }
@@ -298,6 +285,8 @@ class Neevo{
   /**
    * Setup debugging mode
    * @param bool|callback $debug TRUE for STD_ERR, FALSE to disable.
+   * @throws InvalidArgumentException
+   * @return void
    */
   public function debug($debug = true){
     if(is_bool($debug) || is_callable($debug))
@@ -368,113 +357,6 @@ class Neevo{
   public function delete($table){
     $q = new NeevoStmt($this);
     return $q->delete($table);
-  }
-
-
-  /**
-   * Error-reporting level
-   * @return int
-   */
-  public function errorReporting(){
-    if(!isset($this->errorReporting))
-      $this->errorReporting = self::E_STRICT;
-    return $this->errorReporting;
-  }
-
-
-  /**
-   * Sets error-reporting level
-   *
-   * Possible values:
-   * - Neevo::E_NONE: Turns Neevo error-reporting off
-   * - Neevo::E_HANDLE: Neevo exceptions are sent to defined handler
-   * - Neevo::E_STRICT: Throws all Neevo exceptions (default)
-   * @param int $value Error-reporting level.
-   * @return void
-   */
-  public function setErrorReporting($value){
-    $this->errorReporting = $value;
-    if(!isset($this->errorReporting)) $this->errorReporting = self::E_STRICT;
-  }
-
-
-  /**
-   * Error-handler function name
-   * @return string
-   */
-  public function errorHandler(){
-    if(!is_callable($this->errorHandler))
-      $this->errorHandler = array('Neevo', 'defaultErrorHandler');
-    return $this->errorHandler;
-  }
-
-
-  /**
-   * Sets error-handler function
-   * @param callback $callback Name of error-handler function
-   * @return void
-   */
-  public function setErrorHandler($callback){
-    if(is_callable($callback))
-      $this->errorHandler = $callback;
-    else $this->errorHandler = array('Neevo', 'defaultErrorHandler');
-  }
-
-
-  /**
-   * If error_reporting is E_STRICT, throws NeevoException available to catch.
-   * Sends NeevoException instance to defined handler if E_HANDLE, does nothing if E_NONE.
-   * @param string $message Error message
-   * @return false
-   * @throws NeevoException
-   */
-  public function error($message){
-    $level = $this->errorReporting();
-
-    if($level !== Neevo::E_NONE){
-      try{
-        $err = $this->driver->error($message);
-      } catch(NotImplementedException $e){
-          $err = array($message, null);
-        }
-      $exception = new NeevoException($err[0], $err[1]);
-
-      if($level === Neevo::E_STRICT)
-        throw $exception;
-      elseif($level === Neevo::E_HANDLE)
-        call_user_func($this->errorHandler(), $exception);
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Neevo's default error handler function
-   * @param NeevoException $exception
-   * @return void
-   * @internal
-   */
-  public static function defaultErrorHandler(NeevoException $exception){
-    $message = $exception->getMessage();
-    $trace = $exception->getTrace();
-    if(!empty($trace)){
-      $last = $trace[count($trace)-1];
-      $line = $last['line'];
-      $path = $last['file'];
-      $act = "occured";
-    }
-    else{
-      $line = $exception->getLine();
-      $path = $exception->getFile();
-      $act = "thrown";
-    }
-
-    $code = is_numeric($exception->getCode()) ? ' #'.$exception->getCode() : '';
-    $file = basename($path);
-    $path = str_replace($file, "<strong>$file</strong>", $path);
-
-    echo "<p><strong>Neevo exception$code</strong> $act in <em>$path</em> on <strong>line $line</strong>: $message</p>\n";
   }
 
 

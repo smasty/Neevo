@@ -65,7 +65,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
     $this->neevo = $object;
 
     if($cols == null && $table == null)
-      throw new InvalidArgumentException('Missing argument 1 for '.__METHOD__);
+      throw new InvalidArgumentException('Missing argument 2 for '.__METHOD__.'.');
     if(func_get_arg(2) == null){
       $cols = '*';
       $table = func_get_arg(1);
@@ -109,21 +109,48 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   /**
    * Performs JOIN on tables
    * @param string $table Join table
-   * @param string $expr Join expression
+   * @throws InvalidArgumentException
    * @return NeevoResult fluent interface
    */
-  public function join($table, $expr, $type = null){
+  public function join($table, $type = null){
     $this->reinit();
     $prefix = $this->neevo->connection()->prefix();
 
     if(!in_array($type, array(null, Neevo::JOIN_LEFT, Neevo::JOIN_RIGHT, Neevo::JOIN_INNER)))
-      throw new InvalidArgumentException('Argument 3 passed to '.__METHOD__.' must be valid JOIN type or NULL.');
+      throw new InvalidArgumentException('Argument 2 passed to '.__METHOD__.' must be valid JOIN type or NULL.');
     
     $this->join = array(
       'type' => $type,
-      'table' => $this->getTable($table),
-      'expr' => preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $expr)
+      'table' => $this->getTable($table)
     );
+    return $this;
+  }
+
+
+  /**
+   * Sets JOIN operator 'ON'.
+   * @param string $expr
+   * @return NeevoResult fluent interface
+   */
+  public function on($expr){
+    $prefix = $this->neevo->connection()->prefix();
+    $this->join['operator'] = 'ON';
+    $this->join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $expr);
+
+    return $this;
+  }
+
+
+  /**
+   * Sets JOIN operator 'USING'
+   * @param string $expr
+   * @return NeevoResult fluent interface
+   */
+  public function using($expr){
+   $prefix = $this->neevo->connection()->prefix();
+    $this->join['operator'] = 'USING';
+    $this->join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $expr);
+
     return $this;
   }
 
@@ -134,35 +161,34 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @param string $expr Join expression
    * @return NeevoResult fluent interface
    */
-  public function leftJoin($table, $expr){
-    return $this->join($table, $expr, Neevo::JOIN_LEFT);
+  public function leftJoin($table){
+    return $this->join($table, Neevo::JOIN_LEFT);
   }
 
 
   /**
    * Performs RIGHT JOIN on tables
    * @param string $table Join table
-   * @param string $expr Join expression
    * @return NeevoResult fluent interface
    */
-  public function rightJoin($table, $expr){
-    return $this->join($table, $expr, Neevo::JOIN_RIGHT);
+  public function rightJoin($table){
+    return $this->join($table, Neevo::JOIN_RIGHT);
   }
 
 
   /**
    * Performs INNER JOIN on tables
    * @param string $table Join table
-   * @param string $expr Join expression
    * @return NeevoResult fluent interface
    */
-  public function innerJoin($table, $expr){
-    return $this->join($table, $expr, Neevo::JOIN_INNER);
+  public function innerJoin($table){
+    return $this->join($table, Neevo::JOIN_INNER);
   }
 
 
   /**
    * Base fetcher - fetches data as array.
+   * @throws NeevoException
    * @return array|FALSE
    * @internal
    */
@@ -172,14 +198,10 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
     $resultSet = $this->isPerformed() ? $this->resultSet : $this->run();
 
     if(!$resultSet) // Error
-      return $this->neevo->error('Fetching data failed');
+      throw new NeevoException('Fetching result failed.');
 
-    try{
-      $rows = $this->neevo->driver()->fetchAll($resultSet);
-    } catch(NotImplementedException $e){
-      while($row = $this->neevo->driver()->fetch($resultSet))
-        $rows[] = $row;
-      }
+    while($row = $this->neevo->driver()->fetch($resultSet))
+      $rows[] = $row;
 
     $this->free();
 
@@ -209,13 +231,14 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
   /**
    * Fetches the first row in result set.
-   * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC.
+   * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC
+   * @throws NeevoException
    * @return NeevoRow|array|FALSE
    */
   public function fetchRow($format = Neevo::OBJECT){
     $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
     if(!$resultSet) // Error
-      return $this->neevo->error('Fetching data failed');
+      throw new NeevoException('Fetching result failed.');
 
     $result = $this->neevo->driver()->fetch($resultSet);
     
@@ -234,8 +257,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
     if($result === false || $result === null)
       return false;
 
-    if(count($result) == 1) return reset($result);
-    else $this->neevo->error('More than one columns in the row, cannot fetch single');
+    return reset($result);
   }
 
 
@@ -303,12 +325,14 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   /**
    * Move internal result pointer
    * @param int $offset
+   * @throws NeevoException
    * @return bool
    */
   public function seek($offset){
-    if(!$this->isPerformed()) $this->run();
+    $this->isPerformed() || $this->run();
     $seek = $this->neevo->driver()->seek($this->resultSet(), $offset);
-    return $seek ? $seek : $this->neevo->error("Cannot seek to offset $offset");
+    if($seek) return $seek;
+    throw new NeevoException("Cannot seek to offset $offset.");
   }
 
 
@@ -317,7 +341,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @return int
    */
   public function rows(){
-    if(!$this->isPerformed()) $this->run();
+    $this->isPerformed() || $this->run();
     $this->numRows = $this->neevo->driver()->rows($this->resultSet);
     return intval($this->numRows);
   }
@@ -338,11 +362,12 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   /**
    * Class to use as a row class
    * @param string $className
+   * @throws NeevoException
    * @return NeevoResult fluent interface
    */
   public function setRowClass($className){
     if(!class_exists($className))
-      return $this->neevo->error("Cannot set row class '$className' - class does not exist");
+      throw new NeevoException("Cannot set row class '$className'.");
     $this->rowClass = $className;
     return $this;
   }
@@ -353,7 +378,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   }
 
   /** @internal */
-  public function reinit(){
+  private function reinit(){
     $this->performed = false;
     $this->data = null;
     $this->resultSet = null;
@@ -408,7 +433,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
   /** @internal */
   public function offsetExists($offset){
-    if(!$this->isPerformed()) $this->fetch();
+    $this->isPerformed() || $this->fetch();
     return isset($this->data[$offset]);
   }
 
@@ -421,7 +446,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
   /** @internal */
   public function offsetGet($offset){
-    if(!$this->isPerformed()) $this->fetch();
+    $this->isPerformed() || $this->fetch();
     if(!isset($this->data[$offset])) return null;
 
     $current = $this->data[$offset];

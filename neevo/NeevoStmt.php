@@ -69,15 +69,6 @@ class NeevoStmt extends NeevoStmtBase {
 
 
   /**
-   * Alias for NeevoStmt::insert()
-   * @return NeevoStmt fluent interface
-   */
-  public function insertInto($table, array $values){
-    return $this->insert($table, $values);
-  }
-
-
-  /**
    * Creates DELETE statement
    * @param string $table Table name
    * @return NeevoStmt fluent interface
@@ -91,11 +82,11 @@ class NeevoStmt extends NeevoStmtBase {
 
 
   /**
-   * Get the ID generated in the INSERT statement
+   * Get the ID generated in the last INSERT statement
    * @return int|FALSE
    */
   public function insertId(){
-    if(!$this->isPerformed()) $this->run();
+    $this->isPerformed() || $this->run();
     return $this->neevo->driver()->insertId();
   }
 
@@ -105,7 +96,7 @@ class NeevoStmt extends NeevoStmtBase {
    * @return int
    */
   public function affectedRows(){
-    if(!$this->isPerformed()) $this->run();
+    $this->isPerformed() || $this->run();
     return $this->affectedRows = $this->neevo->driver()->affectedRows();
   }
 
@@ -114,7 +105,7 @@ class NeevoStmt extends NeevoStmtBase {
 
 
   /** @internal */
-  public function reinit(){
+  private function reinit(){
     $this->performed = false;
     $this->affectedRows = null;
   }

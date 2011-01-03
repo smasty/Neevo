@@ -62,14 +62,12 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     $this->table = $result->getTable();
 
     if(!isset($this->data[$this->primaryKey])){
-      $this->primaryKey = null;
       $this->freeze = true;
     }
 
     if(count($data) === 1){
       $this->single = true;
-      $keys = array_keys($this->data);
-      $this->singleValue = $this->data[$keys[0]];
+      $this->singleValue = reset($this->data);
       $this->freeze = true;
     }
   }
@@ -77,6 +75,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
   /**
    * Updates corresponding database row if available.
+   * @throws NeevoException
    * @return int Number of affected rows.
    */
   public function update(){
@@ -85,16 +84,13 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
         ->where($this->primaryKey, $this->data[$this->primaryKey])
         ->limit(1)->affectedRows();
     }
-    if($this->freeze){
-      if($this->primaryKey === null)
-        $this->neevo->error('Update disabled - cannot get primary key');
-      else $this->neevo->error('Update disabled - this is a read-only row');
-    }
+    throw new NeevoException('Update disabled - cannot get primary key.');
   }
 
 
   /**
    * Deletes corresponding database row if available.
+   * @throws NeevoException
    * @return int Number of affected rows.
    */
   public function delete(){
@@ -103,11 +99,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
         ->where($this->primaryKey, $this->data[$this->primaryKey])
         ->limit(1)->affectedRows();
     }
-    if($this->freeze){
-      if($this->primaryKey === null)
-        $this->neevo->error('Delete disabled - cannot get primary key');
-      else $this->neevo->error('Delete disabled - this is a read-only row');
-    }
+    throw new NeevoException('Delete disabled - cannot get primary key.');
   }
 
 

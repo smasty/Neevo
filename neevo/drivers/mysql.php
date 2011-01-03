@@ -39,13 +39,14 @@ class NeevoDriverMySQL implements INeevoDriver{
 
 
   /**
-   * If driver extension is loaded, sets Neevo reference, otherwise throw exception
+   * Check for required PHP extension
    * @param Neevo $neevo
    * @throws NeevoException
    * @return void
    */
   public function  __construct(Neevo $neevo){
-    if(!extension_loaded("mysql")) throw new NeevoException("PHP extension 'mysql' not loaded.");
+    if(!extension_loaded("mysql"))
+      throw new NeevoException("PHP extension 'mysql' not loaded.");
     $this->neevo = $neevo;
   }
 
@@ -53,6 +54,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Creates connection to database
    * @param array $config Configuration options
+   * @throws NeevoException
    * @return void
    */
   public function connect(array $config){
@@ -82,12 +84,12 @@ class NeevoDriverMySQL implements INeevoDriver{
       $connection = $config['resource'];
 
     if(!is_resource($connection))
-      $this->neevo->error("Connection to host '".$config['host']."' failed");
+      throw new NeevoException("Connection to host '".$config['host']."' failed");
 
     // Select DB
     if($config['database']){
       $db = mysql_select_db($config['database']);
-      if(!$db) $this->neevo->error("Could not select database '{$config['database']}'");
+      if(!$db) throw new NeevoException("Could not select database '{$config['database']}'");
     }
 
     $this->resource = $connection;
@@ -124,27 +126,17 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Executes given SQL statement
    * @param string $queryString Query-string.
+   * @throws NeevoException
    * @return resource|bool
    */
   public function query($queryString){
-    return @mysql_query($queryString, $this->resource);
-  }
+    $result = mysql_query($queryString, $this->resource);
 
+    $error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', mysql_error($this->resource));
+    if($error && $result === false)
+      throw new NeevoException("Query failed. $error", mysql_errno($this->resource));
 
-  /**
-   * Error message with driver-specific additions
-   * @param string $message Error message
-   * @return array Format: array($error_message, $error_number)
-   */
-  public function error($message){
-    $mysql_msg = @mysql_error($this->resource);
-    $mysql_msg = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $mysql_msg);
-
-    $msg = $message.".";
-    if($mysql_msg)
-      $msg .= " ".$mysql_msg;
-
-    return array($msg, @mysql_errno($this->resource));
+    return $result;
   }
 
 
@@ -155,16 +147,6 @@ class NeevoDriverMySQL implements INeevoDriver{
    */
   public function fetch($resultSet){
     return @mysql_fetch_assoc($resultSet);
-  }
-
-
-  /**
-   * Fetches all rows from given result set as associative arrays.
-   * @param resource $resultSet Result set
-   * @throws NotImplementedException
-   */
-  public function fetchAll($resultSet){
-    throw new NotImplementedException();
   }
 
 
@@ -221,6 +203,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    * Escapes given value
    * @param mixed $value
    * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @throws InvalidArgumentException
    * @return mixed
    */
   public function escape($value, $type){
@@ -236,7 +219,7 @@ class NeevoDriverMySQL implements INeevoDriver{
         return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
         
       default:
-        $this->neevo->error('Unsupported data type');
+        throw new InvalidArgumentException('Unsupported data type.');
         break;
     }
   }

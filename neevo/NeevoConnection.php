@@ -15,7 +15,6 @@
 
 /**
  * Internal class to represent connection to database server.
- * Can be created by calling Neevo->createConnection().
  * @package Neevo
  */
 class NeevoConnection{
@@ -27,19 +26,24 @@ class NeevoConnection{
   private $config;
 
 
+  /**
+   * Instantiate connection
+   * @param INeevoDriver $driver
+   * @param array|string|Traversable $config
+   * @throws InvalidArgumentException
+   * @return void
+   */
   public function __construct(INeevoDriver $driver, $config){
     $this->driver = $driver;
 
     if(is_string($config))
       parse_str($config, $config);
     elseif($config instanceof Traversable){
-      $tmp = array();
       foreach($config as $key=>$val)
-        $tmp[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
-      $config = $tmp;
+        $config[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
     }
     elseif(!is_array($config))
-      throw new InvalidArgumentException('Options must be array, string or object.');
+      throw new InvalidArgumentException('Options must be an array, string or Traversable object.');
 
     self::alias($config, 'username', 'user');
     self::alias($config, 'password', 'pass');
@@ -95,14 +99,14 @@ class NeevoConnection{
 
   /**
    * Create alias for configuration value
-   * @param array $opts
+   * @param array $config
    * @param string $key
    * @param string $alias Alias of $key
    * @return void
    */
-  public static function alias(&$opts, $key, $alias){
-    if(isset($opts[$alias]) && !isset($opts[$key]))
-      $opts[$key] = $opts[$alias];
+  public static function alias(&$config, $key, $alias){
+    if(isset($config[$alias]) && !isset($config[$key]))
+      $config[$key] = $config[$alias];
   }
 
 }

@@ -46,7 +46,7 @@ interface INeevoDriver {
 
 
   /**
-   * If driver extension is loaded, sets Neevo reference, otherwise throw exception
+   * Check for required PHP extension
    * @param Neevo $neev
    * @throws NeevoException
    * @return void
@@ -85,27 +85,11 @@ interface INeevoDriver {
 
 
   /**
-   * Error message with driver-specific additions
-   * @param string $message Error message
-   * @return array Format: array($error_message, $error_number)
-   */
-  public function error($message);
-
-
-  /**
    * Fetches row from given result set as associative array.
    * @param resource $resultSet Result set
    * @return array
    */
   public function fetch($resultSet);
-
-
-  /**
-   * Fetches all rows from given result set as associative arrays.
-   * @param resource $resultSet Result set
-   * @return array
-   */
-  public function fetchAll($resultSet);
 
 
   /**

@@ -19,14 +19,12 @@
  */
 interface INeevoCache {
 
-
   /**
    * Load stored data
    * @param string $key
    * @return mixed|null null if not found
    */
   public function load($key);
-  
 
   /**
    * Save data
@@ -45,13 +43,11 @@ interface INeevoCache {
  */
 class NeevoCacheSession implements INeevoCache {
 
-
   public function load($key){
     if(!isset($_SESSION['NeevoCache'][$key]))
       return null;
     return $_SESSION['NeevoCache'][$key];
   }
-
 
   public function save($key, $value){
     $_SESSION['NeevoCache'][$key] = $value;
@@ -77,18 +73,15 @@ class NeevoCacheFile implements INeevoCache {
     $this->data = unserialize(@file_get_contents($filename));
   }
 
-
   public function __destruct(){
     @file_put_contents($this->filename, serialize($this->data), LOCK_EX);
   }
-
 
   public function load($key){
     if(!isset($this->data[$key]))
       return null;
     return $this->data[$key];
   }
-
 
   public function save($key, $value){
     $this->data[$key] = $value;
@@ -117,7 +110,6 @@ class NeevoCacheMemcache implements INeevoCache {
     return $value;
   }
 
-
   public function save($key, $value){
     $this->memcache->set("NeevoCache.$key", $value);
   }
@@ -131,14 +123,12 @@ class NeevoCacheMemcache implements INeevoCache {
  */
 class NeevoCacheAPC implements INeevoCache {
 
-
   public function load($key){
     $value = apc_fetch("NeevoCache.$key", $success);
     if(!$success)
       return null;
     return $value;
   }
-
 
   public function save($key, $value){
     apc_store("NeevoCache.$key", $value);

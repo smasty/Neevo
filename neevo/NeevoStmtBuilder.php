@@ -91,13 +91,21 @@ class NeevoStmtBuilder{
   /**
    * Builds JOIN part for SELECT statement
    * @param NeevoResult $statement
+   * @throws NeevoException
    * @return string
    */
   protected function buildJoin(NeevoResult $statement){
     $join = $statement->getJoin();
     $type = strtoupper(substr($join['type'], 5));
     if($type !== '') $type .= ' ';
-    return $type.'JOIN '.$join['table'].' ON '.$join['expr'];
+    if($join['operator'] === 'ON'){
+      $expr = " ON $join[expr]";
+    }
+    elseif($join['operator'] === 'USING')
+      $expr = " USING($join[expr])";
+    else throw new NeevoException('JOIN operator not specified.');
+    
+    return $type.'JOIN '.$join['table'].$expr;
   }
 
 
