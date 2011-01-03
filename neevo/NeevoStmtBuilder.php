@@ -219,8 +219,8 @@ class NeevoStmtBuilder{
     $col = trim($col);
     $col = preg_replace('#(\S+)\s+(as)\s+(\S+)#i', '$1 AS $3',  $col);
 
-    if(preg_match('#([^.]+)(\.)([^.]+)#', $col))
-      return $this->neevo->connection()->prefix() . $col;
+    if(preg_match('#[^.]+\.[^.]+#', $col))
+      return $this->neevo->connection->prefix() . $col;
     return $col;
   }
 

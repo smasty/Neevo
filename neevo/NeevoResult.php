@@ -55,14 +55,14 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
   /**
    * Creates SELECT statement
-   * @param array $object Reference to instance of Neevo class which initialized statement
+   * @param array $neevo Reference to instance of Neevo class which initialized statement
    * @param string|array $cols Columns to select (array or comma-separated list)
    * @param string $table Table name
    * @throws InvalidArgumentException
    * @return void
    */
-  public function  __construct(Neevo $object, $cols = null, $table = null){
-    $this->neevo = $object;
+  public function  __construct(Neevo $neevo, $cols = null, $table = null){
+    $this->neevo = $neevo;
 
     if($cols == null && $table == null)
       throw new InvalidArgumentException('Missing argument 2 for '.__METHOD__.'.');
@@ -114,7 +114,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    */
   public function join($table, $type = null){
     $this->reinit();
-    $prefix = $this->neevo->connection()->prefix();
+    $prefix = $this->neevo->connection->prefix();
 
     if(!in_array($type, array(null, Neevo::JOIN_LEFT, Neevo::JOIN_RIGHT, Neevo::JOIN_INNER)))
       throw new InvalidArgumentException('Argument 2 passed to '.__METHOD__.' must be valid JOIN type or NULL.');
@@ -133,7 +133,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @return NeevoResult fluent interface
    */
   public function on($expr){
-    $prefix = $this->neevo->connection()->prefix();
+    $prefix = $this->neevo->connection->prefix();
     $this->join['operator'] = 'ON';
     $this->join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $expr);
 
@@ -147,7 +147,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @return NeevoResult fluent interface
    */
   public function using($expr){
-   $prefix = $this->neevo->connection()->prefix();
+   $prefix = $this->neevo->connection->prefix();
     $this->join['operator'] = 'USING';
     $this->join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $expr);
 

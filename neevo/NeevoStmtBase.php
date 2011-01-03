@@ -19,7 +19,7 @@
  * @method NeevoStmtBase and() and( ) Sets AND glue for WHERE conditions, provides fluent interface
  * @method NeevoStmtBase or() or( ) Sets OR glue for WHERE conditions, provides fluent interface
  */
-abstract class NeevoStmtBase {
+abstract class NeevoStmtBase extends NeevoAbstract {
 
   /** @var string */
   protected $tableName;
@@ -32,9 +32,6 @@ abstract class NeevoStmtBase {
 
   /** @var int */
   protected $offset;
-
-  /** @var Neevo */
-  protected $neevo;
 
   /** @var int */
   protected $time;
@@ -256,14 +253,6 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * @return Neevo
-   * @internal
-   */
-  public function neevo(){
-    return $this->neevo;
-  }
-
-  /**
    * If query was performed, returns true.
    * @return bool
    */
@@ -358,7 +347,7 @@ abstract class NeevoStmtBase {
 
   /** @internal */
   protected function realConnect(){
-    return $this->neevo->connection()->realConnect();
+    return $this->neevo->connection->realConnect();
   }
 
   /**

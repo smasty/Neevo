@@ -18,7 +18,7 @@
  * Class representing a row in result.
  * @package Neevo
  */
-class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
+class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, IteratorAggregate {
 
   /** @var bool */
   private $freeze;
@@ -44,9 +44,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   /** @var mixed */
   private $singleValue;
 
-  /** @var Neevo */
-  private $neevo;
-
 
   /**
    * Create row instance
@@ -57,7 +54,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   public function __construct(array $data, NeevoResult $result){
     $this->data = $data;
     $this->iterable = $this->data;
-    $this->neevo = $result->neevo();
+    $this->neevo = $result->neevo;
     $this->primaryKey = $result->getPrimaryKey();
     $this->table = $result->getTable();
 

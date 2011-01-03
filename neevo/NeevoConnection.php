@@ -22,19 +22,10 @@
  *
  * @package Neevo
  */
-class NeevoConnection{
-  
-  /** @var INeevoDriver */
-  public $driver;
-
-  /** @var NeevoStmtBuilder */
-  public $stmtBuilder;
+class NeevoConnection extends NeevoAbstract{
 
   /** @var array */
   private $config;
-
-  /** @var Neevo */
-  private $neevo;
 
   /** @var bool */
   private $connected = false;
@@ -93,9 +84,8 @@ class NeevoConnection{
   }
 
 
+  /** @internal */
   public function realConnect(){
-    static $n;
-    $n++;
     if($this->connected === false){
       $this->driver->connect($this->config);
       $this->connected = true;

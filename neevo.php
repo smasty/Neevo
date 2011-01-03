@@ -30,22 +30,13 @@ include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
  * Main Neevo layer class.
  * @package Neevo
  */
-class Neevo{
-
-  /** @var NeevoConnection */
-  private $connection;
-
-  /** @var INeevoCache */
-  private $cache;
+class Neevo extends NeevoAbstract {
 
   /** @var NeevoResult */
   private $last;
 
   /** @var int */
   private $queries;
-
-  /** @var bool|callback */
-  private $debug;
 
   
   /** @var bool Ignore warning when using deprecated Neevo methods.*/
@@ -56,7 +47,7 @@ class Neevo{
 
 
   // Neevo revision
-  const REVISION = 244;
+  const REVISION = 245;
 
   // Data types
   const BOOL = 30;
@@ -120,7 +111,11 @@ class Neevo{
    * @return Neevo fluent interface
    */
   public function connect($config){
-    $this->connection = new NeevoConnection($config, $this, isset($this->_old_driver) ? $this->_old_driver : null);
+    $this->connection = new NeevoConnection(
+      $config,
+      $this,
+      isset($this->_old_driver) ? $this->_old_driver : null
+    );
     return $this;
   }
 
@@ -150,15 +145,6 @@ class Neevo{
    */
   public function stmtBuilder(){
     return $this->connection->stmtBuilder;
-  }
-
-
-  /**
-   * Neevo cache object
-   * @return INeevoCache|null
-   */
-  public function cache(){
-    return $this->cache;
   }
 
 
@@ -306,7 +292,7 @@ class Neevo{
     $info = array(
       'executed' => $this->queries(),
       'last' => $this->last()->info($hide_password, true),
-      'connection' => $this->connection()->info($hide_password),
+      'connection' => $this->connection->info($hide_password),
       'version' => $this->revision(false)
     );
     return $info;
@@ -330,10 +316,19 @@ class Neevo{
 
 
 /**
- * Neevo Exception
+ * Friend visibility emulation class
  * @package Neevo
  */
-class NeevoException extends Exception{};
+abstract class NeevoAbstract{
+  /** @var Neevo */
+  protected $neevo;
+  
+  /** @var NeevoConnection */
+  protected $connection;
+
+  /** @var bool|callback */
+  protected $debug;
+}
 
 
 /**
@@ -341,29 +336,21 @@ class NeevoException extends Exception{};
  * @package Neevo
  */
 class NeevoLiteral {
-
-  /** @var string */
   private $value;
-
-  /**
-   * Creates literal value.
-   * @param string $value
-   */
   public function __construct($value) {
     $this->value = $value;
   }
-
-
-  /**
-   * Literal value
-   * @return string
-   */
   public function __get($name){
     return $this->value;
   }
-  
 }
 
+
+/**
+ * Neevo Exception
+ * @package Neevo
+ */
+class NeevoException extends Exception{};
 
 
 /* Other exceptions */
