@@ -19,10 +19,10 @@
  * Driver configuration:
  * - database (or file, db, dbname) => database to select
  * - update_limit (bool) => Set this to TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
- * - table_prefix (or prefix) => prefix for table names
  * - charset => Character encoding to set (defaults to utf-8)
  * - dbcharset => Database character encoding (will be converted to 'charset')
  * - resource (instance of SQLiteDatabase) => Existing SQLite resource
+ * see NeevoConnection for common configuration
  * 
  * @author Martin Srank
  * @package NeevoDrivers
@@ -70,15 +70,20 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
   public function connect(array $config){
     NeevoConnection::alias($config, 'database', 'file');
 
-    if(!isset($config['resource'])) $config['resource'] = null;
-    if(!isset($config['update_limit']) || !is_bool($config['update_limit']))
-      $config['update_limit'] = false;
+    $defaults = array(
+      'resource' => null,
+      'update_limit' => false,
+      'charset' => 'UTF-8',
+      'dbcharset' => 'UTF-8'
+    );
+
+    $config += $defaults;
 
     // Connect
-    if(!($config['resource'] instanceof SQLiteDatabase))
-      $connection = new SQLiteDatabase($config['database'], 0666, $error);
-    else
+    if($config['resource'] instanceof SQLiteDatabase)
       $connection = $config['resource'];
+    else
+      $connection = new SQLiteDatabase($config['database'], 0666, $error);
 
     if(!($connection instanceof SQLiteDatabase))
       throw new NeevoException("Opening database file '$config[database]' failed.");
@@ -87,8 +92,8 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     $this->update_limit = (bool) $config['update_limit'];
 
     // Set charset
-    $this->dbCharset = empty($config['dbcharset']) ? 'UTF-8' : $config['dbcharset'];
-    $this->charset = empty($config['charset']) ? 'UTF-8' : $config['charset'];
+    $this->dbCharset = $config['dbcharset'];
+    $this->charset = $config['charset'];
     if(strcasecmp($this->dbCharset, $this->charset) === 0)
       $this->dbCharset = $this->charset = null;
   }

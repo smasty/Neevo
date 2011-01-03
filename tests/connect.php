@@ -1,6 +1,6 @@
 <?php
 
-include_once dirname(__FILE__). '/../neevo.min.php';
+include_once dirname(__FILE__). '/../neevo.php';
 
 if($driver == 'mysql'){
   $db = new Neevo(array(

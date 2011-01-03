@@ -22,9 +22,9 @@
  * - username (or user)
  * - password (or pass, pswd)
  * - database (or db, dbname) => database to select
- * - table_prefix (or prefix) => prefix for table names
  * - charset => Character encoding to set (defaults to utf8)
  * - resource (type resource) => Existing MySQL connection (created by mysql_connect)
+ * see NeevoConnection for common configuration
  *
  * @author Martin Srank
  * @package NeevoDrivers
@@ -60,36 +60,34 @@ class NeevoDriverMySQL implements INeevoDriver{
   public function connect(array $config){
 
     // Defaults
-    if(!isset($config['resource'])) $config['resource'] = null;
-    if(!isset($config['charset'])) $config['charset'] = 'utf8';
-    if(!isset($config['username'])) $config['username'] = ini_get('mysql.default_user');
-    if(!isset($config['password'])) $config['password'] = ini_get('mysql.default_password');
-    if(!isset($config['host'])){
-      $host = ini_get('mysql.default_host');
-      if($host){
-        $config['host'] = $host;
-        $config['port'] = ini_get('mysql.default_port');
-      }
-      else $config['host'] = null;
-    }
+    $defaults = array(
+      'resource' => null,
+      'charset' => 'utf8',
+      'username' => ini_get('mysql.default_user'),
+      'password' => ini_get('mysql.default_password'),
+      'host' => ini_get('mysql.default_host'),
+      'port' => ini_get('mysql.default_port')
+    );
+
+    $config += $defaults;
 
     if(isset($config['port']))
       $host = $config['host'] .':'. $config['port'];
     else $host = $config['host'];
 
     // Connect
-    if(!is_resource($config['resource']))
-      $connection = @mysql_connect($host, $config['username'], $config['password']);
-    else
+    if(is_resource($config['resource']) && get_resource_type($config['resource']) == 'mysql link')
       $connection = $config['resource'];
+    else
+      $connection = @mysql_connect($host, $config['username'], $config['password']);
 
     if(!is_resource($connection))
-      throw new NeevoException("Connection to host '".$config['host']."' failed");
+      throw new NeevoException("Connection to host '$host' failed.");
 
     // Select DB
     if($config['database']){
       $db = mysql_select_db($config['database']);
-      if(!$db) throw new NeevoException("Could not select database '{$config['database']}'");
+      if(!$db) throw new NeevoException("Could not select database '$config[database]'.");
     }
 
     $this->resource = $connection;
@@ -130,11 +128,11 @@ class NeevoDriverMySQL implements INeevoDriver{
    * @return resource|bool
    */
   public function query($queryString){
-    $result = mysql_query($queryString, $this->resource);
+    $result = @mysql_query($queryString, $this->resource);
 
-    $error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', mysql_error($this->resource));
+    $error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', @mysql_error($this->resource));
     if($error && $result === false)
-      throw new NeevoException("Query failed. $error", mysql_errno($this->resource));
+      throw new NeevoException("Query failed. $error", @mysql_errno($this->resource));
 
     return $result;
   }

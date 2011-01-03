@@ -15,6 +15,11 @@
 
 /**
  * Internal class to represent connection to database server.
+ *
+ * Common configuration: (see driver specific configuration too)
+ * - table_prefix (or prefix) => prefix for table names
+ * - lazy (bool) => If TRUE, connection will be established only when required.
+ *
  * @package Neevo
  */
 class NeevoConnection{
@@ -31,6 +36,9 @@ class NeevoConnection{
   /** @var Neevo */
   private $neevo;
 
+  /** @var bool */
+  private $connected = false;
+
 
   /**
    * Instantiate connection
@@ -41,16 +49,25 @@ class NeevoConnection{
    */
   public function __construct($config, Neevo $neevo, $driverName = null){
     $this->neevo = $neevo;
-    
+
+    // Parse
     if(is_string($config))
       parse_str($config, $config);
     elseif($config instanceof Traversable){
-      foreach($config as $key=>$val)
+      foreach($config as $key => $val)
         $config[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
     }
     elseif(!is_array($config))
       throw new InvalidArgumentException('Options must be an array, string or Traversable object.');
 
+    // Defaults
+    $defaults = array(
+      'driver' => Neevo::$defaultDriver,
+      'lazy' => true,
+      'table_prefix' => ''
+    );
+
+    // Aliases
     self::alias($config, 'driver', 'extension');
     self::alias($config, 'username', 'user');
     self::alias($config, 'password', 'pass');
@@ -60,18 +77,29 @@ class NeevoConnection{
     self::alias($config, 'database', 'db');
     self::alias($config, 'database', 'dbname');
     self::alias($config, 'table_prefix', 'prefix');
-    self::alias($config, 'encoding', 'charset');
+    self::alias($config, 'charset', 'encoding');
 
-    if(!isset($config['driver'])){
-      if($driverName !== null) // BC
-        $config['driver'] = $driverName;
-      else
-        $config['driver'] = Neevo::$defaultDriver;
-    }
+    // Backward compatibility
+    if(!isset($config['driver']) && $driverName !== null)
+      $config['driver'] = $driverName;
+
+    $config += $defaults;
 
     $this->setDriver($config['driver']);
     $this->config = $config;
-    $this->driver->connect($this->config);
+
+    if($config['lazy'] === false)
+      $this->realConnect();
+  }
+
+
+  public function realConnect(){
+    static $n;
+    $n++;
+    if($this->connected === false){
+      $this->driver->connect($this->config);
+      $this->connected = true;
+    }
   }
 
 

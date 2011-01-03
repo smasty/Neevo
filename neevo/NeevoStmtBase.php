@@ -184,8 +184,11 @@ abstract class NeevoStmtBase {
    * @return resource|bool
    */
   public function run(){
+    $this->realConnect();
+
     $start = explode(' ', microtime());
-    $query = $this->neevo->driver()->query($this->build());
+    $query = $this->performed ?
+      $this->resultSet : $this->neevo->driver()->query($this->build());
 
     $end = explode(" ", microtime());
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
@@ -351,7 +354,12 @@ abstract class NeevoStmtBase {
 
 
   /*  ******  Internal methods  ******  */
+  
 
+  /** @internal */
+  protected function realConnect(){
+    return $this->neevo->connection()->realConnect();
+  }
 
   /**
    * Highlights given SQL code
@@ -368,7 +376,6 @@ abstract class NeevoStmtBase {
     $sql = str_replace('\\&#39;', "\\'", $sql);
     return '<code style="color:#555" class="sql-dump">' . $sql . "</code>\n";
   }
-
 
   /** @internal */
   protected static function _highlightCallback($match){

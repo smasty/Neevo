@@ -23,9 +23,9 @@
  * - username (or user)
  * - password (or pass, pswd)
  * - database (or db, dbname) => database to select
- * - table_prefix (or prefix) => prefix for table names
  * - charset => Character encoding to set (defaults to utf8)
  * - resource (instance of mysqli) => Existing MySQLi connection
+ * see NeevoConnection for common configuration
  *
  * @author Martin Srank
  * @package NeevoDrivers
@@ -61,25 +61,23 @@ class NeevoDriverMySQLi implements INeevoDriver{
   public function connect(array $config){
 
     // Defaults
-    if(!isset($config['resource'])) $config['resource'] = null;
-    if(!isset($config['charset'])) $config['charset'] = 'utf8';
-    if(!isset($config['username'])) $config['username'] = ini_get('mysqli.default_user');
-    if(!isset($config['password'])) $config['password'] = ini_get('mysqli.default_pw');
-    if(!isset($config['socket'])) $config['socket'] = ini_get('mysqli.default_socket');
-    if(!isset($config['port'])) $config['port'] = null;
-    if(!isset($config['host'])){
-      $host = ini_get('mysqli.default_host');
-      if($host){
-        $config['host'] = $host;
-        $config['port'] = ini_get('mysqli.default_port');
-      } else $config['host'] = $config['port'] = null;
-    }
+    $defaults = array(
+      'resource' => null,
+      'charset' => 'utf8',
+      'username' => ini_get('mysqli.default_user'),
+      'password' => ini_get('mysqli.default_pw'),
+      'socket' => ini_get('mysqli.default_socket'),
+      'port' => ini_get('mysqli.default_port'),
+      'host' => ini_get('mysqli.default_host')
+    );
+
+    $config += $defaults;
 
     // Connect
-    if(!($config['resource']) instanceof mysqli)
-      $this->resource = new mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
-    else
+    if($config['resource'] instanceof mysqli)
       $this->resource = $config['resource'];
+    else
+      $this->resource = new mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
 
     if($this->resource->connect_errno){
       throw new NeevoException($this->resource->connect_error, $this->resource->connect_errno);

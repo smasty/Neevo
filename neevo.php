@@ -56,7 +56,7 @@ class Neevo{
 
 
   // Neevo revision
-  const REVISION = 243;
+  const REVISION = 244;
 
   // Data types
   const BOOL = 30;
@@ -90,10 +90,12 @@ class Neevo{
   public function __construct($config, INeevoCache $cache = null){
 
     // Backward compatibility with REV < 238
-    parse_str($config, $arr);
-    if(!reset($arr)) // 1st item empty = driver only
-      $this->_old_driver = $config;
-
+    if(is_string($config)){
+      parse_str($config, $arr);
+      if(!reset($arr)) // 1st item empty = driver only
+        $this->_old_driver = $config;
+      else $this->connect($config);
+    }
     else $this->connect($config);
     $this->cache = $cache;
   }
