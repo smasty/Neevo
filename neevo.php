@@ -30,13 +30,16 @@ include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
  * Main Neevo layer class.
  * @package Neevo
  */
-class Neevo extends NeevoAbstract {
+class Neevo extends NeevoAbstract implements SplSubject {
 
   /** @var NeevoResult */
   private $last;
 
   /** @var int */
   private $queries;
+
+  /** @var SplObjectStorage */
+  private $observers;
 
   
   /** @var bool Ignore warning when using deprecated Neevo methods.*/
@@ -47,7 +50,7 @@ class Neevo extends NeevoAbstract {
 
 
   // Neevo revision
-  const REVISION = 257;
+  const REVISION = 258;
 
   // Data types
   const BOOL = 30;
@@ -94,6 +97,7 @@ class Neevo extends NeevoAbstract {
       $this->connect($config);
     }
     $this->cache = $cache;
+    $this->observers = new SplObjectStorage;
   }
 
 
@@ -197,36 +201,7 @@ class Neevo extends NeevoAbstract {
   public function setLast(array $last){
     $this->queries++;
     $this->last = $last;
-    $this->logQuery($last);
-  }
-
-
-  /** @internal */
-  private function logQuery(array $query){
-    if($this->debug){
-      if(!is_callable($this->debug)){
-        fwrite(STDERR, '-- ['.($query['time'] * 1000).'ms] '."$query[query_string]\n");
-      }
-      else{
-        call_user_func($this->debug, $query['query_string'], $query['time'], $query);
-      }
-    }
-  }
-
-
-  /**
-   * Setup debug mode
-   * @param bool|callback $debug TRUE for STD_ERR, FALSE to disable.
-   * @throws InvalidArgumentException
-   * @return void
-   */
-  public function debug($debug = true){
-    if(is_bool($debug) || is_callable($debug)){
-      $this->debug = $debug;
-    }
-    else{
-      throw new InvalidArgumentException('Argument 1 passed to '.__METHOD__.' must be a valid callback or boolean.');
-    }
+    $this->notify();
   }
 
 
@@ -240,6 +215,35 @@ class Neevo extends NeevoAbstract {
 
 
   /**
+   * Attach observer for debugging
+   * @param SplObserver $observer
+   */
+  public function attach(SplObserver $observer){
+    $this->observers->attach($observer);
+  }
+
+
+  /**
+   * Detach observer for debugging
+   * @param SplObserver $observer
+   */
+  public function detach(SplObserver $observer){
+    if($this->observers->contains($observer)){
+      $this->observers->detach($observer);
+    }
+  }
+
+
+  /**
+   * Notify observers
+   */
+  public function notify(){
+    foreach($this->observers as $observer){
+      $observer->update($this);
+    }
+  }
+
+    /**
    * SELECT statement factory.
    * @param string|array $columns Columns to select (array or comma-separated list)
    * @param string $table Table name
@@ -336,9 +340,6 @@ abstract class NeevoAbstract{
   
   /** @var NeevoConnection */
   protected $connection;
-
-  /** @var bool|callback */
-  protected $debug;
 }
 
 
