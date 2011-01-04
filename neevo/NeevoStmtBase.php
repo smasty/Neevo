@@ -47,54 +47,61 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   /**
-   * Sets WHERE condition. More calls appends conditions.
+   * Sets WHERE condition. More calls appends conditions. Accept infinite arguments.
    *
    * Possible combinations for where conditions:
    * | Condition  | SQL code
    * |-----------------------
-   * | `where('field', 'x')`             | `field = 'x'`
-   * | `where('field !=', 'x')`          | `filed != 'x'`
-   * | `where('field LIKE', '%x%')`      | `field LIKE '%x%'`
-   * | `where('field', true)`            | `field`
-   * | `where('field', false)`           | `NOT field`
-   * | `where('field', null)`            | `field IS NULL`
-   * | `where('field', array(1, 2))`     | `field IN(1, 2)`
-   * | `where('field NOT', array(1, 2))` | `field NOT IN(1,2)`
-   * | `where('field', new NeevoLiteral('NOW()'))`  | `field = NOW()`
-   * @param string $condition
+   * | `where('field', 'x')` | `field = 'x'`
+   * | `where('field', true)` | `field`
+   * | `where('field', false)` | `NOT field`
+   * | `where('field', null)` | `field IS NULL`
+   * | `where('field', array(1, 2))` | `field IN(1, 2)`
+   * | `where('field != %1', 'x')` | `filed != 'x'`
+   * | `where('field != %1 OR field < %2', 'x', 15)` | `filed != 'x' OR field < 15`
+   * | `where('field LIKE %1', '%x%')` | `field LIKE '%x%'`
+   * | `where('field NOT %1', array(1, 2))` | `field NOT IN(1, 2)`
+   * | `where('field', new NeevoLiteral('NOW()'))` | `field = NOW()`
+   * @param string $expr
    * @param string|array|bool|null $value
    * @return NeevoStmtBase fluent interface
    */
-  public function where($condition, $value = true){
+  public function where($expr, $value = true){
     $this->reinit();
-    $condition = trim($condition);
-    $column = strstr($condition, ' ') ? substr($condition, 0, strpos($condition, ' ')) : $condition;
-    $operator = strstr($condition, ' ') ? substr($condition, strpos($condition, ' ')+1) : null;
 
-    if(is_null($value)){
-      if(strtoupper($operator) === 'NOT'){
-        $operator = ' NOT';
+    // Simple format
+    if(!preg_match('~%\d+~', $expr)){
+      $field = trim($expr);
+      $this->conditions[] = array(
+        'simple' => true,
+        'field' => $field,
+        'value' => $value,
+        'glue' => 'AND'
+      );
+      return $this;
+    }
+
+    // Format with placeholders
+    $values = func_get_args();
+    unset($values[0]);
+
+    preg_match_all("~%\d+~", $expr, $match);
+    $keys = array_flip($match[0]);
+    $placeholders = array();
+    foreach($values as $k => $v){
+      if(isset($keys["%$k"])){
+        $placeholders[] = $match[0][$keys["%$k"]];
       }
-      $operator = 'IS' . (string) $operator;
-      $value = 'NULL';
-    }
-    elseif($value === true){
-      $operator = '';
-      $value = true;
-    }
-    elseif($value === false){
-      $operator = '';
-      $value = false;
-    }
-    elseif(is_array($value)){
-      $operator = (strtoupper($operator) == 'NOT') ? 'NOT IN' : 'IN';
     }
 
-    if(!isset($operator)){
-      $operator = '=';
-    }
+    $this->conditions[] = array(
+      'simple' => false,
+      'expr' => $expr,
+      'placeholders' => $placeholders,
+      'values' => $values,
+      'glue' => 'AND'
+    );
 
-    $this->conditions[] = array($column, $operator, $value, 'AND');
     return $this;
   }
 
@@ -107,9 +114,9 @@ abstract class NeevoStmtBase extends NeevoAbstract {
   public function  __call($name, $args){
     if(in_array(strtolower($name), array('and', 'or'))){
       $this->reinit();
-      $this->conditions[max(array_keys($this->conditions))][3] = strtoupper($name);
+      $this->conditions[count($this->conditions)-1]['glue'] = strtoupper($name);
       if(count($args) >= 1){
-        $this->where($args[0], isset($args[1]) ? $args[1] : true);
+        call_user_func_array(array($this, 'where'), $args);
       }
       return $this;
     }

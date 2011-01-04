@@ -5,18 +5,18 @@ WHERE test coverage
 
 foreach(array(
   array('id', 1),
-  array('id !=', 1),
-  array('title LIKE', 'Nee%'),
+  array('id != %1', 1),
+  array('title LIKE %1', 'Nee%'),
   array('id', true),
   array('id', false),
   array('id', null),
-  array('id NOT', null),
+  array('id IS NOT %1', null),
   array('id', array(1, 2)),
-  array('id NOT', array(1, 2)),
+  array('id NOT %1', array(1, 2)),
   array('id', new NeevoLiteral(99))
-) as $condition){
+) as $cond){
 
-  $query = $db->select('id', 'software')->where($condition[0], $condition[1])->order('id')->fetch();
+  $query = $db->select('id', 'software')->where($cond[0], $cond[1])->order('id')->fetch();
   if(!$query){
     $query = array();
   }

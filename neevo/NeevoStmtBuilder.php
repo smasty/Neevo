@@ -127,38 +127,59 @@ class NeevoStmtBuilder extends NeevoAbstract{
   protected function buildWhere(NeevoStmtBase $statement){
     $conds = $statement->getConditions();
 
-    unset($conds[count($conds)-1][3]);
+    // Unset glue on last condition
+    unset($conds[count($conds)-1]['glue']);
 
-    foreach($conds as &$cond){
-      $cond[0] = $this->buildColName($cond[0]);
-      // col = true
-      if($cond[2] === true){
-        unset($cond[1], $cond[2]);
-      }
-      // col = false
-      elseif($cond[2] === false){
-        $x = $cond[0];
-        $cond[1] = $cond[0];
-        $cond[0] = 'NOT';
-        unset($cond[2]);
-      }
-      // col IN(...)
-      elseif(is_array($cond[2])){
-        $cond[2] = '(' . join(', ', $this->_escapeArray($cond[2])) . ')';
-      }
-      // col = sql literal
-      elseif($cond[2] instanceof NeevoLiteral){
-        $cond[2] = $cond[2]->value;
-      }
-      // col IS NULL
-      elseif($cond[2] !== 'NULL'){
-        $cond[2] = $this->_escapeString($cond[2]);
+    $conditions = array();
+    foreach($conds as $cond){
+
+      // Conditions with placeholders
+      if($cond['simple'] === false){
+        $expr = str_replace('::', $this->neevo->connection->prefix(),$cond['expr']);
+        $s = '('.str_replace($cond['placeholders'], $this->_escapeArray($cond['values']), $expr).')';
+        if(isset($cond['glue'])){
+          $s .= ' '.$cond['glue'];
+        }
+        $conditions[] = $s;
+        continue;
       }
 
-      $cond = join(' ', $cond);
+      // Simple conditions
+      $field = $this->buildColName($cond['field']);
+      $operator = '';
+      $value = $cond['value'];
+      if($value === null){ // field IS NULL
+        $operator = ' IS';
+        $value = ' NULL';
+      } elseif($value === true){  // field
+        $value = '';
+      } elseif($value === false){ // NOT field
+        $value = $field;
+        $field = 'NOT ';
+      } elseif(is_array($value)){ // field IN (array)
+        $operator = ' IN';
+        $value = '(' . join(', ', $this->_escapeArray($value)) . ')';
+      } elseif($value instanceof NeevoLiteral){ // field = SQL literal
+        $operator = ' = ';
+        $value = $value->val;
+      } elseif($value instanceof DateTime){ // field = DateTime
+        $operator = ' = ';
+        $value = $this->neevo->driver()->escape($value, Neevo::DATETIME);
+      } else{ // field = value
+        $operator = ' = ';
+        $value = (is_numeric($value) && !is_string($value))
+          ? $value : $this->_escapeString($value);
+      }
+      $s = "($field$operator$value)";
+      if(isset($cond['glue'])){
+        $s .= ' '.$cond['glue'];
+      }
+
+      $conditions[] = $s;
+
     }
 
-    return ' WHERE ' . join(' ', $conds);
+    return ' WHERE ' . join(' ', $conditions);
   }
 
 
@@ -273,6 +294,9 @@ class NeevoStmtBuilder extends NeevoAbstract{
       }
       elseif($value instanceof NeevoLiteral){
         $value = $value->value;
+      }
+      elseif(is_array($value)){
+        $value = 'IN(' . join(', ', $this->_escapeArray($value)) . ')';
       }
       else{
         $value = $this->_escapeString((string) $value);
