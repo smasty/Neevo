@@ -47,7 +47,7 @@ class Neevo extends NeevoAbstract {
 
 
   // Neevo revision
-  const REVISION = 252;
+  const REVISION = 253;
 
   // Data types
   const BOOL = 30;
