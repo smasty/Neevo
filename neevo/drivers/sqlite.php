@@ -31,9 +31,6 @@
  */
 class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
-  /** @var Neevo */
-  protected $neevo;
-
   /** @var string */
   private $dbCharset;
 
@@ -56,7 +53,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    * @throws NeevoException
    * @return void
    */
-  public function  __construct(Neevo $neevo){
+  public function  __construct(Neevo $neevo = null){
     if(!extension_loaded("sqlite")){
       throw new NeevoException("PHP extension 'sqlite' not loaded.");
     }

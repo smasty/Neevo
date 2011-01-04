@@ -26,7 +26,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
    * Instantiate StatementBuilder
    * @param Neevo $neevo
    */
-  public function  __construct(Neevo $neevo){
+  public function  __construct(Neevo $neevo = null){
     $this->neevo = $neevo;
   }
 

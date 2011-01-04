@@ -47,11 +47,10 @@ interface INeevoDriver {
 
   /**
    * Check for required PHP extension
-   * @param Neevo $neev
    * @throws NeevoException
    * @return void
    */
-  public function  __construct(Neevo $neevo);
+  public function  __construct();
 
   /**
    * Creates connection to database

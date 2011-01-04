@@ -34,24 +34,19 @@
  */
 class NeevoDriverMySQLi implements INeevoDriver{
 
-  /** @var Neevo */
-  private $neevo;
-
   /** @var mysqli */
   private $resource;
 
 
   /**
    * Check for required PHP extension
-   * @param Neevo $neevo
    * @throws NeevoException
    * @return void
    */
-  public function  __construct(Neevo $neevo){
+  public function  __construct(){
     if(!extension_loaded("mysqli")){
       throw new NeevoException("PHP extension 'mysqli' not loaded.");
     }
-    $this->neevo = $neevo;
   }
 
 

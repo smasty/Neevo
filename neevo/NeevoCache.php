@@ -20,37 +20,34 @@
 interface INeevoCache {
 
   /**
-   * Load stored data
+   * Fetch stored data
    * @param string $key
    * @return mixed|null null if not found
    */
-  public function load($key);
+  public function fetch($key);
 
   /**
-   * Save data
+   * Store data
    * @param string $key
    * @param mixed $value
    * @return void
    */
-  public function save($key, $value);
+  public function store($key, $value);
 
 }
 
 
 /**
- * Neevo session cache
+ * Neevo cache using $_SESSION['NeevoCache'].
  * @package NeevoCache
  */
 class NeevoCacheSession implements INeevoCache {
 
-  public function load($key){
-    if(!isset($_SESSION['NeevoCache'][$key])){
-      return null;
-    }
-    return $_SESSION['NeevoCache'][$key];
+  public function fetch($key){
+    return isset($_SESSION['NeevoCache'][$key]) ? $_SESSION['NeevoCache'][$key] : null;
   }
 
-  public function save($key, $value){
+  public function store($key, $value){
     $_SESSION['NeevoCache'][$key] = $value;
   }
 
@@ -58,7 +55,7 @@ class NeevoCacheSession implements INeevoCache {
 
 
 /**
- * Neevo file cache
+ * Neevo cache using file.
  * @package NeevoCache
  */
 class NeevoCacheFile implements INeevoCache {
@@ -74,26 +71,109 @@ class NeevoCacheFile implements INeevoCache {
     $this->data = unserialize(@file_get_contents($filename));
   }
 
-  public function __destruct(){
-    @file_put_contents($this->filename, serialize($this->data), LOCK_EX);
-  }
-
-  public function load($key){
+  public function fetch($key){
     if(!isset($this->data[$key])){
       return null;
     }
     return $this->data[$key];
   }
 
-  public function save($key, $value){
-    $this->data[$key] = $value;
+  public function store($key, $value){
+    if(!isset($this->data[$key]) || $this->data[$key] !== $value){
+      $this->data[$key] = $value;
+      file_put_contents($this->filename, serialize($this->data), LOCK_EX);
+    }
   }
 
 }
 
 
 /**
- * Neevo Memcache cache
+ * Neevo cache using PHP included file.
+ */
+class NeevoCacheInclude implements INeevoCache {
+
+  /** @var string */
+  private $filename;
+
+  /** @var array */
+  private $data = array();
+
+  public function __construct($filename){
+		$this->filename = $filename;
+		$this->data = @include realpath($filename);
+		if(!is_array($this->data)){
+			$this->data = array();
+		}
+	}
+
+	public function fetch($key){
+		return isset($this->data[$key]) ? $this->data[$key] : null;
+	}
+
+	public function store($key, $value) {
+		if(!isset($this->data[$key]) || $this->data[$key] !== $value){
+			$this->data[$key] = $value;
+			file_put_contents($this->filename, '<?php return '.var_export($this->data, true).';', LOCK_EX);
+		}
+	}
+
+}
+
+
+/**
+ * Neevo cache using database table 'neevo_cache'.
+ *
+ * The table must already exist:
+ * CREATE TABLE neevo_cache (
+ *   id varchar(255) NOT NULL,
+ *   data text NOT NULL,
+ *   PRIMARY KEY (id)
+ * );
+ */
+class NeevoCacheDatabase implements INeevoCache {
+
+  /** @var INeevoDriver */
+  private $driver;
+
+  public function __construct(NeevoConnection $connection){
+    $this->driver = $connection->driver();
+  }
+
+  public function fetch($key){
+    try{
+      $q = $this->driver->query("SELECT data FROM neevo_cache WHERE id = "
+       . $this->driver->escape($key, Neevo::TEXT));
+      $row = $this->driver->fetch($q);
+      if($row !== false){
+        return unserialize($row['data']);
+      }
+      else{
+        return null;
+      }
+    } catch(Exception $e){
+        return null;
+    }
+  }
+
+  public function store($key, $value){
+    $data = array(
+      'id' => $this->driver->escape($key, Neevo::TEXT),
+      'data' => $this->driver->escape(serialize($value), Neevo::TEXT)
+    );
+    $q = $this->driver->query("UPDATE neevo_cache SET data = $data[data] WHERE id = $data[id]");
+    if(!$this->driver->affectedRows()){
+      try{
+        $this->driver->query("INSERT INTO neevo_cache (id, data) VALUES ($data[id], $data[data])");
+      } catch(Exception $e){}
+    }
+  }
+
+}
+
+
+/**
+ * Neevo cache using NeevoCache. prefix in Memcache.
  * @package NeevoCache
  */
 class NeevoCacheMemcache implements INeevoCache {
@@ -105,15 +185,15 @@ class NeevoCacheMemcache implements INeevoCache {
     $this->memcache = $memcache;
   }
 
-  public function load($key){
-    $value = $this->memcache->get("NeevoCache.$key");
+  public function fetch($key){
+    $value = $this->memcache->fetch("NeevoCache.$key");
     if($value === false){
       return null;
     }
     return $value;
   }
 
-  public function save($key, $value){
+  public function store($key, $value){
     $this->memcache->set("NeevoCache.$key", $value);
   }
 
@@ -121,12 +201,12 @@ class NeevoCacheMemcache implements INeevoCache {
 
 
 /**
- * Neevo APC cache
+ * Neevo cache using NeevoCache. prefix in APC.
  * @package NeevoCache
  */
 class NeevoCacheAPC implements INeevoCache {
 
-  public function load($key){
+  public function fetch($key){
     $value = apc_fetch("NeevoCache.$key", $success);
     if(!$success){
       return null;
@@ -134,7 +214,7 @@ class NeevoCacheAPC implements INeevoCache {
     return $value;
   }
 
-  public function save($key, $value){
+  public function store($key, $value){
     apc_store("NeevoCache.$key", $value);
   }
 

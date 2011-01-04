@@ -47,7 +47,7 @@ class Neevo extends NeevoAbstract {
 
 
   // Neevo revision
-  const REVISION = 248;
+  const REVISION = 249;
 
   // Data types
   const BOOL = 30;
@@ -154,27 +154,27 @@ class Neevo extends NeevoAbstract {
 
 
   /**
-   * Load stored data
+   * Fetch stored data
    * @param string $key
    * @return mixed|null null if not found
    */
-  public function cacheLoad($key){
-    if(isset($this->cache)){
-      return $this->cache->load($key);
+  public function cacheFetch($key){
+    if($this->cache instanceof INeevoCache){
+      return $this->cache->get($key);
     }
     return null;
   }
 
 
   /**
-   * Save data
+   * Store data
    * @param string $key
    * @param mixed $value
    * @return void
    */
-  public function cacheSave($key, $value){
-    if(isset($this->cache)){
-      $this->cache->save($key, $value);
+  public function cacheStore($key, $value){
+    if($this->cache instanceof INeevoCache){
+      $this->cache->set($key, $value);
     }
   }
 

@@ -33,24 +33,19 @@
  */
 class NeevoDriverMySQL implements INeevoDriver{
 
-  /** @var Neevo */
-  private $neevo;
-
   /** @var resource */
   private $resource;
 
 
   /**
    * Check for required PHP extension
-   * @param Neevo $neevo
    * @throws NeevoException
    * @return void
    */
-  public function  __construct(Neevo $neevo){
+  public function  __construct(){
     if(!extension_loaded("mysql")){
       throw new NeevoException("PHP extension 'mysql' not loaded.");
     }
-    $this->neevo = $neevo;
   }
 
 

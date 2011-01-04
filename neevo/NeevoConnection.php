@@ -38,7 +38,7 @@ class NeevoConnection extends NeevoAbstract{
    * @throws InvalidArgumentException
    * @return void
    */
-  public function __construct($config, Neevo $neevo, $driverName = null){
+  public function __construct($config, Neevo $neevo = null, $driverName = null){
     $this->neevo = $neevo;
 
     // Parse
@@ -57,7 +57,7 @@ class NeevoConnection extends NeevoAbstract{
     // Defaults
     $defaults = array(
       'driver' => Neevo::$defaultDriver,
-      'lazy' => true,
+      'lazy' => false,
       'table_prefix' => ''
     );
 
@@ -136,6 +136,12 @@ class NeevoConnection extends NeevoAbstract{
 
   public function prefix(){
     return isset($this->config['table_prefix']) ? $this->config['table_prefix'] : '';
+  }
+
+
+  /** @return INeevoDriver */
+  public function driver(){
+    return $this->driver;
   }
 
 

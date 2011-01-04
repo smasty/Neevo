@@ -344,7 +344,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
   public function getPrimaryKey(){
     $table = $this->getTable();
     $key = null;
-    $cached = $this->neevo->cacheLoad($table.'_primaryKey');
+    $cached = $this->neevo->cacheFetch($table.'_primaryKey');
 
     if($cached === null){
       try{
@@ -352,7 +352,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
       } catch(Exception $e){
         return null;
       }
-      $this->neevo->cacheSave($table.'_primaryKey', $key);
+      $this->neevo->cacheStore($table.'_primaryKey', $key);
       return $key === '' ? null : $key;
     }
     return $cached === '' ? null : $cached;
