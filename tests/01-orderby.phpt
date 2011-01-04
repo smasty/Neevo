@@ -10,8 +10,9 @@ foreach(array(
   array('aid', 'web')
 ) as $order){
   foreach($db->select('id', 'software')->order($order)->fetch() as $result){
-    if(isset($result['id']))
+    if(isset($result['id'])){
       echo $result['id'];
+    }
     echo ',';
   }
   echo "\n";

@@ -47,40 +47,45 @@ class NeevoStmtBuilder extends NeevoAbstract{
     $table = $statement->getTable();
 
     // JOIN
-    if($statement instanceof NeevoResult && $statement->getJoin())
+    if($statement instanceof NeevoResult && $statement->getJoin()){
       $table = $table .' '. $this->buildJoin($statement);
+    }
 
     // WHERE
-    if($statement->getConditions())
+    if($statement->getConditions()){
       $where = $this->buildWhere($statement);
+    }
 
     // ORDER BY
-    if($statement->getOrdering())
+    if($statement->getOrdering()){
       $order = $this->buildOrdering($statement);
+    }
 
     // GROUP BY
-    if($statement instanceof NeevoResult && $statement->getGrouping())
+    if($statement instanceof NeevoResult && $statement->getGrouping()){
       $group = $this->buildGrouping($statement);
+    }
 
     // LIMIT, OFFSET
-    if($statement->getLimit()) $limit = ' LIMIT ' .$statement->getLimit();
-    if($statement->getOffset()) $limit .= ' OFFSET ' .$statement->getOffset();
+    if($statement->getLimit()){
+      $limit = ' LIMIT ' .$statement->getLimit();
+    }
+    if($statement->getOffset()){
+      $limit .= ' OFFSET ' .$statement->getOffset();
+    }
 
     if($statement->getType() == Neevo::STMT_SELECT){
       $cols = $this->buildSelectCols($statement);
       $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
     }
-
     elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
       $insert_data = $this->buildInsertData($statement);
       $q .= 'INSERT INTO ' .$table.$insert_data;
     }
-
     elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
       $update_data = $this->buildUpdateData($statement);
       $q .= 'UPDATE ' .$table.$update_data.$where.$order.$limit;
     }
-
     elseif($statement->getType() == Neevo::STMT_DELETE)
       $q .= 'DELETE FROM ' .$table.$where.$order.$limit;
 
@@ -97,13 +102,18 @@ class NeevoStmtBuilder extends NeevoAbstract{
   protected function buildJoin(NeevoResult $statement){
     $join = $statement->getJoin();
     $type = strtoupper(substr($join['type'], 5));
-    if($type !== '') $type .= ' ';
+    if($type !== ''){
+      $type .= ' ';
+    }
     if($join['operator'] === 'ON'){
       $expr = " ON $join[expr]";
     }
-    elseif($join['operator'] === 'USING')
+    elseif($join['operator'] === 'USING'){
       $expr = " USING($join[expr])";
-    else throw new NeevoException('JOIN operator not specified.');
+    }
+    else{
+      throw new NeevoException('JOIN operator not specified.');
+    }
     
     return $type.'JOIN '.$join['table'].$expr;
   }
@@ -133,14 +143,17 @@ class NeevoStmtBuilder extends NeevoAbstract{
         unset($cond[2]);
       }
       // col IN(...)
-      elseif(is_array($cond[2]))
+      elseif(is_array($cond[2])){
         $cond[2] = '(' . join(', ', $this->_escapeArray($cond[2])) . ')';
+      }
       // col = sql literal
-      elseif($cond[2] instanceof NeevoLiteral)
+      elseif($cond[2] instanceof NeevoLiteral){
         $cond[2] = $cond[2]->value;
+      }
       // col IS NULL
-      elseif($cond[2] !== 'NULL')
+      elseif($cond[2] !== 'NULL'){
         $cond[2] = $this->_escapeString($cond[2]);
+      }
 
       $cond = join(' ', $cond);
     }
@@ -214,13 +227,15 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
 
   protected function buildColName($col){
-    if($col instanceof NeevoLiteral)
+    if($col instanceof NeevoLiteral){
       return $col->value;
+    }
     $col = trim($col);
     $col = preg_replace('#(\S+)\s+(as)\s+(\S+)#i', '$1 AS $3',  $col);
 
-    if(preg_match('#[^.]+\.[^.]+#', $col))
+    if(preg_match('#[^.]+\.[^.]+#', $col)){
       return $this->neevo->connection->prefix() . $col;
+    }
     return $col;
   }
 
@@ -233,31 +248,35 @@ class NeevoStmtBuilder extends NeevoAbstract{
    */
   protected function _escapeArray(array $array){
     foreach($array as &$value){
-      if(is_null($value))
+      if(is_null($value)){
         $value = 'NULL';
-
-      elseif(is_bool($value))
-        $value = $this->neevo->driver()->escape($value, Neevo::BOOL);
-
-      elseif(is_numeric($value)){
-        if(is_int($value))
-          $value = intval($value);
-
-        elseif(is_float($value))
-          $value = floatval($value);
-
-        else $value = intval($value);
       }
-      elseif(is_string($value))
+      elseif(is_bool($value)){
+        $value = $this->neevo->driver()->escape($value, Neevo::BOOL);
+      }
+      elseif(is_numeric($value)){
+        if(is_int($value)){
+          $value = intval($value);
+        }
+        elseif(is_float($value)){
+          $value = floatval($value);
+        }
+        else{
+          $value = intval($value);
+        }
+      }
+      elseif(is_string($value)){
         $value = $this->_escapeString($value);
-
-      elseif($value instanceof DateTime)
+      }
+      elseif($value instanceof DateTime){
         $value = $this->neevo->driver()->escape($value, Neevo::DATETIME);
-
-      elseif($value instanceof NeevoLiteral)
+      }
+      elseif($value instanceof NeevoLiteral){
         $value = $value->value;
-
-      else $value = $this->_escapeString((string) $value);
+      }
+      else{
+        $value = $this->_escapeString((string) $value);
+      }
     }
     return $array;
   }
@@ -267,9 +286,12 @@ class NeevoStmtBuilder extends NeevoAbstract{
    * @param string $string
    * @return string
    * @internal
+   * @todo
    */
   protected function _escapeString($string){
-    if(get_magic_quotes_gpc()) $string = stripslashes($string);
+    if(get_magic_quotes_gpc()){
+      $string = stripslashes($string);
+    }
     return $this->neevo->driver()->escape($string, Neevo::TEXT);
   }
   

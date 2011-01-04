@@ -72,8 +72,9 @@ abstract class NeevoStmtBase extends NeevoAbstract {
     $operator = strstr($condition, ' ') ? substr($condition, strpos($condition, ' ')+1) : null;
 
     if(is_null($value)){
-      if(strtoupper($operator) === 'NOT')
+      if(strtoupper($operator) === 'NOT'){
         $operator = ' NOT';
+      }
       $operator = 'IS' . (string) $operator;
       $value = 'NULL';
     }
@@ -85,10 +86,13 @@ abstract class NeevoStmtBase extends NeevoAbstract {
       $operator = '';
       $value = false;
     }
-    elseif(is_array($value))
+    elseif(is_array($value)){
       $operator = (strtoupper($operator) == 'NOT') ? 'NOT IN' : 'IN';
+    }
 
-    if(!isset($operator)) $operator = '=';
+    if(!isset($operator)){
+      $operator = '=';
+    }
 
     $this->conditions[] = array($column, $operator, $value, 'AND');
     return $this;
@@ -104,8 +108,9 @@ abstract class NeevoStmtBase extends NeevoAbstract {
     if(in_array(strtolower($name), array('and', 'or'))){
       $this->reinit();
       $this->conditions[max(array_keys($this->conditions))][3] = strtoupper($name);
-      if(count($args) >= 1)
+      if(count($args) >= 1){
         $this->where($args[0], isset($args[1]) ? $args[1] : true);
+      }
       return $this;
     }
     return $this;
@@ -119,10 +124,12 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    */
   public function order($rules){
     $this->reinit();
-    if(is_array($rules))
+    if(is_array($rules)){
       $this->ordering = $rules;
-    else
+    }
+    else{
       $this->ordering = func_get_args();
+    }
     return $this;
   }
 
@@ -132,8 +139,9 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * @return NeevoStmtBase fluent interface
    */
   public function orderBy($rules){
-    if(is_array($rules))
+    if(is_array($rules)){
       return $this->order($rules);
+    }
     else return $this->order(func_get_args());
   }
 
@@ -147,8 +155,9 @@ abstract class NeevoStmtBase extends NeevoAbstract {
   public function limit($limit, $offset = null){
     $this->reinit();
     $this->limit = $limit;
-    if(isset($offset) && $this->type == Neevo::STMT_SELECT)
+    if(isset($offset) && $this->type == Neevo::STMT_SELECT){
       $this->offset = $offset;
+    }
     return $this;
   }
 
@@ -171,7 +180,9 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    */
   public function dump($return = false){
     $code = (PHP_SAPI === 'cli') ? $this->build() : self::_highlightSql($this->build());
-    if(!$return) echo $code;
+    if(!$return){
+      echo $code;
+    }
     return $return ? $code : $this;
   }
 
@@ -224,17 +235,21 @@ abstract class NeevoStmtBase extends NeevoAbstract {
       'query_string' => strip_tags($this->dump(true))
     );
 
-    if($exclude_connection)
+    if($exclude_connection){
       $this->neevo->connection()->info($hide_password);
+    }
 
     if($this->isPerformed()){
       $info['time'] = $this->time;
-      if(isset($this->numRows))
+      if(isset($this->numRows)){
         $info['rows'] = $this->numRows;
-      if(isset($this->affectedRows))
+      }
+      if(isset($this->affectedRows)){
         $info['affected_rows'] = $this->affectedRows;
-      if($this->type == 'insert')
+      }
+      if($this->type == Neevo::STMT_INSERT){
         $info['last_insert_id'] = $this->insertId();
+      }
     }
 
     return $info;
@@ -271,11 +286,13 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * @return string
    */
   public function getTable($table = null){
-    if($table === null)
+    if($table === null){
       $table = $this->tableName;
+    }
     $prefix = $this->neevo->connection()->prefix();
-    if(preg_match('~([^.]+)(\.)([^.]+)~', $table))
+    if(preg_match('~([^.]+)(\.)([^.]+)~', $table)){
       return str_replace('.', ".$prefix", $table);
+    }
     return $prefix.$table;
   }
 
@@ -368,18 +385,24 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
   /** @internal */
   protected static function _highlightCallback($match){
-    if(!empty($match[1])) // Basic keywords
+    if(!empty($match[1])){ // Basic keywords
       return '<strong style="color:#e71818">'.$match[1].'</strong>';
-    if(!empty($match[2])) // Other keywords
+    }
+    if(!empty($match[2])){ // Other keywords
       return '<strong style="color:#d59401">'.$match[2].'</strong>';
-    if(!empty($match[3])) // Values
+    }
+    if(!empty($match[3])){ // Values
       return '<em style="color:#008000">'.$match[3].'</em>';
-    if(!empty($match[4])) // /* comment */
+    }
+    if(!empty($match[4])){ // /* comment */
       return '<em style="color:#999">'.$match[4].'</em>';
-    if(!empty($match[5])) // -- comment
+    }
+    if(!empty($match[5])){ // -- comment
       return '<em style="color:#999">'.$match[5].'</em>';
-    if(!empty($match[6])) // # comment
+    }
+    if(!empty($match[6])){ // # comment
       return '<em style="color:#999">'.$match[6].'</em>';
+    }
   }
 
 

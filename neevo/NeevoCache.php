@@ -44,8 +44,9 @@ interface INeevoCache {
 class NeevoCacheSession implements INeevoCache {
 
   public function load($key){
-    if(!isset($_SESSION['NeevoCache'][$key]))
+    if(!isset($_SESSION['NeevoCache'][$key])){
       return null;
+    }
     return $_SESSION['NeevoCache'][$key];
   }
 
@@ -78,8 +79,9 @@ class NeevoCacheFile implements INeevoCache {
   }
 
   public function load($key){
-    if(!isset($this->data[$key]))
+    if(!isset($this->data[$key])){
       return null;
+    }
     return $this->data[$key];
   }
 
@@ -105,8 +107,9 @@ class NeevoCacheMemcache implements INeevoCache {
 
   public function load($key){
     $value = $this->memcache->get("NeevoCache.$key");
-    if($value === false)
+    if($value === false){
       return null;
+    }
     return $value;
   }
 
@@ -125,8 +128,9 @@ class NeevoCacheAPC implements INeevoCache {
 
   public function load($key){
     $value = apc_fetch("NeevoCache.$key", $success);
-    if(!$success)
+    if(!$success){
       return null;
+    }
     return $value;
   }
 

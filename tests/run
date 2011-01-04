@@ -9,10 +9,16 @@ $opts = getopt('bd::');
 
 // Default driver
 if(isset($opts['d'])){
-  if(is_string($opts['d']))
+  if(is_string($opts['d'])){
     $driver = strtolower(str_replace('=', '', $opts['d']));
-  else $driver = 'mysql';
-} else $driver = 'mysql';
+  }
+  else{
+    $driver = 'mysql';
+  }
+}
+else{
+  $driver = 'mysql';
+}
 
 
 // Testing interface
@@ -26,9 +32,9 @@ foreach(glob(dirname(__FILE__).'/*.phpt') as $test){
   include_once $test;
   $file = basename($test);
 
-  if(!preg_match("~^--TEST--\r?\n(.*)\n--FILE--\r?\n(.*)--EXPECTF?--\r?\n(.*)~s", ob_get_clean(), $matches))
+  if(!preg_match("~^--TEST--\r?\n(.*)\n--FILE--\r?\n(.*)--EXPECTF?--\r?\n(.*)~s", ob_get_clean(), $matches)){
     fwrite(STDERR, "Error: invalid test file $file\n");
-
+  }
   elseif($matches[2] !== $matches[3]){
     fwrite(STDERR, "Error: Test $file failed - $matches[1]\n");
     

@@ -57,8 +57,9 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    * @return void
    */
   public function  __construct(Neevo $neevo){
-    if(!extension_loaded("sqlite"))
+    if(!extension_loaded("sqlite")){
       throw new NeevoException("PHP extension 'sqlite' not loaded.");
+    }
     $this->neevo = $neevo;
   }
 
@@ -83,15 +84,19 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     $config += $defaults;
 
     // Connect
-    if(is_resource($config['resource']))
+    if(is_resource($config['resource'])){
       $connection = $config['resource'];
-    elseif($config['persistent'])
+    }
+    elseif($config['persistent']){
       $connection = @sqlite_popen($config['database'], 0666, $error);
-    else
+    }
+    else{
       $connection = @sqlite_open($config['database'], 0666, $error);
+    }
 
-    if(!is_resource($connection))
+    if(!is_resource($connection)){
       throw new NeevoException("Opening database file '$config[database]' failed.");
+    }
     
     $this->resource = $connection;
     $this->update_limit = (bool) $config['update_limit'];
@@ -99,8 +104,9 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     // Set charset
     $this->dbCharset = $config['dbcharset'];
     $this->charset = $config['charset'];
-    if(strcasecmp($this->dbCharset, $this->charset) === 0)
+    if(strcasecmp($this->dbCharset, $this->charset) === 0){
       $this->dbCharset = $this->charset = null;
+    }
   }
 
 
@@ -129,12 +135,14 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    */
   public function query($queryString){
 
-    if($this->dbCharset !== null)
+    if($this->dbCharset !== null){
       $queryString = iconv($this->charset, $this->dbCharset . '//IGNORE', $queryString);
+    }
 
     $result = @sqlite_query($this->resource, $queryString, null, $error);
-    if($error && $result === false)
+    if($error && $result === false){
       throw new NeevoException("Query failed. $error", sqlite_last_error($this->resource));
+    }
     return $result;
   }
 
@@ -151,11 +159,14 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
       $fields = array();
       foreach($row as $key => $val){
-        if($charset !== null && is_string($val))
+        if($charset !== null && is_string($val)){
           $val = iconv($this->dbcharset, $charset, $val);
+        }
         $key = str_replace(array('[', ']'), '', $key);
         $pos = strpos($key, '.');
-        if($pos !== false) $key = substr($key, $pos + 1);
+        if($pos !== false){
+          $key = substr($key, $pos + 1);
+        }
         $fields[$key] = $val;
       }
       $row = $fields;
@@ -246,18 +257,22 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
   public function getPrimaryKey($table){
     $key = '';
     $pos = strpos($table, '.');
-    if($pos !== false) $table = substr($table, $pos + 1);
+    if($pos !== false){
+      $table = substr($table, $pos + 1);
+    }
     $q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
     $r = $this->fetch($q);
-    if($r === false)
+    if($r === false){
       return '';
+    }
 
     $sql = $r['sql'];
     $sql = explode("\n", $sql);
     foreach($sql as $field){
       $field = trim($field);
-      if(stripos($field, 'PRIMARY KEY') !== false && $key === '')
+      if(stripos($field, 'PRIMARY KEY') !== false && $key === ''){
         $key = preg_replace('~^"(\w+)".*$~i', '$1', $field);
+      }
     }
     return $key;
   }
@@ -287,44 +302,46 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
       }
       $table = $table .' '. $this->buildJoin($statement);
     }
-
     // WHERE
-    if($statement->getConditions())
+    if($statement->getConditions()){
       $where = $this->buildWhere($statement);
-
+    }
     // ORDER BY
-    if($statement->getOrdering())
+    if($statement->getOrdering()){
       $order = $this->buildOrdering($statement);
-
+    }
     // GROUP BY
-    if($statement instanceof NeevoResult && $statement->getGrouping())
+    if($statement instanceof NeevoResult && $statement->getGrouping()){
       $group = $this->buildGrouping($statement);
-
+    }
     // LIMIT, OFFSET
-    if($statement->getLimit()) $limit = ' LIMIT ' .$statement->getLimit();
-    if($statement->getOffset()) $limit .= ' OFFSET ' .$statement->getOffset();
+    if($statement->getLimit()){
+      $limit = ' LIMIT ' .$statement->getLimit();
+    }
+    if($statement->getOffset()){
+      $limit .= ' OFFSET ' .$statement->getOffset();
+    }
 
     if($statement->getType() == Neevo::STMT_SELECT){
       $cols = $this->buildSelectCols($statement);
       $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
     }
-
     elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
       $insert_data = $this->buildInsertData($statement);
       $q .= 'INSERT INTO ' .$table.$insert_data;
     }
-
     elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
       $update_data = $this->buildUpdateData($statement);
       $q .= 'UPDATE ' .$table.$update_data.$where;
-      if($this->update_limit === true)
+      if($this->update_limit === true){
         $q .= $order.$limit;
+      }
     }
-
     elseif($statement->getType() == Neevo::STMT_DELETE){
       $q .= 'DELETE FROM ' .$table.$where;
-      if($this->update_limit === true)
+      if($this->update_limit === true){
         $q .= $order.$limit;
+      }
     }
 
     return $q.';';
@@ -345,12 +362,15 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
       unset($this->_joinTbl);
     }
     $type = strtoupper(substr($join['type'], 5));
-    if($type !== '') $type .= ' ';
+    if($type !== ''){
+      $type .= ' ';
+    }
     if($join['operator'] === 'ON'){
       $expr = ' ON '.$join['expr'];
     }
-    elseif($join['operator'] === 'USING')
+    elseif($join['operator'] === 'USING'){
       $expr = " USING($join[expr])";
+    }
     else throw new NeevoException('JOIN operator not specified.');
     
     return $type.'JOIN '.$join['table'].$expr;

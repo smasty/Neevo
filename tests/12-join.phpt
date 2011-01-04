@@ -3,13 +3,15 @@ Basic Join test
 --FILE--
 <?php
 
-foreach($db->select('author')->leftJoin('software')->on('author.id = software.aid') as $r)
+foreach($db->select('author')->leftJoin('software')->on('author.id = software.aid') as $r){
   echo "$r->name - $r->title\n";
+}
 
 echo "--\n";
 
-foreach($db->select('author')->rightJoin('software')->on('author.id = software.aid') as $r)
+foreach($db->select('author')->rightJoin('software')->on('author.id = software.aid') as $r){
   echo "$r->name - $r->title\n";
+}
 
 ?>
 --EXPECT--

@@ -42,14 +42,17 @@ class NeevoConnection extends NeevoAbstract{
     $this->neevo = $neevo;
 
     // Parse
-    if(is_string($config))
+    if(is_string($config)){
       parse_str($config, $config);
-    elseif($config instanceof Traversable){
-      foreach($config as $key => $val)
-        $config[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
     }
-    elseif(!is_array($config))
+    elseif($config instanceof Traversable){
+      foreach($config as $key => $val){
+        $config[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
+      }
+    }
+    elseif(!is_array($config)){
       throw new InvalidArgumentException('Options must be an array, string or Traversable object.');
+    }
 
     // Defaults
     $defaults = array(
@@ -71,16 +74,18 @@ class NeevoConnection extends NeevoAbstract{
     self::alias($config, 'charset', 'encoding');
 
     // Backward compatibility
-    if(!isset($config['driver']) && $driverName !== null)
+    if(!isset($config['driver']) && $driverName !== null){
       $config['driver'] = $driverName;
+    }
 
     $config += $defaults;
 
     $this->setDriver($config['driver']);
     $this->config = $config;
 
-    if($config['lazy'] === false)
+    if($config['lazy'] === false){
       $this->realConnect();
+    }
   }
 
 
@@ -106,17 +111,20 @@ class NeevoConnection extends NeevoAbstract{
     if(!$this->isDriver($class)){
       @include_once dirname(__FILE__) . '/drivers/'.strtolower($driver).'.php';
 
-      if(!$this->isDriver($class))
+      if(!$this->isDriver($class)){
         throw new NeevoException("Unable to create instance of Neevo driver '$driver' - class not found or not matching criteria.");
+      }
     }
 
     $this->driver = new $class($this->neevo);
 
     // Set stmtBuilder
-    if(in_array('NeevoStmtBuilder', class_parents($class, false)))
+    if(in_array('NeevoStmtBuilder', class_parents($class, false))){
       $this->stmtBuilder = $this->driver;
-    else
+    }
+    else{
       $this->stmtBuilder = new NeevoStmtBuilder($this->neevo);
+    }
   }
 
 
@@ -138,7 +146,9 @@ class NeevoConnection extends NeevoAbstract{
    */
   public function info($hide_password = true){
     $info = $this->config;
-    if($hide_password) $info['password'] = '*****';
+    if($hide_password){
+      $info['password'] = '*****';
+    }
     return $info;
   }
 
@@ -151,8 +161,9 @@ class NeevoConnection extends NeevoAbstract{
    * @return void
    */
   public static function alias(&$config, $key, $alias){
-    if(isset($config[$alias]) && !isset($config[$key]))
+    if(isset($config[$alias]) && !isset($config[$key])){
       $config[$key] = $config[$alias];
+    }
   }
 
 }

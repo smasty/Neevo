@@ -1,6 +1,7 @@
 <?php
-if(PHP_SAPI !== 'cli')
+if(PHP_SAPI !== 'cli'){
   trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
+}
 
 // Defaults
 $file = 'neevo.php';
@@ -9,8 +10,9 @@ $last_include = "include_once dirname(__FILE__). '/neevo/INeevoDriver.php';";
 
 $args = getopt('d::hq');
 
-if(isset($args['q']))
+if(isset($args['q'])){
   ob_start();
+}
 
 /* ******* Actions ******* */
 
@@ -39,22 +41,24 @@ echo revision($file);
 if(isset($args['d'])){
   $drivers = explode(',', str_replace('=', '', $args['d']));
 
-  foreach($drivers as &$d)
+  foreach($drivers as &$d){
     $d = strtolower(trim($d));
+  }
 }
 // All drivers
-else $drivers = null;
+else{
+  $drivers = null;
+}
 
 // Minify source
 echo minify($file);
 echo "\n";
 
-if(isset($args['q']))
+if(isset($args['q'])){
   ob_end_clean();
-
+}
 
 /* ******* Functions ******* */
-
 
 function revision($file){
   $source = @file_get_contents($file);
@@ -68,14 +72,12 @@ function revision($file){
   return "$response\n";
 }
 
-
 function revision_callback($n){
   global $new_rev;
   $res = $n[1]+1;
   $new_rev = $res;
   return "const REVISION = $res;";
 }
-
 
 function drivers($file){
   global $last_include;
@@ -88,16 +90,17 @@ function list_drivers(){
   global $last_include;
 
   // Include all
-  if($drivers === null)
+  if($drivers === null){
     $list = glob('./neevo/drivers/*.php');
-  
+  }
   // Include only defined
   elseif(is_array($drivers)){
     $list = array();
     foreach($drivers as $driver){
       $path = "./neevo/drivers/$driver.php";
-      if(file_exists($path))
+      if(file_exists($path)){
         $list[] = $path;
+      }
     }
 
     echo 'Compiling drivers: '.join(', ', $drivers)."\n";
@@ -120,8 +123,9 @@ function drivers_path(){
 
   if(is_array($drivers)){
     foreach($drivers as $key => $value){
-      if(!file_exists("./neevo/drivers/$value.php"))
+      if(!file_exists("./neevo/drivers/$value.php")){
         unset($drivers[$key]);
+      }
     }
     sort($drivers);
     return '.' . join('-', $drivers);
@@ -196,7 +200,7 @@ function php_shrink($input){
   $output = '';
   $in_echo = false;
   $doc_comment = false; // include only first /**
-  for (reset($tokens); list($i, $token) = each($tokens); ){
+  for(reset($tokens); list($i, $token) = each($tokens); ){
     if(!is_array($token)){
       $token = array(0, $token);
     }

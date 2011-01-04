@@ -33,6 +33,7 @@ elseif($driver == 'sqlite3'){
     'file' => 'tests/neevo.sqlite3'
   ));
 }
+
 else{
   fwrite(STDERR, "Driver '$driver' is not available.\n");
   exit(1);

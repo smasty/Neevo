@@ -14,9 +14,9 @@
  */
 
 // PHP compatibility
-if(version_compare(PHP_VERSION, '5.1.0', '<'))
+if(version_compare(PHP_VERSION, '5.1.0', '<')){
   trigger_error('Neevo requires PHP version 5.1.0 or newer', E_USER_ERROR);
-
+}
 include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmtBase.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmtBuilder.php';
@@ -47,7 +47,7 @@ class Neevo extends NeevoAbstract {
 
 
   // Neevo revision
-  const REVISION = 247;
+  const REVISION = 248;
 
   // Data types
   const BOOL = 30;
@@ -83,11 +83,16 @@ class Neevo extends NeevoAbstract {
     // Backward compatibility with REV < 238
     if(is_string($config)){
       parse_str($config, $arr);
-      if(!reset($arr)) // 1st item empty = driver only
+      if(!reset($arr)){ // 1st item empty = driver only
         $this->_old_driver = $config;
-      else $this->connect($config);
+      }
+      else{
+        $this->connect($config);
+      }
     }
-    else $this->connect($config);
+    else{
+      $this->connect($config);
+    }
     $this->cache = $cache;
   }
 
@@ -154,8 +159,9 @@ class Neevo extends NeevoAbstract {
    * @return mixed|null null if not found
    */
   public function cacheLoad($key){
-    if(isset($this->cache))
+    if(isset($this->cache)){
       return $this->cache->load($key);
+    }
     return null;
   }
 
@@ -167,8 +173,9 @@ class Neevo extends NeevoAbstract {
    * @return void
    */
   public function cacheSave($key, $value){
-    if(isset($this->cache))
+    if(isset($this->cache)){
       $this->cache->save($key, $value);
+    }
   }
 
 
@@ -197,10 +204,12 @@ class Neevo extends NeevoAbstract {
   /** @internal */
   private function logQuery(array $query){
     if($this->debug){
-      if(!is_callable($this->debug))
+      if(!is_callable($this->debug)){
         fwrite(STDERR, '-- ['.($query['time'] * 1000).'ms] '."$query[query_string]\n");
-      else
+      }
+      else{
         call_user_func($this->debug, $query['query_string'], $query['time'], $query);
+      }
     }
   }
 
@@ -212,10 +221,12 @@ class Neevo extends NeevoAbstract {
    * @return void
    */
   public function debug($debug = true){
-    if(is_bool($debug) || is_callable($debug))
+    if(is_bool($debug) || is_callable($debug)){
       $this->debug = $debug;
-    else
+    }
+    else{
       throw new InvalidArgumentException('Argument 1 passed to '.__METHOD__.' must be a valid callback or boolean.');
+    }
   }
 
 

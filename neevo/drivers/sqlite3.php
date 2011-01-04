@@ -59,8 +59,9 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
    * @return void
    */
   public function  __construct(Neevo $neevo){
-    if(!extension_loaded("sqlite3"))
+    if(!extension_loaded("sqlite3")){
       throw new NeevoException("PHP extension 'sqlite3' not loaded.");
+    }
     $this->neevo = $neevo;
   }
 
@@ -84,8 +85,9 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     $config += $defaults;
 
     // Connect
-    if($config['resource'] instanceof SQLite3)
+    if($config['resource'] instanceof SQLite3){
       $connection = $config['resource'];
+    }
     else{
       try{
         $connection = new SQLite3($config['database']);
@@ -94,8 +96,9 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
       }
     }
 
-    if(!($connection instanceof SQLite3))
+    if(!($connection instanceof SQLite3)){
       throw new NeevoException("Opening database file '$config[database]' failed.");
+    }
     
     $this->resource = $connection;
     $this->update_limit = (bool) $config['update_limit'];
@@ -103,8 +106,9 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     // Set charset
     $this->dbCharset = $config['dbcharset'];
     $this->charset = $config['charset'];
-    if(strcasecmp($this->dbCharset, $this->charset) === 0)
+    if(strcasecmp($this->dbCharset, $this->charset) === 0){
       $this->dbCharset = $this->charset = null;
+    }
   }
 
 
@@ -137,13 +141,15 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
    */
   public function query($queryString){
 
-    if($this->dbCharset !== null)
+    if($this->dbCharset !== null){
       $queryString = iconv($this->charset, $this->dbCharset . '//IGNORE', $queryString);
+    }
 
     $result = $this->resource->query($queryString);
 
-    if($result === false)
+    if($result === false){
       throw new NeevoException($this->resource->lastErrorMsg(), $this->resource->lastErrorCode());
+    }
 
     return $result;
   }
@@ -161,8 +167,9 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     if($row){
       $fields = array();
       foreach($row as $key=>$val){
-        if($charset !== null && is_string($val))
+        if($charset !== null && is_string($val)){
           $val = iconv($this->dbcharset, $charset, $val);
+        }
         $fields[str_replace(array('[', ']'), '', $key)] = $val;
       }
       return $fields;
@@ -226,100 +233,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Builds statement from NeevoResult instance
-   * @param NeevoStmtBase $statement
-   * @return string the statement
-   */
-  public function build(NeevoStmtBase $statement){
-
-    $where = '';
-    $order = '';
-    $group = '';
-    $limit = '';
-    $q = '';
-
-    $table = $statement->getTable();
-
-    // JOIN - Workaround for RIGHT JOIN
-    if($statement instanceof NeevoResult && $statement->getJoin()){
-      $j = $statement->getJoin();
-      if($j['type'] === Neevo::JOIN_RIGHT){
-        $this->_joinTbl = $table;
-        $table = $j['table'];
-      }
-      $table = $table .' '. $this->buildJoin($statement);
-    }
-
-    // WHERE
-    if($statement->getConditions())
-      $where = $this->buildWhere($statement);
-
-    // ORDER BY
-    if($statement->getOrdering())
-      $order = $this->buildOrdering($statement);
-
-    // GROUP BY
-    if($statement instanceof NeevoResult && $statement->getGrouping())
-      $group = $this->buildGrouping($statement);
-
-    // LIMIT, OFFSET
-    if($statement->getLimit()) $limit = ' LIMIT ' .$statement->getLimit();
-    if($statement->getOffset()) $limit .= ' OFFSET ' .$statement->getOffset();
-
-    if($statement->getType() == Neevo::STMT_SELECT){
-      $cols = $this->buildSelectCols($statement);
-      $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
-    }
-
-    elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
-      $insert_data = $this->buildInsertData($statement);
-      $q .= 'INSERT INTO ' .$table.$insert_data;
-    }
-
-    elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
-      $update_data = $this->buildUpdateData($statement);
-      $q .= 'UPDATE ' .$table.$update_data.$where;
-      if($this->update_limit === true)
-        $q .= $order.$limit;
-    }
-
-    elseif($statement->getType() == Neevo::STMT_DELETE){
-      $q .= 'DELETE FROM ' .$table.$where;
-      if($this->update_limit === true)
-        $q .= $order.$limit;
-    }
-
-    return $q.';';
-  }
-
-
-  /**
-   * Builds JOIN part for SELECT statement
-   * @param NeevoResult $statement
-   * @throws NeevoException
-   * @return string
-   */
-  protected function buildJoin(NeevoResult $statement){
-    $join = $statement->getJoin();
-    if(isset($this->_joinTbl) && $join['type'] === Neevo::JOIN_RIGHT){
-      $join['table'] = $this->_joinTbl;
-      $join['type'] = Neevo::JOIN_LEFT;
-      unset($this->_joinTbl);
-    }
-    $type = strtoupper(substr($join['type'], 5));
-    if($type !== '') $type .= ' ';
-    if($join['operator'] === 'ON'){
-      $expr = ' ON '.$join['expr'];
-    }
-    elseif($join['operator'] === 'USING')
-      $expr = " USING($join[expr])";
-    else throw new NeevoException('JOIN operator not specified.');
-    
-    return $type.'JOIN '.$join['table'].$expr;
-  }
-
-
-  /**
    * Escapes given value
    * @param mixed $value
    * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
@@ -352,20 +265,129 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   public function getPrimaryKey($table){
     $key = '';
     $pos = strpos($table, '.');
-    if($pos !== false) $table = substr($table, $pos + 1);
+    if($pos !== false){
+      $table = substr($table, $pos + 1);
+    }
     $q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
     $r = $this->fetch($q);
-    if($r === false)
+    if($r === false){
       return '';
+    }
 
     $sql = $r['sql'];
     $sql = explode("\n", $sql);
     foreach($sql as $field){
       $field = trim($field);
-      if(stripos($field, 'PRIMARY KEY') !== false && $key === '')
+      if(stripos($field, 'PRIMARY KEY') !== false && $key === ''){
         $key = preg_replace('~^"(\w+)".*$~i', '$1', $field);
+      }
     }
     return $key;
+  }
+
+
+  /**
+   * Builds statement from NeevoResult instance
+   * @param NeevoStmtBase $statement
+   * @return string the statement
+   */
+  public function build(NeevoStmtBase $statement){
+
+    $where = '';
+    $order = '';
+    $group = '';
+    $limit = '';
+    $q = '';
+
+    $table = $statement->getTable();
+
+    // JOIN - Workaround for RIGHT JOIN
+    if($statement instanceof NeevoResult && $statement->getJoin()){
+      $j = $statement->getJoin();
+      if($j['type'] === Neevo::JOIN_RIGHT){
+        $this->_joinTbl = $table;
+        $table = $j['table'];
+      }
+      $table = $table .' '. $this->buildJoin($statement);
+    }
+
+    // WHERE
+    if($statement->getConditions()){
+      $where = $this->buildWhere($statement);
+    }
+
+    // ORDER BY
+    if($statement->getOrdering()){
+      $order = $this->buildOrdering($statement);
+    }
+
+    // GROUP BY
+    if($statement instanceof NeevoResult && $statement->getGrouping()){
+      $group = $this->buildGrouping($statement);
+    }
+
+    // LIMIT, OFFSET
+    if($statement->getLimit()){
+      $limit = ' LIMIT ' .$statement->getLimit();
+    }
+    if($statement->getOffset()){
+      $limit .= ' OFFSET ' .$statement->getOffset();
+    }
+
+    if($statement->getType() == Neevo::STMT_SELECT){
+      $cols = $this->buildSelectCols($statement);
+      $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
+    }
+    elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
+      $insert_data = $this->buildInsertData($statement);
+      $q .= 'INSERT INTO ' .$table.$insert_data;
+    }
+    elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
+      $update_data = $this->buildUpdateData($statement);
+      $q .= 'UPDATE ' .$table.$update_data.$where;
+      if($this->update_limit === true){
+        $q .= $order.$limit;
+      }
+    }
+    elseif($statement->getType() == Neevo::STMT_DELETE){
+      $q .= 'DELETE FROM ' .$table.$where;
+      if($this->update_limit === true){
+        $q .= $order.$limit;
+      }
+    }
+
+    return $q.';';
+  }
+
+
+  /**
+   * Builds JOIN part for SELECT statement
+   * @param NeevoResult $statement
+   * @throws NeevoException
+   * @return string
+   */
+  protected function buildJoin(NeevoResult $statement){
+    $join = $statement->getJoin();
+    if(isset($this->_joinTbl) && $join['type'] === Neevo::JOIN_RIGHT){
+      $join['table'] = $this->_joinTbl;
+      $join['type'] = Neevo::JOIN_LEFT;
+      unset($this->_joinTbl);
+    }
+    $type = strtoupper(substr($join['type'], 5));
+    if($type !== ''){
+      $type .= ' ';
+    }
+    if($join['operator'] === 'ON'){
+      $expr = ' ON '.$join['expr'];
+    }
+    elseif($join['operator'] === 'USING'){
+      $expr = " USING($join[expr])";
+    }
+    else{
+      throw new NeevoException('JOIN operator not specified.');
+    }
+
+    return $type.'JOIN '.$join['table'].$expr;
   }
 
 }

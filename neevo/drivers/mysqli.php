@@ -48,8 +48,9 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * @return void
    */
   public function  __construct(Neevo $neevo){
-    if(!extension_loaded("mysqli"))
+    if(!extension_loaded("mysqli")){
       throw new NeevoException("PHP extension 'mysqli' not loaded.");
+    }
     $this->neevo = $neevo;
   }
 
@@ -77,10 +78,12 @@ class NeevoDriverMySQLi implements INeevoDriver{
     $config += $defaults;
 
     // Connect
-    if($config['resource'] instanceof mysqli)
+    if($config['resource'] instanceof mysqli){
       $this->resource = $config['resource'];
-    else
+    }
+    else{
       $this->resource = new mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
+    }
 
     if($this->resource->connect_errno){
       throw new NeevoException($this->resource->connect_error, $this->resource->connect_errno);
@@ -90,7 +93,9 @@ class NeevoDriverMySQLi implements INeevoDriver{
     if($this->resource instanceof mysqli){
       $ok = @$this->resource->set_charset($config['charset']);
 
-      if(!$ok) $this->query("SET NAMES ".$config['charset']);
+      if(!$ok){
+        $this->query("SET NAMES ".$config['charset']);
+      }
     }
 
   }
@@ -125,8 +130,9 @@ class NeevoDriverMySQLi implements INeevoDriver{
     $result = $this->resource->query($queryString);
 
     $error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $this->resource->error);
-    if($error && $result === false)
+    if($error && $result === false){
       throw new NeevoException("Query failed. $error", $this->resource->errno);
+    }
 
     return $result;
   }
@@ -178,8 +184,9 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * @return int|FALSE
    */
   public function rows($resultSet){
-    if($resultSet instanceof mysqli_result)
+    if($resultSet instanceof mysqli_result){
       return $resultSet->num_rows;
+    }
     return false;
   }
 
@@ -228,8 +235,9 @@ class NeevoDriverMySQLi implements INeevoDriver{
     $key = '';
     $q = $this->query('SHOW FULL COLUMNS FROM '.$table);
     while($col = $this->fetch($q)){
-      if(strtolower($col['Key']) === 'pri' && $key === '')
+      if(strtolower($col['Key']) === 'pri' && $key === ''){
         $key = $col['Field'];
+      }
     }
     return $key;
   }

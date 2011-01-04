@@ -47,8 +47,9 @@ class NeevoDriverMySQL implements INeevoDriver{
    * @return void
    */
   public function  __construct(Neevo $neevo){
-    if(!extension_loaded("mysql"))
+    if(!extension_loaded("mysql")){
       throw new NeevoException("PHP extension 'mysql' not loaded.");
+    }
     $this->neevo = $neevo;
   }
 
@@ -74,13 +75,15 @@ class NeevoDriverMySQL implements INeevoDriver{
 
     $config += $defaults;
 
-    if(isset($config['port']))
+    if(isset($config['port'])){
       $host = $config['host'] .':'. $config['port'];
+    }
     else $host = $config['host'];
 
     // Connect
-    if(is_resource($config['resource']))
+    if(is_resource($config['resource'])){
       $connection = $config['resource'];
+    }
     elseif($config['persistent']){
       $connection = @mysql_pconnect($host, $config['username'], $config['password']);
     }
@@ -88,23 +91,29 @@ class NeevoDriverMySQL implements INeevoDriver{
       $connection = @mysql_connect($host, $config['username'], $config['password']);
     }
 
-    if(!is_resource($connection))
+    if(!is_resource($connection)){
       throw new NeevoException("Connection to host '$host' failed.");
+    }
 
     // Select DB
     if($config['database']){
       $db = mysql_select_db($config['database']);
-      if(!$db) throw new NeevoException("Could not select database '$config[database]'.");
+      if(!$db){
+        throw new NeevoException("Could not select database '$config[database]'.");
+      }
     }
 
     $this->resource = $connection;
 
     //Set charset
     if(is_resource($connection)){
-      if(function_exists('mysql_set_charset'))
-				$ok = @mysql_set_charset($config['charset'], $connection);
+      if(function_exists('mysql_set_charset')){
+        $ok = @mysql_set_charset($config['charset'], $connection);
+      }
 
-      if(!$ok) $this->query("SET NAMES ".$config['charset']);
+      if(!$ok){
+        $this->query("SET NAMES ".$config['charset']);
+      }
     }
   }
 
@@ -138,8 +147,9 @@ class NeevoDriverMySQL implements INeevoDriver{
     $result = @mysql_query($queryString, $this->resource);
 
     $error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', @mysql_error($this->resource));
-    if($error && $result === false)
+    if($error && $result === false){
       throw new NeevoException("Query failed. $error", @mysql_errno($this->resource));
+    }
 
     return $result;
   }
@@ -239,8 +249,9 @@ class NeevoDriverMySQL implements INeevoDriver{
     $key = '';
     $q = $this->query('SHOW FULL COLUMNS FROM '.$table);
     while($col = $this->fetch($q)){
-      if(strtolower($col['Key']) === 'pri' && $key === '')
+      if(strtolower($col['Key']) === 'pri' && $key === ''){
         $key = $col['Field'];
+      }
     }
     return $key;
   }

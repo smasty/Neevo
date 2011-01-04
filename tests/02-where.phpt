@@ -17,11 +17,13 @@ foreach(array(
 ) as $condition){
 
   $query = $db->select('id', 'software')->where($condition[0], $condition[1])->order('id')->fetch();
-  if(!$query)
+  if(!$query){
     $query = array();
+  }
   foreach($query as $result){
-    if(isset($result['id']))
+    if(isset($result['id'])){
       echo $result['id'];
+    }
     echo ',';
   }
   echo "\n";

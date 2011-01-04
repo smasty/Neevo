@@ -102,8 +102,9 @@ class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, Iterator
 
   /** @internal */
   public function __toString(){
-    if($this->single === true)
+    if($this->single === true){
       return (string) $this->singleValue;
+    }
     return '';
   }
 
@@ -122,8 +123,9 @@ class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, Iterator
    * @return mixed|void
    */
   public function getSingle(){
-    if($this->isSingle())
+    if($this->isSingle()){
       return $this->singleValue;
+    }
   }
 
 
@@ -138,8 +140,9 @@ class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, Iterator
 
   /** @internal */
   public function __get($name){
-    if($this->single)
+    if($this->single){
       return $this->singleValue;
+    }
     return isset($this->modified[$name]) ? $this->modified[$name] :
       isset($this->data[$name]) ? $this->data[$name] : null;
   }
