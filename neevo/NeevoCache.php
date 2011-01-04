@@ -38,7 +38,7 @@ interface INeevoCache {
 
 
 /**
- * Neevo cache using $_SESSION['NeevoCache'].
+ * Neevo cache using `$_SESSION['NeevoCache']`.
  * @package NeevoCache
  */
 class NeevoCacheSession implements INeevoCache {
@@ -122,14 +122,15 @@ class NeevoCacheInclude implements INeevoCache {
 
 
 /**
- * Neevo cache using database table 'neevo_cache'.
+ * Neevo cache using database table `neevo_cache`.
  *
  * The table must already exist:
- * CREATE TABLE neevo_cache (
+ *
+ * `CREATE TABLE neevo_cache (
  *   id varchar(255) NOT NULL,
  *   data text NOT NULL,
  *   PRIMARY KEY (id)
- * );
+ * );`
  */
 class NeevoCacheDatabase implements INeevoCache {
 
@@ -173,7 +174,7 @@ class NeevoCacheDatabase implements INeevoCache {
 
 
 /**
- * Neevo cache using NeevoCache. prefix in Memcache.
+ * Neevo cache using `NeevoCache.` prefix in Memcache.
  * @package NeevoCache
  */
 class NeevoCacheMemcache implements INeevoCache {
@@ -201,7 +202,7 @@ class NeevoCacheMemcache implements INeevoCache {
 
 
 /**
- * Neevo cache using NeevoCache. prefix in APC.
+ * Neevo cache using `NeevoCache.` prefix in APC.
  * @package NeevoCache
  */
 class NeevoCacheAPC implements INeevoCache {

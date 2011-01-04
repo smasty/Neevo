@@ -48,13 +48,13 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
   /**
    * Sets WHERE condition. Accepts infinite arguments.
-   * 
-   * **Warning!** When using expressions with placeholders, field names have to
-   * start with :: (double colon) in order to respect defined table prefix.
    *
    * More calls append conditions with 'AND' operator. Conditions can also be specified
    * by calling and() / or() methods the same way as where().
    * Corresponding operator will be used.
+   *
+   * **Warning! When using placeholders, field names have to start
+   * with :: (double colon) in order to respect defined table prefix!**
    *
    * Possible combinations for where conditions:
    * | Condition  | SQL code
@@ -64,11 +64,15 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * | `where('field', false)` | `NOT field`
    * | `where('field', null)` | `field IS NULL`
    * | `where('field', array(1, 2))` | `field IN(1, 2)`
+   * |-------------------------------
+   * | Condition (with placeholders)
+   * |-------------------------------
    * | `where('field != %1', 'x')` | `filed != 'x'`
    * | `where('field != %1 OR field < %2', 'x', 15)` | `filed != 'x' OR field < 15`
    * | `where('field LIKE %1', '%x%')` | `field LIKE '%x%'`
    * | `where('field NOT %1', array(1, 2))` | `field NOT IN(1, 2)`
    * | `where('field', new NeevoLiteral('NOW()'))` | `field = NOW()`
+   * <br>
    * 
    * @param string $expr
    * @param mixed $value
