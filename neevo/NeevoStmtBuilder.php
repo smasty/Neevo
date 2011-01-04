@@ -17,7 +17,7 @@
  * Building SQL string from NeevoResult instance.
  * @package Neevo
  */
-class NeevoStmtBuilder{
+class NeevoStmtBuilder extends NeevoAbstract{
 
   /** @var Neevo */
   protected $neevo;
