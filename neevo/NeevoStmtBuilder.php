@@ -254,7 +254,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
     if($col instanceof NeevoLiteral){
       return $col->value;
     }
-    $col = trim($col);
+    $col = trim(str_replace('::', '', $col));
     $col = preg_replace('#(\S+)\s+(as)\s+(\S+)#i', '$1 AS $3',  $col);
 
     if(preg_match('#[^.]+\.[^.]+#', $col)){

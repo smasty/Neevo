@@ -63,7 +63,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * | `where('field NOT %1', array(1, 2))` | `field NOT IN(1, 2)`
    * | `where('field', new NeevoLiteral('NOW()'))` | `field = NOW()`
    *
-   * **Warning!** When using expressions with placeholder, field names have to
+   * **Warning!** When using expressions with placeholders, field names have to
    * start with :: (double collon) in order to respect defined table prefix.
    * @param string $expr
    * @param mixed $value
