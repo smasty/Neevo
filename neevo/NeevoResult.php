@@ -116,7 +116,6 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    */
   public function join($table, $type = null){
     $this->reinit();
-    $prefix = $this->neevo->connection->prefix();
 
     if(!in_array($type, array(null, Neevo::JOIN_LEFT, Neevo::JOIN_RIGHT, Neevo::JOIN_INNER))){
       throw new InvalidArgumentException('Argument 2 passed to '.__METHOD__.' must be valid JOIN type or NULL.');
@@ -136,9 +135,8 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @return NeevoResult fluent interface
    */
   public function on($expr){
-    $prefix = $this->neevo->connection->prefix();
     $this->join['operator'] = 'ON';
-    $this->join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $expr);
+    $this->join['expr'] = $expr;
 
     return $this;
   }
@@ -150,9 +148,8 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @return NeevoResult fluent interface
    */
   public function using($expr){
-   $prefix = $this->neevo->connection->prefix();
     $this->join['operator'] = 'USING';
-    $this->join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $expr);
+    $this->join['expr'] = $expr;
 
     return $this;
   }

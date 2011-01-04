@@ -63,7 +63,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * | `where('field NOT %1', array(1, 2))` | `field NOT IN(1, 2)`
    * | `where('field', new NeevoLiteral('NOW()'))` | `field = NOW()`
    * @param string $expr
-   * @param string|array|bool|null $value
+   * @param mixed $value
    * @return NeevoStmtBase fluent interface
    */
   public function where($expr, $value = true){
@@ -84,7 +84,6 @@ abstract class NeevoStmtBase extends NeevoAbstract {
     // Format with placeholders
     $values = func_get_args();
     unset($values[0]);
-
     preg_match_all("~%\d+~", $expr, $match);
     $keys = array_flip($match[0]);
     $placeholders = array();
@@ -93,7 +92,6 @@ abstract class NeevoStmtBase extends NeevoAbstract {
         $placeholders[] = $match[0][$keys["%$k"]];
       }
     }
-
     $this->conditions[] = array(
       'simple' => false,
       'expr' => $expr,
@@ -101,7 +99,6 @@ abstract class NeevoStmtBase extends NeevoAbstract {
       'values' => $values,
       'glue' => 'AND'
     );
-
     return $this;
   }
 

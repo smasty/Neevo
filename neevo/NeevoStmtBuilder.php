@@ -101,7 +101,10 @@ class NeevoStmtBuilder extends NeevoAbstract{
    */
   protected function buildJoin(NeevoResult $statement){
     $join = $statement->getJoin();
+    $prefix = $this->neevo->connection->prefix();
+    $join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $join['expr']);
     $type = strtoupper(substr($join['type'], 5));
+
     if($type !== ''){
       $type .= ' ';
     }

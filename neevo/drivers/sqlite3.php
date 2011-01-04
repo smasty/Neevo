@@ -369,7 +369,10 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
       $join['type'] = Neevo::JOIN_LEFT;
       unset($this->_joinTbl);
     }
+    $prefix = $this->neevo->connection->prefix();
+    $join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $join['expr']);
     $type = strtoupper(substr($join['type'], 5));
+
     if($type !== ''){
       $type .= ' ';
     }
