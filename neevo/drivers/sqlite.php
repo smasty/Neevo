@@ -21,6 +21,7 @@
  *  - charset => Character encoding to set (defaults to utf-8)
  *  - dbcharset => Database character encoding (will be converted to 'charset')
  *  - persistent (bool) => Try to find a persistent link
+ *  - unbuffered (bool) => Sends query without fetching and buffering the result
  * 
  *  - update_limit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
  *  - resource (type resource) => Existing SQLite link
@@ -32,16 +33,19 @@
 class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
   /** @var string */
-  private $dbCharset;
+  private $charset;
 
   /** @var string */
-  private $charset;
+  private $dbCharset;
 
   /** @var bool */
   private $update_limit;
 
   /** @var resource */
   private $resource;
+
+  /** @var bool */
+  private $unbuffered;
 
   /** @var string */
   private $_joinTbl;
@@ -75,7 +79,8 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
       'update_limit' => false,
       'charset' => 'UTF-8',
       'dbcharset' => 'UTF-8',
-      'persistent' => false
+      'persistent' => false,
+      'unbuffered' => false
     );
 
     $config += $defaults;
@@ -104,6 +109,9 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     if(strcasecmp($this->dbCharset, $this->charset) === 0){
       $this->dbCharset = $this->charset = null;
     }
+
+    $this->unbuffered = $config['unbuffered'];
+    $this->persistent = $config['persistent'];
   }
 
 
@@ -111,7 +119,11 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    * Closes connection
    * @return void
    */
-  public function close(){}
+  public function close(){
+    if(!$this->persistent){
+      sqlite_close($this->resource);
+    }
+  }
 
 
   /**
@@ -136,7 +148,12 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
       $queryString = iconv($this->charset, $this->dbCharset . '//IGNORE', $queryString);
     }
 
-    $result = @sqlite_query($this->resource, $queryString, null, $error);
+    if($this->unbuffered){
+      $result = @sqlite_unbuffered_query($this->resource, $queryString, null, $error);
+    } else{
+      $result = @sqlite_query($this->resource, $queryString, null, $error);
+    }
+    
     if($error && $result === false){
       throw new NeevoException("Query failed. $error", sqlite_last_error($this->resource));
     }
@@ -177,8 +194,12 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    * @param SQLiteResult $resultSet
    * @param int $offset
    * @return bool
+   * @throws NotSupportedException
    */
   public function seek($resultSet, $offset){
+    if($this->unbuffered){
+      throw new NotSupportedException('Cannot seek on unbuffered result.');
+    }
     return @sqlite_seek($resultSet, $offset);
   }
 
@@ -206,8 +227,12 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    * Number of rows in result set.
    * @param SQLiteResult $resultSet
    * @return int|FALSE
+   * @throws NotSupportedException
    */
   public function rows($resultSet){
+    if($this->unbuffered){
+      throw new NotSupportedException('Cannot seek on unbuffered result.');
+    }
     return @sqlite_num_rows($resultSet);
   }
 
@@ -291,8 +316,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     $table = $statement->getTable();
 
     // JOIN - Workaround for RIGHT JOIN
-    if($statement instanceof NeevoResult && $statement->getJoin()){
-      $j = $statement->getJoin();
+    if($statement instanceof NeevoResult && $j = $statement->getJoin()){
       if($j['type'] === Neevo::JOIN_RIGHT){
         $this->_joinTbl = $table;
         $table = $j['table'];

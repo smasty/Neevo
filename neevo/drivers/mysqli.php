@@ -25,6 +25,7 @@
  *  - database => database to select
  *  - charset => Character encoding to set (defaults to utf8)
  *  - peristent (bool) => Try to find a persistent link
+ *  - unbuffered (bool) => Sends query without fetching and buffering the result
  *
  *  - resource (instance of mysqli) => Existing MySQLi link
  *  - lazy, table_prefix... => see NeevoConnection
@@ -36,6 +37,9 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /** @var mysqli */
   private $resource;
+
+  /** @var bool */
+  private $unbuffered;
 
 
   /**
@@ -67,7 +71,8 @@ class NeevoDriverMySQLi implements INeevoDriver{
       'socket' => ini_get('mysqli.default_socket'),
       'port' => ini_get('mysqli.default_port'),
       'host' => ini_get('mysqli.default_host'),
-      'persistent' => false
+      'persistent' => false,
+      'unbuffered' => false
     );
 
     $config += $defaults;
@@ -87,12 +92,12 @@ class NeevoDriverMySQLi implements INeevoDriver{
     // Set charset
     if($this->resource instanceof mysqli){
       $ok = @$this->resource->set_charset($config['charset']);
-
       if(!$ok){
         $this->query("SET NAMES ".$config['charset']);
       }
     }
 
+    $this->unbuffered = $config['unbuffered'];
   }
 
 
@@ -118,11 +123,11 @@ class NeevoDriverMySQLi implements INeevoDriver{
   /**
    * Executes given SQL statement
    * @param string $queryString Query-string.
-   * @throws NeevoException
    * @return mysqli_result|bool
+   * @throws NeevoException
    */
   public function query($queryString){
-    $result = $this->resource->query($queryString);
+    $result = $this->resource->query($queryString, $this->unbuffered ? MYSQLI_USE_RESULT : MYSQLI_STORE_RESULT);
 
     $error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $this->resource->error);
     if($error && $result === false){
@@ -148,8 +153,12 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * @param mysqli_result $resultSet
    * @param int $offset
    * @return bool
+   * @throws NotSupportedException
    */
   public function seek($resultSet, $offset){
+    if($this->unbuffered){
+      throw new NotSupportedException('Cannot seek on unbuffered result.');
+    }
     return $resultSet->data_seek($offset);
   }
 
@@ -177,8 +186,12 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * Number of rows in result set.
    * @param mysqli_result $resultSet
    * @return int|FALSE
+   * @throws NotSupportedException
    */
   public function rows($resultSet){
+    if($this->unbuffered){
+      throw new NotSupportedException('Cannot seek on unbuffered result.');
+    }
     if($resultSet instanceof mysqli_result){
       return $resultSet->num_rows;
     }
