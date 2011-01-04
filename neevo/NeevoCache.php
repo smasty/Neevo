@@ -126,11 +126,13 @@ class NeevoCacheInclude implements INeevoCache {
  *
  * The table must already exist:
  *
- * `CREATE TABLE neevo_cache (
+ * /---pre
+ * CREATE TABLE neevo_cache (
  *   id varchar(255) NOT NULL,
  *   data text NOT NULL,
  *   PRIMARY KEY (id)
- * );`
+ * );
+ * \---
  */
 class NeevoCacheDatabase implements INeevoCache {
 
