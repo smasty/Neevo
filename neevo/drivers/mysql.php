@@ -17,14 +17,16 @@
  * Neevo MySQL driver (PHP extension 'mysql')
  *
  * Driver configuration:
- * - host (or hostname, server) => MySQL server name or address
- * - port => MySQL server port
- * - username (or user)
- * - password (or pass, pswd)
- * - database (or db, dbname) => database to select
- * - charset => Character encoding to set (defaults to utf8)
- * - resource (type resource) => Existing MySQL connection (created by mysql_connect)
- * see NeevoConnection for common configuration
+ *  - host => MySQL server name or address
+ *  - port (int) => MySQL server port
+ *  - username
+ *  - password
+ *  - database => database to select
+ *  - charset => Character encoding to set (defaults to utf8)
+ *  - persistent (bool) => Try to find a persistent link
+ *
+ *  - resource (type resource) => Existing MySQL link
+ *  - lazy, table_prefix... => see NeevoConnection
  *
  * @author Martin Srank
  * @package NeevoDrivers
@@ -66,7 +68,8 @@ class NeevoDriverMySQL implements INeevoDriver{
       'username' => ini_get('mysql.default_user'),
       'password' => ini_get('mysql.default_password'),
       'host' => ini_get('mysql.default_host'),
-      'port' => ini_get('mysql.default_port')
+      'port' => ini_get('mysql.default_port'),
+      'persistent' => false
     );
 
     $config += $defaults;
@@ -76,10 +79,14 @@ class NeevoDriverMySQL implements INeevoDriver{
     else $host = $config['host'];
 
     // Connect
-    if(is_resource($config['resource']) && get_resource_type($config['resource']) == 'mysql link')
+    if(is_resource($config['resource']))
       $connection = $config['resource'];
-    else
+    elseif($config['persistent']){
+      $connection = @mysql_pconnect($host, $config['username'], $config['password']);
+    }
+    else{
       $connection = @mysql_connect($host, $config['username'], $config['password']);
+    }
 
     if(!is_resource($connection))
       throw new NeevoException("Connection to host '$host' failed.");

@@ -17,7 +17,7 @@
  * Internal class to represent connection to database server.
  *
  * Common configuration: (see driver specific configuration too)
- * - table_prefix (or prefix) => prefix for table names
+ * - table_prefix => prefix for table names
  * - lazy (bool) => If TRUE, connection will be established only when required.
  *
  * @package Neevo

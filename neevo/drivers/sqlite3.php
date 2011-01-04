@@ -17,12 +17,13 @@
  * Neevo SQLite 3 driver (PHP extension 'sqlite3')
  *
  * Driver configuration:
- * - database (or file, db, dbname) => database to select
- * - update_limit (bool) => Set this to TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
- * - charset => Character encoding to set (defaults to utf-8)
- * - dbcharset => Database character encoding (will be converted to 'charset')
- * - resource (instance of SQLite3) => Existing SQLite 3 resource
- * see NeevoConnection for common configuration
+ *  - database (or file)
+ *  - charset => Character encoding to set (defaults to utf-8)
+ *  - dbcharset => Database character encoding (will be converted to 'charset')
+ * 
+ *  - update_limit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
+ *  - resource (instance of SQLite3) => Existing SQLite 3 link
+ *  - lazy, table_prefix => see NeevoConnection
  *
  * Since SQLite 3 only allows unbuffered queries, number of result rows and seeking
  * is not supported for this driver.
@@ -180,7 +181,7 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
    * @return bool
    */
   public function seek($resultSet, $offset){
-    throw new NotSupportedException('Not supported on unbuffered queries.');
+    throw new NotSupportedException('Cannot seek on unbuffered result.');
   }
 
 
@@ -211,7 +212,7 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
    * @return int|FALSE
    */
   public function rows($resultSet){
-    throw new NotSupportedException('Not supported on unbuffered queries.');
+    throw new NotSupportedException('Cannot count rows on unbuffered result.');
   }
 
 

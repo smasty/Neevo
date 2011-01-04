@@ -17,15 +17,17 @@
  * Neevo MySQLi driver (PHP extension 'mysqli')
  *
  * Driver configuration:
- * - host (or hostname, server) => MySQL server name or address
- * - port => MySQL server port
- * - socket
- * - username (or user)
- * - password (or pass, pswd)
- * - database (or db, dbname) => database to select
- * - charset => Character encoding to set (defaults to utf8)
- * - resource (instance of mysqli) => Existing MySQLi connection
- * see NeevoConnection for common configuration
+ *  - host => MySQL server name or address
+ *  - port (int) => MySQL server port
+ *  - socket
+ *  - username
+ *  - password
+ *  - database => database to select
+ *  - charset => Character encoding to set (defaults to utf8)
+ *  - peristent (bool) => Try to find a persistent link
+ *
+ *  - resource (instance of mysqli) => Existing MySQLi link
+ *  - lazy, table_prefix... => see NeevoConnection
  *
  * @author Martin Srank
  * @package NeevoDrivers
@@ -68,7 +70,8 @@ class NeevoDriverMySQLi implements INeevoDriver{
       'password' => ini_get('mysqli.default_pw'),
       'socket' => ini_get('mysqli.default_socket'),
       'port' => ini_get('mysqli.default_port'),
-      'host' => ini_get('mysqli.default_host')
+      'host' => ini_get('mysqli.default_host'),
+      'persistent' => false
     );
 
     $config += $defaults;
