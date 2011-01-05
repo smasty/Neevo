@@ -32,27 +32,10 @@
  */
 class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
-  /** @var string */
-  private $charset;
-
-  /** @var string */
-  private $dbCharset;
-
-  /** @var bool */
-  private $update_limit;
-
-  /** @var resource */
-  private $resource;
-
-  /** @var bool */
-  private $unbuffered;
-
-  /** @var string */
-  private $_joinTbl;
-
+  private $charset, $dbCharset, $update_limit, $resource, $unbuffered, $_joinTbl;
 
   /**
-   * Check for required PHP extension
+   * Check for required PHP extension.
    * @param Neevo $neevo
    * @throws NeevoException
    * @return void
@@ -66,7 +49,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Creates connection to database
+   * Create connection to database.
    * @param array $config Configuration options
    * @throws NeevoException
    * @return void
@@ -116,7 +99,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Closes connection
+   * Close the connection.
    * @return void
    */
   public function close(){
@@ -127,7 +110,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Frees memory used by result
+   * Free memory used by given result set.
    * @param SQLiteResult $resultSet
    * @return bool
    */
@@ -137,7 +120,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Executes given SQL statement
+   * Execute given SQL statement.
    * @param string $queryString Query-string.
    * @throws NeevoException
    * @return SQLiteResult|bool
@@ -162,7 +145,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Fetches row from given result set as associative array.
+   * Fetch row from given result set as an associative array.
    * @param resource $resultSet Result set
    * @return array
    */
@@ -190,7 +173,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Move internal result pointer
+   * Move internal result pointer.
    * @param SQLiteResult $resultSet
    * @param int $offset
    * @return bool
@@ -205,7 +188,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Get the ID generated in the INSERT statement
+   * Get the ID generated in the INSERT statement.
    * @return int
    */
   public function insertId(){
@@ -224,7 +207,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Number of rows in result set.
+   * Get the number of rows in the given result set.
    * @param SQLiteResult $resultSet
    * @return int|FALSE
    * @throws NotSupportedException
@@ -238,7 +221,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Number of affected rows in previous operation.
+   * Get the number of affected rows in previous operation.
    * @return int
    */
   public function affectedRows(){
@@ -247,7 +230,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
   
   
   /**
-   * Escapes given value
+   * Escape given value.
    * @param mixed $value
    * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @throws InvalidArgumentException
@@ -272,7 +255,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Get PRIMARY KEY column for table
+   * Get the PRIMARY KEY column for given table.
    * @param $table string
    * @return string
    */
@@ -301,9 +284,9 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Builds statement from NeevoResult instance
+   * Build the SQL statement from the instance.
    * @param NeevoStmtBase $statement
-   * @return string the statement
+   * @return string The SQL statement
    */
   public function build(NeevoStmtBase $statement){
 
@@ -370,7 +353,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
-   * Builds JOIN part for SELECT statement
+   * Build JOIN part for SELECT statement.
    * @param NeevoResult $statement
    * @throws NeevoException
    * @return string

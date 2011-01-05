@@ -46,14 +46,14 @@ interface INeevoDriver {
 
 
   /**
-   * Check for required PHP extension
+   * Check for required PHP extension.
    * @throws NeevoException
    * @return void
    */
   public function  __construct();
 
   /**
-   * Creates connection to database
+   * Create connection to database.
    * @param array $config Configuration options
    * @return void
    */
@@ -61,14 +61,14 @@ interface INeevoDriver {
 
 
   /**
-   * Closes connection
+   * Close the connection.
    * @return void
    */
   public function close();
 
 
   /**
-   * Frees memory used by result
+   * Free memory used by given result.
    * @param resource $resultSet
    * @return bool
    */
@@ -76,7 +76,7 @@ interface INeevoDriver {
 
 
   /**
-   * Executes given SQL statement
+   * Execute given SQL statement.
    * @param string $queryString Query-string.
    * @return resource|bool
    */
@@ -84,7 +84,7 @@ interface INeevoDriver {
 
 
   /**
-   * Fetches row from given result set as associative array.
+   * Fetch row from given result set as an associative array.
    * @param resource $resultSet Result set
    * @return array
    */
@@ -92,7 +92,7 @@ interface INeevoDriver {
 
 
   /**
-   * Move internal result pointer
+   * Move internal result pointer.
    * @param resource $resultSet
    * @param int $offset
    * @return bool
@@ -101,7 +101,7 @@ interface INeevoDriver {
 
 
   /**
-   * Get the ID generated in the INSERT statement
+   * Get the ID generated in the INSERT statement.
    * @return int
    */
   public function insertId();
@@ -115,7 +115,7 @@ interface INeevoDriver {
 
 
   /**
-   * Number of rows in result set.
+   * Get the number of rows in the given result set.
    * @param resource $resultSet
    * @return int|FALSE
    */
@@ -123,14 +123,14 @@ interface INeevoDriver {
 
 
   /**
-   * Number of affected rows in previous operation.
+   * Get the number of affected rows in previous operation.
    * @return int
    */
   public function affectedRows();
 
 
   /**
-   * Escapes given value
+   * Escape given value.
    * @param mixed $value
    * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @return mixed
@@ -139,7 +139,7 @@ interface INeevoDriver {
 
 
   /**
-   * Get PRIMARY KEY column for table
+   * Get the PRIMARY KEY column for given table.
    * @param $table string
    * @return string|null
    */

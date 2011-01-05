@@ -35,15 +35,10 @@
  */
 class NeevoDriverMySQLi implements INeevoDriver{
 
-  /** @var mysqli */
-  private $resource;
-
-  /** @var bool */
-  private $unbuffered;
-
+  private $resource, $unbuffered;
 
   /**
-   * Check for required PHP extension
+   * Check for required PHP extension.
    * @throws NeevoException
    * @return void
    */
@@ -55,7 +50,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Creates connection to database
+   * Create connection to database.
    * @param array $config Configuration options
    * @throws NeevoException
    * @return void
@@ -102,7 +97,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Closes connection
+   * Close the connection.
    * @return void
    */
   public function close(){
@@ -111,7 +106,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Frees memory used by result
+   * Free memory used by given result set.
    * @param mysqli_result $resultSet
    * @return bool
    */
@@ -121,7 +116,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Executes given SQL statement
+   * Execute given SQL statement.
    * @param string $queryString Query-string.
    * @return mysqli_result|bool
    * @throws NeevoException
@@ -139,7 +134,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Fetches row from given result set as associative array.
+   * Fetch row from given result set as an associative array.
    * @param mysqli_result $resultSet Result set
    * @return array
    */
@@ -149,7 +144,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Move internal result pointer
+   * Move internal result pointer.
    * @param mysqli_result $resultSet
    * @param int $offset
    * @return bool
@@ -164,7 +159,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Get the ID generated in the INSERT statement
+   * Get the ID generated in the INSERT statement.
    * @return int
    */
   public function insertId(){
@@ -183,7 +178,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Number of rows in result set.
+   * Get the number of rows in the given result set.
    * @param mysqli_result $resultSet
    * @return int|FALSE
    * @throws NotSupportedException
@@ -200,7 +195,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Number of affected rows in previous operation.
+   * Get the number of affected rows in previous operation.
    * @return int
    */
   public function affectedRows(){
@@ -209,7 +204,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Escapes given value
+   * Escape given value.
    * @param mixed $value
    * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @throws InvalidArgumentException
@@ -235,7 +230,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Get PRIMARY KEY column for table
+   * Get the PRIMARY KEY column for given table.
    * @param $table string
    * @return string
    */

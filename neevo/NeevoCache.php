@@ -20,14 +20,14 @@
 interface INeevoCache {
 
   /**
-   * Fetch stored data
+   * Fetch stored data.
    * @param string $key
    * @return mixed|null null if not found
    */
   public function fetch($key);
 
   /**
-   * Store data
+   * Store data in cache.
    * @param string $key
    * @param mixed $value
    * @return void
@@ -60,10 +60,8 @@ class NeevoCacheSession implements INeevoCache {
  */
 class NeevoCacheFile implements INeevoCache {
 
-  /** @var string */
   private $filename;
 
-  /** @var array */
   private $data = array();
 
   public function __construct($filename){
@@ -93,10 +91,8 @@ class NeevoCacheFile implements INeevoCache {
  */
 class NeevoCacheInclude implements INeevoCache {
 
-  /** @var string */
   private $filename;
 
-  /** @var array */
   private $data = array();
 
   public function __construct($filename){
@@ -126,17 +122,14 @@ class NeevoCacheInclude implements INeevoCache {
  *
  * The table must already exist:
  *
- * /---pre
- * CREATE TABLE neevo_cache (
+ * <pre>CREATE TABLE neevo_cache (
  *   id varchar(255) NOT NULL,
  *   data text NOT NULL,
  *   PRIMARY KEY (id)
- * );
- * \---
+ * );</pre>
  */
 class NeevoCacheDatabase implements INeevoCache {
 
-  /** @var INeevoDriver */
   private $driver;
 
   public function __construct(NeevoConnection $connection){
@@ -181,7 +174,6 @@ class NeevoCacheDatabase implements INeevoCache {
  */
 class NeevoCacheMemcache implements INeevoCache {
 
-  /** @var Memcache */
   private $memcache;
 
   public function __construct(Memcache $memcache){

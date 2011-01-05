@@ -14,32 +14,27 @@
  */
 
 /**
- * Class for non-retriveing statements
+ * Class for non-retriveing statements.
  * @package Neevo
  * @method NeevoStmt and() and( ) Sets AND glue for WHERE conditions, provides fluent interface
  * @method NeevoStmt or() or( ) Sets OR glue for WHERE conditions, provides fluent interface
  */
 class NeevoStmt extends NeevoStmtBase {
 
-  /** @var int */
-  protected $affectedRows;
-
-  /** @var array */
-  protected $values = array();
-
+  protected $affectedRows, $values = array();
 
   /**
-   * Creates non-retrieving statement
-   * @param array $object Reference to instance of Neevo class which initialized statement
+   * Create non-retrieving statement.
+   * @param array $neevo
    * @return void
    */
-  public function  __construct(Neevo $object){
-    $this->neevo = $object;
+  public function  __construct(Neevo $neevo){
+    $this->neevo = $neevo;
   }
 
 
   /**
-   * Creates UPDATE statement
+   * Create UPDATE statement.
    * @param string $table Table name
    * @param array $data Data to update
    * @return NeevoStmt fluent interface
@@ -54,7 +49,7 @@ class NeevoStmt extends NeevoStmtBase {
 
 
   /**
-   * Creates INSERT statement
+   * Create INSERT statement.
    * @param string $table Table name
    * @param array $values Values to insert
    * @return NeevoStmt fluent interface
@@ -69,7 +64,7 @@ class NeevoStmt extends NeevoStmtBase {
 
 
   /**
-   * Creates DELETE statement
+   * Create DELETE statement.
    * @param string $table Table name
    * @return NeevoStmt fluent interface
    */
@@ -82,7 +77,7 @@ class NeevoStmt extends NeevoStmtBase {
 
 
   /**
-   * Get the ID generated in the last INSERT statement
+   * Get the ID generated in the last INSERT statement.
    * @return int|FALSE
    */
   public function insertId(){
@@ -92,7 +87,7 @@ class NeevoStmt extends NeevoStmtBase {
 
 
   /**
-   * Number of rows affected by statement
+   * Get the number of rows affected by the statement.
    * @return int
    */
   public function affectedRows(){
@@ -111,7 +106,7 @@ class NeevoStmt extends NeevoStmtBase {
   }
 
   /**
-   * Statement values fraction for INSERT/UPDATE statements
+   * Statement values fraction for INSERT/UPDATE statements.
    *
    * [INSERT INTO tbl] (col1, col2, ...) VALUES (val1, val2, ...) or
    * [UPDATE tbl] SET col1 = val1,  col2 = val2, ...

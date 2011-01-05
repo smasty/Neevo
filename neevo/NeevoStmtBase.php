@@ -14,47 +14,25 @@
  */
 
 /**
- * Neevo statement abstract base ancestor
+ * Neevo statement abstract base ancestor.
  * @package Neevo
  * @method NeevoStmtBase and() and( ) Sets AND glue for WHERE conditions, provides fluent interface
  * @method NeevoStmtBase or() or( ) Sets OR glue for WHERE conditions, provides fluent interface
  */
 abstract class NeevoStmtBase extends NeevoAbstract {
 
-  /** @var string */
-  protected $tableName;
-
-  /** @var string */
-  protected $type;
-
-  /** @var int */
-  protected $limit;
-
-  /** @var int */
-  protected $offset;
-
-  /** @var int */
-  protected $time;
-
-  /** @var bool */
-  protected $performed;
-
-  /** @var array */
-  protected  $conditions = array();
-
-  /** @var array */
-  protected $ordering = array();
-
+  protected $tableName, $type, $limit, $offset, $time, $performed;
+  protected $conditions = array(), $ordering = array();
 
   /**
-   * Sets WHERE condition. Accepts infinite arguments.
+   * Set WHERE condition. Accepts infinite arguments.
    *
    * More calls append conditions with 'AND' operator. Conditions can also be specified
    * by calling and() / or() methods the same way as where().
    * Corresponding operator will be used.
    *
    * **Warning! When using placeholders, field names have to start
-   * with :: (double colon) in order to respect defined table prefix!**
+   * with '::' (double colon) in order to respect defined table prefix!**
    *
    * Possible combinations for where conditions:
    * | Condition  | SQL code
@@ -64,19 +42,19 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * | `where('field', false)` | `NOT field`
    * | `where('field', null)` | `field IS NULL`
    * | `where('field', array(1, 2))` | `field IN(1, 2)`
+   * | `where('field', new NeevoLiteral('NOW()'))` | `field = NOW()`
    * |-------------------------------
    * | Condition (with placeholders)
    * |-------------------------------
-   * | `where('field != %1', 'x')` | `filed != 'x'`
-   * | `where('field != %1 OR field < %2', 'x', 15)` | `filed != 'x' OR field < 15`
-   * | `where('field LIKE %1', '%x%')` | `field LIKE '%x%'`
-   * | `where('field NOT %1', array(1, 2))` | `field NOT IN(1, 2)`
-   * | `where('field', new NeevoLiteral('NOW()'))` | `field = NOW()`
+   * | `where('::field != %1', 'x')` | `filed != 'x'`
+   * | `where('::field != %1 OR ::field < %2', 'x', 15)` | `filed != 'x' OR field < 15`
+   * | `where('::field LIKE %1', '%x%')` | `field LIKE '%x%'`
+   * | `where('::field NOT %1', array(1, 2))` | `field NOT IN(1, 2)`
    * <br>
    * 
    * @param string $expr
    * @param mixed $value
-   * @return NeevoStmtBase fluent interface
+   * @return NeevoStmt|NeevoResult fluent interface
    */
   public function where($expr, $value = true){
     $this->reinit();
@@ -116,8 +94,8 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   /**
-   * Sets AND/OR glue for WHERE conditions
-   * @return NeevoStmtBase fluent interface
+   * Set AND/OR glue for WHERE conditions.
+   * @return NeevoStmt|NeevoResult fluent interface
    * @internal
    */
   public function  __call($name, $args){
@@ -129,14 +107,14 @@ abstract class NeevoStmtBase extends NeevoAbstract {
       }
       return $this;
     }
-    return $this;
+    throw new BadMethodCallException('Call to undefined method '.__CLASS__."::$name()");
   }
 
 
   /**
-   * Sets ORDER clauses. Accepts infinite arguments (rules) or array.
+   * Set ORDER clauses. Accepts infinite arguments (rules) or an array.
    * @param string|array $rules Order rules: "column", "col1, col2 DESC", etc.
-   * @return NeevoStmtBase fluent interface
+   * @return NeevoStmt|NeevoResult fluent interface
    */
   public function order($rules){
     $this->reinit();
@@ -152,7 +130,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
   /**
    * Alias for NeevoStmtBase::order().
-   * @return NeevoStmtBase fluent interface
+   * @return NeevoStmt|NeevoResult fluent interface
    */
   public function orderBy($rules){
     if(is_array($rules)){
@@ -163,10 +141,10 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   /**
-   * Sets LIMIT and OFFSET clause.
+   * Set LIMIT and OFFSET clause.
    * @param int $limit
    * @param int $offset
-   * @return NeevoStmtBase fluent interface
+   * @return NeevoStmt|NeevoResult fluent interface
    */
   public function limit($limit, $offset = null){
     $this->reinit();
@@ -179,8 +157,8 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   /**
-   * Randomize order. Removes any other order clause.
-   * @return NeevoStmtBase fluent interface
+   * Randomize order. Removes any other order clauses.
+   * @return NeevoStmt|NeevoResult fluent interface
    */
   public function rand(){
     $this->reinit();
@@ -190,9 +168,9 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   /**
-   * Prints out syntax highlighted statement.
-   * @param bool $return Return output instead of printing it?
-   * @return string|NeevoStmtBase fluent interface
+   * Print out syntax highlighted statement.
+   * @param bool $return Return the output instead of printing it
+   * @return string|NeevoStmt|NeevoResult fluent interface
    */
   public function dump($return = false){
     $code = (PHP_SAPI === 'cli') ? $this->build() : self::_highlightSql($this->build());
@@ -204,7 +182,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   /**
-   * Performs statement
+   * Perform the statement.
    * @return resource|bool
    */
   public function run(){
@@ -228,8 +206,17 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   /**
-   * Builds statement from NeevoStmtBase instance
-   * @return string The statement in SQL dialect
+   * Perform the statement. Alias for run().
+   * @return resource|bool
+   */
+  public function exec(){
+    return $this->run();
+  }
+
+
+  /**
+   * Build the SQL statement from the instance.
+   * @return string The SQL statement
    * @internal
    */
   public function build(){
@@ -238,7 +225,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   /**
-   * Basic information about statement
+   * Basic information about the statement.
    * @param bool $hide_password Password will be replaced by '*****'.
    * @param bool $exclude_connection Connection info will be excluded.
    * @return array
@@ -298,13 +285,14 @@ abstract class NeevoStmtBase extends NeevoAbstract {
   }
 
   /**
-   * Full table name (with prefix)
+   * Full table name (with prefix).
    * @return string
    */
   public function getTable($table = null){
     if($table === null){
       $table = $this->tableName;
     }
+    $table = str_replace('::', '', $table);
     $prefix = $this->neevo->connection()->prefix();
     if(preg_match('~([^.]+)(\.)([^.]+)~', $table)){
       return str_replace('.', ".$prefix", $table);
@@ -313,7 +301,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
   }
 
   /**
-   * Statement type
+   * Statement type.
    * @return string
    */
   public function getType(){
@@ -321,7 +309,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
   }
 
   /**
-   * Statement LIMIT fraction
+   * Statement LIMIT fraction.
    * @return int
    */
   public function getLimit(){
@@ -329,7 +317,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
   }
 
   /**
-   * Statement OFFSET fraction
+   * Statement OFFSET fraction.
    * @return int
    */
   public function getOffset(){
@@ -337,7 +325,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
   }
 
   /**
-   * Statement WHERE conditions
+   * Statement WHERE conditions.
    * @return array
    */
   public function getConditions(){
@@ -345,7 +333,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
   }
 
   /**
-   * Statement ORDER BY fraction
+   * Statement ORDER BY fraction.
    * @return array
    */
   public function getOrdering(){
@@ -354,7 +342,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   /**
-   * Name of PRIMARY KEY column
+   * Name of the PRIMARY KEY column.
    * @return string|null
    */
   public function getPrimaryKey(){
@@ -384,7 +372,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
   }
 
   /**
-   * Highlights given SQL code
+   * Highlight given SQL code.
    * @param string $sql
    * @return string
    * @internal

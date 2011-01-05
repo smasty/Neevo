@@ -32,9 +32,9 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
 
   /**
-   * Builds statement from NeevoResult instance
+   * Build the SQL statement from the instance.
    * @param NeevoStmtBase $statement
-   * @return string the statement
+   * @return string The SQL statement
    */
   public function build(NeevoStmtBase $statement){
 
@@ -94,7 +94,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
 
   /**
-   * Builds JOIN part for SELECT statement
+   * Build JOIN part for SELECT statement.
    * @param NeevoResult $statement
    * @throws NeevoException
    * @return string
@@ -123,7 +123,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
 
   /**
-   * Builds WHERE condition statement
+   * Build WHERE condition for statement.
    * @param NeevoStmtBase $statement
    * @return string
    */
@@ -187,7 +187,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
 
   /**
-   * Builds data part for INSERT statements ([INSERT INTO] (...) VALUES (...) )
+   * Build data part for INSERT statements ([INSERT INTO] (...) VALUES (...) ).
    * @param NeevoStmtBase $statement
    * @return string
    */
@@ -201,7 +201,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
 
   /**
-   * Builds data part for UPDATE statements ([UPDATE ...] SET ...)
+   * Build data part for UPDATE statements ([UPDATE ...] SET ...).
    * @param NeevoStmtBase $statement
    * @return string
    */
@@ -214,7 +214,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
 
   /**
-   * Builds ORDER BY statement
+   * Build ORDER BY statement.
    * @param NeevoStmtBase $statement
    * @return string
    */
@@ -224,7 +224,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
 
   /**
-   * Builds GROUP BY statement
+   * Build GROUP BY statement.
    * @param NeevoStmtBase $statement
    * @return string
    */
@@ -235,7 +235,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
 
   /**
-   * Builds columns part for SELECT statements
+   * Build columns part for SELECT statements.
    * @param NeevoStmtBase $statement
    * @return string
    */
@@ -265,7 +265,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
 
   /**
-   * Escapes whole array for use in SQL
+   * Escape whole array for use in SQL.
    * @param array $array
    * @return array
    * @internal
@@ -309,7 +309,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
   }
 
   /**
-   * Escapes given string for use in SQL
+   * Escape given string for use in SQL.
    * @param string $string
    * @return string
    * @internal

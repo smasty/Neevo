@@ -27,20 +27,12 @@ include_once dirname(__FILE__). '/neevo/NeevoCache.php';
 include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
 
 /**
- * Main Neevo layer class.
+ * Core Neevo class.
  * @package Neevo
  */
 class Neevo extends NeevoAbstract implements SplSubject {
 
-  /** @var NeevoResult */
-  private $last;
-
-  /** @var int */
-  private $queries;
-
-  /** @var SplObjectStorage */
-  private $observers;
-
+  private $last, $queries, $observers;
   
   /** @var bool Ignore warning when using deprecated Neevo methods.*/
   public static $ignoreDeprecated = false;
@@ -48,9 +40,8 @@ class Neevo extends NeevoAbstract implements SplSubject {
   /** @var string Default Neevo driver */
   public static $defaultDriver = 'mysql';
 
-
   // Neevo revision
-  const REVISION = 258;
+  const REVISION = 259;
 
   // Data types
   const BOOL = 30;
@@ -73,10 +64,10 @@ class Neevo extends NeevoAbstract implements SplSubject {
   const JOIN_INNER = 'join_inner';
 
   /**
-   * Instantiate Neevo.
+   * Configure Neevo and establish a connection.
    *
    * Configuration can be different - see the API for your driver.
-   * @param array|string|Traversable $config Driver-specific configuration.
+   * @param mixed $config Connection configuration.
    * @param INeevoCache|null $cache Cache to use. NULL for no cache.
    * @return void
    * @throws NeevoException
@@ -102,7 +93,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Closes connection to server.
+   * Close connection to server.
    * @return void
    */
   public function  __destruct(){
@@ -113,10 +104,10 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Creates and uses a new connection to a server.
+   * Establish a new connection.
    *
    * Configuration can be different - see the API for your driver.
-   * @param array|string|Traversable $config Driver-specific configuration.
+   * @param mixed $config Connection configuration.
    * @return Neevo fluent interface
    */
   public function connect($config){
@@ -130,7 +121,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Current NeevoConnection instance
+   * Current NeevoConnection instance.
    * @return NeevoConnection
    */
   public function connection(){
@@ -139,7 +130,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Neevo Driver class
+   * Current Neevo Driver instance.
    * @return INeevoDriver
    */
   public function driver(){
@@ -148,7 +139,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Statement builder class
+   * Current StmtBuilder instance.
    * @return NeevoStmtBuilder
    * @internal
    */
@@ -158,7 +149,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Fetch stored data
+   * Fetch stored data.
    * @param string $key
    * @return mixed|null null if not found
    */
@@ -171,7 +162,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Store data
+   * Store data in cache.
    * @param string $key
    * @param mixed $value
    * @return void
@@ -184,7 +175,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Last executed statement info
+   * Last executed statement info.
    * @return array
    */
   public function last(){
@@ -193,9 +184,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Sets last executed statement
-   * @param array $last Last executed statement
-   * @return void
+   * Set last executed statement.
    * @internal
    */
   public function setLast(array $last){
@@ -206,7 +195,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Amount of executed queries
+   * Get amount of executed queries.
    * @return int
    */
   public function queries(){
@@ -215,7 +204,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Attach observer for debugging
+   * Attach an observer for debugging.
    * @param SplObserver $observer
    */
   public function attach(SplObserver $observer){
@@ -224,7 +213,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Detach observer for debugging
+   * Detach given observer.
    * @param SplObserver $observer
    */
   public function detach(SplObserver $observer){
@@ -235,7 +224,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Notify observers
+   * Notify observers.
    */
   public function notify(){
     foreach($this->observers as $observer){
@@ -245,7 +234,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
     /**
    * SELECT statement factory.
-   * @param string|array $columns Columns to select (array or comma-separated list)
+   * @param string|array $columns array or comma-separated list
    * @param string $table Table name
    * @return NeevoResult fluent interface
    */
@@ -299,7 +288,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Basic information about library
+   * Basic information about the library.
    * @param bool $hide_password Password will be replaced by '*****'.
    * @return array
    */
@@ -315,7 +304,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Neevo revision
+   * Neevo revision.
    * @return int
    */
   public function revision(){
@@ -331,10 +320,11 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
 /**
- * Friend visibility emulation class
+ * Friend visibility emulation class.
  * @package Neevo
  */
 abstract class NeevoAbstract{
+
   /** @var Neevo */
   protected $neevo;
   
@@ -344,7 +334,7 @@ abstract class NeevoAbstract{
 
 
 /**
- * Object representing SQL literal value.
+ * Representation of SQL literal.
  * @package Neevo
  */
 class NeevoLiteral {
@@ -359,7 +349,7 @@ class NeevoLiteral {
 
 
 /**
- * Neevo Exception
+ * Neevo Exception.
  * @package Neevo
  */
 class NeevoException extends Exception{};

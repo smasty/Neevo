@@ -21,41 +21,12 @@
  */
 class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Countable {
 
-
-  /** @var mixed */
-  protected $resultSet;
-
-  /** @var int */
-  protected $numRows;
-
-  /** @var string */
-  private $grouping;
-
-  /** @var string */
-  private $having = null;
-  
-  /** @var array */
-  protected $columns = array();
-
-  /** @var array */
-  private $join;
-
-  /** @var int */
-  private $iteratorPointer;
-
-  /** @var array */
-  private $data;
-
-  /** @var int */
-  private $dataFormat;
-
-  /** @var string */
-  private $rowClass = 'NeevoRow';
-
+  protected $resultSet, $numRows, $grouping, $having = null, $columns = array();
+  private $join, $iteratorPointer, $data, $dataFormat, $rowClass = 'NeevoRow';
 
   /**
-   * Creates SELECT statement
-   * @param array $neevo Reference to instance of Neevo class which initialized statement
+   * Create SELECT statement.
+   * @param array $neevo Neevo instance
    * @param string|array $cols Columns to select (array or comma-separated list)
    * @param string $table Table name
    * @throws InvalidArgumentException
@@ -84,7 +55,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Sets GROUP BY clause with optional HAVING.
+   * Set GROUP BY clause with optional HAVING.
    * @param string $rule
    * @param string $having Optional HAVING
    * @return NeevoResult fluent interface
@@ -109,7 +80,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Performs JOIN on tables
+   * Perform JOIN on tables.
    * @param string $table Join table
    * @throws InvalidArgumentException
    * @return NeevoResult fluent interface
@@ -130,7 +101,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Sets JOIN operator 'ON'.
+   * Set JOIN operator 'ON'.
    * @param string $expr
    * @return NeevoResult fluent interface
    */
@@ -143,7 +114,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Sets JOIN operator 'USING'
+   * Set JOIN operator 'USING'
    * @param string $expr
    * @return NeevoResult fluent interface
    */
@@ -156,7 +127,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Performs LEFT JOIN on tables
+   * Perform LEFT JOIN on tables.
    * @param string $table Join table
    * @param string $expr Join expression
    * @return NeevoResult fluent interface
@@ -167,7 +138,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Performs RIGHT JOIN on tables
+   * Perform RIGHT JOIN on tables.
    * @param string $table Join table
    * @return NeevoResult fluent interface
    */
@@ -177,7 +148,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Performs INNER JOIN on tables
+   * Perform INNER JOIN on tables.
    * @param string $table Join table
    * @return NeevoResult fluent interface
    */
@@ -216,7 +187,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Fetches data from given result set.
+   * Fetch data from the result set.
    * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC.
    * @return NeevoResult|array|FALSE Iterable result, array or FALSE.
    */
@@ -235,7 +206,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Fetches the first row in result set.
+   * Fetch the first row in the result set.
    * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC
    * @throws NeevoException
    * @return NeevoRow|array|FALSE
@@ -257,7 +228,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Fetches the only value in result set.
+   * Fetch single value in the result set.
    * @return mixed|FALSE
    */
   public function fetchSingle(){
@@ -271,7 +242,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Fetches data as $key=>$value pairs.
+   * Fetch rows as $key=>$value pairs.
    * @param string $key Key column
    * @param string|NULL $value Value column. NULL for all specified columns.
    * @return array|FALSE
@@ -315,7 +286,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Move internal result pointer
+   * Move internal result pointer.
    * @param int $offset
    * @throws NeevoException
    * @return bool
@@ -331,7 +302,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Number of rows in result set
+   * Get the number of rows in the result set.
    * @return int
    */
   public function rows(){
@@ -342,7 +313,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Implementation of Countable
+   * Implementation of Countable.
    * @return int
    */
   public function count(){
@@ -354,7 +325,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Class to use as a row class
+   * Set class to use as a row class.
    * @param string $className
    * @throws NeevoException
    * @return NeevoResult fluent interface
@@ -380,7 +351,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   }
 
   /**
-   * Statement GROUP BY fraction
+   * Statement GROUP BY fraction.
    * @return string
    */
   public function getGrouping(){
@@ -388,7 +359,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   }
 
   /**
-   * Statement HAVING fraction
+   * Statement HAVING fraction.
    * @return string
    */
   public function getHaving(){
@@ -396,7 +367,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   }
 
   /**
-   * Statement columns fraction ([SELECT] col1, col2, ...)
+   * Statement columns fraction ([SELECT] col1, col2, ...).
    * @return array
    */
   public function getColumns(){
@@ -404,7 +375,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   }
 
   /**
-   * Statement JOIN fraction
+   * Statement JOIN fraction.
    * @return array|false
    */
   public function getJoin(){

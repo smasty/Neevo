@@ -15,43 +15,23 @@
 
 
 /**
- * Class representing a row in result.
+ * Representation of a row in a result.
  * @package Neevo
  */
 class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, IteratorAggregate {
 
-  /** @var bool */
-  private $freeze;
-
-  /** @var string */
-  private $primaryKey;
-
-  /** @var string */
-  private $table;
-
-  /** @var array */
-  private $data = array();
-
-  /** @var array */
-  private $modified = array();
-
-  /** @var array */
-  private $iterable = array();
-
-  /** @var bool */
-  private $single = false;
-
-  /** @var mixed */
-  private $singleValue;
+  private $freeze, $primaryKey, $table, $singleValue, $single = false;
+  private $data = array(), $modified = array(), $iterable = array();
 
 
   /**
-   * Create row instance
+   * Create a row instance.
    * @param array $data
    * @param NeevoResult $result
    * @return void
    */
   public function __construct(array $data, NeevoResult $result){
+    Debug::dump($this->data);
     $this->data = $data;
     $this->iterable = $this->data;
     $this->neevo = $result->neevo;
@@ -71,7 +51,7 @@ class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, Iterator
 
 
   /**
-   * Updates corresponding database row if available.
+   * Update corresponding database row if available.
    * @throws NeevoException
    * @return int Number of affected rows.
    */
@@ -86,7 +66,7 @@ class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, Iterator
 
 
   /**
-   * Deletes corresponding database row if available.
+   * Delete corresponding database row if available.
    * @throws NeevoException
    * @return int Number of affected rows.
    */
@@ -130,7 +110,7 @@ class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, Iterator
 
 
   /**
-   * Object as an array
+   * Return object as an array.
    * @return array
    */
   public function toArray(){

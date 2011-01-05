@@ -14,7 +14,7 @@
  */
 
 /**
- * Internal class to represent connection to database server.
+ * Representation of database connection.
  *
  * Common configuration: (see driver specific configuration too)
  * - table_prefix => prefix for table names
@@ -24,15 +24,10 @@
  */
 class NeevoConnection extends NeevoAbstract{
 
-  /** @var array */
-  private $config;
-
-  /** @var bool */
-  private $connected = false;
-
+  private $config, $connected = false;
 
   /**
-   * Instantiate connection
+   * Establish a connection.
    * @param array|string|Traversable $config
    * @param Neevo $neevo
    * @throws InvalidArgumentException
@@ -99,7 +94,7 @@ class NeevoConnection extends NeevoAbstract{
 
 
   /**
-   * Sets Neevo driver to use
+   * Setup driver and statement builder.
    * @param string $driver Driver name
    * @throws NeevoException
    * @return void
@@ -134,8 +129,13 @@ class NeevoConnection extends NeevoAbstract{
   }
 
 
+  /**
+   * Get defined table prefix
+   * @return string
+   */
   public function prefix(){
-    return isset($this->config['table_prefix']) ? $this->config['table_prefix'] : '';
+    return isset($this->config['table_prefix'])
+      ? $this->config['table_prefix'] : '';
   }
 
 
@@ -146,13 +146,13 @@ class NeevoConnection extends NeevoAbstract{
 
 
   /**
-   * Basic information about current connection
+   * Basic information about current connection.
    * @param bool $hide_password Password will be replaced by '*****'.
    * @return array
    */
   public function info($hide_password = true){
     $info = $this->config;
-    if($hide_password){
+    if(array_key_exists('password', $info) && $hide_password){
       $info['password'] = '*****';
     }
     return $info;
@@ -160,8 +160,8 @@ class NeevoConnection extends NeevoAbstract{
 
 
   /**
-   * Create alias for configuration value
-   * @param array $config
+   * Create an alias for configuration value.
+   * @param array $config Passed by reference
    * @param string $key
    * @param string $alias Alias of $key
    * @return void
