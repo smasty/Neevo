@@ -30,24 +30,14 @@ can be easily added.
 Features
 ========
 
- - SELECT queries (JOIN support as well)
- - INSERT queries
- - UPDATE queries
- - DELETE queries
-
+ - Easy and intuitive manipulation
+ - SELECT, INSERT, UPDATE, DELTE queires (with JOIN support)
+ - Transaction support
  - Multiple drivers support
  - More ways to fetch your data: as objects, arrays, key=>value pairs, single row...
- - Affected rows
- - Retrieved rows
- - Seek
- - Table prefix support
- - Query execution time
- - Last executed query
- - Executed queries counter
- - Query and connection info
- - Randomize result order
  - Dump queries
- - One-file-only minified version with stripped comments and whitespace
+ - Query debugging
+ - One-file-only minified version
     (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
 
 
