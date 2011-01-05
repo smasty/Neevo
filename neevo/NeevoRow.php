@@ -31,7 +31,6 @@ class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, Iterator
    * @return void
    */
   public function __construct(array $data, NeevoResult $result){
-    Debug::dump($this->data);
     $this->data = $data;
     $this->iterable = $this->data;
     $this->neevo = $result->neevo;

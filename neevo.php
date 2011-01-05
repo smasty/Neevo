@@ -41,7 +41,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 259;
+  const REVISION = 260;
 
   // Data types
   const BOOL = 30;
