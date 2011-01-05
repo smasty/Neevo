@@ -145,6 +145,36 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
 
   /**
+   * Begin a transaction, if supported.
+   * @param string $savepoint
+   * @return void
+   */
+  public function begin($savepoint = null){
+    $this->query('BEGIN');
+  }
+
+
+  /**
+   * Commit statements in a transaction.
+   * @param string $savepoint
+   * @return void
+   */
+  public function commit($savepoint = null){
+    $this->query('COMMIT');
+  }
+
+
+  /**
+   * Rollback changes in a transaction.
+   * @param string $savepoint
+   * @return void
+   */
+  public function rollback($savepoint = null){
+    $this->query('ROLLBACK');
+  }
+
+
+  /**
    * Fetch row from given result set as an associative array.
    * @param resource $resultSet Result set
    * @return array

@@ -134,6 +134,36 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
+   * Begin a transaction, if supported.
+   * @param string $savepoint
+   * @return void
+   */
+  public function begin($savepoint = null){
+    $this->query($savepoint ? "SAVEPOINT $savepoint" : 'START TRANSACTION');
+  }
+
+
+  /**
+   * Commit statements in a transaction.
+   * @param string $savepoint
+   * @return void
+   */
+  public function commit($savepoint = null){
+    $this->query($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
+  }
+
+
+  /**
+   * Rollback changes in a transaction.
+   * @param string $savepoint
+   * @return void
+   */
+  public function rollback($savepoint = null){
+    $this->query($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
+  }
+
+
+  /**
    * Fetch row from given result set as an associative array.
    * @param mysqli_result $resultSet Result set
    * @return array

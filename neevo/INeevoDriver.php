@@ -84,6 +84,30 @@ interface INeevoDriver {
 
 
   /**
+   * Begin a transaction, if supported.
+   * @param string $savepoint
+   * @return void
+   */
+  public function begin($savepoint = null);
+
+
+  /**
+   * Commit statements in a transaction.
+   * @param string $savepoint
+   * @return void
+   */
+  public function commit($savepoint = null);
+
+
+  /**
+   * Rollback changes in a transaction.
+   * @param string $savepoint
+   * @return void
+   */
+  public function rollback($savepoint = null);
+
+
+  /**
    * Fetch row from given result set as an associative array.
    * @param resource $resultSet Result set
    * @return array

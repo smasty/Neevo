@@ -41,7 +41,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 260;
+  const REVISION = 262;
 
   // Data types
   const BOOL = 30;
@@ -284,6 +284,36 @@ class Neevo extends NeevoAbstract implements SplSubject {
   public function delete($table){
     $q = new NeevoStmt($this);
     return $q->delete($table);
+  }
+
+
+  /**
+   * Begin a transaction, if supported.
+   * @param string $savepoint
+   * @return void
+   */
+  public function begin($savepoint = null){
+    $this->driver()->begin($savepoint);
+  }
+
+
+  /**
+   * Commit statements in a transaction.
+   * @param string $savepoint
+   * @return void
+   */
+  public function commit($savepoint = null){
+    $this->driver()->commit($savepoint);
+  }
+
+
+  /**
+   * Rollback changes in a transaction.
+   * @param string $savepoint
+   * @return void
+   */
+  public function rollback($savepoint = null){
+    $this->driver()->rollback($savepoint);
   }
 
 
