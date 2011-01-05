@@ -33,6 +33,7 @@
 class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
   private $charset, $dbCharset, $update_limit, $resource, $unbuffered, $_joinTbl;
+  private $affectedRows;
 
   /**
    * Check for required PHP extension.
@@ -127,6 +128,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    */
   public function query($queryString){
 
+    $this->affectedRows = false;
     if($this->dbCharset !== null){
       $queryString = iconv($this->charset, $this->dbCharset . '//IGNORE', $queryString);
     }
@@ -140,6 +142,8 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     if($error && $result === false){
       throw new NeevoException("Query failed. $error", sqlite_last_error($this->resource));
     }
+
+    $this->affectedRows = @sqlite_changes($this->resource);
     return $result;
   }
 
@@ -255,7 +259,7 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    * @return int
    */
   public function affectedRows(){
-    return @sqlite_changes($this->resource);
+    return $this->affectedRows;
   }
   
   

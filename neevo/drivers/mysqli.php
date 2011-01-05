@@ -35,7 +35,7 @@
  */
 class NeevoDriverMySQLi implements INeevoDriver{
 
-  private $resource, $unbuffered;
+  private $resource, $unbuffered, $affectedRows;
 
   /**
    * Check for required PHP extension.
@@ -122,6 +122,8 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * @throws NeevoException
    */
   public function query($queryString){
+
+    $this->affectedRows = false;
     $result = $this->resource->query($queryString, $this->unbuffered ? MYSQLI_USE_RESULT : MYSQLI_STORE_RESULT);
 
     $error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $this->resource->error);
@@ -129,6 +131,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
       throw new NeevoException("Query failed. $error", $this->resource->errno);
     }
 
+    $this->affectedRows = $this->resource->affected_rows;
     return $result;
   }
 
@@ -229,7 +232,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * @return int
    */
   public function affectedRows(){
-    return $this->resource->affected_rows;
+    return $this->affectedRows;
   }
 
 

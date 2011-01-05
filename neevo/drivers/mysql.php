@@ -34,7 +34,7 @@
  */
 class NeevoDriverMySQL implements INeevoDriver{
 
-  private $resource, $unbuffered;
+  private $resource, $unbuffered, $affectedRows;
 
   /**
    * Check for required PHP extension.
@@ -140,6 +140,8 @@ class NeevoDriverMySQL implements INeevoDriver{
    * @return resource|bool
    */
   public function query($queryString){
+
+    $this->affectedRows = false;
     if($this->unbuffered){
       $result = @mysql_unbuffered_query($queryString, $this->resource);
     } else{
@@ -151,6 +153,7 @@ class NeevoDriverMySQL implements INeevoDriver{
       throw new NeevoException("Query failed. $error", @mysql_errno($this->resource));
     }
 
+    $this->affectedRows = @mysql_affected_rows($this->resource);
     return $result;
   }
 
@@ -248,7 +251,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    * @return int
    */
   public function affectedRows(){
-    return @mysql_affected_rows($this->resource);
+    return $this->affectedRows;
   }
 
 
