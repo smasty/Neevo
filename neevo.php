@@ -2,7 +2,7 @@
 /**
  * Neevo - Tiny open-source database abstraction layer for PHP
  *
- * Copyright 2010 Martin Srank (http://smasty.net)
+ * Copyright 2010-2011 Martin Srank (http://smasty.net)
  *
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
@@ -41,7 +41,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 264;
+  const REVISION = 265;
 
   // Data types
   const BOOL = 30;
