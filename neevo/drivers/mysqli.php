@@ -134,7 +134,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
 
   /**
-   * Begin a transaction, if supported.
+   * Begin a transaction if supported.
    * @param string $savepoint
    * @return void
    */

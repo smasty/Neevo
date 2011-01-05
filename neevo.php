@@ -41,7 +41,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 262;
+  const REVISION = 263;
 
   // Data types
   const BOOL = 30;
@@ -288,7 +288,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Begin a transaction, if supported.
+   * Begin a transaction if supported.
    * @param string $savepoint
    * @return void
    */
