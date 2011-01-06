@@ -16,8 +16,6 @@
 /**
  * Represents result. Can be iterated, accessed as array and provides fluent interface.
  * @package Neevo
- * @method NeevoResult and() and( ) Sets AND glue for WHERE conditions, provides fluent interface
- * @method NeevoResult or() or( ) Sets OR glue for WHERE conditions, provides fluent interface
  */
 class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Countable {
 
@@ -61,6 +59,9 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @return NeevoResult fluent interface
    */
   public function group($rule, $having = null){
+    if($this->checkCond()){
+      return $this;
+    }
     $this->reinit();
     $this->grouping = $rule;
     if(is_string($having)){
@@ -86,6 +87,9 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @return NeevoResult fluent interface
    */
   public function join($table, $type = null){
+    if($this->checkCond()){
+      return $this;
+    }
     $this->reinit();
 
     if(!in_array($type, array(null, Neevo::JOIN_LEFT, Neevo::JOIN_RIGHT, Neevo::JOIN_INNER))){
@@ -106,6 +110,9 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @return NeevoResult fluent interface
    */
   public function on($expr){
+    if($this->checkCond()){
+      return $this;
+    }
     $this->join['operator'] = 'ON';
     $this->join['expr'] = $expr;
 
@@ -119,6 +126,9 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @return NeevoResult fluent interface
    */
   public function using($expr){
+    if($this->checkCond()){
+      return $this;
+    }
     $this->join['operator'] = 'USING';
     $this->join['expr'] = $expr;
 

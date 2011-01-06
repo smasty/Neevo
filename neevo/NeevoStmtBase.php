@@ -16,14 +16,18 @@
 /**
  * Neevo statement abstract base ancestor.
  * @package Neevo
- * @method NeevoStmtBase and() and( ) Sets AND glue for WHERE conditions, provides fluent interface
- * @method NeevoStmtBase or() or( ) Sets OR glue for WHERE conditions, provides fluent interface
+ * @method NeevoStmtBase and()
+ * @method NeevoStmtBase or()
+ * @method NeevoStmtBase if()
+ * @method NeevoStmtBase else()
+ * @method NeevoStmtBase end()
  */
 abstract class NeevoStmtBase extends NeevoAbstract {
 
   protected $tableName, $type, $limit, $offset, $time, $performed;
-  protected $conditions = array(), $ordering = array();
-
+  protected $whereFilters = array(), $ordering = array();
+  protected $condition = null;
+  
   /**
    * Set WHERE condition. Accepts infinite arguments.
    *
@@ -57,12 +61,15 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * @return NeevoStmt|NeevoResult fluent interface
    */
   public function where($expr, $value = true){
+    if($this->checkCond()){
+      return $this;
+    }
     $this->reinit();
 
     // Simple format
     if(!preg_match('~%\d+~', $expr)){
       $field = trim($expr);
-      $this->conditions[] = array(
+      $this->whereFilters[] = array(
         'simple' => true,
         'field' => $field,
         'value' => $value,
@@ -82,7 +89,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
         $placeholders[] = $match[0][$keys["%$k"]];
       }
     }
-    $this->conditions[] = array(
+    $this->whereFilters[] = array(
       'simple' => false,
       'expr' => $expr,
       'placeholders' => $placeholders,
@@ -94,21 +101,55 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   /**
-   * Set AND/OR glue for WHERE conditions.
    * @return NeevoStmt|NeevoResult fluent interface
    * @internal
    * @throws BadMethodCallException
+   * @throws InvalidArgumentException
    */
   public function  __call($name, $args){
-    if(in_array(strtolower($name), array('and', 'or'))){
+    $name = strtolower($name);
+
+    // AND/OR where() glues
+    if(in_array($name, array('and', 'or'))){
+      if($this->checkCond()){
+        return $this;
+      }
       $this->reinit();
-      $this->conditions[count($this->conditions)-1]['glue'] = strtoupper($name);
+      $this->whereFilters[count($this->whereFilters)-1]['glue'] = strtoupper($name);
       if(count($args) >= 1){
         call_user_func_array(array($this, 'where'), $args);
       }
       return $this;
     }
+
+    // Conditional statements
+    elseif(in_array($name, array('if', 'else', 'end'))){
+
+      // Parameter counts
+      if(count($args) < 1 && $name == 'if'){
+        throw new InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
+      }
+
+      if($name == 'if'){
+        $this->condition = (bool) $args[0];
+      } elseif($name == 'else'){
+        $this->condition = !$this->condition;
+      } elseif($name == 'end'){
+        $this->condition = null;
+      }
+
+      return $this;
+
+    }
     throw new BadMethodCallException('Call to undefined method '.__CLASS__."::$name()");
+  }
+
+
+  protected function checkCond(){
+    if($this->condition === null){
+      return false;
+    }
+    return !$this->condition;
   }
 
 
@@ -118,6 +159,9 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * @return NeevoStmt|NeevoResult fluent interface
    */
   public function order($rules){
+    if($this->checkCond()){
+      return $this;
+    }
     $this->reinit();
     if(is_array($rules)){
       $this->ordering = $rules;
@@ -134,10 +178,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * @return NeevoStmt|NeevoResult fluent interface
    */
   public function orderBy($rules){
-    if(is_array($rules)){
-      return $this->order($rules);
-    }
-    else return $this->order(func_get_args());
+    return $this->order(is_array($rules) ? $rules : func_get_args());
   }
 
 
@@ -148,6 +189,9 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * @return NeevoStmt|NeevoResult fluent interface
    */
   public function limit($limit, $offset = null){
+    if($this->checkCond()){
+      return $this;
+    }
     $this->reinit();
     $this->limit = $limit;
     if(isset($offset) && $this->type == Neevo::STMT_SELECT){
@@ -162,6 +206,9 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * @return NeevoStmt|NeevoResult fluent interface
    */
   public function rand(){
+    if($this->checkCond()){
+      return $this;
+    }
     $this->reinit();
     $this->neevo->driver()->rand($this);
     return $this;
@@ -330,7 +377,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * @return array
    */
   public function getConditions(){
-    return $this->conditions;
+    return $this->whereFilters;
   }
 
   /**

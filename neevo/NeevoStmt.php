@@ -16,8 +16,6 @@
 /**
  * Class for non-retriveing statements.
  * @package Neevo
- * @method NeevoStmt and() and( ) Sets AND glue for WHERE conditions, provides fluent interface
- * @method NeevoStmt or() or( ) Sets OR glue for WHERE conditions, provides fluent interface
  */
 class NeevoStmt extends NeevoStmtBase {
 
