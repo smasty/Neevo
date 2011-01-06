@@ -14,7 +14,7 @@
  */
 
 /**
- * Represents result. Can be iterated and provides fluent interface.
+ * Represents result. Can be iterated, accessed as array and provides fluent interface.
  * @package Neevo
  * @method NeevoResult and() and( ) Sets AND glue for WHERE conditions, provides fluent interface
  * @method NeevoResult or() or( ) Sets OR glue for WHERE conditions, provides fluent interface
@@ -187,11 +187,11 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Fetch data from the result set.
+   * Fetch all data from the result set at once.
    * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC.
    * @return NeevoResult|array|FALSE Iterable result, array or FALSE.
    */
-  public function fetch($format = Neevo::OBJECT){
+  public function fetchAll($format = Neevo::OBJECT){
     $result = $this->fetchPlain();
     if($result === false){
       return false;
@@ -206,7 +206,23 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Fetch the row in the result set.
+   * Fetch the data in resultSet
+   * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC.
+   * @return NeevoResult|FALSE Iterable instance
+   */
+  public function fetch($format = Neevo::OBJECT){
+    $row = $this->fetchRow();
+    if($row === false)
+      return false;
+    $this->data[] = $row;
+    $this->dataFormat = $format;
+
+    return $this;
+  }
+
+
+  /**
+   * Fetch the current row in the result set.
    * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC
    * @throws NeevoException
    * @return NeevoRow|array|FALSE
@@ -304,9 +320,11 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   /**
    * Get the number of rows in the result set.
    * @return int
+   * @throws NotSupportedException
    */
   public function rows(){
     $this->isPerformed() || $this->run();
+
     $this->numRows = (int) $this->neevo->driver()->rows($this->resultSet);
     return $this->numRows;
   }
@@ -315,6 +333,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   /**
    * Implementation of Countable.
    * @return int
+   * @throws NotSupportedException
    */
   public function count(){
     return $this->rows();
@@ -327,8 +346,8 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   /**
    * Set class to use as a row class.
    * @param string $className
-   * @throws NeevoException
    * @return NeevoResult fluent interface
+   * @throws NeevoException
    */
   public function setRowClass($className){
     if(!class_exists($className)){
@@ -336,13 +355,6 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
     }
     $this->rowClass = $className;
     return $this;
-  }
-
-  /** @internal */
-  private function reinit(){
-    $this->performed = false;
-    $this->data = null;
-    $this->resultSet = null;
   }
 
   /**
@@ -385,78 +397,198 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   /*  ******  Internal methods  ******  */
 
 
+  private function reinit(){
+    $this->performed = false;
+    $this->data = null;
+    $this->resultSet = null;
+  }
+
+  
+  private function instantiateRow(& $row){
+    if(!is_array($row) && !($row instanceof $this->rowClass)){
+      throw new InvalidArgumentException('Argument 1 passed to '.__METHOD__.' must be an instance of NeevoResult::rowClass or array.');
+    }
+    if(is_array($row)){
+      if( (isset($this->dataFormat) && $this->dataFormat === Neevo::OBJECT) || !isset($this->dataFormat) ){
+        $row = new $this->rowClass($row, $this);
+      }
+    }
+
+    return $row;
+  }
+
+
   /* Implementation of Array Access */
 
-  /** @internal */
-  public function offsetSet($offset, $value){
-    $this->data[$offset] = $value;
-  }
 
-
-  /** @internal */
+  /**
+   * Check if row of given offset exists in the resultSet.
+   *
+   * This is a bit tricky because of lazy fetching.
+   * At first, method checks whether there is a result of given offset stored or not.
+   * If seek() is not available (e.g. unbuffered result), first, all rows
+   * are fetched and stored and the checking is done on given offset.
+   * If seek() is available, Neevo seeks to given offset and tries to fetch the Row.
+   * If it succeed, the row is stored and the check is done on it.
+   * @param string|int $offset
+   * @return bool
+   */
   public function offsetExists($offset){
-    $this->isPerformed() || $this->fetch();
-    return isset($this->data[$offset]);
+    // Offset already stored
+    if(is_array($this->data) && array_key_exists($offset, $this->data)){
+      return !empty($this->data[$offset]);
+    }
+
+    // Try seeking to the offset
+    try{
+      $this->seek($offset);
+    } catch(NotSupportedException $ed){
+      // Seek not supported -> get all rows & return current
+        if(empty($this->data)){
+          $this->fetchAll();
+        }
+        return !empty($this->data[$offset]);
+    } catch(NeevoException $en){
+      // Offset overflow (offset not in resultSet)
+        return false;
+    }
+
+    // Fetch the row, store it & return
+    $this->data[$offset] = $this->fetchRow();
+    return !empty($this->data[$offset]);
   }
 
 
-  /** @internal */
+  /**
+   * Get the row of given offset from the resultSet.
+   *
+   * This is a bit tricky because of lazy fetching. See offsetExists().
+   * This method does the same as offsetExists(), because it can be called without calling
+   * offsetExists().
+   * @param scalar $offset
+   * @return object|array|null
+   */
+  public function offsetGet($offset){
+    // Offset already stored
+    if(is_array($this->data) && array_key_exists($offset, $this->data)){
+      if(empty($this->data[$offset])){
+        return null;
+      }
+      return $this->instantiateRow($this->data[$offset]);
+    }
+
+    // Try seeking to the offset
+    try{
+      $this->seek($offset);
+    } catch(NotSupportedException $ed){
+      // Seek not supported -> get all rows & return current/null
+        if(empty($this->data)){
+          $this->fetchAll();
+        }
+        if(empty($this->data[$offset])){
+          return null;
+        }
+        return $this->instantiateRow($this->data[$offset]);
+    } catch(NeevoException $en){
+      // Offset overflow (offset not in resultSet)
+        return null;
+    }
+
+    // Fetch the row & store it
+    $this->data[$offset] = $this->fetchRow();
+    return $this->instantiateRow($this->data[$offset]);
+  }
+
+
+  /**
+   * @throws NeevoException
+   */
+  public function offsetSet($offset, $value){
+    throw new NeevoException('Cannot set offset value.');
+  }
+
+
+  /**
+   * Unset the value on given offset
+   * @param scalar $offset
+   * @return void
+   */
   public function offsetUnset($offset){
     unset($this->data[$offset]);
   }
 
 
-  /** @internal */
-  public function offsetGet($offset){
-    $this->isPerformed() || $this->fetch();
-    if(!isset($this->data[$offset])){
-      return null;
-    }
-
-    $current = $this->data[$offset];
-
-    if($this->dataFormat == Neevo::OBJECT && !($current instanceof $this->rowClass)){
-      $current = $this->data[$offset] = new $this->rowClass($current, $this);
-    }
-
-    return $current;
-  }
-
-
   /* Implementation of Iterator */
 
-  /** @internal */
+
+  /**
+   * Rewind internal iterator pointer. Force execution of statement for all future loops.
+   * @return void
+   */
   public function rewind(){
-    if(!empty($this->data) || $this->data === null){ // Force execution for future loops
+    // Force execution for future loops - data may changed.
+    if(!empty($this->data) || $this->data === null){
       $this->reinit();
-      $this->fetch();
     }
     $this->iteratorPointer = 0;
   }
 
-  /** @internal */
+
+  /**
+   * Get the current key in iteration.
+   * @return int
+   */
   public function key(){
     return $this->iteratorPointer;
   }
 
-  /** @internal */
+
+  /**
+   * Get the key of the current element
+   * @return void
+   */
   public function next(){
     $this->iteratorPointer++;
   }
 
-  /** @internal */
+
+  /**
+   * Get the current row in resultSet in iteration.
+   * @return object|array
+   */
   public function current(){
-    $current = $this->data[$this->iteratorPointer];
-
-    if($this->dataFormat == Neevo::OBJECT && !($current instanceof $this->rowClass)){
-      $current = $this->data[$this->iteratorPointer] = new $this->rowClass($current, $this);
-    }
-
-    return $current;
+    return $this->instantiateRow($this->data[$this->iteratorPointer]);
   }
 
-  /** @internal */
+
+  /**
+   * Check if current row in resultSet is valid in iteration.
+   *
+   * This is a bit tricky because of lazy fetching. See offsetExists().
+   * @return bool
+   */
   public function valid(){
+    // Position already stored
+    if(is_array($this->data) && array_key_exists($this->iteratorPointer, $this->data)){
+      return !empty($this->data[$this->iteratorPointer]);
+    }
+    
+    // Try seeking to the Position
+    try{
+      $this->seek($this->iteratorPointer);
+    } catch(NotSupportedException $ed){
+      // Seek not supported -> get all rows & return current
+        if(empty($this->data)){
+          $this->fetchAll();
+        }
+        return !empty($this->data[$this->iteratorPointer]);
+    } catch(NeevoException $en){
+      // Position overflow (already past the last)
+        return false;
+    }
+
+    // Fetch the row, store it & return
+    $this->data[$this->iteratorPointer] = $this->fetchRow();
     return !empty($this->data[$this->iteratorPointer]);
   }
 

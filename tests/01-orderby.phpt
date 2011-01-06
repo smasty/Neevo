@@ -9,7 +9,7 @@ foreach(array(
   array('aid DESC', 'web'),
   array('aid', 'web')
 ) as $order){
-  foreach($db->select('id', 'software')->order($order)->fetch() as $result){
+  foreach($db->select('id', 'software')->order($order) as $result){
     if(isset($result['id'])){
       echo $result['id'];
     }
