@@ -206,20 +206,20 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
 
 
   /**
-   * Fetch the first row in the result set.
+   * Fetch the row in the result set.
    * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC
    * @throws NeevoException
    * @return NeevoRow|array|FALSE
    */
   public function fetchRow($format = Neevo::OBJECT){
-    $resultSet = $this->isPerformed() ? $this->resultSet() : $this->run();
+    $resultSet = $this->isPerformed() ? $this->resultSet : $this->run();
     if(!$resultSet){ // Error
       throw new NeevoException('Fetching result failed.');
     }
 
     $result = $this->neevo->driver()->fetch($resultSet);
     
-    $this->free();
+    //$this->free();
     if($result === false){
       return false;
     }
@@ -293,7 +293,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    */
   public function seek($offset){
     $this->isPerformed() || $this->run();
-    $seek = $this->neevo->driver()->seek($this->resultSet(), $offset);
+    $seek = $this->neevo->driver()->seek($this->resultSet, $offset);
     if($seek){
       return $seek;
     }
@@ -307,8 +307,8 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    */
   public function rows(){
     $this->isPerformed() || $this->run();
-    $this->numRows = $this->neevo->driver()->rows($this->resultSet);
-    return intval($this->numRows);
+    $this->numRows = (int) $this->neevo->driver()->rows($this->resultSet);
+    return $this->numRows;
   }
 
 
@@ -317,7 +317,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
    * @return int
    */
   public function count(){
-    return (int) $this->rows();
+    return $this->rows();
   }
 
 
@@ -336,11 +336,6 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
     }
     $this->rowClass = $className;
     return $this;
-  }
-
-  /** @internal */
-  public function resultSet(){
-    return $this->resultSet;
   }
 
   /** @internal */

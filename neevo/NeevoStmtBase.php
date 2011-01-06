@@ -97,6 +97,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
    * Set AND/OR glue for WHERE conditions.
    * @return NeevoStmt|NeevoResult fluent interface
    * @internal
+   * @throws BadMethodCallException
    */
   public function  __call($name, $args){
     if(in_array(strtolower($name), array('and', 'or'))){
