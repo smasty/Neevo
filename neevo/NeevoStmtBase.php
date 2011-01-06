@@ -26,7 +26,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
   protected $tableName, $type, $limit, $offset, $time, $performed;
   protected $whereFilters = array(), $ordering = array();
-  protected $condition = null;
+  protected $conditions = array();
   
   /**
    * Set WHERE condition. Accepts infinite arguments.
@@ -123,19 +123,27 @@ abstract class NeevoStmtBase extends NeevoAbstract {
     }
 
     // Conditional statements
-    elseif(in_array($name, array('if', 'else', 'end'))){
+    elseif(in_array($name, array('if', 'else', /*'elseif',*/ 'end'))){
 
       // Parameter counts
-      if(count($args) < 1 && $name == 'if'){
+      if(count($args) < 1 && ($name == 'if'/* || $name == 'elseif'*/)){
         throw new InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
       }
 
+      $conds = & $this->conditions;
       if($name == 'if'){
-        $this->condition = (bool) $args[0];
-      } elseif($name == 'else'){
-        $this->condition = !$this->condition;
-      } elseif($name == 'end'){
-        $this->condition = null;
+        $conds[] = (bool) $args[0];
+      }
+      // TODO elseif()
+      /*elseif($name == 'elseif'){
+        $conds[count($conds)-1] = !end($conds);
+        $conds[] = (bool) $args[0];
+      }*/
+      elseif($name == 'else'){
+        $conds[count($conds)-1] = !end($conds);
+      }
+      elseif($name == 'end'){
+        unset($conds[count($conds)-1]);
       }
 
       return $this;
@@ -146,10 +154,13 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
 
   protected function checkCond(){
-    if($this->condition === null){
+    if(empty($this->conditions)){
       return false;
     }
-    return !$this->condition;
+    foreach($this->conditions as $cond){
+      if($cond) continue;
+      else return true;
+    }
   }
 
 
