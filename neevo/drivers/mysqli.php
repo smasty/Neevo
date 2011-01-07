@@ -48,7 +48,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
     }
   }
 
-
   /**
    * Create connection to database.
    * @param array $config Configuration options
@@ -95,7 +94,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
     $this->unbuffered = $config['unbuffered'];
   }
 
-
   /**
    * Close the connection.
    * @return void
@@ -103,7 +101,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
   public function close(){
     @$this->resource->close();
   }
-
 
   /**
    * Free memory used by given result set.
@@ -113,7 +110,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
   public function free($resultSet){
     return true;
   }
-
 
   /**
    * Execute given SQL statement.
@@ -135,7 +131,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
     return $result;
   }
 
-
   /**
    * Begin a transaction if supported.
    * @param string $savepoint
@@ -144,7 +139,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
   public function begin($savepoint = null){
     $this->query($savepoint ? "SAVEPOINT $savepoint" : 'START TRANSACTION');
   }
-
 
   /**
    * Commit statements in a transaction.
@@ -155,7 +149,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
     $this->query($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
   }
 
-
   /**
    * Rollback changes in a transaction.
    * @param string $savepoint
@@ -165,7 +158,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
     $this->query($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
   }
 
-
   /**
    * Fetch row from given result set as an associative array.
    * @param mysqli_result $resultSet Result set
@@ -174,7 +166,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
   public function fetch($resultSet){
     return $resultSet->fetch_assoc();
   }
-
 
   /**
    * Move internal result pointer.
@@ -190,7 +181,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
     return $resultSet->data_seek($offset);
   }
 
-
   /**
    * Get the ID generated in the INSERT statement.
    * @return int
@@ -198,7 +188,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
   public function insertId(){
     return $this->resource->insert_id;
   }
-
 
   /**
    * Randomize result order.
@@ -208,7 +197,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
   public function rand(NeevoStmtBase $statement){
     $statement->order('RAND()');
   }
-
 
   /**
    * Get the number of rows in the given result set.
@@ -226,7 +214,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
     return false;
   }
 
-
   /**
    * Get the number of affected rows in previous operation.
    * @return int
@@ -234,7 +221,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
   public function affectedRows(){
     return $this->affectedRows;
   }
-
 
   /**
    * Escape given value.
@@ -260,7 +246,6 @@ class NeevoDriverMySQLi implements INeevoDriver{
         break;
     }
   }
-
 
   /**
    * Get the PRIMARY KEY column for given table.

@@ -86,7 +86,6 @@ class NeevoConnection {
     }
   }
 
-
   /** @internal */
   public function realConnect(){
     if($this->connected === false){
@@ -94,7 +93,6 @@ class NeevoConnection {
       $this->connected = true;
     }
   }
-
 
   /**
    * Setup driver and statement builder.
@@ -107,7 +105,7 @@ class NeevoConnection {
     $class = "NeevoDriver$driver";
 
     if(!$this->isDriver($class)){
-      include_once dirname(__FILE__) . '/drivers/'.strtolower($driver).'.php';
+      @include_once dirname(__FILE__) . '/drivers/'.strtolower($driver).'.php';
 
       if(!$this->isDriver($class)){
         throw new NeevoException("Unable to create instance of Neevo driver '$driver' - class not found or not matching criteria.");
@@ -125,12 +123,10 @@ class NeevoConnection {
     }
   }
 
-
   /** @internal */
   private function isDriver($class){
     return (class_exists($class, false) && in_array('INeevoDriver', class_implements($class, false)));
   }
-
 
   /**
    * Get defined table prefix
@@ -141,12 +137,10 @@ class NeevoConnection {
       ? $this->config['table_prefix'] : '';
   }
 
-
   /** @return INeevoDriver */
   public function driver(){
     return $this->driver;
   }
-
 
   /**
    * Basic information about current connection.
@@ -160,7 +154,6 @@ class NeevoConnection {
     }
     return $info;
   }
-
 
   /**
    * Create an alias for configuration value.

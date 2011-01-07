@@ -66,14 +66,12 @@ interface INeevoDriver {
    */
   public function close();
 
-
   /**
    * Free memory used by given result.
    * @param resource $resultSet
    * @return bool
    */
   public function free($resultSet);
-
 
   /**
    * Execute given SQL statement.
@@ -82,14 +80,12 @@ interface INeevoDriver {
    */
   public function query($queryString);
 
-
   /**
    * Begin a transaction if supported.
    * @param string $savepoint
    * @return void
    */
   public function begin($savepoint = null);
-
 
   /**
    * Commit statements in a transaction.
@@ -98,7 +94,6 @@ interface INeevoDriver {
    */
   public function commit($savepoint = null);
 
-
   /**
    * Rollback changes in a transaction.
    * @param string $savepoint
@@ -106,14 +101,12 @@ interface INeevoDriver {
    */
   public function rollback($savepoint = null);
 
-
   /**
    * Fetch row from given result set as an associative array.
    * @param resource $resultSet Result set
    * @return array
    */
   public function fetch($resultSet);
-
 
   /**
    * Move internal result pointer.
@@ -123,20 +116,17 @@ interface INeevoDriver {
    */
   public function seek($resultSet, $offset);
 
-
   /**
    * Get the ID generated in the INSERT statement.
    * @return int
    */
   public function insertId();
 
-
   /**
    * Randomize result order.
    * @param NeevoStmtBase $statement
    */
   public function rand(NeevoStmtBase $statement);
-
 
   /**
    * Get the number of rows in the given result set.
@@ -145,13 +135,11 @@ interface INeevoDriver {
    */
   public function rows($resultSet);
 
-
   /**
    * Get the number of affected rows in previous operation.
    * @return int
    */
   public function affectedRows();
-
 
   /**
    * Escape given value.
@@ -160,7 +148,6 @@ interface INeevoDriver {
    * @return mixed
    */
   public function escape($value, $type);
-
 
   /**
    * Get the PRIMARY KEY column for given table.

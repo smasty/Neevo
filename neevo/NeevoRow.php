@@ -26,7 +26,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   /** @var Neevo */
   private $neevo;
 
-
   /**
    * Create a row instance.
    * @param array $data
@@ -51,7 +50,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     }
   }
 
-
   /**
    * Update corresponding database row if available.
    * @throws NeevoException
@@ -65,7 +63,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     }
     throw new NeevoException('Update disabled - cannot get primary key.');
   }
-
 
   /**
    * Delete corresponding database row if available.
@@ -81,7 +78,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     throw new NeevoException('Delete disabled - cannot get primary key.');
   }
 
-
   /** @internal */
   public function __toString(){
     if($this->single === true){
@@ -90,7 +86,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     return '';
   }
 
-
   /**
    * Is there only one value in row?
    * @return bool
@@ -98,7 +93,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   public function isSingle(){
     return $this->single;
   }
-
 
   /**
    * If there is only one value in row, return it.
@@ -110,7 +104,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     }
   }
 
-
   /**
    * Return object as an array.
    * @return array
@@ -119,8 +112,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     return $this->iterable;
   }
 
-
-  /** @internal */
   public function __get($name){
     if($this->single){
       return $this->singleValue;
@@ -129,8 +120,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
       isset($this->data[$name]) ? $this->data[$name] : null;
   }
 
-
-  /** @internal */
   public function __set($name, $value){
     if(isset($this->data[$name])){
       $this->modified[$name] = $value;
@@ -138,52 +127,38 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     }
   }
 
-
-  /** @internal */
   public function __isset($name){
     return isset($this->data[$name]);
   }
 
-
-  /** @internal */
   public function __unset($name){
     $this->modified[$offset] = null;
     $this->iterable = array_merge($this->data, $this->modified);
   }
 
-
   /* Implementation of Array Access */
 
-  /** @internal */
   public function offsetGet($offset){
     return $this->__get($offset);
   }
 
-
-  /** @internal */
   public function offsetSet($offset, $value){
     $this->__set($offset, $value);
   }
 
-
-  /** @internal */
   public function offsetExists($offset){
     return $this->__isset($offset);
   }
 
-
-  /** @internal */
   public function offsetUnset($offset){
     $this->__unset($offset);
   }
-
 
   /* Implementation of Countable */
 
   public function count(){
     return count($this->iterable);
   }
-
 
   /* Implementation of IteratorAggregate */
 

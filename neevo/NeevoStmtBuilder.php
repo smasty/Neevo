@@ -30,7 +30,6 @@ class NeevoStmtBuilder {
     $this->neevo = $neevo;
   }
 
-
   /**
    * Build the SQL statement from the instance.
    * @param NeevoStmtBase $statement
@@ -92,7 +91,6 @@ class NeevoStmtBuilder {
     return $q.';';
   }
 
-
   /**
    * Build JOIN part for SELECT statement.
    * @param NeevoResult $statement
@@ -120,7 +118,6 @@ class NeevoStmtBuilder {
     
     return $type.'JOIN '.$join['table'].$expr;
   }
-
 
   /**
    * Build WHERE condition for statement.
@@ -185,7 +182,6 @@ class NeevoStmtBuilder {
     return ' WHERE ' . join(' ', $conditions);
   }
 
-
   /**
    * Build data part for INSERT statements ([INSERT INTO] (...) VALUES (...) ).
    * @param NeevoStmtBase $statement
@@ -212,7 +208,6 @@ class NeevoStmtBuilder {
     return ' SET ' . join(', ', $update);
   }
 
-
   /**
    * Build ORDER BY statement.
    * @param NeevoStmtBase $statement
@@ -221,7 +216,6 @@ class NeevoStmtBuilder {
   protected function buildOrdering(NeevoStmtBase $statement){
     return ' ORDER BY ' . join(', ', $statement->getOrdering());
   }
-
 
   /**
    * Build GROUP BY statement.
@@ -233,7 +227,6 @@ class NeevoStmtBuilder {
     return ' GROUP BY ' . $statement->getGrouping() . $having;
   }
 
-
   /**
    * Build columns part for SELECT statements.
    * @param NeevoStmtBase $statement
@@ -244,11 +237,9 @@ class NeevoStmtBuilder {
       $cols[] = $this->buildColName($col);
     }
     return join(', ', $cols);
-  }
-  
+  }  
   
   /*  ******  Internal methods  ******  */
-
 
   protected function buildColName($col){
     if($col instanceof NeevoLiteral){
@@ -262,7 +253,6 @@ class NeevoStmtBuilder {
     }
     return $col;
   }
-
 
   /**
    * Escape whole array for use in SQL.

@@ -44,7 +44,7 @@ class Neevo implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 272;
+  const REVISION = 274;
 
   // Data types
   const BOOL = 30;
@@ -94,7 +94,6 @@ class Neevo implements SplSubject {
     $this->observers = new SplObjectStorage;
   }
 
-
   /**
    * Establish a new connection.
    *
@@ -111,9 +110,6 @@ class Neevo implements SplSubject {
     return $this;
   }
 
-
-
-
   /**
    * SELECT statement factory.
    * @param string|array $columns array or comma-separated list
@@ -123,7 +119,6 @@ class Neevo implements SplSubject {
   public function select($columns = null, $table = null){
     return new NeevoResult($this, $columns, $table);
   }
-
 
   /**
    * INSERT statement factory.
@@ -136,7 +131,6 @@ class Neevo implements SplSubject {
     return $q->insert($table, $values);
   }
 
-
   /**
    * Alias for Neevo::insert().
    * @return NeevoStmt fluent interface
@@ -144,7 +138,6 @@ class Neevo implements SplSubject {
   public function insertInto($table, array $values){
     return $this->insert($table, $values);
   }
-
 
   /**
    * UPDATE statement factory.
@@ -157,7 +150,6 @@ class Neevo implements SplSubject {
     return $q->update($table, $data);
   }
 
-
   /**
    * DELETE statement factory.
    * @param string $table Table name
@@ -167,7 +159,6 @@ class Neevo implements SplSubject {
     $q = new NeevoStmt($this);
     return $q->delete($table);
   }
-
 
   /**
    * Import a SQL dump from given file.
@@ -198,7 +189,6 @@ class Neevo implements SplSubject {
     return $count;
   }
 
-
   /**
    * Begin a transaction if supported.
    * @param string $savepoint
@@ -207,7 +197,6 @@ class Neevo implements SplSubject {
   public function begin($savepoint = null){
     $this->driver()->begin($savepoint);
   }
-
 
   /**
    * Commit statements in a transaction.
@@ -218,7 +207,6 @@ class Neevo implements SplSubject {
     $this->driver()->commit($savepoint);
   }
 
-
   /**
    * Rollback changes in a transaction.
    * @param string $savepoint
@@ -227,7 +215,6 @@ class Neevo implements SplSubject {
   public function rollback($savepoint = null){
     $this->driver()->rollback($savepoint);
   }
-
 
   /**
    * Fetch stored data.
@@ -241,7 +228,6 @@ class Neevo implements SplSubject {
     return null;
   }
 
-
   /**
    * Store data in cache.
    * @param string $key
@@ -253,7 +239,6 @@ class Neevo implements SplSubject {
       $this->cache->set($key, $value);
     }
   }
-
 
   /**
    * Basic information about the library.
@@ -270,7 +255,6 @@ class Neevo implements SplSubject {
     return $info;
   }
 
-
   /**
    * Attach an observer for debugging. Alias for Neevo::attach().
    * @param SplObserver $observer
@@ -279,7 +263,6 @@ class Neevo implements SplSubject {
   public function addObserver(SplObserver $observer){
     $this->attach($observer);
   }
-
 
   /**
    * Detach given observer. Alias for Neevo::detach().
@@ -290,7 +273,6 @@ class Neevo implements SplSubject {
     $this->detach($observer);
   }
 
-
   /**
    * Current NeevoConnection instance.
    * @return NeevoConnection
@@ -299,7 +281,6 @@ class Neevo implements SplSubject {
     return $this->connection;
   }
 
-
   /**
    * Current Neevo Driver instance.
    * @return INeevoDriver
@@ -307,7 +288,6 @@ class Neevo implements SplSubject {
   public function driver(){
     return $this->connection->driver;
   }
-
 
   /**
    * Current StmtBuilder instance.
@@ -318,7 +298,6 @@ class Neevo implements SplSubject {
     return $this->connection->stmtBuilder;
   }
 
-
   /**
    * Last executed statement info.
    * @return array
@@ -326,7 +305,6 @@ class Neevo implements SplSubject {
   public function last(){
     return $this->last;
   }
-
 
   /**
    * Set last executed statement.
@@ -338,7 +316,6 @@ class Neevo implements SplSubject {
     $this->notify();
   }
 
-
   /**
    * Get amount of executed queries.
    * @return int
@@ -346,7 +323,6 @@ class Neevo implements SplSubject {
   public function queries(){
     return $this->queries;
   }
-
 
   /**
    * Attach an observer for debugging.
@@ -356,7 +332,6 @@ class Neevo implements SplSubject {
   public function attach(SplObserver $observer){
     $this->observers->attach($observer);
   }
-
 
   /**
    * Detach given observer.
@@ -369,7 +344,6 @@ class Neevo implements SplSubject {
     }
   }
 
-
   /**
    * Notify observers.
    * @return void
@@ -379,7 +353,6 @@ class Neevo implements SplSubject {
       $observer->update($this);
     }
   }
-
 
   /**
    * Neevo revision.
@@ -393,7 +366,6 @@ class Neevo implements SplSubject {
   public function version(){
     return self::REVISION;
   }
-
 
   /**
    * Close connection to server.

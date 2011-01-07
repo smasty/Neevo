@@ -102,7 +102,6 @@ abstract class NeevoStmtBase {
     return $this;
   }
 
-
   /**
    * @return NeevoStmt|NeevoResult fluent interface
    * @internal
@@ -155,7 +154,7 @@ abstract class NeevoStmtBase {
     throw new BadMethodCallException('Call to undefined method '.__CLASS__."::$name()");
   }
 
-
+  /** @internal */
   protected function checkCond(){
     if(empty($this->conditions)){
       return false;
@@ -165,7 +164,6 @@ abstract class NeevoStmtBase {
       else return true;
     }
   }
-
 
   /**
    * Set ORDER clauses. Accepts infinite arguments (rules) or an array.
@@ -186,7 +184,6 @@ abstract class NeevoStmtBase {
     return $this;
   }
 
-
   /**
    * Alias for NeevoStmtBase::order().
    * @return NeevoStmt|NeevoResult fluent interface
@@ -194,7 +191,6 @@ abstract class NeevoStmtBase {
   public function orderBy($rules){
     return $this->order(is_array($rules) ? $rules : func_get_args());
   }
-
 
   /**
    * Set LIMIT and OFFSET clause.
@@ -214,7 +210,6 @@ abstract class NeevoStmtBase {
     return $this;
   }
 
-
   /**
    * Randomize order. Removes any other order clauses.
    * @return NeevoStmt|NeevoResult fluent interface
@@ -228,7 +223,6 @@ abstract class NeevoStmtBase {
     return $this;
   }
 
-
   /**
    * Print out syntax highlighted statement.
    * @param bool $return Return the output instead of printing it
@@ -241,7 +235,6 @@ abstract class NeevoStmtBase {
     }
     return $return ? $code : $this;
   }
-
 
   /**
    * Perform the statement.
@@ -266,7 +259,6 @@ abstract class NeevoStmtBase {
     return $query;
   }
 
-
   /**
    * Perform the statement. Alias for run().
    * @return resource|bool
@@ -274,7 +266,6 @@ abstract class NeevoStmtBase {
   public function exec(){
     return $this->run();
   }
-
 
   /**
    * Build the SQL statement from the instance.
@@ -284,7 +275,6 @@ abstract class NeevoStmtBase {
   public function build(){
     return $this->neevo->stmtBuilder()->build($this);
   }
-
 
   /**
    * Basic information about the statement.
@@ -320,9 +310,7 @@ abstract class NeevoStmtBase {
     return $info;
   }
 
-
   /*  ******  Setters & Getters  ******  */
-
 
   /**
    * Query execution time.
@@ -339,7 +327,6 @@ abstract class NeevoStmtBase {
   public function isPerformed(){
     return $this->performed;
   }
-
 
   /** @internal */
   private function reinit(){
@@ -402,7 +389,6 @@ abstract class NeevoStmtBase {
     return $this->ordering;
   }
 
-
   /**
    * Name of the PRIMARY KEY column.
    * @return string|null
@@ -424,10 +410,8 @@ abstract class NeevoStmtBase {
     return $cached === '' ? null : $cached;
   }
 
-
   /*  ******  Internal methods  ******  */
   
-
   /** @internal */
   protected function realConnect(){
     return $this->neevo->connection()->realConnect();

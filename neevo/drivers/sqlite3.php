@@ -47,7 +47,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     $this->neevo = $neevo;
   }
 
-
   /**
    * Create connection to database.
    * @param array $config Configuration options
@@ -93,7 +92,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     }
   }
 
-
   /**
    * Close the connection.
    * @return void
@@ -101,7 +99,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   public function close(){
     $this->resource->close();
   }
-
 
   /**
    * Free memory used by given result.
@@ -113,7 +110,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   public function free($resultSet){
     return true;
   }
-
 
   /**
    * Execute given SQL statement.
@@ -138,7 +134,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     return $result;
   }
 
-
   /**
    * Begin a transaction if supported.
    * @param string $savepoint
@@ -147,7 +142,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   public function begin($savepoint = null){
     $this->query($savepoint ? "SAVEPOINT $savepoint" : 'BEGIN');
   }
-
 
   /**
    * Commit statements in a transaction.
@@ -158,7 +152,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     $this->query($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
   }
 
-
   /**
    * Rollback changes in a transaction.
    * @param string $savepoint
@@ -167,7 +160,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   public function rollback($savepoint = null){
     $this->query($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
   }
-
 
   /**
    * Fetch row from given result set as an associative array.
@@ -191,7 +183,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     return $row;
   }
 
-
   /**
    * Move internal result pointer.
    *
@@ -205,7 +196,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     throw new NotSupportedException('Cannot seek on unbuffered result.');
   }
 
-
   /**
    * Get the ID generated in the INSERT statement.
    * @return int
@@ -214,7 +204,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     return $this->resource->lastInsertRowID();
   }
 
-
   /**
    * Randomize result order.
    * @param NeevoStmtBase $statement
@@ -222,7 +211,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   public function rand(NeevoStmtBase $statement){
     $statement->order('RANDOM()');
   }
-
 
   /**
    * Get the number of rows in the given result set.
@@ -236,7 +224,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     throw new NotSupportedException('Cannot count rows on unbuffered result.');
   }
 
-
   /**
    * Get the umber of affected rows in previous operation.
    * @return int
@@ -244,7 +231,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   public function affectedRows(){
     return $this->affectedRows;
   }
-
 
   /**
    * Escape given value.
@@ -269,7 +255,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
         break;
     }
   }
-
 
   /**
    * Get the PRIMARY KEY column for given table.
@@ -298,7 +283,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     }
     return $key;
   }
-
 
   /**
    * Build the SQL statement from the instance.
@@ -372,7 +356,6 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
 
     return $q.';';
   }
-
 
   /**
    * Build JOIN part for SELECT statement.

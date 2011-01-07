@@ -30,7 +30,6 @@ class NeevoStmt extends NeevoStmtBase {
     $this->neevo = $neevo;
   }
 
-
   /**
    * Create UPDATE statement.
    * @param string $table Table name
@@ -44,7 +43,6 @@ class NeevoStmt extends NeevoStmtBase {
     $this->values = $data;
     return $this;
   }
-
 
   /**
    * Create INSERT statement.
@@ -60,7 +58,6 @@ class NeevoStmt extends NeevoStmtBase {
     return $this;
   }
 
-
   /**
    * Create DELETE statement.
    * @param string $table Table name
@@ -73,7 +70,6 @@ class NeevoStmt extends NeevoStmtBase {
     return $this;
   }
 
-
   /**
    * Get the ID generated in the last INSERT statement.
    * @return int|FALSE
@@ -82,7 +78,6 @@ class NeevoStmt extends NeevoStmtBase {
     $this->isPerformed() || $this->run();
     return $this->neevo->driver()->insertId();
   }
-
 
   /**
    * Get the number of rows affected by the statement.
@@ -93,9 +88,7 @@ class NeevoStmt extends NeevoStmtBase {
     return $this->affectedRows = $this->neevo->driver()->affectedRows();
   }
 
-
   /*  ******  Setters & Getters  ******  */
-
 
   /** @internal */
   private function reinit(){
