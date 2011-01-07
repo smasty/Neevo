@@ -200,7 +200,8 @@ function php_shrink($input){
   $output = '';
   $in_echo = false;
   $doc_comment = false; // include only first /**
-  for(reset($tokens); list($i, $token) = each($tokens); ){
+  //for(reset($tokens); list($i, $token) = each($tokens); ){
+  foreach($tokens as $i => $token){
     if(!is_array($token)){
       $token = array(0, $token);
     }

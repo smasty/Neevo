@@ -22,9 +22,12 @@
  *
  * @package Neevo
  */
-class NeevoConnection extends NeevoAbstract{
+class NeevoConnection {
 
   private $config, $connected = false;
+
+  /** @var Neevo */
+  private $neevo;
 
   /**
    * Establish a connection.
@@ -33,7 +36,7 @@ class NeevoConnection extends NeevoAbstract{
    * @throws InvalidArgumentException
    * @return void
    */
-  public function __construct($config, Neevo $neevo = null, $driverName = null){
+  public function __construct($config, Neevo $neevo, $driverName = null){
     $this->neevo = $neevo;
 
     // Parse
@@ -104,7 +107,7 @@ class NeevoConnection extends NeevoAbstract{
     $class = "NeevoDriver$driver";
 
     if(!$this->isDriver($class)){
-      @include_once dirname(__FILE__) . '/drivers/'.strtolower($driver).'.php';
+      include_once dirname(__FILE__) . '/drivers/'.strtolower($driver).'.php';
 
       if(!$this->isDriver($class)){
         throw new NeevoException("Unable to create instance of Neevo driver '$driver' - class not found or not matching criteria.");

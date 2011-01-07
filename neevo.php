@@ -30,9 +30,12 @@ include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
  * Core Neevo class.
  * @package Neevo
  */
-class Neevo extends NeevoAbstract implements SplSubject {
+class Neevo implements SplSubject {
 
   private $last, $queries, $observers;
+
+  /** @var NeevoConnection */
+  private $connection;
   
   /** @var bool Ignore warning when using deprecated Neevo methods.*/
   public static $ignoreDeprecated = false;
@@ -41,7 +44,7 @@ class Neevo extends NeevoAbstract implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 269;
+  const REVISION = 272;
 
   // Data types
   const BOOL = 30;
@@ -93,17 +96,6 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
-   * Close connection to server.
-   * @return void
-   */
-  public function  __destruct(){
-    try{
-      $this->driver()->close();
-    } catch(NotImplementedException $e){}
-  }
-
-
-  /**
    * Establish a new connection.
    *
    * Configuration can be different - see the API for your driver.
@@ -120,119 +112,9 @@ class Neevo extends NeevoAbstract implements SplSubject {
   }
 
 
-  /**
-   * Current NeevoConnection instance.
-   * @return NeevoConnection
-   */
-  public function connection(){
-    return $this->connection;
-  }
 
 
   /**
-   * Current Neevo Driver instance.
-   * @return INeevoDriver
-   */
-  public function driver(){
-    return $this->connection->driver;
-  }
-
-
-  /**
-   * Current StmtBuilder instance.
-   * @return NeevoStmtBuilder
-   * @internal
-   */
-  public function stmtBuilder(){
-    return $this->connection->stmtBuilder;
-  }
-
-
-  /**
-   * Fetch stored data.
-   * @param string $key
-   * @return mixed|null null if not found
-   */
-  public function cacheFetch($key){
-    if($this->cache instanceof INeevoCache){
-      return $this->cache->get($key);
-    }
-    return null;
-  }
-
-
-  /**
-   * Store data in cache.
-   * @param string $key
-   * @param mixed $value
-   * @return void
-   */
-  public function cacheStore($key, $value){
-    if($this->cache instanceof INeevoCache){
-      $this->cache->set($key, $value);
-    }
-  }
-
-
-  /**
-   * Last executed statement info.
-   * @return array
-   */
-  public function last(){
-    return $this->last;
-  }
-
-
-  /**
-   * Set last executed statement.
-   * @internal
-   */
-  public function setLast(array $last){
-    $this->queries++;
-    $this->last = $last;
-    $this->notify();
-  }
-
-
-  /**
-   * Get amount of executed queries.
-   * @return int
-   */
-  public function queries(){
-    return $this->queries;
-  }
-
-
-  /**
-   * Attach an observer for debugging.
-   * @param SplObserver $observer
-   */
-  public function attach(SplObserver $observer){
-    $this->observers->attach($observer);
-  }
-
-
-  /**
-   * Detach given observer.
-   * @param SplObserver $observer
-   */
-  public function detach(SplObserver $observer){
-    if($this->observers->contains($observer)){
-      $this->observers->detach($observer);
-    }
-  }
-
-
-  /**
-   * Notify observers.
-   */
-  public function notify(){
-    foreach($this->observers as $observer){
-      $observer->update($this);
-    }
-  }
-
-    /**
    * SELECT statement factory.
    * @param string|array $columns array or comma-separated list
    * @param string $table Table name
@@ -288,6 +170,36 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
+   * Import a SQL dump from given file.
+   * @param string $filename
+   * @return int number of commands executed
+   */
+  public function loadFile($filename){
+    $this->connection->realConnect();
+    @set_time_limit(0);
+
+    $handle = @fopen($filename, 'r');
+    if($handle === false){
+      throw new NeevoException("Cannot open file '$filename'.");
+    }
+
+    $sql = '';
+    $count = 0;
+    while(!feof($handle)){
+      $content = fgets($handle);
+      $sql .= $content;
+      if(substr(rtrim($content), -1) === ';'){
+        $this->driver()->query($sql);
+        $sql = '';
+        $count++;
+      }
+    }
+    fclose($handle);
+    return $count;
+  }
+
+
+  /**
    * Begin a transaction if supported.
    * @param string $savepoint
    * @return void
@@ -318,18 +230,154 @@ class Neevo extends NeevoAbstract implements SplSubject {
 
 
   /**
+   * Fetch stored data.
+   * @param string $key
+   * @return mixed|null null if not found
+   */
+  public function cacheFetch($key){
+    if($this->cache instanceof INeevoCache){
+      return $this->cache->get($key);
+    }
+    return null;
+  }
+
+
+  /**
+   * Store data in cache.
+   * @param string $key
+   * @param mixed $value
+   * @return void
+   */
+  public function cacheStore($key, $value){
+    if($this->cache instanceof INeevoCache){
+      $this->cache->set($key, $value);
+    }
+  }
+
+
+  /**
    * Basic information about the library.
    * @param bool $hide_password Password will be replaced by '*****'.
    * @return array
    */
   public function info($hide_password = true){
     $info = array(
-      'executed' => $this->queries(),
-      'last' => $this->last()->info($hide_password, true),
+      'executed' => (int) $this->queries(),
+      'last' => $this->last(),
       'connection' => $this->connection->info($hide_password),
-      'version' => $this->revision(false)
+      'revision' => self::REVISION
     );
     return $info;
+  }
+
+
+  /**
+   * Attach an observer for debugging. Alias for Neevo::attach().
+   * @param SplObserver $observer
+   * @return void
+   */
+  public function addObserver(SplObserver $observer){
+    $this->attach($observer);
+  }
+
+
+  /**
+   * Detach given observer. Alias for Neevo::detach().
+   * @param SplObserver $observer
+   * @return void
+   */
+  public function removeObserver(SplObserver $observer){
+    $this->detach($observer);
+  }
+
+
+  /**
+   * Current NeevoConnection instance.
+   * @return NeevoConnection
+   */
+  public function connection(){
+    return $this->connection;
+  }
+
+
+  /**
+   * Current Neevo Driver instance.
+   * @return INeevoDriver
+   */
+  public function driver(){
+    return $this->connection->driver;
+  }
+
+
+  /**
+   * Current StmtBuilder instance.
+   * @return NeevoStmtBuilder
+   * @internal
+   */
+  public function stmtBuilder(){
+    return $this->connection->stmtBuilder;
+  }
+
+
+  /**
+   * Last executed statement info.
+   * @return array
+   */
+  public function last(){
+    return $this->last;
+  }
+
+
+  /**
+   * Set last executed statement.
+   * @internal
+   */
+  public function setLast(array $last){
+    $this->queries++;
+    $this->last = $last;
+    $this->notify();
+  }
+
+
+  /**
+   * Get amount of executed queries.
+   * @return int
+   */
+  public function queries(){
+    return $this->queries;
+  }
+
+
+  /**
+   * Attach an observer for debugging.
+   * @param SplObserver $observer
+   * @return void
+   */
+  public function attach(SplObserver $observer){
+    $this->observers->attach($observer);
+  }
+
+
+  /**
+   * Detach given observer.
+   * @param SplObserver $observer
+   * @return void
+   */
+  public function detach(SplObserver $observer){
+    if($this->observers->contains($observer)){
+      $this->observers->detach($observer);
+    }
+  }
+
+
+  /**
+   * Notify observers.
+   * @return void
+   */
+  public function notify(){
+    foreach($this->observers as $observer){
+      $observer->update($this);
+    }
   }
 
 
@@ -346,20 +394,17 @@ class Neevo extends NeevoAbstract implements SplSubject {
     return self::REVISION;
   }
 
-}
 
+  /**
+   * Close connection to server.
+   * @return void
+   */
+  public function  __destruct(){
+    try{
+      $this->driver()->close();
+    } catch(NotImplementedException $e){}
+  }
 
-/**
- * Friend visibility emulation class.
- * @package Neevo
- */
-abstract class NeevoAbstract{
-
-  /** @var Neevo */
-  protected $neevo;
-  
-  /** @var NeevoConnection */
-  protected $connection;
 }
 
 
@@ -368,12 +413,9 @@ abstract class NeevoAbstract{
  * @package Neevo
  */
 class NeevoLiteral {
-  private $value;
+  public $value;
   public function __construct($value) {
     $this->value = $value;
-  }
-  public function __get($name){
-    return $this->value;
   }
 }
 

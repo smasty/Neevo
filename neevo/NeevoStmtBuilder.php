@@ -17,7 +17,7 @@
  * Building SQL string from NeevoResult instance.
  * @package Neevo
  */
-class NeevoStmtBuilder extends NeevoAbstract{
+class NeevoStmtBuilder {
 
   /** @var Neevo */
   protected $neevo;
@@ -26,7 +26,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
    * Instantiate StatementBuilder
    * @param Neevo $neevo
    */
-  public function  __construct(Neevo $neevo = null){
+  public function  __construct(Neevo $neevo){
     $this->neevo = $neevo;
   }
 
@@ -101,7 +101,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
    */
   protected function buildJoin(NeevoResult $statement){
     $join = $statement->getJoin();
-    $prefix = $this->neevo->connection->prefix();
+    $prefix = $this->neevo->connection()->prefix();
     $join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $join['expr']);
     $type = strtoupper(substr($join['type'], 5));
 
@@ -138,7 +138,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
 
       // Conditions with placeholders
       if($cond['simple'] === false){
-        $expr = str_replace('::', $this->neevo->connection->prefix(),$cond['expr']);
+        $expr = str_replace('::', $this->neevo->connection()->prefix(),$cond['expr']);
         $s = '('.str_replace($cond['placeholders'], $this->_escapeArray($cond['values']), $expr).')';
         if(isset($cond['glue'])){
           $s .= ' '.$cond['glue'];
@@ -164,7 +164,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
         $value = '(' . join(', ', $this->_escapeArray($value)) . ')';
       } elseif($value instanceof NeevoLiteral){ // field = SQL literal
         $operator = ' = ';
-        $value = $value->val;
+        $value = $value->value;
       } elseif($value instanceof DateTime){ // field = DateTime
         $operator = ' = ';
         $value = $this->neevo->driver()->escape($value, Neevo::DATETIME);
@@ -258,7 +258,7 @@ class NeevoStmtBuilder extends NeevoAbstract{
     $col = preg_replace('#(\S+)\s+(as)\s+(\S+)#i', '$1 AS $3',  $col);
 
     if(preg_match('#[^.]+\.[^.]+#', $col)){
-      return $this->neevo->connection->prefix() . $col;
+      return $this->neevo->connection()->prefix() . $col;
     }
     return $col;
   }

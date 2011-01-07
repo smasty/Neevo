@@ -22,11 +22,14 @@
  * @method NeevoStmtBase else()
  * @method NeevoStmtBase end()
  */
-abstract class NeevoStmtBase extends NeevoAbstract {
+abstract class NeevoStmtBase {
 
   protected $tableName, $type, $limit, $offset, $time, $performed;
   protected $whereFilters = array(), $ordering = array();
   protected $conditions = array();
+
+  /** @var Neevo */
+  protected $neevo;
   
   /**
    * Set WHERE condition. Accepts infinite arguments.
@@ -258,7 +261,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
     $this->performed = true;
     $this->resultSet = $query;
 
-    $this->neevo->setLast($this->info());
+    $this->neevo->setLast($this->info(true, true));
 
     return $query;
   }
@@ -294,7 +297,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
       'type' => substr($this->type, 5),
       'table' => $this->getTable(),
       'executed' => (bool) $this->isPerformed(),
-      'query_string' => strip_tags($this->dump(true))
+      'query_string' => trim(strip_tags($this->dump(true)))
     );
 
     if($exclude_connection){
@@ -427,7 +430,7 @@ abstract class NeevoStmtBase extends NeevoAbstract {
 
   /** @internal */
   protected function realConnect(){
-    return $this->neevo->connection->realConnect();
+    return $this->neevo->connection()->realConnect();
   }
 
   /**
@@ -466,6 +469,11 @@ abstract class NeevoStmtBase extends NeevoAbstract {
     if(!empty($match[6])){ // # comment
       return '<em style="color:#999">'.$match[6].'</em>';
     }
+  }
+
+  /** @internal */
+  public function neevo(){
+    return $this->neevo;
   }
 
 

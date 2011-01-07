@@ -41,7 +41,7 @@ class NeevoDriverMySQL implements INeevoDriver{
    * @throws NeevoException
    * @return void
    */
-  public function  __construct(){
+  public function  __construct(Neevo $neevo){
     if(!extension_loaded("mysql")){
       throw new NeevoException("PHP extension 'mysql' not loaded.");
     }

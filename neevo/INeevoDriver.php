@@ -50,7 +50,7 @@ interface INeevoDriver {
    * @throws NeevoException
    * @return void
    */
-  public function  __construct();
+  public function  __construct(Neevo $neevo);
 
   /**
    * Create connection to database.

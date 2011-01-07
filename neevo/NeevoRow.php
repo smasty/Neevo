@@ -18,10 +18,13 @@
  * Representation of a row in a result.
  * @package Neevo
  */
-class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, IteratorAggregate {
+class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
   private $freeze, $primaryKey, $table, $singleValue, $single = false;
   private $data = array(), $modified = array(), $iterable = array();
+
+  /** @var Neevo */
+  private $neevo;
 
 
   /**
@@ -33,7 +36,7 @@ class NeevoRow extends NeevoAbstract implements ArrayAccess, Countable, Iterator
   public function __construct(array $data, NeevoResult $result){
     $this->data = $data;
     $this->iterable = $this->data;
-    $this->neevo = $result->neevo;
+    $this->neevo = $result->neevo();
     $this->primaryKey = $result->getPrimaryKey();
     $this->table = $result->getTable();
 

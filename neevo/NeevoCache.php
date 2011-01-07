@@ -128,7 +128,7 @@ class NeevoCacheInclude implements INeevoCache {
  *   PRIMARY KEY (id)
  * );</pre>
  */
-class NeevoCacheDatabase implements INeevoCache {
+/*class NeevoCacheDatabase implements INeevoCache {
 
   private $driver;
 
@@ -165,7 +165,7 @@ class NeevoCacheDatabase implements INeevoCache {
     }
   }
 
-}
+}*/
 
 
 /**
