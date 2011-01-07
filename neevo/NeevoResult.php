@@ -200,14 +200,15 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   }
 
   /**
-   * Fetch the data in resultSet
+   * Fetch the data ftom  the result set
    * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC.
    * @return NeevoResult|FALSE Iterable instance
    */
   public function fetch($format = Neevo::OBJECT){
     $row = $this->fetchRow();
-    if(!$row)
+    if(!$row){
       return false;
+    }
     $this->data[] = $row;
     $this->dataFormat = $format;
 
@@ -215,7 +216,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   }
 
   /**
-   * Fetch the current row in the result set.
+   * Fetch the current row from the result set.
    * @param int $format Return format - Neevo::OBJECT (default) or Neevo::ASSOC
    * @throws NeevoException
    * @return NeevoRow|array|FALSE
@@ -236,7 +237,7 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
   }
 
   /**
-   * Fetch single value in the result set.
+   * Fetch single value from the result set.
    * @return mixed|FALSE
    */
   public function fetchSingle(){
