@@ -137,7 +137,6 @@ abstract class NeevoStmtBase {
       if($name == 'if'){
         $conds[] = array((bool) $args[0], 1);
       }
-      // TODO elseif()
       elseif($name == 'elseif'){
         $conds[count($conds)-1] = array(!$conds[count($conds)-1][0], 3);
         $conds[] = array((bool) $args[0], 3);

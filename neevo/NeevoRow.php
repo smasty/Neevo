@@ -20,7 +20,7 @@
  */
 class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
-  private $freeze, $primaryKey, $table, $singleValue, $single = false;
+  private $freeze, $primaryKey, $table;
   private $data = array(), $modified = array(), $iterable = array();
 
   /** @var Neevo */
@@ -40,12 +40,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     $this->table = $result->getTable();
 
     if(!isset($this->data[$this->primaryKey])){
-      $this->freeze = true;
-    }
-
-    if(count($data) === 1){
-      $this->single = true;
-      $this->singleValue = reset($this->data);
       $this->freeze = true;
     }
   }
@@ -78,32 +72,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     throw new NeevoException('Delete disabled - cannot get primary key.');
   }
 
-  /** @internal */
-  public function __toString(){
-    if($this->single === true){
-      return (string) $this->singleValue;
-    }
-    return '';
-  }
-
-  /**
-   * Is there only one value in row?
-   * @return bool
-   */
-  public function isSingle(){
-    return $this->single;
-  }
-
-  /**
-   * If there is only one value in row, return it.
-   * @return mixed|void
-   */
-  public function getSingle(){
-    if($this->isSingle()){
-      return $this->singleValue;
-    }
-  }
-
   /**
    * Return object as an array.
    * @return array
@@ -113,18 +81,13 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   }
 
   public function __get($name){
-    if($this->single){
-      return $this->singleValue;
-    }
     return isset($this->modified[$name]) ? $this->modified[$name] :
       isset($this->data[$name]) ? $this->data[$name] : null;
   }
 
   public function __set($name, $value){
-    if(isset($this->data[$name])){
       $this->modified[$name] = $value;
       $this->iterable = array_merge($this->data, $this->modified);
-    }
   }
 
   public function __isset($name){
@@ -136,7 +99,9 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     $this->iterable = array_merge($this->data, $this->modified);
   }
 
+
   /*  ************  Implementation of Array Access  ************  */
+
 
   public function offsetGet($offset){
     return $this->__get($offset);
@@ -154,14 +119,18 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     $this->__unset($offset);
   }
 
+
   /*  ************  Implementation of Countable  ************  */
+
 
   public function count(){
     return count($this->iterable);
   }
 
+
   /*  ************  Implementation of IteratorAggregate  ************  */
 
+  
   public function getIterator(){
     return new ArrayIterator($this->iterable);
   }

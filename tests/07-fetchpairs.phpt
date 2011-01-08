@@ -6,7 +6,9 @@ NeevoResult->fetchPairs() key=>value test, key=>row test.
 // Also check columns auto-adding
 print_r($db->select('web', 'author')->order('id')->limit(2)->fetchPairs('id', 'name'));
 
-print_r($db->select('author')->order('id')->limit(2)->fetchPairs('id'));
+foreach($db->select('author')->order('id')->limit(2)->fetchPairs('id') as $r){
+  print_r($r->toArray());
+}
 ?>
 --EXPECT--
 Array
@@ -16,18 +18,13 @@ Array
 )
 Array
 (
-    [11] => Array
-        (
-            [id] => 11
-            [name] => Martin Srank
-            [web] => http://smasty.net
-        )
-
-    [12] => Array
-        (
-            [id] => 12
-            [name] => Linus Torvalds
-            [web] => http://torvalds-family.blogspot.com
-        )
-
+    [id] => 11
+    [name] => Martin Srank
+    [web] => http://smasty.net
+)
+Array
+(
+    [id] => 12
+    [name] => Linus Torvalds
+    [web] => http://torvalds-family.blogspot.com
 )

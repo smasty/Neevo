@@ -4,7 +4,7 @@ SELECT with only table name passed.
 <?php
 
 echo join(',', array_keys($db->select('software')
-  ->order('id')->limit(1)->fetchRow(Neevo::ASSOC))) . "\n";
+  ->order('id')->limit(1)->fetch()->toArray())) . "\n";
 
 try{
   $db->select();

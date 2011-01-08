@@ -21,6 +21,7 @@ include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmtBase.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmtBuilder.php';
 include_once dirname(__FILE__). '/neevo/NeevoResult.php';
+include_once dirname(__FILE__). '/neevo/NeevoResultIterator.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmt.php';
 include_once dirname(__FILE__). '/neevo/NeevoRow.php';
 include_once dirname(__FILE__). '/neevo/NeevoCache.php';
@@ -36,15 +37,12 @@ class Neevo implements SplSubject {
 
   /** @var NeevoConnection */
   private $connection;
-  
-  /** @var bool Ignore warning when using deprecated Neevo methods.*/
-  public static $ignoreDeprecated = false;
 
   /** @var string Default Neevo driver */
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 278;
+  const REVISION = 279;
 
   // Data types
   const BOOL = 30;

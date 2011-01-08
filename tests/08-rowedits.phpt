@@ -7,14 +7,16 @@ $db->insert('user', array(
   'mail' => 'john@example.com'
 ))->run();
 
-$result = $db->select('user')->limit(1);
-$result[0]->mail = 'doe@example.com';
+$row = $db->select('user')->limit(1)->fetchRow();
+$row->mail = 'doe@example.com';
 
 // Update
-echo $result[0]->update() ? "update ok\n" : "update failed\n";
+echo $row->update() ? "update ok\n" : "update failed\n";
 
 // Delete
-echo $result[0]->delete() ? "delete ok\n" : "delete failed\n";
+echo $row->delete() ? "delete ok\n" : "delete failed\n";
+
+unset($row);
 ?>
 --EXPECT--
 update ok
