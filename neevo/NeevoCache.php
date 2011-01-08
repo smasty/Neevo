@@ -114,6 +114,57 @@ class NeevoCacheInclude implements INeevoCache {
 
 
 /**
+ * Neevo cache using database table 'neevo_cache'.
+ *
+ * The table must already exist:
+ * <pre>CREATE TABLE neevo_cache (
+ *   id varchar(255) NOT NULL,
+ *   data text NOT NULL,
+ *   PRIMARY KEY (id)
+ * );</pre>
+ */
+class NeevoCacheDB implements INeevoCache {
+
+  /** @var INeevoDriver */
+  private $driver;
+
+  public function __construct(NeevoConnection $connection){
+    $this->driver = $connection->driver();
+  }
+
+  public function fetch($key){
+    try{
+      $q = $this->driver->query("SELECT data FROM neevo_cache WHERE id = "
+       . $this->driver->escape($key, Neevo::TEXT));
+      $row = $this->driver->fetch($q);
+      if($row !== false){
+        return unserialize($row['data']);
+      }
+      else{
+        return null;
+      }
+    } catch(Exception $e){
+        return null;
+    }
+  }
+
+  public function store($key, $value){
+    $data = array(
+      'id' => $this->driver->escape($key, Neevo::TEXT),
+      'data' => $this->driver->escape(serialize($value), Neevo::TEXT)
+    );
+    $q = $this->driver->query("UPDATE neevo_cache SET data = $data[data] WHERE id = $data[id]");
+    if(!$this->driver->affectedRows()){
+      try{
+        $this->driver->query("INSERT INTO neevo_cache (id, data) VALUES ($data[id], $data[data])");
+      } catch(Exception $e){}
+    }
+  }
+
+}
+
+
+/**
  * Neevo cache using `NeevoCache.` prefix in Memcache.
  * @package NeevoCache
  */

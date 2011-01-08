@@ -48,7 +48,7 @@ class Neevo implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 285;
+  const REVISION = 286;
 
   // Data types
   const BOOL = 30;
@@ -206,7 +206,7 @@ class Neevo implements SplSubject {
    */
   public static function cacheFetch($key){
     if(self::$cache instanceof INeevoCache){
-      return self::$cache->get($key);
+      return self::$cache->fetch($key);
     }
     return null;
   }
@@ -219,7 +219,7 @@ class Neevo implements SplSubject {
    */
   public static function cacheStore($key, $value){
     if(self::$cache instanceof INeevoCache){
-      self::$cache->set($key, $value);
+      self::$cache->store($key, $value);
     }
   }
 
