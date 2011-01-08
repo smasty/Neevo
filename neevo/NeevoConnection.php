@@ -33,11 +33,10 @@ class NeevoConnection {
    * Establish a connection.
    * @param array|string|Traversable $config
    * @param Neevo $neevo
-   * @param string $driverName For backward compatibility with REV < 238
    * @throws InvalidArgumentException
    * @return void
    */
-  public function __construct($config, Neevo $neevo, $driverName = null){
+  public function __construct($config, Neevo $neevo){
     $this->neevo = $neevo;
 
     // Parse
@@ -71,11 +70,6 @@ class NeevoConnection {
     self::alias($config, 'database', 'dbname');
     self::alias($config, 'table_prefix', 'prefix');
     self::alias($config, 'charset', 'encoding');
-
-    // Backward compatibility
-    if(!isset($config['driver']) && $driverName !== null){
-      $config['driver'] = $driverName;
-    }
 
     $config += $defaults;
 

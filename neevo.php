@@ -44,7 +44,7 @@ class Neevo implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 277;
+  const REVISION = 278;
 
   // Data types
   const BOOL = 30;
@@ -76,20 +76,7 @@ class Neevo implements SplSubject {
    * @throws NeevoException
    */
   public function __construct($config, INeevoCache $cache = null){
-
-    // Backward compatibility with REV < 238
-    if(is_string($config)){
-      parse_str($config, $arr);
-      if(!reset($arr)){ // 1st item empty = driver only
-        $this->_old_driver = $config;
-      }
-      else{
-        $this->connect($config);
-      }
-    }
-    else{
-      $this->connect($config);
-    }
+    $this->connect($config);
     $this->cache = $cache;
     $this->observers = new SplObjectStorage;
   }
@@ -102,11 +89,7 @@ class Neevo implements SplSubject {
    * @return Neevo fluent interface
    */
   public function connect($config){
-    $this->connection = new NeevoConnection(
-      $config,
-      $this,
-      isset($this->_old_driver) ? $this->_old_driver : null
-    );
+    $this->connection = new NeevoConnection($config, $this);
     return $this;
   }
 
