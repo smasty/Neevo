@@ -161,13 +161,6 @@ function minify($file){
   $source = str_replace(array('<?php', '?>'), '', $source);
   $source = "<?php\n$source\n";
 
-  // Remove driver autoload from NeevoConnection
-  $source = str_replace("
-      @include_once dirname(__FILE__) . '/drivers/'.strtolower(\$driver).'.php';
-
-      if(!\$this->isDriver(\$class))
-  ", "\n", $source);
-
   // Minify file
   $result = php_shrink($source);
 
