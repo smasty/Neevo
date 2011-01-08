@@ -33,7 +33,10 @@ include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
  */
 class Neevo implements SplSubject {
 
-  private $last, $queries, $observers;
+  private $last, $queries;
+
+  /** @var SplObjectStorage */
+  private $observers;
 
   /** @var NeevoConnection */
   private $connection;
@@ -42,7 +45,7 @@ class Neevo implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 279;
+  const REVISION = 280;
 
   // Data types
   const BOOL = 30;
@@ -61,7 +64,6 @@ class Neevo implements SplSubject {
 
   // JOIN types
   const JOIN_LEFT = 'join_left';
-  const JOIN_RIGHT = 'join_right';
   const JOIN_INNER = 'join_inner';
 
   /**

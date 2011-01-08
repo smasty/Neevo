@@ -318,10 +318,6 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
 
     // JOIN - Workaround for RIGHT JOIN
     if($statement instanceof NeevoResult && $j = $statement->getJoin()){
-      if($j['type'] === Neevo::JOIN_RIGHT){
-        $this->_joinTbl = $table;
-        $table = $j['table'];
-      }
       $table = $table .' '. $this->buildJoin($statement);
     }
     // WHERE
@@ -367,37 +363,6 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
     }
 
     return $q.';';
-  }
-
-  /**
-   * Build JOIN part for SELECT statement.
-   * @param NeevoResult $statement
-   * @throws NeevoException
-   * @return string
-   */
-  protected function buildJoin(NeevoResult $statement){
-    $join = $statement->getJoin();
-    if(isset($this->_joinTbl) && $join['type'] === Neevo::JOIN_RIGHT){
-      $join['table'] = $this->_joinTbl;
-      $join['type'] = Neevo::JOIN_LEFT;
-      unset($this->_joinTbl);
-    }
-    $prefix = $this->neevo->connection()->prefix();
-    $join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $join['expr']);
-    $type = strtoupper(substr($join['type'], 5));
-    
-    if($type !== ''){
-      $type .= ' ';
-    }
-    if($join['operator'] === 'ON'){
-      $expr = ' ON '.$join['expr'];
-    }
-    elseif($join['operator'] === 'USING'){
-      $expr = " USING($join[expr])";
-    }
-    else throw new NeevoException('JOIN operator not specified.');
-    
-    return $type.'JOIN '.$join['table'].$expr;
   }
 
 }
