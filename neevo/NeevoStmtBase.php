@@ -29,8 +29,8 @@ abstract class NeevoStmtBase {
   protected $whereFilters = array(), $ordering = array();
   protected $conditions = array();
 
-  /** @var Neevo */
-  protected $neevo;
+  /** @var NeevoConnection */
+  protected $connection;
   
   /**
    * Set WHERE condition. Accepts infinite arguments.
@@ -222,7 +222,7 @@ abstract class NeevoStmtBase {
       return $this;
     }
     $this->reinit();
-    $this->neevo->driver()->rand($this);
+    $this->driver()->rand($this);
     return $this;
   }
 
@@ -248,7 +248,7 @@ abstract class NeevoStmtBase {
 
     $start = explode(' ', microtime());
     $query = $this->performed ?
-      $this->resultSet : $this->neevo->driver()->query($this->build());
+      $this->resultSet : $this->driver()->query($this->build());
 
     $end = explode(" ", microtime());
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
@@ -257,7 +257,7 @@ abstract class NeevoStmtBase {
     $this->performed = true;
     $this->resultSet = $query;
 
-    $this->neevo->setLast($this->info(true, true));
+    $this->connection->setLast($this->info(true, true));
 
     return $query;
   }
@@ -276,7 +276,7 @@ abstract class NeevoStmtBase {
    * @internal
    */
   public function build(){
-    return $this->neevo->stmtBuilder()->build($this);
+    return $this->connection->stmtBuilder()->build($this);
   }
 
   /**
@@ -336,7 +336,7 @@ abstract class NeevoStmtBase {
       $table = $this->tableName;
     }
     $table = str_replace('::', '', $table);
-    $prefix = $this->neevo->connection()->prefix();
+    $prefix = $this->connection->prefix();
     if(preg_match('~([^.]+)(\.)([^.]+)~', $table)){
       return str_replace('.', ".$prefix", $table);
     }
@@ -390,15 +390,15 @@ abstract class NeevoStmtBase {
   public function getPrimaryKey(){
     $table = $this->getTable();
     $key = null;
-    $cached = $this->neevo->cacheFetch($table.'_primaryKey');
+    $cached = Neevo::cacheFetch($table.'_primaryKey');
 
     if($cached === null){
       try{
-        $key = $this->neevo->driver()->getPrimaryKey($table);
+        $key = $this->driver()->getPrimaryKey($table);
       } catch(Exception $e){
         return null;
       }
-      $this->neevo->cacheStore($table.'_primaryKey', $key);
+      Neevo::cacheStore($table.'_primaryKey', $key);
       return $key === '' ? null : $key;
     }
     return $cached === '' ? null : $cached;
@@ -410,7 +410,7 @@ abstract class NeevoStmtBase {
 
   /** @internal */
   protected function realConnect(){
-    return $this->neevo->connection()->realConnect();
+    return $this->connection->realConnect();
   }
 
   /**
@@ -452,8 +452,13 @@ abstract class NeevoStmtBase {
   }
 
   /** @internal */
-  public function neevo(){
-    return $this->neevo;
+  public function connection(){
+    return $this->connection;
+  }
+
+  /** @internal */
+  public function driver(){
+    return $this->connection->driver();
   }
 
   /** @internal */

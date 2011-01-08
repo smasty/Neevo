@@ -24,14 +24,14 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
   /**
    * Create SELECT statement.
-   * @param array $neevo Neevo instance
+   * @param NeevoConnection $connection
    * @param string|array $cols Columns to select (array or comma-separated list)
    * @param string $table Table name
    * @throws InvalidArgumentException
    * @return void
    */
-  public function  __construct(Neevo $neevo, $cols = null, $table = null){
-    $this->neevo = $neevo;
+  public function  __construct(NeevoConnection $connection, $cols = null, $table = null){
+    $this->connection = $connection;
 
     if($cols == null && $table == null){
       throw new InvalidArgumentException('Missing argument 2 for '.__METHOD__.'.');
@@ -156,7 +156,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   public function fetch(){
     $resultSet = $this->performed ? $this->resultSet : $this->run();
     
-    $row = $this->neevo->driver()->fetch($resultSet);
+    $row = $this->driver()->fetch($resultSet);
     if(!is_array($row)){
       return false;
     }
@@ -207,7 +207,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
    */
   public function fetchSingle(){
     $resultSet = $this->performed ? $this->resultSet : $this->run();
-    $row = $this->neevo->driver()->fetch($resultSet);
+    $row = $this->driver()->fetch($resultSet);
     
     if(!$row) return false;
     return reset($row);
@@ -246,7 +246,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
    */
   private function free(){
     try{
-      $this->neevo->driver()->free($this->resultSet);
+      $this->driver()->free($this->resultSet);
     } catch(NotImplementedException $e){}
     $this->resultSet = null;
   }
@@ -259,7 +259,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
    */
   public function seek($offset){
     $this->performed || $this->run();
-    $seek = $this->neevo->driver()->seek($this->resultSet, $offset);
+    $seek = $this->driver()->seek($this->resultSet, $offset);
     if($seek){
       return $seek;
     }
@@ -274,7 +274,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   public function rows(){
     $this->performed || $this->run();
 
-    $this->numRows = (int) $this->neevo->driver()->rows($this->resultSet);
+    $this->numRows = (int) $this->driver()->rows($this->resultSet);
     return $this->numRows;
   }
 

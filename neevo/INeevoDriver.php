@@ -23,7 +23,7 @@
  * The exception will be catched and Neevo will decide, what to do next.
  *
  * If something is not supported by the driver (e.g. number of result rows on unbuffered queries)
- * it's a good thing to throw NotSupportedException.
+ * the driver should throw NotSupportedException.
  *
  * When the driver needs to rewrite default output for SQL commands, it **must**
  * extend **NeevoStmtBuilder** class.
@@ -50,7 +50,7 @@ interface INeevoDriver {
    * @throws NeevoException
    * @return void
    */
-  public function  __construct(Neevo $neevo);
+  public function  __construct();
 
   /**
    * Create connection to database.

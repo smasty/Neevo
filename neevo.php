@@ -41,11 +41,14 @@ class Neevo implements SplSubject {
   /** @var NeevoConnection */
   private $connection;
 
+  /** @var INeevoCache */
+  private static $cache;
+
   /** @var string Default Neevo driver */
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 283;
+  const REVISION = 284;
 
   // Data types
   const BOOL = 30;
@@ -77,7 +80,7 @@ class Neevo implements SplSubject {
    */
   public function __construct($config, INeevoCache $cache = null){
     $this->connect($config);
-    $this->cache = $cache;
+    self::$cache = $cache;
     $this->observers = new SplObjectStorage;
   }
 
@@ -100,7 +103,7 @@ class Neevo implements SplSubject {
    * @return NeevoResult fluent interface
    */
   public function select($columns = null, $table = null){
-    return new NeevoResult($this, $columns, $table);
+    return new NeevoResult($this->connection, $columns, $table);
   }
 
   /**
@@ -110,7 +113,7 @@ class Neevo implements SplSubject {
    * @return NeevoStmt fluent interface
    */
   public function insert($table, array $values){
-    $q = new NeevoStmt($this);
+    $q = new NeevoStmt($this->connection);
     return $q->insert($table, $values);
   }
 
@@ -129,7 +132,7 @@ class Neevo implements SplSubject {
    * @return NeevoStmt fluent interface
    */
   public function update($table, array $data){
-    $q = new NeevoStmt($this);
+    $q = new NeevoStmt($this->connection);
     return $q->update($table, $data);
   }
 
@@ -139,7 +142,7 @@ class Neevo implements SplSubject {
    * @return NeevoStmt fluent interface
    */
   public function delete($table){
-    $q = new NeevoStmt($this);
+    $q = new NeevoStmt($this->connection);
     return $q->delete($table);
   }
 
@@ -205,9 +208,9 @@ class Neevo implements SplSubject {
    * @param string $key
    * @return mixed|null null if not found
    */
-  public function cacheFetch($key){
-    if($this->cache instanceof INeevoCache){
-      return $this->cache->get($key);
+  public static function cacheFetch($key){
+    if(self::$cache instanceof INeevoCache){
+      return self::$cache->get($key);
     }
     return null;
   }
@@ -218,9 +221,9 @@ class Neevo implements SplSubject {
    * @param mixed $value
    * @return void
    */
-  public function cacheStore($key, $value){
-    if($this->cache instanceof INeevoCache){
-      $this->cache->set($key, $value);
+  public static function cacheStore($key, $value){
+    if(self::$cache instanceof INeevoCache){
+      self::$cache->set($key, $value);
     }
   }
 
@@ -262,23 +265,6 @@ class Neevo implements SplSubject {
    */
   public function connection(){
     return $this->connection;
-  }
-
-  /**
-   * Current Neevo Driver instance.
-   * @return INeevoDriver
-   */
-  public function driver(){
-    return $this->connection->driver;
-  }
-
-  /**
-   * Current StmtBuilder instance.
-   * @return NeevoStmtBuilder
-   * @internal
-   */
-  public function stmtBuilder(){
-    return $this->connection->stmtBuilder;
   }
 
   /**
@@ -356,7 +342,7 @@ class Neevo implements SplSubject {
    */
   public function  __destruct(){
     try{
-      $this->driver()->close();
+      $this->connection->driver()->close();
     } catch(NotImplementedException $e){}
   }
 

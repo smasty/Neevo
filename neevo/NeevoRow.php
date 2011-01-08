@@ -23,8 +23,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   private $freeze, $primaryKey, $table;
   private $data = array(), $modified = array(), $iterable = array();
 
-  /** @var Neevo */
-  private $neevo;
+  /** @var NeevoConnection */
+  private $connection;
 
   /**
    * Create a row instance.
@@ -35,7 +35,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   public function __construct(array $data, NeevoResult $result){
     $this->data = $data;
     $this->iterable = $this->data;
-    $this->neevo = $result->neevo();
+    $this->connection = $result->connection();
     $this->primaryKey = $result->getPrimaryKey();
     $this->table = $result->getTable();
 
@@ -54,7 +54,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
      throw new NeevoException('Update disabled - cannot get primary key.');
     }
     if(!empty($this->modified) && $this->data != $this->iterable){
-      return $this->neevo->update($this->table, $this->modified)
+      $stmt = new NeevoStmt($this->connection);
+      return $stmt->update($this->table, $this->modified)
         ->where($this->primaryKey, $this->data[$this->primaryKey])
         ->limit(1)->affectedRows();
     }
@@ -67,7 +68,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
    */
   public function delete(){
     if(!$this->freeze){
-      return $this->neevo->delete($this->table)
+      $stmt = new NeevoStmt($this->connection);
+      return $stmt->delete($this->table)
         ->where($this->primaryKey, $this->data[$this->primaryKey])
         ->limit(1)->affectedRows();
     }

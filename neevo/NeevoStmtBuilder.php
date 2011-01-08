@@ -19,16 +19,8 @@
  */
 class NeevoStmtBuilder {
 
-  /** @var Neevo */
-  protected $neevo;
-
-  /**
-   * Instantiate StatementBuilder
-   * @param Neevo $neevo
-   */
-  public function  __construct(Neevo $neevo){
-    $this->neevo = $neevo;
-  }
+  /** @var NeevoStmtBase */
+  protected $statement;
 
   /**
    * Build the SQL statement from the instance.
@@ -36,6 +28,8 @@ class NeevoStmtBuilder {
    * @return string The SQL statement
    */
   public function build(NeevoStmtBase $statement){
+
+    $this->statement = $statement;
 
     $where = '';
     $order = '';
@@ -47,22 +41,22 @@ class NeevoStmtBuilder {
 
     // JOIN
     if($statement instanceof NeevoResult && $statement->getJoin()){
-      $table = $table .' '. $this->buildJoin($statement);
+      $table = $table .' '. $this->buildJoin();
     }
 
     // WHERE
     if($statement->getConditions()){
-      $where = $this->buildWhere($statement);
+      $where = $this->buildWhere();
     }
 
     // ORDER BY
     if($statement->getOrdering()){
-      $order = $this->buildOrdering($statement);
+      $order = $this->buildOrdering();
     }
 
     // GROUP BY
     if($statement instanceof NeevoResult && $statement->getGrouping()){
-      $group = $this->buildGrouping($statement);
+      $group = $this->buildGrouping();
     }
 
     // LIMIT, OFFSET
@@ -74,15 +68,15 @@ class NeevoStmtBuilder {
     }
 
     if($statement->getType() == Neevo::STMT_SELECT){
-      $cols = $this->buildSelectCols($statement);
+      $cols = $this->buildSelectCols();
       $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
     }
     elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
-      $insert_data = $this->buildInsertData($statement);
+      $insert_data = $this->buildInsertData();
       $q .= 'INSERT INTO ' .$table.$insert_data;
     }
     elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
-      $update_data = $this->buildUpdateData($statement);
+      $update_data = $this->buildUpdateData();
       $q .= 'UPDATE ' .$table.$update_data.$where.$order.$limit;
     }
     elseif($statement->getType() == Neevo::STMT_DELETE)
@@ -93,13 +87,12 @@ class NeevoStmtBuilder {
 
   /**
    * Build JOIN part for SELECT statement.
-   * @param NeevoResult $statement
    * @throws NeevoException
    * @return string
    */
-  protected function buildJoin(NeevoResult $statement){
-    $join = $statement->getJoin();
-    $prefix = $this->neevo->connection()->prefix();
+  protected function buildJoin(){
+    $join = $this->statement->getJoin();
+    $prefix = $this->statement->connection()->prefix();
     $join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $join['expr']);
     $type = strtoupper(substr($join['type'], 5));
 
@@ -121,11 +114,10 @@ class NeevoStmtBuilder {
 
   /**
    * Build WHERE condition for statement.
-   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildWhere(NeevoStmtBase $statement){
-    $conds = $statement->getConditions();
+  protected function buildWhere(){
+    $conds = $this->statement->getConditions();
 
     // Unset glue on last condition
     unset($conds[count($conds)-1]['glue']);
@@ -135,7 +127,7 @@ class NeevoStmtBuilder {
 
       // Conditions with placeholders
       if($cond['simple'] === false){
-        $expr = str_replace('::', $this->neevo->connection()->prefix(),$cond['expr']);
+        $expr = str_replace('::', $this->statement->connection()->prefix(),$cond['expr']);
         $s = '('.str_replace($cond['placeholders'], $this->_escapeArray($cond['values']), $expr).')';
         if(isset($cond['glue'])){
           $s .= ' '.$cond['glue'];
@@ -164,7 +156,7 @@ class NeevoStmtBuilder {
         $value = $value->value;
       } elseif($value instanceof DateTime){ // field = DateTime
         $operator = ' = ';
-        $value = $this->neevo->driver()->escape($value, Neevo::DATETIME);
+        $value = $this->statement->driver()->escape($value, Neevo::DATETIME);
       } else{ // field = value
         $operator = ' = ';
         $value = (is_numeric($value) && !is_string($value))
@@ -184,11 +176,10 @@ class NeevoStmtBuilder {
 
   /**
    * Build data part for INSERT statements ([INSERT INTO] (...) VALUES (...) ).
-   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildInsertData(NeevoStmtBase $statement){
-    foreach($this->_escapeArray($statement->getValues()) as $col => $value){
+  protected function buildInsertData(){
+    foreach($this->_escapeArray($this->statement->getValues()) as $col => $value){
       $cols[] = $this->buildColName($col);
       $values[] = $value;
     }
@@ -198,11 +189,10 @@ class NeevoStmtBuilder {
 
   /**
    * Build data part for UPDATE statements ([UPDATE ...] SET ...).
-   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildUpdateData(NeevoStmtBase $statement){
-    foreach($this->_escapeArray($statement->getValues()) as $col => $value){
+  protected function buildUpdateData(){
+    foreach($this->_escapeArray($this->statement->getValues()) as $col => $value){
       $update[] = $this->buildColName($col) . ' = ' . $value;
     }
     return ' SET ' . join(', ', $update);
@@ -210,30 +200,27 @@ class NeevoStmtBuilder {
 
   /**
    * Build ORDER BY statement.
-   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildOrdering(NeevoStmtBase $statement){
-    return ' ORDER BY ' . join(', ', $statement->getOrdering());
+  protected function buildOrdering(){
+    return ' ORDER BY ' . join(', ', $this->statement->getOrdering());
   }
 
   /**
    * Build GROUP BY statement.
-   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildGrouping(NeevoStmtBase $statement){
-    $having = $statement->getHaving() ? ' HAVING ' . (string) $statement->getHaving() : '';
-    return ' GROUP BY ' . $statement->getGrouping() . $having;
+  protected function buildGrouping(){
+    $having = $this->statement->getHaving() ? ' HAVING ' . (string) $this->statement->getHaving() : '';
+    return ' GROUP BY ' . $this->statement->getGrouping() . $having;
   }
 
   /**
    * Build columns part for SELECT statements.
-   * @param NeevoStmtBase $statement
    * @return string
    */
-  protected function buildSelectCols(NeevoStmtBase $statement){
-    foreach ($statement->getColumns() as $col) { // For each col
+  protected function buildSelectCols(){
+    foreach ($this->statement->getColumns() as $col) { // For each col
       $cols[] = $this->buildColName($col);
     }
     return join(', ', $cols);
@@ -247,7 +234,7 @@ class NeevoStmtBuilder {
     $col = preg_replace('#(\S+)\s+(as)\s+(\S+)#i', '$1 AS $3',  $col);
 
     if(preg_match('#[^.]+\.[^.]+#', $col)){
-      return $this->neevo->connection()->prefix() . $col;
+      return $this->statement->connection()->prefix() . $col;
     }
     return $col;
   }
@@ -268,7 +255,7 @@ class NeevoStmtBuilder {
         $value = 'NULL';
       }
       elseif(is_bool($value)){
-        $value = $this->neevo->driver()->escape($value, Neevo::BOOL);
+        $value = $this->statement->driver()->escape($value, Neevo::BOOL);
       }
       elseif(is_numeric($value)){
         if(is_int($value)){
@@ -285,7 +272,7 @@ class NeevoStmtBuilder {
         $value = $this->_escapeString($value);
       }
       elseif($value instanceof DateTime){
-        $value = $this->neevo->driver()->escape($value, Neevo::DATETIME);
+        $value = $this->statement->driver()->escape($value, Neevo::DATETIME);
       }
       elseif($value instanceof NeevoLiteral){
         $value = $value->value;
@@ -311,7 +298,7 @@ class NeevoStmtBuilder {
     if(get_magic_quotes_gpc()){
       $string = stripslashes($string);
     }
-    return $this->neevo->driver()->escape($string, Neevo::TEXT);
+    return $this->statement->driver()->escape($string, Neevo::TEXT);
   }
   
 }

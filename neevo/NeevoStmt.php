@@ -23,11 +23,11 @@ class NeevoStmt extends NeevoStmtBase {
 
   /**
    * Create non-retrieving statement.
-   * @param array $neevo
+   * @param NeevoConnection $connection
    * @return void
    */
-  public function  __construct(Neevo $neevo){
-    $this->neevo = $neevo;
+  public function  __construct(NeevoConnection $connection){
+    $this->connection = $connection;
   }
 
   /**
@@ -76,7 +76,7 @@ class NeevoStmt extends NeevoStmtBase {
    */
   public function insertId(){
     $this->isPerformed() || $this->run();
-    return $this->neevo->driver()->insertId();
+    return $this->driver()->insertId();
   }
 
   /**
@@ -85,7 +85,7 @@ class NeevoStmt extends NeevoStmtBase {
    */
   public function affectedRows(){
     $this->isPerformed() || $this->run();
-    return $this->affectedRows = $this->neevo->driver()->affectedRows();
+    return $this->affectedRows = $this->driver()->affectedRows();
   }
 
   /**

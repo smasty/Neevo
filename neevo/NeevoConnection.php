@@ -29,6 +29,12 @@ class NeevoConnection {
   /** @var Neevo */
   private $neevo;
 
+  /** @var INeevoDriver */
+  private $driver;
+
+  /** @var NeevoStmtBuilder */
+  private $stmtBuilder;
+
   /**
    * Establish a connection.
    * @param array|string|Traversable $config
@@ -36,9 +42,9 @@ class NeevoConnection {
    * @throws InvalidArgumentException
    * @return void
    */
-  public function __construct($config, Neevo $neevo){
+  public function __construct($config, Neevo $neevo = null){
     $this->neevo = $neevo;
-
+    
     // Parse
     if(is_string($config)){
       parse_str($config, $config);
@@ -98,6 +104,10 @@ class NeevoConnection {
     return $this->driver;
   }
 
+  public function stmtBuilder(){
+    return $this->stmtBuilder;
+  }
+
   /**
    * Create an alias for configuration value.
    * @param array $config Passed by reference
@@ -150,22 +160,27 @@ class NeevoConnection {
     $class = "NeevoDriver$driver";
 
     if(!$this->isDriver($class)){
-      @include_once dirname(__FILE__) . '/drivers/'.strtolower($driver).'.php';
+      include_once dirname(__FILE__) . '/drivers/'.strtolower($driver).'.php';
 
       if(!$this->isDriver($class)){
-        throw new NeevoException("Unable to create instance of Neevo driver '$driver' - class not found or not matching criteria.");
+        throw new NeevoException("Unable to create instance of Neevo driver '$driver'.");
       }
     }
 
-    $this->driver = new $class($this->neevo);
+    $this->driver = new $class;
 
     // Set stmtBuilder
     if(in_array('NeevoStmtBuilder', class_parents($class, false))){
       $this->stmtBuilder = $this->driver;
     }
     else{
-      $this->stmtBuilder = new NeevoStmtBuilder($this->neevo);
+      $this->stmtBuilder = new NeevoStmtBuilder;
     }
+  }
+
+  /** @internal */
+  public function setLast(array $last){
+    $this->neevo->setLast($last);
   }
 
 }
