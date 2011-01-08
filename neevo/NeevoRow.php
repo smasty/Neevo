@@ -50,12 +50,14 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
    * @return int Number of affected rows.
    */
   public function update(){
-    if(!empty($this->modified) && $this->data != $this->iterable && !$this->freeze){
+    if($this->freeze){
+     throw new NeevoException('Update disabled - cannot get primary key.');
+    }
+    if(!empty($this->modified) && $this->data != $this->iterable){
       return $this->neevo->update($this->table, $this->modified)
         ->where($this->primaryKey, $this->data[$this->primaryKey])
         ->limit(1)->affectedRows();
     }
-    throw new NeevoException('Update disabled - cannot get primary key.');
   }
 
   /**
