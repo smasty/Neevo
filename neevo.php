@@ -48,16 +48,12 @@ class Neevo implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 284;
+  const REVISION = 285;
 
   // Data types
   const BOOL = 30;
   const TEXT = 33;
   const DATETIME = 36;
-
-  // Fetch formats
-  const OBJECT = 1;
-  const ASSOC = 2;
 
   // Statement types
   const STMT_SELECT = 'stmt_select';
