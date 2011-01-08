@@ -305,6 +305,10 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /*  ************  Getters  ************  */
 
 
+  /**
+   * Get the result iterator
+   * @return NeevoResultIterator
+   */
   public function  getIterator(){
     return new NeevoResultIterator($this);
   }
