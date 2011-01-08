@@ -237,9 +237,7 @@ class NeevoStmtBuilder {
       $cols[] = $this->buildColName($col);
     }
     return join(', ', $cols);
-  }  
-  
-  /*  ******  Internal methods  ******  */
+  }
 
   protected function buildColName($col){
     if($col instanceof NeevoLiteral){
@@ -253,6 +251,10 @@ class NeevoStmtBuilder {
     }
     return $col;
   }
+
+
+  /*  ************  Internal methods  ************  */
+  
 
   /**
    * Escape whole array for use in SQL.

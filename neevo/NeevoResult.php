@@ -327,8 +327,6 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
     return $this->rows();
   }
 
-  /*  ******  Setters & Getters  ******  */
-
   /**
    * Set class to use as a row class.
    * @param string $className
@@ -343,64 +341,8 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
     return $this;
   }
 
-  /**
-   * Statement GROUP BY fraction.
-   * @return string
-   */
-  public function getGrouping(){
-    return $this->grouping;
-  }
 
-  /**
-   * Statement HAVING fraction.
-   * @return string
-   */
-  public function getHaving(){
-    return $this->having;
-  }
-
-  /**
-   * Statement columns fraction ([SELECT] col1, col2, ...).
-   * @return array
-   */
-  public function getColumns(){
-    return $this->columns;
-  }
-
-  /**
-   * Statement JOIN fraction.
-   * @return array|false
-   */
-  public function getJoin(){
-    if(!empty($this->join)){
-      return $this->join;
-    }
-    return false;
-  }
-
-  /*  ******  Internal methods  ******  */
-
-  private function reinit(){
-    $this->performed = false;
-    $this->data = null;
-    $this->resultSet = null;
-  }
-  
-  private function instantiateRow(& $row){
-    if(!is_array($row) && !($row instanceof $this->rowClass)){
-      throw new InvalidArgumentException('Argument 1 passed to '.__METHOD__.' must be an instance of NeevoResult::rowClass or array.');
-    }
-    if(is_array($row)){
-      if( (isset($this->dataFormat) && $this->dataFormat === Neevo::OBJECT) || !isset($this->dataFormat) ){
-        $row = new $this->rowClass($row, $this);
-      }
-    }
-
-    return $row;
-  }
-
-
-  /* Implementation of Array Access */
+  /*  ************  Implementation of Array Access  ************  */
 
 
   /**
@@ -496,7 +438,9 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
     unset($this->data[$offset]);
   }
 
-  /* Implementation of Iterator */
+
+  /*  ************  Implementation of Iterator  ************  */
+
 
   /**
    * Rewind internal iterator pointer. Force execution of statement for all future loops.
@@ -549,6 +493,66 @@ class NeevoResult extends NeevoStmtBase implements ArrayAccess, Iterator, Counta
     // Fetch the row, store it & return
     $this->data[$this->iteratorPointer] = $this->fetchRow();
     return !empty($this->data[$this->iteratorPointer]);
+  }
+
+  /*  ************  Getters  ************  */
+
+  /**
+   * Statement GROUP BY fraction.
+   * @return string
+   */
+  public function getGrouping(){
+    return $this->grouping;
+  }
+
+  /**
+   * Statement HAVING fraction.
+   * @return string
+   */
+  public function getHaving(){
+    return $this->having;
+  }
+
+  /**
+   * Statement columns fraction ([SELECT] col1, col2, ...).
+   * @return array
+   */
+  public function getColumns(){
+    return $this->columns;
+  }
+
+  /**
+   * Statement JOIN fraction.
+   * @return array|false
+   */
+  public function getJoin(){
+    if(!empty($this->join)){
+      return $this->join;
+    }
+    return false;
+  }
+
+
+  /*  ************  Internal methods  ************  */
+
+
+  private function instantiateRow(& $row){
+    if(!is_array($row) && !($row instanceof $this->rowClass)){
+      throw new InvalidArgumentException('Argument 1 passed to '.__METHOD__.' must be an instance of NeevoResult::rowClass or array.');
+    }
+    if(is_array($row)){
+      if( (isset($this->dataFormat) && $this->dataFormat === Neevo::OBJECT) || !isset($this->dataFormat) ){
+        $row = new $this->rowClass($row, $this);
+      }
+    }
+
+    return $row;
+  }
+
+  private function reinit(){
+    $this->performed = false;
+    $this->data = null;
+    $this->resultSet = null;
   }
 
 }

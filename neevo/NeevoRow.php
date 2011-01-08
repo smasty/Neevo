@@ -136,7 +136,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     $this->iterable = array_merge($this->data, $this->modified);
   }
 
-  /* Implementation of Array Access */
+  /*  ************  Implementation of Array Access  ************  */
 
   public function offsetGet($offset){
     return $this->__get($offset);
@@ -154,13 +154,13 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     $this->__unset($offset);
   }
 
-  /* Implementation of Countable */
+  /*  ************  Implementation of Countable  ************  */
 
   public function count(){
     return count($this->iterable);
   }
 
-  /* Implementation of IteratorAggregate */
+  /*  ************  Implementation of IteratorAggregate  ************  */
 
   public function getIterator(){
     return new ArrayIterator($this->iterable);

@@ -308,7 +308,9 @@ abstract class NeevoStmtBase {
     return $info;
   }
 
-  /*  ******  Setters & Getters  ******  */
+
+  /*  ************  Getters  ************  */
+
 
   /**
    * Query execution time.
@@ -324,11 +326,6 @@ abstract class NeevoStmtBase {
    */
   public function isPerformed(){
     return $this->performed;
-  }
-
-  /** @internal */
-  private function reinit(){
-    $this->performed = false;
   }
 
   /**
@@ -408,8 +405,10 @@ abstract class NeevoStmtBase {
     return $cached === '' ? null : $cached;
   }
 
-  /*  ******  Internal methods  ******  */
-  
+
+  /*  ************  Internal methods  ************  */
+
+
   /** @internal */
   protected function realConnect(){
     return $this->neevo->connection()->realConnect();
@@ -456,6 +455,11 @@ abstract class NeevoStmtBase {
   /** @internal */
   public function neevo(){
     return $this->neevo;
+  }
+
+  /** @internal */
+  private function reinit(){
+    $this->performed = false;
   }
 
 

@@ -88,14 +88,6 @@ class NeevoStmt extends NeevoStmtBase {
     return $this->affectedRows = $this->neevo->driver()->affectedRows();
   }
 
-  /*  ******  Setters & Getters  ******  */
-
-  /** @internal */
-  private function reinit(){
-    $this->performed = false;
-    $this->affectedRows = null;
-  }
-
   /**
    * Statement values fraction for INSERT/UPDATE statements.
    *
@@ -105,6 +97,11 @@ class NeevoStmt extends NeevoStmtBase {
    */
   public function getValues(){
     return $this->values;
+  }
+
+  private function reinit(){
+    $this->performed = false;
+    $this->affectedRows = null;
   }
   
 }

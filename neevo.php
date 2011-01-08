@@ -44,7 +44,7 @@ class Neevo implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 276;
+  const REVISION = 277;
 
   // Data types
   const BOOL = 30;
@@ -180,6 +180,7 @@ class Neevo implements SplSubject {
       $content = fgets($handle);
       $sql .= $content;
       if(substr(rtrim($content), -1) === ';'){
+        // Passed directly to driver without logging.
         $this->driver()->query($sql);
         $sql = '';
         $count++;
@@ -298,7 +299,7 @@ class Neevo implements SplSubject {
   }
 
   /**
-   * Last executed statement info.
+   * Last executed query info.
    * @return array
    */
   public function last(){
