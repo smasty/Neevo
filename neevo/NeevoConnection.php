@@ -143,19 +143,6 @@ class NeevoConnection {
   }
 
   /**
-   * Basic information about current connection.
-   * @param bool $hide_password Password will be replaced by '*****'.
-   * @return array
-   */
-  public function info($hide_password = true){
-    $info = $this->config;
-    if(array_key_exists('password', $info) && $hide_password){
-      $info['password'] = '*****';
-    }
-    return $info;
-  }
-
-  /**
    * Create an alias for configuration value.
    * @param array $config Passed by reference
    * @param string $key
@@ -165,7 +152,20 @@ class NeevoConnection {
   public static function alias(&$config, $key, $alias){
     if(isset($config[$alias]) && !isset($config[$key])){
       $config[$key] = $config[$alias];
+      unset($config[$alias]);
     }
+  }
+
+  /**
+   * Basic information about the connection.
+   * @return array
+   */
+  public function info(){
+    $info = $this->config;
+    if(array_key_exists('password', $info)){
+      $info['password'] = '*****';
+    }
+    return $info;
   }
 
 }

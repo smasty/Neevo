@@ -20,6 +20,7 @@
  * @method NeevoStmtBase or()
  * @method NeevoStmtBase if()
  * @method NeevoStmtBase else()
+ * @method NeevoStmtBase elseif()
  * @method NeevoStmtBase end()
  */
 abstract class NeevoStmtBase {
@@ -125,26 +126,29 @@ abstract class NeevoStmtBase {
     }
 
     // Conditional statements
-    elseif(in_array($name, array('if', 'else', /*'elseif',*/ 'end'))){
+    elseif(in_array($name, array('if', 'else', 'elseif', 'end'))){
 
       // Parameter counts
-      if(count($args) < 1 && ($name == 'if'/* || $name == 'elseif'*/)){
+      if(count($args) < 1 && ($name == 'if' || $name == 'elseif')){
         throw new InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
       }
 
       $conds = & $this->conditions;
       if($name == 'if'){
-        $conds[] = (bool) $args[0];
+        $conds[] = array((bool) $args[0], 1);
       }
       // TODO elseif()
-      /*elseif($name == 'elseif'){
-        $conds[count($conds)-1] = !end($conds);
-        $conds[] = (bool) $args[0];
-      }*/
+      elseif($name == 'elseif'){
+        $conds[count($conds)-1] = array(!$conds[count($conds)-1][0], 3);
+        $conds[] = array((bool) $args[0], 3);
+      }
       elseif($name == 'else'){
-        $conds[count($conds)-1] = !end($conds);
+        $conds[count($conds)-1] = array(!$conds[count($conds)-1][0], 2);
       }
       elseif($name == 'end'){
+        if($conds[count($conds)-1][1] === 3){
+          $this->end();
+        }
         unset($conds[count($conds)-1]);
       }
 
@@ -160,7 +164,7 @@ abstract class NeevoStmtBase {
       return false;
     }
     foreach($this->conditions as $cond){
-      if($cond) continue;
+      if($cond[0]) continue;
       else return true;
     }
   }
@@ -278,21 +282,15 @@ abstract class NeevoStmtBase {
 
   /**
    * Basic information about the statement.
-   * @param bool $hide_password Password will be replaced by '*****'.
-   * @param bool $exclude_connection Connection info will be excluded.
    * @return array
    */
-  public function info($hide_password = true, $exclude_connection = false){
+  public function info(){
     $info = array(
       'type' => substr($this->type, 5),
       'table' => $this->getTable(),
       'executed' => (bool) $this->isPerformed(),
       'query_string' => trim(strip_tags($this->dump(true)))
     );
-
-    if($exclude_connection){
-      $this->neevo->connection()->info($hide_password);
-    }
 
     if($this->isPerformed()){
       $info['time'] = $this->time;

@@ -44,7 +44,7 @@ class Neevo implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 275;
+  const REVISION = 276;
 
   // Data types
   const BOOL = 30;
@@ -242,14 +242,13 @@ class Neevo implements SplSubject {
 
   /**
    * Basic information about the library.
-   * @param bool $hide_password Password will be replaced by '*****'.
    * @return array
    */
-  public function info($hide_password = true){
+  public function info(){
     $info = array(
       'executed' => (int) $this->queries(),
       'last' => $this->last(),
-      'connection' => $this->connection->info($hide_password),
+      'connection' => $this->connection->info(),
       'revision' => self::REVISION
     );
     return $info;
