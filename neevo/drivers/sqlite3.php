@@ -189,10 +189,10 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
    * @param SQLite3Result $resultSet
    * @param int $offset
    * @return bool
-   * @throws NotSupportedException
+   * @throws NeevoDriverException
    */
   public function seek($resultSet, $offset){
-    throw new NotSupportedException('Cannot seek on unbuffered result.');
+    throw new NeevoDriverException('Cannot seek on unbuffered result.');
   }
 
   /**
@@ -217,10 +217,10 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
    * Not supported because of unbuffered queries.
    * @param SQLite3Result $resultSet
    * @return int|FALSE
-   * @throws NotSupportedException
+   * @throws NeevoDriverException
    */
   public function rows($resultSet){
-    throw new NotSupportedException('Cannot count rows on unbuffered result.');
+    throw new NeevoDriverException('Cannot count rows on unbuffered result.');
   }
 
   /**

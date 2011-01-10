@@ -172,11 +172,11 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * @param mysqli_result $resultSet
    * @param int $offset
    * @return bool
-   * @throws NotSupportedException
+   * @throws NeevoDriverException
    */
   public function seek($resultSet, $offset){
     if($this->unbuffered){
-      throw new NotSupportedException('Cannot seek on unbuffered result.');
+      throw new NeevoDriverException('Cannot seek on unbuffered result.');
     }
     return $resultSet->data_seek($offset);
   }
@@ -202,11 +202,11 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * Get the number of rows in the given result set.
    * @param mysqli_result $resultSet
    * @return int|FALSE
-   * @throws NotSupportedException
+   * @throws NeevoDriverException
    */
   public function rows($resultSet){
     if($this->unbuffered){
-      throw new NotSupportedException('Cannot seek on unbuffered result.');
+      throw new NeevoDriverException('Cannot seek on unbuffered result.');
     }
     if($resultSet instanceof mysqli_result){
       return $resultSet->num_rows;

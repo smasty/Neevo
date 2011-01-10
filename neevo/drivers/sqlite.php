@@ -200,11 +200,11 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    * @param SQLiteResult $resultSet
    * @param int $offset
    * @return bool
-   * @throws NotSupportedException
+   * @throws NeevoDriverException
    */
   public function seek($resultSet, $offset){
     if($this->unbuffered){
-      throw new NotSupportedException('Cannot seek on unbuffered result.');
+      throw new NeevoDriverException('Cannot seek on unbuffered result.');
     }
     return @sqlite_seek($resultSet, $offset);
   }
@@ -230,11 +230,11 @@ class NeevoDriverSQLite extends NeevoStmtBuilder implements INeevoDriver{
    * Get the number of rows in the given result set.
    * @param SQLiteResult $resultSet
    * @return int|FALSE
-   * @throws NotSupportedException
+   * @throws NeevoDriverException
    */
   public function rows($resultSet){
     if($this->unbuffered){
-      throw new NotSupportedException('Cannot seek on unbuffered result.');
+      throw new NeevoDriverException('Cannot seek on unbuffered result.');
     }
     return @sqlite_num_rows($resultSet);
   }

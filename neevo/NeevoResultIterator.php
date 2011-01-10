@@ -82,7 +82,7 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 
   /**
    * Implementation of Countable.
-   * @throws NotSupportedException on unbuffered result.
+   * @throws NeevoDriverException on unbuffered result.
    * @return int
    */
   public function count(){
@@ -91,7 +91,7 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 
   /**
    * Implementation of SeekableIterator
-   * @throws NotSupportedException on unbuffered result.
+   * @throws NeevoDriverException on unbuffered result.
    * @param int $offset
    */
   public function seek($offset){

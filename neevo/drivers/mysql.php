@@ -194,11 +194,11 @@ class NeevoDriverMySQL implements INeevoDriver{
    * @param resource $resultSet
    * @param int $offset
    * @return bool
-   * @throws NotSupportedException
+   * @throws NeevoDriverException
    */
   public function seek($resultSet, $offset){
     if($this->unbuffered){
-      throw new NotSupportedException('Cannot seek on unbuffered result.');
+      throw new NeevoDriverException('Cannot seek on unbuffered result.');
     }
     return @mysql_data_seek($resultSet, $offset);
   }
@@ -224,11 +224,11 @@ class NeevoDriverMySQL implements INeevoDriver{
    * Get the number of rows in the given result set.
    * @param resource $resultSet
    * @return int|FALSE
-   * @throws NotSupportedException
+   * @throws NeevoDriverException
    */
   public function rows($resultSet){
     if($this->unbuffered){
-      throw new NotSupportedException('Cannot count rows on unbuffered result.');
+      throw new NeevoDriverException('Cannot count rows on unbuffered result.');
     }
     return @mysql_num_rows($resultSet);
   }

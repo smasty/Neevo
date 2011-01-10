@@ -247,7 +247,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   private function free(){
     try{
       $this->driver()->free($this->resultSet);
-    } catch(NotImplementedException $e){}
+    } catch(NeevoImplemenationException $e){}
     $this->resultSet = null;
   }
 
@@ -269,7 +269,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /**
    * Get the number of rows in the result set.
    * @return int
-   * @throws NotSupportedException
+   * @throws NeevoDriverException
    */
   public function rows(){
     $this->performed || $this->run();
@@ -281,7 +281,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /**
    * Implementation of Countable.
    * @return int
-   * @throws NotSupportedException
+   * @throws NeevoDriverException
    */
   public function count(){
     return $this->rows();
