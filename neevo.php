@@ -17,6 +17,10 @@
 if(version_compare(PHP_VERSION, '5.1.0', '<')){
   trigger_error('Neevo requires PHP version 5.1.0 or newer', E_USER_ERROR);
 }
+
+@set_magic_quotes_runtime(FALSE);
+
+
 include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmtBase.php';
 include_once dirname(__FILE__). '/neevo/NeevoStmtBuilder.php';
@@ -26,6 +30,7 @@ include_once dirname(__FILE__). '/neevo/NeevoStmt.php';
 include_once dirname(__FILE__). '/neevo/NeevoRow.php';
 include_once dirname(__FILE__). '/neevo/NeevoCache.php';
 include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
+
 
 /**
  * Core Neevo class.
@@ -48,7 +53,7 @@ class Neevo implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 290;
+  const REVISION = 292;
 
   // Data types
   const BOOL = 30;
@@ -333,6 +338,43 @@ class Neevo implements SplSubject {
   }
 
   /**
+   * Highlight given SQL code.
+   * @param string $sql
+   * @return string
+   */
+  public static function highlightSql($sql){
+    $keywords1 = 'SELECT|UPDATE|INSERT\s+INTO|DELETE|FROM|VALUES|SET|WHERE|HAVING|GROUP\s+BY|ORDER\s+BY|LIMIT|OFFSET|(?:LEFT |RIGHT |INNER )?JOIN';
+    $keywords2 = 'RANDOM|RAND|ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
+
+    $sql = str_replace("\\'", '\\&#39;', $sql);
+    $sql = preg_replace_callback("~($keywords1)|($keywords2)|('[^']+'|[0-9]+)|(/\*.*\*/)|(--\s?[^;]+)|(#[^;]+)~", array('Neevo', '_highlightCallback'), $sql);
+    $sql = str_replace('\\&#39;', "\\'", $sql);
+    return '<code style="color:#555" class="sql-dump">' . $sql . "</code>\n";
+  }
+
+  /** @internal */
+  protected static function _highlightCallback($match){
+    if(!empty($match[1])){ // Basic keywords
+      return '<strong style="color:#e71818">'.$match[1].'</strong>';
+    }
+    if(!empty($match[2])){ // Other keywords
+      return '<strong style="color:#d59401">'.$match[2].'</strong>';
+    }
+    if(!empty($match[3])){ // Values
+      return '<em style="color:#008000">'.$match[3].'</em>';
+    }
+    if(!empty($match[4])){ // /* comment */
+      return '<em style="color:#999">'.$match[4].'</em>';
+    }
+    if(!empty($match[5])){ // -- comment
+      return '<em style="color:#999">'.$match[5].'</em>';
+    }
+    if(!empty($match[6])){ // # comment
+      return '<em style="color:#999">'.$match[6].'</em>';
+    }
+  }
+
+  /**
    * Close connection to server.
    * @return void
    */
@@ -365,12 +407,12 @@ class NeevoException extends Exception{};
 
 /**
  * Exception for features not implemented by the driver,
- * @package Neevo
+ * @package NeevoExceptions
  */
 class NeevoImplemenationException extends NeevoException{};
 
 /**
  * Neevo driver exception.
- * @package Neevo
+ * @package NeevoExceptions
  */
 class NeevoDriverException extends NeevoException{};

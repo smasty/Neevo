@@ -126,30 +126,25 @@ abstract class NeevoStmtBase {
     }
 
     // Conditional statements
-    elseif(in_array($name, array('if', 'else', 'elseif', 'end'))){
+    elseif(in_array($name, array('if', 'else', 'end'))){
 
       // Parameter counts
-      if(count($args) < 1 && ($name == 'if' || $name == 'elseif')){
+      if(count($args) < 1 && $name == 'if'){
         throw new InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
       }
 
       $conds = & $this->conditions;
       if($name == 'if'){
-        $conds[] = array((bool) $args[0], 1);
-      }
-      elseif($name == 'elseif'){
-        $conds[count($conds)-1] = array(!$conds[count($conds)-1][0], 3);
-        $conds[] = array((bool) $args[0], 3);
+        $conds[] = (bool) $args[0];
       }
       elseif($name == 'else'){
-        $conds[count($conds)-1] = array(!$conds[count($conds)-1][0], 2);
+        $conds[ count($conds)-1 ] = !end($conds);
       }
       elseif($name == 'end'){
-        if($conds[count($conds)-1][1] === 3){
-          $this->end();
-        }
-        unset($conds[count($conds)-1]);
+        array_pop($conds);
       }
+
+      //reset($conds);
 
       return $this;
 
@@ -163,7 +158,7 @@ abstract class NeevoStmtBase {
       return false;
     }
     foreach($this->conditions as $cond){
-      if($cond[0]) continue;
+      if($cond) continue;
       else return true;
     }
   }
@@ -232,7 +227,7 @@ abstract class NeevoStmtBase {
    * @return string|NeevoStmt|NeevoResult fluent interface
    */
   public function dump($return = false){
-    $code = (PHP_SAPI === 'cli') ? $this->build() : self::_highlightSql($this->build());
+    $code = (PHP_SAPI === 'cli') ? $this->build() : Neevo::highlightSql($this->build());
     if(!$return){
       echo $code;
     }
@@ -287,20 +282,24 @@ abstract class NeevoStmtBase {
     $info = array(
       'type' => substr($this->type, 5),
       'table' => $this->getTable(),
-      'executed' => (bool) $this->isPerformed(),
-      'query_string' => trim(strip_tags($this->dump(true)))
+      'executed' => (bool) $this->performed,
+      'sql' => trim(strip_tags($this->dump(true)))
     );
 
-    if($this->isPerformed()){
+    if($this->performed){
       $info['time'] = $this->time;
-      if(isset($this->numRows)){
-        $info['rows'] = $this->numRows;
-      }
       if(isset($this->affectedRows)){
         $info['affected_rows'] = $this->affectedRows;
       }
       if($this->type == Neevo::STMT_INSERT){
-        $info['last_insert_id'] = $this->insertId();
+        try{
+          $info['last_insert_id'] = $this->insertId();
+        } catch(Exception $e){}
+      }
+      if($this->type == Neevo::STMT_SELECT){
+        try{
+          $info['rows'] = @$this->rows();
+        } catch(Exception $e){}
       }
     }
 
@@ -411,44 +410,6 @@ abstract class NeevoStmtBase {
   /** @internal */
   protected function realConnect(){
     return $this->connection->realConnect();
-  }
-
-  /**
-   * Highlight given SQL code.
-   * @param string $sql
-   * @return string
-   * @internal
-   */
-  protected static function _highlightSql($sql){
-    $keywords1 = 'SELECT|UPDATE|INSERT\s+INTO|DELETE|FROM|VALUES|SET|WHERE|HAVING|GROUP\s+BY|ORDER\s+BY|LIMIT|OFFSET|(?:LEFT |RIGHT |INNER )?JOIN';
-    $keywords2 = 'RANDOM|RAND|ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
-
-    $sql = str_replace("\\'", '\\&#39;', $sql);
-    $sql = preg_replace_callback("~($keywords1)|($keywords2)|('[^']+'|[0-9]+)|(/\*.*\*/)|(--\s?[^;]+)|(#[^;]+)~", array('NeevoStmtBase', '_highlightCallback'), $sql);
-    $sql = str_replace('\\&#39;', "\\'", $sql);
-    return '<code style="color:#555" class="sql-dump">' . $sql . "</code>\n";
-  }
-
-  /** @internal */
-  protected static function _highlightCallback($match){
-    if(!empty($match[1])){ // Basic keywords
-      return '<strong style="color:#e71818">'.$match[1].'</strong>';
-    }
-    if(!empty($match[2])){ // Other keywords
-      return '<strong style="color:#d59401">'.$match[2].'</strong>';
-    }
-    if(!empty($match[3])){ // Values
-      return '<em style="color:#008000">'.$match[3].'</em>';
-    }
-    if(!empty($match[4])){ // /* comment */
-      return '<em style="color:#999">'.$match[4].'</em>';
-    }
-    if(!empty($match[5])){ // -- comment
-      return '<em style="color:#999">'.$match[5].'</em>';
-    }
-    if(!empty($match[6])){ // # comment
-      return '<em style="color:#999">'.$match[6].'</em>';
-    }
   }
 
   /** @internal */

@@ -15,15 +15,7 @@ echo $db->select('software')
   ->else()->limit(2)
   ->end()->getLimit() === 2 ? "else ok\n" : "else failed\n";
 
-// ELSEIF test
-echo $db->select('software')
-  ->if(false)->limit(1)
-  ->elseif(true)->limit(3)
-  ->else()->limit(2)
-  ->end()->getLimit() === 3 ? "elseif ok\n" : "elseif failed\n";
-
 ?>
 --EXPECT--
 if ok
 else ok
-elseif ok

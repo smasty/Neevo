@@ -26,6 +26,7 @@ include_once dirname(__FILE__) . '/connect.php';
 
 echo "Driver: $driver\n";
 
+$errcount = 0;
 foreach(glob(dirname(__FILE__).'/*.phpt') as $test){
 
   ob_start();
@@ -37,11 +38,17 @@ foreach(glob(dirname(__FILE__).'/*.phpt') as $test){
   }
   elseif($matches[2] !== $matches[3]){
     fwrite(STDERR, "Error: Test $file failed - $matches[1]\n");
+    $errcount++;
     
     // Debug mode (-b option)
-    if(isset($opts['b']))
+    if(isset($opts['b'])){
       echo "EXPECT:\n$matches[3]\n-\nRESULT:\n$matches[2]\n-\n\n";
+      exit(1);
+    }
   }
 }
 
-printf("\n%.3F sec, %d KB\n", microtime(true) - $start, memory_get_peak_usage() / 1024);
+if($errcount === 0){
+  echo "\nTests passed successfully.";
+  printf("\n%.3F sec, %d KB\n", microtime(true) - $start, memory_get_peak_usage() / 1024);
+}
