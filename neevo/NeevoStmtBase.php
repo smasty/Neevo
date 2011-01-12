@@ -31,6 +31,15 @@ abstract class NeevoStmtBase {
 
   /** @var NeevoConnection */
   protected $connection;
+
+  /**
+   * Create statement.
+   * @param NeevoConnection $connection
+   * @return void
+   */
+  public function  __construct(NeevoConnection $connection){
+    $this->connection = $connection;
+  }
   
   /**
    * Set WHERE condition. Accepts infinite arguments.
@@ -412,12 +421,18 @@ abstract class NeevoStmtBase {
     return $this->connection->realConnect();
   }
 
-  /** @internal */
+  /**
+   * @internal
+   * @return NeevoConnection
+   */
   public function connection(){
     return $this->connection;
   }
 
-  /** @internal */
+  /**
+   * @internal
+   * @return INeevoDriver
+   */
   public function driver(){
     return $this->connection->driver();
   }
@@ -425,6 +440,11 @@ abstract class NeevoStmtBase {
   /** @internal */
   private function reinit(){
     $this->performed = false;
+  }
+
+  /** @internal */
+  protected function getConfig($key = null){
+    return $this->connection->getConfig($key);
   }
 
 

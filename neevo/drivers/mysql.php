@@ -68,7 +68,6 @@ class NeevoDriverMySQL implements INeevoDriver{
     );
 
     $config += $defaults;
-
     if(isset($config['port'])){
       $host = $config['host'] .':'. $config['port'];
     }
@@ -244,7 +243,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   /**
    * Escape given value.
    * @param mixed $value
-   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param string $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @throws InvalidArgumentException
    * @return mixed
    */
@@ -267,6 +266,19 @@ class NeevoDriverMySQL implements INeevoDriver{
   }
 
   /**
+   * Decode given value.
+   * @param mixed $value
+   * @param string $type
+   * @return mixed
+   */
+  public function unescape($value, $type){
+    if($type === Neevo::BINARY){
+      return $value;
+    }
+    throw new InvalidArgumentException('Unsupported data type.');
+  }
+
+  /**
    * Get the PRIMARY KEY column for given table.
    * @param $table string
    * @return string
@@ -280,6 +292,22 @@ class NeevoDriverMySQL implements INeevoDriver{
       }
     }
     return $key;
+  }
+
+  /**
+   * Get types of columns in given result set.
+   * @param resource $resultSet
+   * @param string $table
+   * @return array
+   */
+  public function getColumnTypes($resultSet, $table){
+    $cols = array();
+    $count = mysql_num_fields($resultSet);
+    for($i = 0; $i < $count; $i++){
+      $field = mysql_fetch_field($resultSet, $i);
+      $cols[$field->name] = $field->type;
+    }
+    return $cols;
   }
 
 }

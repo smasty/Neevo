@@ -17,8 +17,10 @@
  * Representation of database connection.
  *
  * Common configuration: (see driver specific configuration too)
- * - table_prefix => prefix for table names
+ * - tablePrefix => prefix for table names
  * - lazy (bool) => If TRUE, connection will be established only when required.
+ * - detectTypes (bool) => Detect column types automatically
+ * - formatDateTime => date/time format ("U" for timestamp. If empty, DateTime object used)
  *
  * @package Neevo
  */
@@ -62,7 +64,9 @@ class NeevoConnection {
     $defaults = array(
       'driver' => Neevo::$defaultDriver,
       'lazy' => false,
-      'table_prefix' => ''
+      'tablePrefix' => '',
+      'formatDateTime' => '',
+      'detectTypes' => false
     );
 
     // Aliases
@@ -74,7 +78,8 @@ class NeevoConnection {
     self::alias($config, 'host', 'server');
     self::alias($config, 'database', 'db');
     self::alias($config, 'database', 'dbname');
-    self::alias($config, 'table_prefix', 'prefix');
+    self::alias($config, 'tablePrefix', 'table_prefix');
+    self::alias($config, 'tablePrefix', 'prefix');
     self::alias($config, 'charset', 'encoding');
 
     $config += $defaults;
@@ -88,12 +93,24 @@ class NeevoConnection {
   }
 
   /**
+   * Get configuration
+   * @param string $key
+   * @return mixed
+   */
+  public function getConfig($key = null){
+    if($key === null){
+      return $this->config;
+    }
+    return isset($this->config[$key]) ? $this->config[$key] : null;
+  }
+
+  /**
    * Get defined table prefix
    * @return string
    */
   public function prefix(){
-    return isset($this->config['table_prefix'])
-      ? $this->config['table_prefix'] : '';
+    return isset($this->config['tablePrefix'])
+      ? $this->config['tablePrefix'] : '';
   }
 
   /**

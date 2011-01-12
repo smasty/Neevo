@@ -225,7 +225,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
   /**
    * Escape given value.
    * @param mixed $value
-   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param string $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @throws InvalidArgumentException
    * @return mixed
    */
@@ -248,6 +248,19 @@ class NeevoDriverMySQLi implements INeevoDriver{
   }
 
   /**
+   * Decode given value.
+   * @param mixed $value
+   * @param string $type
+   * @return mixed
+   */
+  public function unescape($value, $type){
+    if($type === Neevo::BINARY){
+      return $value;
+    }
+    throw new InvalidArgumentException('Unsupported data type.');
+  }
+
+  /**
    * Get the PRIMARY KEY column for given table.
    * @param $table string
    * @return string
@@ -261,6 +274,31 @@ class NeevoDriverMySQLi implements INeevoDriver{
       }
     }
     return $key;
+  }
+
+  /**
+   * Get types of columns in given result set.
+   * @param mysqli_result $resultSet
+   * @param string $table
+   * @return array
+   */
+  public function getColumnTypes($resultSet, $table){
+    static $types;
+    if(empty($types)){
+      $consts = get_defined_constants(true);
+      foreach($consts['mysqli'] as $key => $value){
+        if(strncmp($key, 'MYSQLI_TYPE_', 12) === 0){
+          $types[$value] = strtolower(substr($key, 12));
+        }
+      }
+      $types[MYSQLI_TYPE_TINY] = $types[MYSQLI_TYPE_SHORT] = $types[MYSQLI_TYPE_LONG] = 'int';
+    }
+
+    $cols = array();
+    while($field = $resultSet->fetch_field()){
+      $cols[$field->name] = $types[$field->type];
+    }
+    return $cols;
   }
 
 }

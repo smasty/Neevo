@@ -21,15 +21,7 @@ class NeevoStmt extends NeevoStmtBase {
 
   protected $affectedRows, $values = array();
 
-  /**
-   * Create non-retrieving statement.
-   * @param NeevoConnection $connection
-   * @return void
-   */
-  public function  __construct(NeevoConnection $connection){
-    $this->connection = $connection;
-  }
-
+  
   /**
    * Create UPDATE statement.
    * @param string $table Table name
@@ -75,7 +67,7 @@ class NeevoStmt extends NeevoStmtBase {
    * @return int|FALSE
    */
   public function insertId(){
-    $this->isPerformed() || $this->run();
+    $this->performed || $this->run();
     return $this->driver()->insertId();
   }
 
@@ -84,7 +76,7 @@ class NeevoStmt extends NeevoStmtBase {
    * @return int
    */
   public function affectedRows(){
-    $this->isPerformed() || $this->run();
+    $this->performed || $this->run();
     return $this->affectedRows = $this->driver()->affectedRows();
   }
 

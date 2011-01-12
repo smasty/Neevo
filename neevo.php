@@ -14,8 +14,8 @@
  */
 
 // PHP compatibility
-if(version_compare(PHP_VERSION, '5.1.0', '<')){
-  trigger_error('Neevo requires PHP version 5.1.0 or newer', E_USER_ERROR);
+if(version_compare(PHP_VERSION, '5.2.0', '<')){
+  trigger_error('Neevo requires PHP version 5.2.0 or newer', E_USER_ERROR);
 }
 
 @set_magic_quotes_runtime(FALSE);
@@ -38,7 +38,7 @@ include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
  */
 class Neevo implements SplSubject {
 
-  private $last, $queries;
+  private $last, $queries = 0;
 
   /** @var SplObjectStorage */
   private $observers;
@@ -53,12 +53,15 @@ class Neevo implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 292;
+  const REVISION = 293;
 
   // Data types
-  const BOOL = 30;
-  const TEXT = 33;
-  const DATETIME = 36;
+  const BOOL = 'b';
+  const INT = 'i';
+  const FLOAT = 'f';
+  const TEXT = 't';
+  const BINARY = 'bin';
+  const DATETIME = 'd';
 
   // Statement types
   const STMT_SELECT = 'stmt_select';
@@ -234,7 +237,7 @@ class Neevo implements SplSubject {
    */
   public function info(){
     $info = array(
-      'executed' => (int) $this->queries(),
+      'executed' => (int) $this->queries,
       'last' => $this->last(),
       'connection' => $this->connection->info(),
       'revision' => self::REVISION

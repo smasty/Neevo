@@ -144,10 +144,18 @@ interface INeevoDriver {
   /**
    * Escape given value.
    * @param mixed $value
-   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param string $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @return mixed
    */
   public function escape($value, $type);
+
+  /**
+   * Decode given value.
+   * @param mixed $value
+   * @param string $type
+   * @return mixed
+   */
+  public function unescape($value, $type);
 
   /**
    * Get the PRIMARY KEY column for given table.
@@ -155,5 +163,13 @@ interface INeevoDriver {
    * @return string|null
    */
   public function getPrimaryKey($table);
+
+  /**
+   * Get types of columns in given result set.
+   * @param resource $resultSet
+   * @param string $table
+   * @return array
+   */
+  public function getColumnTypes($resultSet, $table);
   
 }

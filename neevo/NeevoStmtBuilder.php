@@ -160,7 +160,7 @@ class NeevoStmtBuilder {
       } else{ // field = value
         $operator = ' = ';
         $value = (is_numeric($value) && !is_string($value))
-          ? $value : $this->_escapeString($value);
+          ? $value : $this->statement->driver()->escape($value, Neevo::TEXT);
       }
       $s = "($field$operator$value)";
       if(isset($cond['glue'])){
@@ -269,7 +269,7 @@ class NeevoStmtBuilder {
         }
       }
       elseif(is_string($value)){
-        $value = $this->_escapeString($value);
+        $value = $this->statement->driver()->escape($value, Neevo::TEXT);
       }
       elseif($value instanceof DateTime){
         $value = $this->statement->driver()->escape($value, Neevo::DATETIME);
@@ -281,24 +281,10 @@ class NeevoStmtBuilder {
         $value = 'IN(' . join(', ', $this->_escapeArray($value)) . ')';
       }
       else{
-        $value = $this->_escapeString((string) $value);
+        $value = $this->statement->driver()->escape((string) $value, Neevo::TEXT);
       }
     }
     return $array;
-  }
-
-  /**
-   * Escape given string for use in SQL.
-   * @param string $string
-   * @return string
-   * @internal
-   * @todo
-   */
-  protected function _escapeString($string){
-    if(get_magic_quotes_gpc()){
-      $string = stripslashes($string);
-    }
-    return $this->statement->driver()->escape($string, Neevo::TEXT);
   }
   
 }

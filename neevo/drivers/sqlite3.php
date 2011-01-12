@@ -33,7 +33,7 @@
  */
 class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
 
-  private $dbCharset, $charset, $update_limit, $resource, $affectedRows;
+  private $dbCharset, $charset, $update_limit, $resource, $affectedRows, $tblData;
 
   /**
    * Check for required PHP extension.
@@ -234,7 +234,7 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   /**
    * Escape given value.
    * @param mixed $value
-   * @param int $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param string $type Type of value (Neevo::TEXT, Neevo::BOOL...)
    * @throws InvalidArgumentException
    * @return mixed
    */
@@ -256,6 +256,19 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   }
 
   /**
+   * Decode given value.
+   * @param mixed $value
+   * @param string $type
+   * @return mixed
+   */
+  public function unescape($value, $type){
+    if($type === Neevo::BINARY){
+      return $value;
+    }
+    throw new InvalidArgumentException('Unsupported data type.');
+  }
+
+  /**
    * Get the PRIMARY KEY column for given table.
    * @param $table string
    * @return string
@@ -266,13 +279,15 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     if($pos !== false){
       $table = substr($table, $pos + 1);
     }
-    $q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
-    $r = $this->fetch($q);
-    if($r === false){
-      return '';
+    if(isset($this->tblData[$table])){
+      $sql = $this->tblData[$table];
+    } else{
+      $q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
+      $r = $this->fetch($q);
+      if($r === false) return '';
+      $this->tblData[$table] = $sql = $r['sql'];
     }
 
-    $sql = $r['sql'];
     $sql = explode("\n", $sql);
     foreach($sql as $field){
       $field = trim($field);
@@ -281,6 +296,34 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
       }
     }
     return $key;
+  }
+  
+  /**
+   * Get types of columns in given result set.
+   * @param SQLite3Result $resultSet
+   * @param string $table
+   * @return array
+   */
+  public function getColumnTypes($resultSet, $table){
+    if(isset($this->tblData[$table])){
+      $sql = $this->tblData[$table];
+    } else{
+      $q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
+      $r = $this->fetch($q);
+      if($r === false) return array();
+      $this->tblData[$table] = $sql = $r['sql'];
+    }
+    $sql = explode("\n", $sql);
+
+    $cols = array();
+    foreach($sql as $field){
+      $field = trim($field);
+      preg_match('~^"(\w+)"\s+(integer|real|numeric|text|blob).+$~i', $field, $m);
+      if(isset($m[1], $m[2])){
+        $cols[$m[1]] = $m[2];
+      }
+    }
+    return $cols;
   }
 
   /**
