@@ -15,6 +15,7 @@
 
 /**
  * Interface for NeevoCache classes.
+ * @author Martin Srank
  * @package NeevoCache
  */
 interface INeevoCache {

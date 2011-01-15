@@ -15,6 +15,7 @@
 
 /**
  * Result set iterator.
+ * @author Martin Srank
  * @package Neevo
  */
 class NeevoResultIterator implements Iterator, Countable, SeekableIterator {

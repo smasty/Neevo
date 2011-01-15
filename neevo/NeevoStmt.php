@@ -15,6 +15,7 @@
 
 /**
  * Class for non-retriveing statements.
+ * @author Martin Srank
  * @package Neevo
  */
 class NeevoStmt extends NeevoStmtBase {

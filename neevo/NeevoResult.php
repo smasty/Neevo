@@ -15,6 +15,7 @@
 
 /**
  * Represents a result. Can be iterated, counted and provides fluent interface.
+ * @author Martin Srank
  * @package Neevo
  */
 class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable {

@@ -34,6 +34,7 @@ include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
 
 /**
  * Core Neevo class.
+ * @author Martin Srank
  * @package Neevo
  */
 class Neevo implements SplSubject {
@@ -53,7 +54,7 @@ class Neevo implements SplSubject {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 293;
+  const REVISION = 294;
 
   // Data types
   const BOOL = 'b';
@@ -114,16 +115,18 @@ class Neevo implements SplSubject {
    * INSERT statement factory.
    * @param string $table Table name
    * @param array $values Values to insert
-   * @return NeevoStmt fluent interface
+   * @return int|NeevoStmt Last inserted ID or NeevoStmt on lazy connection
    */
   public function insert($table, array $values){
     $q = new NeevoStmt($this->connection);
-    return $q->insert($table, $values);
+    $ins = $q->insert($table, $values);
+    return $this->connection->getConfig('lazy')
+      ? $ins : $ins->insertId();
   }
 
   /**
    * Alias for Neevo::insert().
-   * @return NeevoStmt fluent interface
+   * @return int|NeevoStmt
    */
   public function insertInto($table, array $values){
     return $this->insert($table, $values);
@@ -392,6 +395,7 @@ class Neevo implements SplSubject {
 
 /**
  * Representation of SQL literal.
+ * @author Martin Srank
  * @package Neevo
  */
 class NeevoLiteral {
@@ -404,18 +408,21 @@ class NeevoLiteral {
 
 /**
  * Main Neevo exception.
+ * @author Martin Srank
  * @package NeevoExceptions
  */
 class NeevoException extends Exception{};
 
 /**
  * Exception for features not implemented by the driver,
+ * @author Martin Srank
  * @package NeevoExceptions
  */
 class NeevoImplemenationException extends NeevoException{};
 
 /**
  * Neevo driver exception.
+ * @author Martin Srank
  * @package NeevoExceptions
  */
 class NeevoDriverException extends NeevoException{};

@@ -15,6 +15,7 @@
 
 /**
  * Building SQL string from NeevoResult instance.
+ * @author Martin Srank
  * @package Neevo
  */
 class NeevoStmtBuilder {

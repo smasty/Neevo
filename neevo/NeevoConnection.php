@@ -22,6 +22,7 @@
  * - detectTypes (bool) => Detect column types automatically
  * - formatDateTime => date/time format ("U" for timestamp. If empty, DateTime object used)
  *
+ * @author Martin Srank
  * @package Neevo
  */
 class NeevoConnection {

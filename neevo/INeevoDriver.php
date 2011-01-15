@@ -40,6 +40,7 @@
  * 
  * For proper use, see "source of **NeevoStmtBuilder** class":./source-neevo.NeevoStmtBuilder.php.html.
  *
+ * @author Martin Srank
  * @package NeevoDrivers
  */
 interface INeevoDriver {

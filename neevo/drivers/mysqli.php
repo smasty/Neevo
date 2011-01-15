@@ -283,20 +283,20 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * @return array
    */
   public function getColumnTypes($resultSet, $table){
-    static $types;
-    if(empty($types)){
-      $consts = get_defined_constants(true);
-      foreach($consts['mysqli'] as $key => $value){
-        if(strncmp($key, 'MYSQLI_TYPE_', 12) === 0){
-          $types[$value] = strtolower(substr($key, 12));
+    static $colTypes;
+    if(empty($colTypes)){
+      $constants = get_defined_constants(true);
+      foreach($constants['mysqli'] as $type => $code){
+        if(strncmp($type, 'MYSQLI_TYPE_', 12) === 0){
+          $colTypes[$code] = strtolower(substr($type, 12));
         }
       }
-      $types[MYSQLI_TYPE_TINY] = $types[MYSQLI_TYPE_SHORT] = $types[MYSQLI_TYPE_LONG] = 'int';
+      $colTypes[MYSQLI_TYPE_LONG] = $colTypes[MYSQLI_TYPE_SHORT] = $colTypes[MYSQLI_TYPE_TINY] = 'int';
     }
 
     $cols = array();
     while($field = $resultSet->fetch_field()){
-      $cols[$field->name] = $types[$field->type];
+      $cols[$field->name] = $colTypes[$field->type];
     }
     return $cols;
   }

@@ -16,6 +16,7 @@
 
 /**
  * Representation of a row in a result.
+ * @author Martin Srank
  * @package Neevo
  */
 class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
