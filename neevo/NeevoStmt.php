@@ -66,10 +66,18 @@ class NeevoStmt extends NeevoStmtBase {
   /**
    * Get the ID generated in the last INSERT statement.
    * @return int|FALSE
+   * @throws NeevoException on non-INSERT statements.
    */
   public function insertId(){
+    if($this->type !== Neevo::STMT_INSERT){
+      throw new NeevoException(__METHOD__.' can be called only on INSERT statements.');
+    }
     $this->performed || $this->run();
-    return $this->driver()->insertId();
+    try{
+      return $this->driver()->insertId();
+    } catch(NeevoImplemenationException $e){
+      return false;
+    }
   }
 
   /**

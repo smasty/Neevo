@@ -5,7 +5,7 @@ NeevoRow Update/delete functionality
 
 $db->insert('user', array(
   'mail' => 'john@example.com'
-))->run();
+));
 
 $row = $db->select('user')->limit(1)->fetchRow();
 $row->mail = 'doe@example.com';

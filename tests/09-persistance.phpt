@@ -9,7 +9,8 @@ $db->insert('software',
     'id' => 5,
     'title' => 'Debian',
     'web' => 'http://debian.org'
-  ))->exec();
+  ));
+
 // Check insertion
 echo $db->select('title', 'software')->where('id', 5)->limit(1)->fetchSingle() . "\n";
 
