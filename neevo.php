@@ -21,17 +21,6 @@ if(version_compare(PHP_VERSION, '5.2.0', '<')){
 @set_magic_quotes_runtime(FALSE);
 
 
-include_once dirname(__FILE__). '/neevo/NeevoConnection.php';
-include_once dirname(__FILE__). '/neevo/NeevoStmtBase.php';
-include_once dirname(__FILE__). '/neevo/NeevoStmtBuilder.php';
-include_once dirname(__FILE__). '/neevo/NeevoResult.php';
-include_once dirname(__FILE__). '/neevo/NeevoResultIterator.php';
-include_once dirname(__FILE__). '/neevo/NeevoStmt.php';
-include_once dirname(__FILE__). '/neevo/NeevoRow.php';
-include_once dirname(__FILE__). '/neevo/NeevoCache.php';
-include_once dirname(__FILE__). '/neevo/INeevoDriver.php';
-
-
 /**
  * Core Neevo class.
  * @author Martin Srank
@@ -53,8 +42,32 @@ class Neevo implements SplSubject {
   /** @var string Default Neevo driver */
   public static $defaultDriver = 'mysql';
 
+  /** @var array path to Neevo classes (for autoloader) */
+  private static $classes = array(
+    'neevo' => '',
+    'neevoliteral' => '',
+    'neevoexception' => '',
+    'neevodriverexception' => '',
+    'neevoimplementationexception' => '',
+    'neevoconnection' => '/neevo/NeevoConnection.php',
+    'ineevocache' => '/neevo/NeevoCache.php',
+    'neevocacheapc' => '/neevo/NeevoCache.php',
+    'neevocachedb' => '/neevo/NeevoCache.php',
+    'neevocachefile' => '/neevo/NeevoCache.php',
+    'neevocacheinclude' => '/neevo/NeevoCache.php',
+    'neevocachememcache' => '/neevo/NeevoCache.php',
+    'neevocachesession' => '/neevo/NeevoCache.php',
+    'neevostmtbase' => '/neevo/NeevoStmtBase.php',
+    'neevostmtbuilder' => '/neevo/NeevoStmtBuilder.php',
+    'neevostmt' => '/neevo/NeevoStmt.php',
+    'neevoresult' => '/neevo/NeevoResult.php',
+    'neevoresultiterator' => '/neevo/NeevoResultIterator.php',
+    'neevorow' => '/neevo/NeevoRow.php',
+    'ineevodriver' => '/neevo/INeevoDriver.php',
+  );
+
   // Neevo revision
-  const REVISION = 295;
+  const REVISION = 296;
 
   // Data types
   const BOOL = 'b';
@@ -84,6 +97,8 @@ class Neevo implements SplSubject {
    * @throws NeevoException
    */
   public function __construct($config, INeevoCache $cache = null){
+    spl_autoload_register(array('Neevo', '_autoload'));
+    
     $this->connect($config);
     self::$cache = $cache;
     $this->observers = new SplObjectStorage;
@@ -388,6 +403,21 @@ class Neevo implements SplSubject {
     try{
       $this->connection->driver()->close();
     } catch(NeevoImplemenationException $e){}
+  }
+
+  /**
+   * Neevo autoloader
+   * @param string $class
+   * @return bool
+   * @internal
+   */
+  public static function _autoload($class){
+    $class = strtolower($class);
+    
+    if(isset(self::$classes[$class])){
+      return include_once dirname(__FILE__).self::$classes[$class];
+    }
+    return false;
   }
 
 }
