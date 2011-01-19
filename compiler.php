@@ -1,9 +1,23 @@
 <?php
+/**
+ * Neevo - Tiny open-source database abstraction layer for PHP
+ *
+ * Copyright 2010-2011 Martin Srank (http://smasty.net)
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this package in the file license.txt.
+ *
+ * @author   Martin Srank (http://smasty.net)
+ * @license  http://neevo.smasty.net/license  MIT license
+ * @link     http://neevo.smasty.net/
+ *
+ */
+
 if(PHP_SAPI !== 'cli'){
   trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
 }
 
-$args = getopt('d::hq');
+$args = getopt('d:hq');
 
 // Quiet mode
 if(isset($args['q'])){
@@ -12,26 +26,13 @@ if(isset($args['q'])){
 
 // Help
 if(isset($args['h'])){
-  echo "Usage:
-  $ php ".basename(__FILE__)." [-d=<drivers>] [-h] [-q]
-
-Options:
-
-  -d=<drivers>  Comma-separated list of drivers to include.
-                Defaults to all drivers.
-  -h            Displays help.
-  -q            Quiet mode - no output.
-";
-  exit(0);
+  Compiler::getHelp();
 }
 
 // Retrieve drivers
 $drivers = null;
 if(isset($args['d'])){
-  $drivers = explode(',', str_replace('=', '', $args['d']));
-  foreach($drivers as &$d){
-    $d = strtolower(trim($d));
-  }
+  $drivers = array_map('strtolower', explode(',', $args['d']));
 }
 
 $compiler = new Compiler(array(
@@ -71,7 +72,6 @@ class Compiler{
     $this->drivers = $this->getDrivers($options['drivers']);
   }
 
-
   /**
    * @param array|null
    * @return array
@@ -91,7 +91,6 @@ class Compiler{
     return $drivers;
   }
 
-
   /**
    * @return string Message
    */
@@ -110,7 +109,6 @@ class Compiler{
     self::$newRevision = $match[1]+1;
     return 'const REVISION = ' . self::$newRevision . ';';
   }
-
 
   /**
    * @return string Message
@@ -142,7 +140,6 @@ class Compiler{
       'Source minified' : $this->error('Minification failed');
   }
 
-
   /**
    * @param string
    * @return string
@@ -156,7 +153,6 @@ class Compiler{
     }
     return str_replace($last_line, "$license\n", $content);
   }
-
 
   /**
    * @return string
@@ -172,9 +168,10 @@ class Compiler{
     return '.'. join('-', $drivers);
   }
 
-
   /**
    * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
+   * @param string $path
+   * @return string
    */
   private function includeFile($path) {
     $file = @file_get_contents($path);
@@ -183,9 +180,10 @@ class Compiler{
     return "?>\n$file" . ($php ? "<?php" : "");
   }
 
-
   /**
    * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
+   * @param string $input
+   * @return string
    */
   private function phpShrink($input){
     $tokens = token_get_all($input);
@@ -240,6 +238,20 @@ class Compiler{
       }
     }
     return $output;
+  }
+
+  public static function getHelp(){
+    echo "Usage:
+  $ php ".basename(__FILE__)." [-d <drivers>] [-h] [-q]
+
+Options:
+
+  -d <drivers>  Comma-separated list of drivers to include -
+                defaults to all drivers.
+  -h            Displays help.
+  -q            Quiet mode - no output.
+";
+    exit(0);
   }
 
   private function error($message){

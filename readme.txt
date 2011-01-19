@@ -66,12 +66,12 @@ Neevo comes with a "compiler" - PHP CLI script shrinking whole Neevo to one PHP 
 Included drivers can also be specified.
 
 Usage:
-  $ php compiler.php [-d=<drivers>] [-h] [-q]
+  $ php compiler.php [-d <drivers>] [-h] [-q]
 
 Options:
 
-  -d=<drivers>  Comma-separated list of drivers to include.
-                Defaults to all drivers.
+  -d <drivers>  Comma-separated list of drivers to include -
+                defaults to all drivers.
   -h            Displays help.
   -q            Quiet mode - no output.
 
