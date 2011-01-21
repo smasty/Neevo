@@ -21,7 +21,8 @@
 class NeevoStmtParser {
 
   /** @var NeevoStmtBase */
-  protected $statement;
+  protected $stmt;
+  protected $clauses = array();
 
   /**
    * Parse the instance.
@@ -29,71 +30,109 @@ class NeevoStmtParser {
    * @return string The SQL statement
    */
   public function parse(NeevoStmtBase $statement){
-
-    $this->statement = $statement;
-
-    $where = '';
-    $order = '';
-    $group = '';
-    $limit = '';
-    $q = '';
-
+    $this->stmt = $statement;
+    $where = $order = $group = $limit = $q = '';
     $table = $statement->getTable();
 
-    // JOIN
-    if($statement instanceof NeevoResult && $statement->getJoin()){
+    if($this->stmt instanceof NeevoResult && $this->stmt->getJoin()){
       $table = $table .' '. $this->parseJoin();
     }
-
-    // WHERE
-    if($statement->getConditions()){
+    if($this->stmt->getConditions()){
       $where = $this->parseWhere();
     }
-
-    // ORDER BY
-    if($statement->getOrdering()){
-      $order = $this->parseOrdering();
-    }
-
-    // GROUP BY
-    if($statement instanceof NeevoResult && $statement->getGrouping()){
+    if($this->stmt instanceof NeevoResult && $this->stmt->getGrouping()){
       $group = $this->parseGrouping();
     }
-
-    // LIMIT, OFFSET
-    if($statement->getLimit()){
-      $limit = ' LIMIT ' .$statement->getLimit();
+    if($this->stmt->getOrdering()){
+      $order = $this->parseOrdering();
     }
-    if($statement->getOffset()){
-      $limit .= ' OFFSET ' .$statement->getOffset();
+    if($this->stmt->getLimit() || $this->stmt->getOffset()){
+      $limit = $this->parseLimit();
     }
 
-    if($statement->getType() == Neevo::STMT_SELECT){
-      $cols = $this->parseSelectCols();
-      $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
+    $this->clauses = array($table, $where, $group, $order, $limit);
+
+    if($this->stmt->getType() == Neevo::STMT_SELECT){
+      $q = $this->parseSelectStmt();
     }
     elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
-      $insert_data = $this->parseInsertData();
-      $q .= 'INSERT INTO ' .$table.$insert_data;
+      $q = $this->parseInsertStmt();
     }
     elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
-      $update_data = $this->parseUpdateData();
-      $q .= 'UPDATE ' .$table.$update_data.$where.$order.$limit;
+      $q = $this->parseUpdateStmt();
     }
-    elseif($statement->getType() == Neevo::STMT_DELETE)
-      $q .= 'DELETE FROM ' .$table.$where.$order.$limit;
+    elseif($statement->getType() == Neevo::STMT_DELETE){
+      $q = $this->parseDeleteStmt();
+    }
 
-    return $q.';';
+    $this->stmt = null;
+    $this->clauses = array();
+    return $q . ';';
   }
 
   /**
-   * Parse JOIN part for SELECT statement.
+   * Parse SELECT statement.
+   * @return string
+   */
+  protected function parseSelectStmt(){
+    $cols = array();
+    list($table, $where, $group, $order, $limit) = $this->clauses;
+    foreach ($this->stmt->getColumns() as $col) {
+      $cols[] = $this->parseColName($col);
+    }
+    $cols = join(', ', $cols);
+
+    return "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
+  }
+
+  /**
+   * Parse INSERT statement.
+   * @return string
+   */
+  protected function parseInsertStmt(){
+    $cols = array();
+    foreach($this->_escapeArray($this->stmt->getValues()) as $col => $value){
+      $cols[] = $this->parseColName($col);
+      $values[] = $value;
+    }
+    $data = ' (' . join(', ',$cols) . ') VALUES (' . join(', ',$values). ')';
+
+    return 'INSERT INTO '.$this->clauses[0].$data;
+  }
+
+  /**
+   * Parse UPDATE statement.
+   * @return string
+   */
+  protected function parseUpdateStmt(){
+    $values = array();
+    list($table, $where, , $order, $limit) = $this->clauses;
+    foreach($this->_escapeArray($this->stmt->getValues()) as $col => $value){
+      $values[] = $this->parseColName($col) . ' = ' . $value;
+    }
+    $data = ' SET ' . join(', ', $values);
+
+    return 'UPDATE ' .$table.$data.$where.$order.$limit;
+  }
+
+  /**
+   * Parse DELETE statement.
+   * @return string
+   */
+  protected function parseDeleteStmt(){
+    list($table, $where, , $order, $limit) = $this->clauses;
+    
+    return 'DELETE FROM ' .$table.$where.$order.$limit;
+  }
+
+  /**
+   * Parse JOIN clause.
    * @throws NeevoException
    * @return string
    */
   protected function parseJoin(){
-    $join = $this->statement->getJoin();
-    $prefix = $this->statement->connection()->prefix();
+    $join = $this->stmt->getJoin();
+    $prefix = $this->stmt->connection()->prefix();
     $join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $join['expr']);
     $type = strtoupper(substr($join['type'], 5));
 
@@ -114,11 +153,11 @@ class NeevoStmtParser {
   }
 
   /**
-   * Parse WHERE condition for statement.
+   * Parse WHERE clause.
    * @return string
    */
   protected function parseWhere(){
-    $conds = $this->statement->getConditions();
+    $conds = $this->stmt->getConditions();
 
     // Unset glue on last condition
     unset($conds[count($conds)-1]['glue']);
@@ -128,7 +167,7 @@ class NeevoStmtParser {
 
       // Conditions with placeholders
       if($cond['simple'] === false){
-        $expr = str_replace('::', $this->statement->connection()->prefix(),$cond['expr']);
+        $expr = str_replace('::', $this->stmt->connection()->prefix(),$cond['expr']);
         $s = '('.str_replace($cond['placeholders'], $this->_escapeArray($cond['values']), $expr).')';
         if(isset($cond['glue'])){
           $s .= ' '.$cond['glue'];
@@ -157,11 +196,11 @@ class NeevoStmtParser {
         $value = $value->value;
       } elseif($value instanceof DateTime){ // field = DateTime
         $operator = ' = ';
-        $value = $this->statement->driver()->escape($value, Neevo::DATETIME);
+        $value = $this->stmt->driver()->escape($value, Neevo::DATETIME);
       } else{ // field = value
         $operator = ' = ';
         $value = (is_numeric($value) && !is_string($value))
-          ? $value : $this->statement->driver()->escape($value, Neevo::TEXT);
+          ? $value : $this->stmt->driver()->escape($value, Neevo::TEXT);
       }
       $s = "($field$operator$value)";
       if(isset($cond['glue'])){
@@ -176,55 +215,20 @@ class NeevoStmtParser {
   }
 
   /**
-   * Parse data part for INSERT statements ([INSERT INTO] (...) VALUES (...) ).
-   * @return string
-   */
-  protected function parseInsertData(){
-    foreach($this->_escapeArray($this->statement->getValues()) as $col => $value){
-      $cols[] = $this->parseColName($col);
-      $values[] = $value;
-    }
-    return ' (' . join(', ',$cols) . ') VALUES (' . join(', ',$values). ')';
-  }
-
-
-  /**
-   * Parse data part for UPDATE statements ([UPDATE ...] SET ...).
-   * @return string
-   */
-  protected function parseUpdateData(){
-    foreach($this->_escapeArray($this->statement->getValues()) as $col => $value){
-      $update[] = $this->parseColName($col) . ' = ' . $value;
-    }
-    return ' SET ' . join(', ', $update);
-  }
-
-  /**
-   * Parse ORDER BY statement.
+   * Parse ORDER BY clause.
    * @return string
    */
   protected function parseOrdering(){
-    return ' ORDER BY ' . join(', ', $this->statement->getOrdering());
+    return ' ORDER BY ' . join(', ', $this->stmt->getOrdering());
   }
 
   /**
-   * Parse GROUP BY statement.
+   * Parse GROUP BY clause.
    * @return string
    */
   protected function parseGrouping(){
-    $having = $this->statement->getHaving() ? ' HAVING ' . (string) $this->statement->getHaving() : '';
-    return ' GROUP BY ' . $this->statement->getGrouping() . $having;
-  }
-
-  /**
-   * Parse columns part for SELECT statements.
-   * @return string
-   */
-  protected function parseSelectCols(){
-    foreach ($this->statement->getColumns() as $col) { // For each col
-      $cols[] = $this->parseColName($col);
-    }
-    return join(', ', $cols);
+    $having = $this->stmt->getHaving() ? ' HAVING ' . (string) $this->stmt->getHaving() : '';
+    return ' GROUP BY ' . $this->stmt->getGrouping() . $having;
   }
 
   protected function parseColName($col){
@@ -235,9 +239,21 @@ class NeevoStmtParser {
     $col = preg_replace('#(\S+)\s+(as)\s+(\S+)#i', '$1 AS $3',  $col);
 
     if(preg_match('#[^.]+\.[^.]+#', $col)){
-      return $this->statement->connection()->prefix() . $col;
+      return $this->stmt->connection()->prefix() . $col;
     }
     return $col;
+  }
+
+  /**
+   * Parse LIMIT/OFFSET clause.
+   * @return string
+   */
+  protected function parseLimit(){
+    $limit = ' LIMIT '. (int) $this->stmt->getLimit();
+    if($o = $this->stmt->getOffset()){
+      $limit .= ' OFFSET '. (int) $o;
+    }
+    return $limit;
   }
 
 
@@ -256,7 +272,7 @@ class NeevoStmtParser {
         $value = 'NULL';
       }
       elseif(is_bool($value)){
-        $value = $this->statement->driver()->escape($value, Neevo::BOOL);
+        $value = $this->stmt->driver()->escape($value, Neevo::BOOL);
       }
       elseif(is_numeric($value)){
         if(is_int($value)){
@@ -270,10 +286,10 @@ class NeevoStmtParser {
         }
       }
       elseif(is_string($value)){
-        $value = $this->statement->driver()->escape($value, Neevo::TEXT);
+        $value = $this->stmt->driver()->escape($value, Neevo::TEXT);
       }
       elseif($value instanceof DateTime){
-        $value = $this->statement->driver()->escape($value, Neevo::DATETIME);
+        $value = $this->stmt->driver()->escape($value, Neevo::DATETIME);
       }
       elseif($value instanceof NeevoLiteral){
         $value = $value->value;
@@ -282,7 +298,7 @@ class NeevoStmtParser {
         $value = 'IN(' . join(', ', $this->_escapeArray($value)) . ')';
       }
       else{
-        $value = $this->statement->driver()->escape((string) $value, Neevo::TEXT);
+        $value = $this->stmt->driver()->escape((string) $value, Neevo::TEXT);
       }
     }
     return $array;

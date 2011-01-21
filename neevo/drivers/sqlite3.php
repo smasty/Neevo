@@ -21,7 +21,7 @@
  *  - charset => Character encoding to set (defaults to utf-8)
  *  - dbcharset => Database character encoding (will be converted to 'charset')
  * 
- *  - update_limit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
+ *  - updateLimit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
  *  - resource (instance of SQLite3) => Existing SQLite 3 link
  *  - lazy, table_prefix => see NeevoConnection
  *
@@ -33,7 +33,7 @@
  */
 class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
 
-  private $dbCharset, $charset, $update_limit, $resource, $affectedRows, $tblData;
+  private $dbCharset, $charset, $updateLimit, $resource, $affectedRows, $tblData;
 
   /**
    * Check for required PHP extension.
@@ -54,10 +54,11 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
    */
   public function connect(array $config){
     NeevoConnection::alias($config, 'database', 'file');
+    NeevoConnection::alias($config, 'updateLimit', 'update_limit');
 
     $defaults = array(
       'resource' => null,
-      'update_limit' => false,
+      'updateLimit' => false,
       'charset' => 'UTF-8',
       'dbcharset' => 'UTF-8'
     );
@@ -81,7 +82,7 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
     }
     
     $this->resource = $connection;
-    $this->update_limit = (bool) $config['update_limit'];
+    $this->updateLimit = (bool) $config['updateLimit'];
 
     // Set charset
     $this->dbCharset = $config['dbcharset'];
@@ -326,74 +327,32 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
     return $cols;
   }
 
+
+  /*  ============  NeevoStmtParser overrides  ============  */
+
   /**
-   * Parse the instance.
-   * @param NeevoStmtBase $statement
-   * @return string The SQL statement
+   * Parse UPDATE statement.
+   * @return string
    */
-  public function parse(NeevoStmtBase $statement){
-
-    $this->statement = $statement;
-
-    $where = '';
-    $order = '';
-    $group = '';
-    $limit = '';
-    $q = '';
-
-    $table = $statement->getTable();
-
-    // JOIN - Workaround for RIGHT JOIN
-    if($statement instanceof NeevoResult && $statement->getJoin()){
-      $table = $table .' '. $this->parseJoin();
+  protected function parseUpdateStmt(){
+    $values = array();
+    list($table, $where, , $order, $limit) = $this->clauses;
+    foreach($this->_escapeArray($this->stmt->getValues()) as $col => $value){
+      $values[] = $this->parseColName($col) . ' = ' . $value;
     }
+    $data = ' SET ' . join(', ', $values);
 
-    // WHERE
-    if($statement->getConditions()){
-      $where = $this->parseWhere();
-    }
+    return 'UPDATE ' .$table.$data.$where. ($this->updateLimit ? $order.$limit : '');
+  }
 
-    // ORDER BY
-    if($statement->getOrdering()){
-      $order = $this->parseOrdering();
-    }
+  /**
+   * Parse DELETE statement.
+   * @return string
+   */
+  protected function parseDeleteStmt(){
+    list($table, $where, , $order, $limit) = $this->clauses;
 
-    // GROUP BY
-    if($statement instanceof NeevoResult && $statement->getGrouping()){
-      $group = $this->parseGrouping();
-    }
-
-    // LIMIT, OFFSET
-    if($statement->getLimit()){
-      $limit = ' LIMIT ' .$statement->getLimit();
-    }
-    if($statement->getOffset()){
-      $limit .= ' OFFSET ' .$statement->getOffset();
-    }
-
-    if($statement->getType() == Neevo::STMT_SELECT){
-      $cols = $this->parseSelectCols();
-      $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
-    }
-    elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
-      $insert_data = $this->parseInsertData();
-      $q .= 'INSERT INTO ' .$table.$insert_data;
-    }
-    elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
-      $update_data = $this->parseUpdateData();
-      $q .= 'UPDATE ' .$table.$update_data.$where;
-      if($this->update_limit === true){
-        $q .= $order.$limit;
-      }
-    }
-    elseif($statement->getType() == Neevo::STMT_DELETE){
-      $q .= 'DELETE FROM ' .$table.$where;
-      if($this->update_limit === true){
-        $q .= $order.$limit;
-      }
-    }
-
-    return $q.';';
+    return 'DELETE FROM ' .$table.$where. ($this->updateLimit ? $order.$limit : '');
   }
 
 }

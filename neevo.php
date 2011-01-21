@@ -67,7 +67,7 @@ class Neevo implements SplSubject {
   );
 
   // Neevo revision
-  const REVISION = 320;
+  const REVISION = 321;
 
   // Data types
   const BOOL = 'b';
