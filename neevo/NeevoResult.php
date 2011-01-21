@@ -46,6 +46,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
     $this->columns = is_string($cols) ? explode(',', $cols) : $cols;
     $this->tableName = $table;
     $this->detectTypes = (bool) $this->getConfig('detectTypes');
+
+    $this->setRowClass($this->getConfig('rowClass'));
   }
 
   /**

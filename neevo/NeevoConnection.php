@@ -21,6 +21,7 @@
  * - lazy (bool) => If TRUE, connection will be established only when required.
  * - detectTypes (bool) => Detect column types automatically
  * - formatDateTime => date/time format ("U" for timestamp. If empty, DateTime object used)
+ * - rowClass => Name of class to use as a row class.
  *
  * @author Martin Srank
  * @package Neevo
@@ -67,7 +68,8 @@ class NeevoConnection {
       'lazy' => false,
       'tablePrefix' => '',
       'formatDateTime' => '',
-      'detectTypes' => false
+      'detectTypes' => false,
+      'rowClass' => 'NeevoRow'
     );
 
     // Aliases
@@ -165,7 +167,7 @@ class NeevoConnection {
   }
 
   private function isDriver($class){
-    return (class_exists($class, false) && in_array('INeevoDriver', class_implements($class, false)));
+    return (class_exists($class) && in_array('INeevoDriver', class_implements($class)));
   }
 
   /**
