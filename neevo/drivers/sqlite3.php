@@ -31,7 +31,7 @@
  * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
+class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
 
   private $dbCharset, $charset, $update_limit, $resource, $affectedRows, $tblData;
 
@@ -327,11 +327,11 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
   }
 
   /**
-   * Build the SQL statement from the instance.
+   * Parse the instance.
    * @param NeevoStmtBase $statement
    * @return string The SQL statement
    */
-  public function build(NeevoStmtBase $statement){
+  public function parse(NeevoStmtBase $statement){
 
     $this->statement = $statement;
 
@@ -345,22 +345,22 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
 
     // JOIN - Workaround for RIGHT JOIN
     if($statement instanceof NeevoResult && $statement->getJoin()){
-      $table = $table .' '. $this->buildJoin();
+      $table = $table .' '. $this->parseJoin();
     }
 
     // WHERE
     if($statement->getConditions()){
-      $where = $this->buildWhere();
+      $where = $this->parseWhere();
     }
 
     // ORDER BY
     if($statement->getOrdering()){
-      $order = $this->buildOrdering();
+      $order = $this->parseOrdering();
     }
 
     // GROUP BY
     if($statement instanceof NeevoResult && $statement->getGrouping()){
-      $group = $this->buildGrouping();
+      $group = $this->parseGrouping();
     }
 
     // LIMIT, OFFSET
@@ -372,15 +372,15 @@ class NeevoDriverSQLite3 extends NeevoStmtBuilder implements INeevoDriver{
     }
 
     if($statement->getType() == Neevo::STMT_SELECT){
-      $cols = $this->buildSelectCols();
+      $cols = $this->parseSelectCols();
       $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
     }
     elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
-      $insert_data = $this->buildInsertData();
+      $insert_data = $this->parseInsertData();
       $q .= 'INSERT INTO ' .$table.$insert_data;
     }
     elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
-      $update_data = $this->buildUpdateData();
+      $update_data = $this->parseUpdateData();
       $q .= 'UPDATE ' .$table.$update_data.$where;
       if($this->update_limit === true){
         $q .= $order.$limit;

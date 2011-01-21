@@ -5,16 +5,11 @@ error_reporting(E_ALL | E_STRICT);
 $start = microtime(true);
 
 // CLI options
-$opts = getopt('bd::');
+$opts = getopt('bd:');
 
 // Default driver
 if(isset($opts['d'])){
-  if(is_string($opts['d'])){
-    $driver = strtolower(str_replace('=', '', $opts['d']));
-  }
-  else{
-    $driver = 'mysql';
-  }
+  $driver = strtolower($opts['d']);
 }
 else{
   $driver = 'mysql';

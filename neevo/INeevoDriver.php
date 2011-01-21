@@ -26,19 +26,19 @@
  * the driver should throw NeevoDriverException.
  *
  * When the driver needs to rewrite default output for SQL commands, it **must**
- * extend **NeevoStmtBuilder** class.
+ * extend **NeevoStmtParser** class.
  * Then following methods can than be used to rewrite SQL command output:
- * - **build()**           - Base structure of SQL command.
- * - **buildColName()**    - Column names, including table.column syntax
- * - **buildSelectCols()** - `[SELECT] "col1, table.col2" ...`
- * - **buildInsertData()** - `[INSERT INTO] "(col1, col2) VALUES (val1, val2)" ...`
- * - **buildUpdateData()** - `[UPDATE table] "SET col1 = val1, col2 = val2 ..."`
- * - **buildJoin()**       - JOIN syntax
- * - **buildWhere()**      - WHERE clause
- * - **buildOrdering()**   - ORDER BY clause
- * - **buildGrouping()**   - GROUP BY clause
+ * - **parse()**           - Base structure of SQL command.
+ * - **parseColName()**    - Column names, including table.column syntax
+ * - **parseSelectCols()** - `[SELECT] "col1, table.col2" ...`
+ * - **parseInsertData()** - `[INSERT INTO] "(col1, col2) VALUES (val1, val2)" ...`
+ * - **parseUpdateData()** - `[UPDATE table] "SET col1 = val1, col2 = val2 ..."`
+ * - **parseJoin()**       - JOIN syntax
+ * - **parseWhere()**      - WHERE clause
+ * - **parseOrdering()**   - ORDER BY clause
+ * - **parseGrouping()**   - GROUP BY clause
  * 
- * For proper use, see "source of **NeevoStmtBuilder** class":./source-neevo.NeevoStmtBuilder.php.html.
+ * For proper use, see "source of **NeevoStmtParser** class":./source-neevo.NeevoStmtParser.php.html.
  *
  * @author Martin Srank
  * @package NeevoDrivers

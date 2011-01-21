@@ -14,21 +14,21 @@
  */
 
 /**
- * Building SQL string from NeevoResult instance.
+ * Parse NeevoStmt to SQL command
  * @author Martin Srank
  * @package Neevo
  */
-class NeevoStmtBuilder {
+class NeevoStmtParser {
 
   /** @var NeevoStmtBase */
   protected $statement;
 
   /**
-   * Build the SQL statement from the instance.
+   * Parse the instance.
    * @param NeevoStmtBase $statement
    * @return string The SQL statement
    */
-  public function build(NeevoStmtBase $statement){
+  public function parse(NeevoStmtBase $statement){
 
     $this->statement = $statement;
 
@@ -42,22 +42,22 @@ class NeevoStmtBuilder {
 
     // JOIN
     if($statement instanceof NeevoResult && $statement->getJoin()){
-      $table = $table .' '. $this->buildJoin();
+      $table = $table .' '. $this->parseJoin();
     }
 
     // WHERE
     if($statement->getConditions()){
-      $where = $this->buildWhere();
+      $where = $this->parseWhere();
     }
 
     // ORDER BY
     if($statement->getOrdering()){
-      $order = $this->buildOrdering();
+      $order = $this->parseOrdering();
     }
 
     // GROUP BY
     if($statement instanceof NeevoResult && $statement->getGrouping()){
-      $group = $this->buildGrouping();
+      $group = $this->parseGrouping();
     }
 
     // LIMIT, OFFSET
@@ -69,15 +69,15 @@ class NeevoStmtBuilder {
     }
 
     if($statement->getType() == Neevo::STMT_SELECT){
-      $cols = $this->buildSelectCols();
+      $cols = $this->parseSelectCols();
       $q .= "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
     }
     elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
-      $insert_data = $this->buildInsertData();
+      $insert_data = $this->parseInsertData();
       $q .= 'INSERT INTO ' .$table.$insert_data;
     }
     elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
-      $update_data = $this->buildUpdateData();
+      $update_data = $this->parseUpdateData();
       $q .= 'UPDATE ' .$table.$update_data.$where.$order.$limit;
     }
     elseif($statement->getType() == Neevo::STMT_DELETE)
@@ -87,11 +87,11 @@ class NeevoStmtBuilder {
   }
 
   /**
-   * Build JOIN part for SELECT statement.
+   * Parse JOIN part for SELECT statement.
    * @throws NeevoException
    * @return string
    */
-  protected function buildJoin(){
+  protected function parseJoin(){
     $join = $this->statement->getJoin();
     $prefix = $this->statement->connection()->prefix();
     $join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $join['expr']);
@@ -114,10 +114,10 @@ class NeevoStmtBuilder {
   }
 
   /**
-   * Build WHERE condition for statement.
+   * Parse WHERE condition for statement.
    * @return string
    */
-  protected function buildWhere(){
+  protected function parseWhere(){
     $conds = $this->statement->getConditions();
 
     // Unset glue on last condition
@@ -138,7 +138,7 @@ class NeevoStmtBuilder {
       }
 
       // Simple conditions
-      $field = $this->buildColName($cond['field']);
+      $field = $this->parseColName($cond['field']);
       $operator = '';
       $value = $cond['value'];
       if($value === null){ // field IS NULL
@@ -176,12 +176,12 @@ class NeevoStmtBuilder {
   }
 
   /**
-   * Build data part for INSERT statements ([INSERT INTO] (...) VALUES (...) ).
+   * Parse data part for INSERT statements ([INSERT INTO] (...) VALUES (...) ).
    * @return string
    */
-  protected function buildInsertData(){
+  protected function parseInsertData(){
     foreach($this->_escapeArray($this->statement->getValues()) as $col => $value){
-      $cols[] = $this->buildColName($col);
+      $cols[] = $this->parseColName($col);
       $values[] = $value;
     }
     return ' (' . join(', ',$cols) . ') VALUES (' . join(', ',$values). ')';
@@ -189,45 +189,45 @@ class NeevoStmtBuilder {
 
 
   /**
-   * Build data part for UPDATE statements ([UPDATE ...] SET ...).
+   * Parse data part for UPDATE statements ([UPDATE ...] SET ...).
    * @return string
    */
-  protected function buildUpdateData(){
+  protected function parseUpdateData(){
     foreach($this->_escapeArray($this->statement->getValues()) as $col => $value){
-      $update[] = $this->buildColName($col) . ' = ' . $value;
+      $update[] = $this->parseColName($col) . ' = ' . $value;
     }
     return ' SET ' . join(', ', $update);
   }
 
   /**
-   * Build ORDER BY statement.
+   * Parse ORDER BY statement.
    * @return string
    */
-  protected function buildOrdering(){
+  protected function parseOrdering(){
     return ' ORDER BY ' . join(', ', $this->statement->getOrdering());
   }
 
   /**
-   * Build GROUP BY statement.
+   * Parse GROUP BY statement.
    * @return string
    */
-  protected function buildGrouping(){
+  protected function parseGrouping(){
     $having = $this->statement->getHaving() ? ' HAVING ' . (string) $this->statement->getHaving() : '';
     return ' GROUP BY ' . $this->statement->getGrouping() . $having;
   }
 
   /**
-   * Build columns part for SELECT statements.
+   * Parse columns part for SELECT statements.
    * @return string
    */
-  protected function buildSelectCols(){
+  protected function parseSelectCols(){
     foreach ($this->statement->getColumns() as $col) { // For each col
-      $cols[] = $this->buildColName($col);
+      $cols[] = $this->parseColName($col);
     }
     return join(', ', $cols);
   }
 
-  protected function buildColName($col){
+  protected function parseColName($col){
     if($col instanceof NeevoLiteral){
       return $col->value;
     }

@@ -239,7 +239,7 @@ abstract class NeevoStmtBase {
    * @return string|NeevoStmt|NeevoResult fluent interface
    */
   public function dump($return = false){
-    $code = (PHP_SAPI === 'cli') ? $this->build() : Neevo::highlightSql($this->build());
+    $code = (PHP_SAPI === 'cli') ? $this->parse() : Neevo::highlightSql($this->parse());
     if(!$return){
       echo $code;
     }
@@ -255,7 +255,7 @@ abstract class NeevoStmtBase {
 
     $start = explode(' ', microtime());
     $query = $this->performed ?
-      $this->resultSet : $this->driver()->query($this->build());
+      $this->resultSet : $this->driver()->query($this->parse());
 
     $end = explode(" ", microtime());
     $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
@@ -282,8 +282,8 @@ abstract class NeevoStmtBase {
    * @return string The SQL statement
    * @internal
    */
-  public function build(){
-    return $this->connection->stmtBuilder()->build($this);
+  public function parse(){
+    return $this->connection->stmtParser()->parse($this);
   }
 
   /**

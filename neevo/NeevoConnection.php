@@ -36,8 +36,8 @@ class NeevoConnection {
   /** @var INeevoDriver */
   private $driver;
 
-  /** @var NeevoStmtBuilder */
-  private $stmtBuilder;
+  /** @var NeevoStmtParser */
+  private $stmtParser;
 
   /**
    * Establish a connection.
@@ -124,8 +124,12 @@ class NeevoConnection {
     return $this->driver;
   }
 
-  public function stmtBuilder(){
-    return $this->stmtBuilder;
+  /**
+   *
+   * @return NeevoStmtParser
+   */
+  public function stmtParser(){
+    return $this->stmtParser;
   }
 
   /**
@@ -190,11 +194,11 @@ class NeevoConnection {
     $this->driver = new $class;
 
     // Set stmtBuilder
-    if(in_array('NeevoStmtBuilder', class_parents($class, false))){
-      $this->stmtBuilder = $this->driver;
+    if(in_array('NeevoStmtParser', class_parents($class))){
+      $this->stmtParser = $this->driver;
     }
     else{
-      $this->stmtBuilder = new NeevoStmtBuilder;
+      $this->stmtParser = new NeevoStmtParser;
     }
   }
 

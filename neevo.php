@@ -58,7 +58,7 @@ class Neevo implements SplSubject {
     'neevocachememcache' => '/neevo/NeevoCache.php',
     'neevocachesession' => '/neevo/NeevoCache.php',
     'neevostmtbase' => '/neevo/NeevoStmtBase.php',
-    'neevostmtbuilder' => '/neevo/NeevoStmtBuilder.php',
+    'neevostmtparser' => '/neevo/NeevoStmtParser.php',
     'neevostmt' => '/neevo/NeevoStmt.php',
     'neevoresult' => '/neevo/NeevoResult.php',
     'neevoresultiterator' => '/neevo/NeevoResultIterator.php',
@@ -67,7 +67,7 @@ class Neevo implements SplSubject {
   );
 
   // Neevo revision
-  const REVISION = 319;
+  const REVISION = 320;
 
   // Data types
   const BOOL = 'b';
