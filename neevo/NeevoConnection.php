@@ -22,6 +22,7 @@
  * - detectTypes (bool) => Detect column types automatically
  * - formatDateTime => date/time format ("U" for timestamp. If empty, DateTime object used)
  * - rowClass => Name of class to use as a row class.
+ * - nettePanel (bool) => register Nette Framework Debug panel.
  *
  * @author Martin Srank
  * @package Neevo
@@ -69,7 +70,8 @@ class NeevoConnection {
       'tablePrefix' => '',
       'formatDateTime' => '',
       'detectTypes' => false,
-      'rowClass' => 'NeevoRow'
+      'rowClass' => 'NeevoRow',
+      'nettePanel' => defined('NETTE')
     );
 
     // Aliases

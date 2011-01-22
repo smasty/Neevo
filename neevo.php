@@ -64,10 +64,11 @@ class Neevo implements SplSubject {
     'neevoresultiterator' => '/neevo/NeevoResultIterator.php',
     'neevorow' => '/neevo/NeevoRow.php',
     'ineevodriver' => '/neevo/INeevoDriver.php',
+    'neevodebugpanel' => '/neevo/NeevoDebugPanel.php'
   );
 
   // Neevo revision
-  const REVISION = 321;
+  const REVISION = 322;
 
   // Data types
   const BOOL = 'b';
@@ -98,10 +99,10 @@ class Neevo implements SplSubject {
    */
   public function __construct($config, INeevoCache $cache = null){
     spl_autoload_register(array('Neevo', '_autoload'));
-    
-    $this->connect($config);
-    self::$cache = $cache;
+
     $this->observers = new SplObjectStorage;
+    self::$cache = $cache;
+    $this->connect($config);
   }
 
   /**
@@ -113,6 +114,11 @@ class Neevo implements SplSubject {
    */
   public function connect($config){
     $this->connection = new NeevoConnection($config, $this);
+    
+    if($this->connection->getConfig('nettePanel') && class_exists('NeevoDebugPanel')){
+      $panel = new NeevoDebugPanel($this);
+      $this->attach($panel);
+    }
     return $this;
   }
 

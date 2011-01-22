@@ -14,7 +14,7 @@
  */
 
 /**
- * Parse NeevoStmt to SQL command
+ * NeevoStmt to SQL command parser.
  * @author Martin Srank
  * @package Neevo
  */
