@@ -95,4 +95,3 @@ class NeevoDebugPanel implements IDebugPanel, SplObserver{
 }
 
 endif;
-?>

@@ -22,7 +22,7 @@
  * - detectTypes (bool) => Detect column types automatically
  * - formatDateTime => date/time format ("U" for timestamp. If empty, DateTime object used)
  * - rowClass => Name of class to use as a row class.
- * - nettePanel (bool) => register Nette Framework Debug panel.
+ * - nettePanel (bool) => Register Nette Framework Debug panel.
  *
  * @author Martin Srank
  * @package Neevo

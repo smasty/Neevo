@@ -17,7 +17,7 @@ if(PHP_SAPI !== 'cli'){
   trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
 }
 
-$args = getopt('d:hq');
+$args = getopt('d:hqr');
 
 // Quiet mode
 if(isset($args['q'])){
@@ -41,9 +41,13 @@ $compiler = new Compiler(array(
   'drivers' => $drivers
 ));
 
-echo $compiler->revision(),
-     $compiler->minify(),
-     "\n";
+
+// Revision change
+if(isset($args['r'])){
+  echo $compiler->revision();
+}
+
+echo $compiler->minify(), "\n";
 
 
 // Quiet mode
@@ -67,7 +71,7 @@ class Compiler{
 
 
   public function  __construct(array $options){
-    $this->file = $options['file'];
+    $this->file = self::BASE_PATH . '/../' .$options['file'];
     $this->includeLine = $options['includeLine'];
     $this->drivers = $this->getDrivers($options['drivers']);
   }
@@ -242,12 +246,13 @@ class Compiler{
 
   public static function getHelp(){
     echo "Usage:
-  $ php ".basename(__FILE__)." [-d <drivers>] [-h] [-q]
+  $ php ".basename(__FILE__)." [-d <drivers>] [-r] [-h] [-q]
 
 Options:
 
   -d <drivers>  Comma-separated list of drivers to include -
                 defaults to all drivers.
+  -r            Increments revision number.
   -h            Displays help.
   -q            Quiet mode - no output.
 ";

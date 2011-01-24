@@ -68,7 +68,7 @@ class Neevo implements SplSubject {
   );
 
   // Neevo revision
-  const REVISION = 322;
+  const REVISION = 323;
 
   // Data types
   const BOOL = 'b';
@@ -447,18 +447,18 @@ class NeevoLiteral {
  * @author Martin Srank
  * @package NeevoExceptions
  */
-class NeevoException extends Exception{};
+class NeevoException extends Exception{}
 
 /**
  * Exception for features not implemented by the driver,
  * @author Martin Srank
  * @package NeevoExceptions
  */
-class NeevoImplemenationException extends NeevoException{};
+class NeevoImplemenationException extends NeevoException{}
 
 /**
  * Neevo driver exception.
  * @author Martin Srank
  * @package NeevoExceptions
  */
-class NeevoDriverException extends NeevoException{};
+class NeevoDriverException extends NeevoException{}
