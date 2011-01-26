@@ -102,7 +102,16 @@ class NeevoObserver implements INeevoObserver, IDebugPanel{
 
   /** @var int */
   private $filter = INeevoObserver::ALL;
-  
+
+  /**
+   * Create the observer.
+   *
+   * Available config:
+   * - filter (int) => Event type filter (see constants).
+   * - file => path to log file if you want to log events to file.
+   * @param array|Traversable $config
+   * @return void
+   */
   public function __construct($config = null){
 
     if($config !== null){

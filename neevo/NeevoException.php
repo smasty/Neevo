@@ -57,6 +57,50 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable{
   }
 
 
+  /*  ============  Implementation of INeevoObservable  ============  */
+
+  /**
+   * Attach given observer. Static for attachObserver().
+   * @param INeevoObserver $observer
+   * @return void
+   */
+  public static function attach(INeevoObserver $observer){
+    if(!self::$observers) self::$observers = new SplObjectStorage;
+    self::$observers->attach($observer);
+  }
+
+  /**
+   * Detach given observer. Static for detachObserver().
+   * @param INeevoObserver $observer
+   * @return void
+   */
+  public static function detach(INeevoObserver $observer){
+    if(!self::$observers) return;
+    self::$observers->detach($observer);
+  }
+
+  public function attachObserver(INeevoObserver $observer){
+    self::attach($observer);
+  }
+
+  public function detachObserver(INeevoObserver $observer){
+    self::detach($observer);
+  }
+
+  /**
+   * Notify attached observers.
+   * @param int $event
+   * @param NeevoStmtBase $statement
+   * @return void
+   */
+  public function notifyObservers($event = INeevoObserver::EXCEPTION, NeevoStmtBase $statement = null){
+    if(!self::$observers) return;
+    foreach(self::$observers as $observer){
+      $observer->update($this, $event);
+    }
+  }
+
+
   /*  ============  Implementation of Nette\IDebugPanel  ============  */
 
   public function getId(){
@@ -72,43 +116,9 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable{
     return '<pre>' . Neevo::highlightSql($this->sql) . '</pre>';
   }
 
-
-  /*  ============  Implementation of INeevoObservable  ============  */
-
-  /**
-   * Attach given observer. Static for attachObserver().
-   * @param INeevoObserver $observer
-   */
-  public static function attach(INeevoObserver $observer){
-    if(!self::$observers) self::$observers = new SplObjectStorage;
-    self::$observers->attach($observer);
-  }
-
-  /**
-   * Detach given observer. Static for detachObserver().
-   * @param INeevoObserver $observer
-   */
-  public static function detach(INeevoObserver $observer){
-    if(!self::$observers) return;
-    self::$observers->detach($observer);
-  }
-
-  public function attachObserver(INeevoObserver $observer){
-    self::attach($observer);
-  }
-
-  public function detachObserver(INeevoObserver $observer){
-    self::detach($observer);
-  }
-
-  public function notifyObservers($event = INeevoObserver::EXCEPTION, NeevoStmtBase $statement = null){
-    if(!self::$observers) return;
-    foreach(self::$observers as $observer){
-      $observer->update($this, $event);
-    }
-  }
-
 }
+
+
 
 /**
  * Exception for features not implemented by the driver,
@@ -116,6 +126,8 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable{
  * @package NeevoExceptions
  */
 class NeevoImplemenationException extends NeevoException{}
+
+
 
 /**
  * Neevo driver exception.

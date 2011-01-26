@@ -23,13 +23,21 @@ if(interface_exists('Nette\IDebugPanel')){
   class_alias('Nette\IDebugPanel', 'IDebugPanel');
 }
 if(!interface_exists('IDebugPanel')){
-  interface IDebugPanel{}
+  /**
+   * Nette Framework compatibility.
+   */
+  interface IDebugPanel{
+    function getId();
+    function getTab();
+    function getPanel();
+  }
 }
 
 // Neevo class autoloader
 spl_autoload_register(array('Neevo', '_autoload'));
 
 @set_magic_quotes_runtime(FALSE);
+
 
 
 /**
@@ -78,7 +86,7 @@ class Neevo {
   );
 
   // Neevo revision
-  const REVISION = 331;
+  const REVISION = 332;
 
   // Data types
   const BOOL = 'b';
@@ -398,6 +406,7 @@ class Neevo {
   }
 
 }
+
 
 
 /**
