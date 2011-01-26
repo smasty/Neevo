@@ -22,17 +22,13 @@
  * - detectTypes (bool) => Detect column types automatically
  * - formatDateTime => date/time format ("U" for timestamp. If empty, DateTime object used)
  * - rowClass => Name of class to use as a row class.
- * - nettePanel (bool) => Register Nette Framework Debug panel.
  *
  * @author Martin Srank
  * @package Neevo
  */
-class NeevoConnection {
+class NeevoConnection implements INeevoObservable {
 
   private $config, $connected = false;
-
-  /** @var Neevo */
-  private $neevo;
 
   /** @var INeevoDriver */
   private $driver;
@@ -40,15 +36,17 @@ class NeevoConnection {
   /** @var NeevoStmtParser */
   private $stmtParser;
 
+  /** @var SplObjectStorage */
+  private $observers;
+
   /**
    * Establish a connection.
    * @param array|string|Traversable $config
-   * @param Neevo $neevo
    * @throws InvalidArgumentException
    * @return void
    */
-  public function __construct($config, Neevo $neevo = null){
-    $this->neevo = $neevo;
+  public function __construct($config){
+    $this->observers = new SplObjectStorage;
     
     // Parse
     if(is_string($config)){
@@ -70,8 +68,7 @@ class NeevoConnection {
       'tablePrefix' => '',
       'formatDateTime' => '',
       'detectTypes' => false,
-      'rowClass' => 'NeevoRow',
-      'nettePanel' => defined('NETTE')
+      'rowClass' => 'NeevoRow'
     );
 
     // Aliases
@@ -149,15 +146,33 @@ class NeevoConnection {
   }
 
   /**
-   * Basic information about the connection.
-   * @return array
+   * Attach given observer.
+   * @param INeevoObserver $observer
+   * @return void
    */
-  public function info(){
-    $info = $this->config;
-    if(array_key_exists('password', $info)){
-      $info['password'] = '*****';
+  public function attachObserver(INeevoObserver $observer){
+      $this->observers->attach($observer);
+  }
+
+  /**
+   * Detach given observer.
+   * @param INeevoObserver $observer
+   * @return void
+   */
+  public function detachObserver(INeevoObserver $observer){
+    $this->observers->detach($observer);
+  }
+
+  /**
+   * Notify observers.
+   * @param int $event
+   * @param NeevoStmtBase $statement
+   * @return void
+   */
+  public function notifyObservers($event, NeevoStmtBase $statement = null){
+    foreach($this->observers as $observer){
+      $observer->update($this, $event, $statement);
     }
-    return $info;
   }
 
 
@@ -169,6 +184,8 @@ class NeevoConnection {
     if($this->connected === false){
       $this->driver->connect($this->config);
       $this->connected = true;
+
+      $this->notifyObservers(INeevoObserver::CONNECT);
     }
   }
 
@@ -202,11 +219,6 @@ class NeevoConnection {
     else{
       $this->stmtParser = new NeevoStmtParser;
     }
-  }
-
-  /** @internal */
-  public function setLast(array $last){
-    $this->neevo->setLast($last);
   }
 
 }

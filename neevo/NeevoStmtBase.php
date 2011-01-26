@@ -35,6 +35,14 @@ abstract class NeevoStmtBase {
   /** @var NeevoConnection */
   protected $connection;
 
+  /** @var array Event type conversion table */
+  protected static $eventTable = array(
+    Neevo::STMT_SELECT => INeevoObserver::SELECT,
+    Neevo::STMT_INSERT => INeevoObserver::INSERT,
+    Neevo::STMT_UPDATE => INeevoObserver::UPDATE,
+    Neevo::STMT_DELETE => INeevoObserver::DELETE
+  );
+
   /**
    * Create statement.
    * @param NeevoConnection $connection
@@ -42,6 +50,14 @@ abstract class NeevoStmtBase {
    */
   public function  __construct(NeevoConnection $connection){
     $this->connection = $connection;
+  }
+
+  /**
+   * String representation of object.
+   * @return string
+   */
+  public function __toString(){
+    return (string) $this->parse();
   }
   
   /**
@@ -253,18 +269,17 @@ abstract class NeevoStmtBase {
   public function run(){
     $this->realConnect();
 
-    $start = explode(' ', microtime());
+    $start = -microtime(true);
+    
     $query = $this->performed ?
       $this->resultSet : $this->driver()->query($this->parse());
 
-    $end = explode(" ", microtime());
-    $time = round(max(0, $end[0] - $start[0] + $end[1] - $start[1]), 4);
-    $this->time = $time;
+    $this->time = $start + microtime(true);
 
     $this->performed = true;
     $this->resultSet = $query;
 
-    $this->connection->setLast($this->info(true, true));
+    $this->connection->notifyObservers(self::$eventTable[$this->type], $this);
 
     return $query;
   }
@@ -284,38 +299,6 @@ abstract class NeevoStmtBase {
    */
   public function parse(){
     return $this->connection->stmtParser()->parse($this);
-  }
-
-  /**
-   * Basic information about the statement.
-   * @return array
-   */
-  public function info(){
-    $info = array(
-      'type' => substr($this->type, 5),
-      'table' => $this->getTable(),
-      'executed' => (bool) $this->performed,
-      'sql' => trim(strip_tags($this->dump(true)))
-    );
-
-    if($this->performed){
-      $info['time'] = $this->time;
-      if(isset($this->affectedRows)){
-        $info['affected_rows'] = $this->affectedRows;
-      }
-      if($this->type == Neevo::STMT_INSERT){
-        try{
-          $info['last_insert_id'] = $this->insertId();
-        } catch(Exception $e){}
-      }
-      if($this->type == Neevo::STMT_SELECT){
-        try{
-          $info['rows'] = @$this->rows();
-        } catch(Exception $e){}
-      }
-    }
-
-    return $info;
   }
 
 

@@ -135,7 +135,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
     }
     
     if($error && $result === false){
-      throw new NeevoException("Query failed. $error", sqlite_last_error($this->resource));
+      throw new NeevoException("Query failed. $error", sqlite_last_error($this->resource), $queryString);
     }
 
     $this->affectedRows = @sqlite_changes($this->resource);

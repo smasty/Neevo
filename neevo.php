@@ -18,6 +18,17 @@ if(version_compare(PHP_VERSION, '5.2.0', '<')){
   trigger_error('Neevo requires PHP version 5.2.0 or newer', E_USER_ERROR);
 }
 
+// Nette Framework compatibility
+if(interface_exists('Nette\IDebugPanel')){
+  class_alias('Nette\IDebugPanel', 'IDebugPanel');
+}
+if(!interface_exists('IDebugPanel')){
+  interface IDebugPanel{}
+}
+
+// Neevo class autoloader
+spl_autoload_register(array('Neevo', '_autoload'));
+
 @set_magic_quotes_runtime(FALSE);
 
 
@@ -26,12 +37,9 @@ if(version_compare(PHP_VERSION, '5.2.0', '<')){
  * @author Martin Srank
  * @package Neevo
  */
-class Neevo implements SplSubject {
+class Neevo {
 
   private $last, $queries = 0;
-
-  /** @var SplObjectStorage */
-  private $observers;
 
   /** @var NeevoConnection */
   private $connection;
@@ -46,9 +54,9 @@ class Neevo implements SplSubject {
   private static $classes = array(
     'neevo' => '',
     'neevoliteral' => '',
-    'neevoexception' => '',
-    'neevodriverexception' => '',
-    'neevoimplementationexception' => '',
+    'neevoexception' => '/neevo/NeevoException.php',
+    'neevodriverexception' => '/neevo/NeevoException.php',
+    'neevoimplementationexception' => '/neevo/NeevoException.php',
     'neevoconnection' => '/neevo/NeevoConnection.php',
     'ineevocache' => '/neevo/NeevoCache.php',
     'neevocacheapc' => '/neevo/NeevoCache.php',
@@ -64,11 +72,13 @@ class Neevo implements SplSubject {
     'neevoresultiterator' => '/neevo/NeevoResultIterator.php',
     'neevorow' => '/neevo/NeevoRow.php',
     'ineevodriver' => '/neevo/INeevoDriver.php',
-    'neevodebugpanel' => '/neevo/NeevoDebugPanel.php'
+    'neevoobserver' => '/neevo/NeevoObserver.php',
+    'ineevoobserver' => '/neevo/NeevoObserver.php',
+    'ineevoobservable' => '/neevo/NeevoObserver.php'
   );
 
   // Neevo revision
-  const REVISION = 323;
+  const REVISION = 330;
 
   // Data types
   const BOOL = 'b';
@@ -98,9 +108,6 @@ class Neevo implements SplSubject {
    * @throws NeevoException
    */
   public function __construct($config, INeevoCache $cache = null){
-    spl_autoload_register(array('Neevo', '_autoload'));
-
-    $this->observers = new SplObjectStorage;
     self::$cache = $cache;
     $this->connect($config);
   }
@@ -113,7 +120,7 @@ class Neevo implements SplSubject {
    * @return Neevo fluent interface
    */
   public function connect($config){
-    $this->connection = new NeevoConnection($config, $this);
+    $this->connection = new NeevoConnection($config);
     
     if($this->connection->getConfig('nettePanel') && class_exists('NeevoDebugPanel')){
       $panel = new NeevoDebugPanel($this);
@@ -211,6 +218,7 @@ class Neevo implements SplSubject {
    */
   public function begin($savepoint = null){
     $this->driver()->begin($savepoint);
+    $this->connection->notifyObservers(INeevoObserver::BEGIN);
   }
 
   /**
@@ -220,6 +228,7 @@ class Neevo implements SplSubject {
    */
   public function commit($savepoint = null){
     $this->driver()->commit($savepoint);
+    $this->connection->notifyObservers(INeevoObserver::COMMIT);
   }
 
   /**
@@ -229,6 +238,7 @@ class Neevo implements SplSubject {
    */
   public function rollback($savepoint = null){
     $this->driver()->rollback($savepoint);
+    $this->connection->notifyObservers(INeevoObserver::ROLLBACK);
   }
 
   /**
@@ -270,21 +280,26 @@ class Neevo implements SplSubject {
   }
 
   /**
-   * Attach an observer for debugging. Alias for Neevo::attach().
-   * @param SplObserver $observer
+   * Attach an observer for debugging.
+   * @param INeevoObserver $observer
+   * @param bool $exception Also attach observer to NeevoException
    * @return void
    */
-  public function addObserver(SplObserver $observer){
-    $this->attach($observer);
+  public function attachObserver(INeevoObserver $observer, $exception = true){
+    $this->connection->attachObserver($observer);
+    if($exception){
+      NeevoException::attach($observer);
+    }
   }
 
   /**
-   * Detach given observer. Alias for Neevo::detach().
-   * @param SplObserver $observer
+   * Detach given observer.
+   * @param INeevoObserver $observer
    * @return void
    */
-  public function removeObserver(SplObserver $observer){
-    $this->detach($observer);
+  public function detachObserver(INeevoObserver $observer){
+    $this->connection->detachObserver($observer);
+    NeevoException::detach($observer);
   }
 
   /**
@@ -319,36 +334,6 @@ class Neevo implements SplSubject {
    */
   public function queries(){
     return $this->queries;
-  }
-
-  /**
-   * Attach an observer for debugging.
-   * @param SplObserver $observer
-   * @return void
-   */
-  public function attach(SplObserver $observer){
-    $this->observers->attach($observer);
-  }
-
-  /**
-   * Detach given observer.
-   * @param SplObserver $observer
-   * @return void
-   */
-  public function detach(SplObserver $observer){
-    if($this->observers->contains($observer)){
-      $this->observers->detach($observer);
-    }
-  }
-
-  /**
-   * Notify observers.
-   * @return void
-   */
-  public function notify(){
-    foreach($this->observers as $observer){
-      $observer->update($this);
-    }
   }
 
   /**
@@ -440,25 +425,3 @@ class NeevoLiteral {
     $this->value = $value;
   }
 }
-
-
-/**
- * Main Neevo exception.
- * @author Martin Srank
- * @package NeevoExceptions
- */
-class NeevoException extends Exception{}
-
-/**
- * Exception for features not implemented by the driver,
- * @author Martin Srank
- * @package NeevoExceptions
- */
-class NeevoImplemenationException extends NeevoException{}
-
-/**
- * Neevo driver exception.
- * @author Martin Srank
- * @package NeevoExceptions
- */
-class NeevoDriverException extends NeevoException{}

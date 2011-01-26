@@ -73,7 +73,7 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
       try{
         $connection = new SQLite3($config['database']);
       } catch(Exception $e){
-          throw new NeevoException($e->getMessage(), $e->getCode(), $e);
+          throw new NeevoException($e->getMessage(), $e->getCode());
       }
     }
 
@@ -127,7 +127,7 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
     $result = $this->resource->query($queryString);
 
     if($result === false){
-      throw new NeevoException($this->resource->lastErrorMsg(), $this->resource->lastErrorCode());
+      throw new NeevoException($this->resource->lastErrorMsg(), $this->resource->lastErrorCode(), $queryString);
     }
 
     $this->affectedRows = $this->resource->changes();

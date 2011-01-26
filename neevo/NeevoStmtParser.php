@@ -67,6 +67,7 @@ class NeevoStmtParser {
 
     $this->stmt = null;
     $this->clauses = array();
+    
     return $q . ';';
   }
 

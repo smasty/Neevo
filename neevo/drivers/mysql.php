@@ -145,7 +145,7 @@ class NeevoDriverMySQL implements INeevoDriver{
 
     $error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', @mysql_error($this->resource));
     if($error && $result === false){
-      throw new NeevoException("Query failed. $error", @mysql_errno($this->resource));
+      throw new NeevoException("Query failed. $error", @mysql_errno($this->resource), $queryString);
     }
 
     $this->affectedRows = @mysql_affected_rows($this->resource);
