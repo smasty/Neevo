@@ -78,7 +78,7 @@ class Neevo {
   );
 
   // Neevo revision
-  const REVISION = 330;
+  const REVISION = 331;
 
   // Data types
   const BOOL = 'b';
@@ -263,20 +263,6 @@ class Neevo {
     if(self::$cache instanceof INeevoCache){
       self::$cache->store($key, $value);
     }
-  }
-
-  /**
-   * Basic information about the library.
-   * @return array
-   */
-  public function info(){
-    $info = array(
-      'executed' => (int) $this->queries,
-      'last' => $this->last(),
-      'connection' => $this->connection->info(),
-      'revision' => self::REVISION
-    );
-    return $info;
   }
 
   /**
