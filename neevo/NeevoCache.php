@@ -35,6 +35,12 @@ interface INeevoCache {
    */
   public function store($key, $value);
 
+  /**
+   * Flush entire cache.
+   * @return bool
+   */
+  public function flush();
+
 }
 
 
@@ -50,6 +56,11 @@ class NeevoCacheSession implements INeevoCache {
 
   public function store($key, $value){
     $_SESSION['NeevoCache'][$key] = $value;
+  }
+
+  public function flush(){
+    $_SESSION['NeevoCache'] = array();
+    return true;
   }
 
 }
@@ -69,17 +80,19 @@ class NeevoCacheFile implements INeevoCache {
   }
 
   public function fetch($key){
-    if(!isset($this->data[$key])){
-      return null;
-    }
-    return $this->data[$key];
+    return isset($this->data[$key]) ? $this->data[$key] : null;
   }
 
   public function store($key, $value){
     if(!isset($this->data[$key]) || $this->data[$key] !== $value){
       $this->data[$key] = $value;
-      file_put_contents($this->filename, serialize($this->data), LOCK_EX);
+      @file_put_contents($this->filename, serialize($this->data), LOCK_EX);
     }
+  }
+
+  public function flush(){
+    $this->data = array();
+    return @file_put_contents($this->filename, serialize($this->data), LOCK_EX);
   }
 
 }
@@ -107,9 +120,14 @@ class NeevoCacheInclude implements INeevoCache {
 	public function store($key, $value) {
 		if(!isset($this->data[$key]) || $this->data[$key] !== $value){
 			$this->data[$key] = $value;
-			file_put_contents($this->filename, '<?php return '.var_export($this->data, true).';', LOCK_EX);
+			@file_put_contents($this->filename, '<?php return '.var_export($this->data, true).';', LOCK_EX);
 		}
 	}
+
+  public function flush(){
+    $this->data = array();
+	  @file_put_contents($this->filename, '<?php return '.var_export($this->data, true).';', LOCK_EX);
+  }
 
 }
 
@@ -133,6 +151,7 @@ class NeevoCacheDB implements INeevoCache {
 
   public function __construct(NeevoConnection $connection){
     $this->driver = $connection->driver();
+    $connection->realConnect();
   }
 
   public function fetch($key){
@@ -140,12 +159,7 @@ class NeevoCacheDB implements INeevoCache {
       $q = $this->driver->query("SELECT data FROM neevo_cache WHERE id = "
        . $this->driver->escape($key, Neevo::TEXT));
       $row = $this->driver->fetch($q);
-      if($row !== false){
-        return unserialize($row['data']);
-      }
-      else{
-        return null;
-      }
+      return $row !== false ? unserialize($row['data']) : null;
     } catch(Exception $e){
         return null;
     }
@@ -164,6 +178,14 @@ class NeevoCacheDB implements INeevoCache {
     }
   }
 
+  public function flush(){
+    try{
+     return (bool) $this->driver->query("DELETE FROM neevo_cache");
+    } catch(Exception $e){
+        return false;
+      }
+  }
+
 }
 
 
@@ -173,7 +195,7 @@ class NeevoCacheDB implements INeevoCache {
  */
 class NeevoCacheMemcache implements INeevoCache {
 
-  private $memcache;
+  private $memcache, $keys = array();
 
   public function __construct(Memcache $memcache){
     $this->memcache = $memcache;
@@ -181,14 +203,19 @@ class NeevoCacheMemcache implements INeevoCache {
 
   public function fetch($key){
     $value = $this->memcache->fetch("NeevoCache.$key");
-    if($value === false){
-      return null;
-    }
-    return $value;
+    return $value !== false ? $value : null;
   }
 
   public function store($key, $value){
     $this->memcache->set("NeevoCache.$key", $value);
+    $this->keys[] = $key;
+  }
+
+  public function flush(){
+    foreach($this->keys as $key){
+      $this->memcache->delete($key);
+    }
+    return true;
   }
 
 }
@@ -200,16 +227,26 @@ class NeevoCacheMemcache implements INeevoCache {
  */
 class NeevoCacheAPC implements INeevoCache {
 
+  private $keys = array();
+
   public function fetch($key){
     $value = apc_fetch("NeevoCache.$key", $success);
     if(!$success){
       return null;
     }
-    return $value;
+    return $value !== false ? $value : null;
   }
 
   public function store($key, $value){
     apc_store("NeevoCache.$key", $value);
+    $this->keys[] = $key;
+  }
+
+  public function flush(){
+    foreach($this->keys as $key){
+      apc_delete($key);
+    }
+    return true;
   }
 
 }
