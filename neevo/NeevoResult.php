@@ -353,10 +353,20 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
    * @return NeevoResult fluent interface
    */
   public function detectTypes(){
+    $table = $this->getTable();
     $this->performed || $this->run();
-    $types = $this->driver()->getColumnTypes($this->resultSet, $this->getTable());
+
+    // Try fetch from cache
+    $cached = Neevo::cacheFetch($table.'_detectedTypes');
+    $types = $cached !== null
+      ? $cached : $this->driver()->getColumnTypes($this->resultSet, $table);
+
     foreach($types as $col => $type){
-      $this->columnTypes[$col] = $this->resolveType($type);
+      $this->columnTypes[$col] = $cached !== null ? $type : $this->resolveType($type);
+    }
+    // Store in cache
+    if($cached === null){
+      Neevo::cacheStore($table.'_detectedTypes', $this->columnTypes);
     }
     return $this;
   }

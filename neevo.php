@@ -86,7 +86,7 @@ class Neevo {
   );
 
   // Neevo revision
-  const REVISION = 332;
+  const REVISION = 334;
 
   // Data types
   const BOOL = 'b';
@@ -270,6 +270,16 @@ class Neevo {
   public static function cacheStore($key, $value){
     if(self::$cache instanceof INeevoCache){
       self::$cache->store($key, $value);
+    }
+  }
+
+  /**
+   * Flush entire cache.
+   * @return bool
+   */
+  public static function cacheFlush(){
+    if(self::$cache instanceof INeevoCache){
+      return self::$cache->flush();
     }
   }
 
