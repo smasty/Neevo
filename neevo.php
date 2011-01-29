@@ -52,9 +52,6 @@ class Neevo {
   /** @var NeevoConnection */
   private $connection;
 
-  /** @var INeevoCache */
-  private static $cache;
-
   /** @var string Default Neevo driver */
   public static $defaultDriver = 'mysql';
 
@@ -67,6 +64,7 @@ class Neevo {
     'neevoimplementationexception' => '/neevo/NeevoException.php',
     'neevoconnection' => '/neevo/NeevoConnection.php',
     'ineevocache' => '/neevo/NeevoCache.php',
+    'neevocache' => '/neevo/NeevoCache.php',
     'neevocacheapc' => '/neevo/NeevoCache.php',
     'neevocachedb' => '/neevo/NeevoCache.php',
     'neevocachefile' => '/neevo/NeevoCache.php',
@@ -80,13 +78,13 @@ class Neevo {
     'neevoresultiterator' => '/neevo/NeevoResultIterator.php',
     'neevorow' => '/neevo/NeevoRow.php',
     'ineevodriver' => '/neevo/INeevoDriver.php',
-    'neevoobserver' => '/neevo/NeevoObserver.php',
     'ineevoobserver' => '/neevo/NeevoObserver.php',
+    'neevoobserver' => '/neevo/NeevoObserver.php',
     'ineevoobservable' => '/neevo/NeevoObserver.php'
   );
 
   // Neevo revision
-  const REVISION = 335;
+  const REVISION = 336;
 
   // Data types
   const BOOL = 'b';
@@ -111,13 +109,12 @@ class Neevo {
    *
    * Configuration can be different - see the API for your driver.
    * @param mixed $config Connection configuration.
-   * @param INeevoCache|null $cache Cache to use. NULL for no cache.
+   * @param INeevoCache $cache Cache to use.
    * @return void
    * @throws NeevoException
    */
   public function __construct($config, INeevoCache $cache = null){
-    self::$cache = $cache ? $cache : new NeevoCache;
-    $this->connect($config);
+    $this->connect($config, $cache);
   }
 
   /**
@@ -125,10 +122,11 @@ class Neevo {
    *
    * Configuration can be different - see the API for your driver.
    * @param mixed $config Connection configuration.
+   * @param INeevoCache $cache Cache to use.
    * @return Neevo fluent interface
    */
-  public function connect($config){
-    $this->connection = new NeevoConnection($config);
+  public function connect($config, INeevoCache $cache = null){
+    $this->connection = new NeevoConnection($config, $cache);
     return $this;
   }
 
@@ -242,40 +240,6 @@ class Neevo {
   public function rollback($savepoint = null){
     $this->driver()->rollback($savepoint);
     $this->connection->notifyObservers(INeevoObserver::ROLLBACK);
-  }
-
-  /**
-   * Fetch stored data.
-   * @param string $key
-   * @return mixed|null null if not found
-   */
-  public static function cacheFetch($key){
-    if(self::$cache instanceof INeevoCache){
-      return self::$cache->fetch($key);
-    }
-    return null;
-  }
-
-  /**
-   * Store data in cache.
-   * @param string $key
-   * @param mixed $value
-   * @return void
-   */
-  public static function cacheStore($key, $value){
-    if(self::$cache instanceof INeevoCache){
-      self::$cache->store($key, $value);
-    }
-  }
-
-  /**
-   * Flush entire cache.
-   * @return bool
-   */
-  public static function cacheFlush(){
-    if(self::$cache instanceof INeevoCache){
-      return self::$cache->flush();
-    }
   }
 
   /**

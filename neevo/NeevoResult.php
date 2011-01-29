@@ -357,7 +357,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
     $this->performed || $this->run();
 
     // Try fetch from cache
-    $cached = Neevo::cacheFetch($table.'_detectedTypes');
+    $cached = $this->connection->cache()->fetch($table.'_detectedTypes');
     $types = $cached !== null
       ? $cached : $this->driver()->getColumnTypes($this->resultSet, $table);
 
@@ -366,7 +366,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
     }
     // Store in cache
     if($cached === null){
-      Neevo::cacheStore($table.'_detectedTypes', $this->columnTypes);
+      $this->connection->cache()->store($table.'_detectedTypes', $this->columnTypes);
     }
     return $this;
   }

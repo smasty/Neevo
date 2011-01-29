@@ -39,14 +39,20 @@ class NeevoConnection implements INeevoObservable {
   /** @var SplObjectStorage */
   private $observers;
 
+  /** @var INeevoCache */
+  private $cache;
+
   /**
    * Establish a connection.
    * @param array|string|Traversable $config
+   * @param INeevoCache $cache
    * @throws InvalidArgumentException
    * @return void
    */
-  public function __construct($config){
+  public function __construct($config, INeevoCache $cache = null){
     $this->observers = new SplObjectStorage;
+
+    $this->cache = $cache ? $cache : new NeevoCache;
     
     // Parse
     if(is_string($config)){
@@ -115,20 +121,19 @@ class NeevoConnection implements INeevoObservable {
       ? $this->config['tablePrefix'] : '';
   }
 
-  /**
-   * Get curret driver instance
-   * @return INeevoDriver
-   */
+  /** @return INeevoDriver */
   public function driver(){
     return $this->driver;
   }
 
-  /**
-   *
-   * @return NeevoStmtParser
-   */
+  /** @return NeevoStmtParser */
   public function stmtParser(){
     return $this->stmtParser;
+  }
+
+  /** @return INeevoCache */
+  public function cache(){
+    return $this->cache;
   }
 
   /**
