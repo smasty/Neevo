@@ -45,7 +45,7 @@ spl_autoload_register(array('Neevo', '_autoload'));
  * @author Martin Srank
  * @package Neevo
  */
-class Neevo {
+class Neevo implements INeevoObservable {
 
   private $last, $queries = 0;
 
@@ -84,7 +84,7 @@ class Neevo {
   );
 
   // Neevo revision
-  const REVISION = 336;
+  const REVISION = 337;
 
   // Data types
   const BOOL = 'b';
@@ -263,6 +263,10 @@ class Neevo {
   public function detachObserver(INeevoObserver $observer){
     $this->connection->detachObserver($observer);
     NeevoException::detach($observer);
+  }
+
+  public function notifyObservers($event, NeevoStmtBase $statement = null){
+    $this->connection->notifyObservers($event, $statement);
   }
 
   /**
