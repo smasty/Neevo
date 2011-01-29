@@ -176,7 +176,7 @@ class NeevoConnection implements INeevoObservable {
    */
   public function notifyObservers($event, NeevoStmtBase $statement = null){
     foreach($this->observers as $observer){
-      $observer->update($this, $event, $statement);
+      $observer->updateStatus($this, $event, $statement);
     }
   }
 
