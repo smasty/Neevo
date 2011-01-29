@@ -93,6 +93,10 @@ abstract class NeevoStmtBase {
    * @return NeevoStmtBase fluent interface
    */
   public function where($expr, $value = true){
+    if(is_array($expr) && $value === true){
+      return call_user_func_array(array($this, 'where'), $expr);
+    }
+
     if($this->checkCond()){
       return $this;
     }

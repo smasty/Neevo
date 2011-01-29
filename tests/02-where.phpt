@@ -16,7 +16,7 @@ foreach(array(
   array('id', new NeevoLiteral(99))
 ) as $cond){
 
-  $query = $db->select('id', 'software')->where($cond[0], $cond[1])->order('id');
+  $query = $db->select('id', 'software')->where($cond)->order('id');
   if(!$query){
     $query = array();
   }
