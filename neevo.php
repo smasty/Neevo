@@ -84,7 +84,7 @@ class Neevo {
   );
 
   // Neevo revision
-  const REVISION = 339;
+  const REVISION = 340;
 
   // Data types
   const BOOL = 'b';

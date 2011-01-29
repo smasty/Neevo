@@ -244,20 +244,20 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
    * @return array
    */
   public function fetchPairs($key, $value = null){
+    $clone = clone $this;
+
     // If executed w/o needed cols, force exec w/ them.
-    if(!in_array('*', $this->columns)){
-      if(!in_array($key, $this->columns)){
-        $this->reinit();
-        $this->columns[] = $key;
+    if(!in_array('*', $clone->columns)){
+      if(!in_array($key, $clone->columns)){
+        $clone->columns[] = $key;
       }
-      if($value !== null && !in_array($value, $this->columns)){
-        $this->reinit();
-        $this->columns[] = $value;
+      if($value !== null && !in_array($value, $clone->columns)){
+        $clone->columns[] = $value;
       }
     }
 
     $rows = array();
-    while($row = $this->fetch()){
+    while($row = $clone->fetch()){
       if(!$row) return array();
       $rows[$row[$key]] = $value === null ? $row : $row->$value;
     }
@@ -475,8 +475,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
   /** @internal */
   public function reinit(){
-    $this->performed = false;
+    parent::reinit();
     $this->resultSet = null;
+    $this->numRows = null;
   }
 
   public function  __destruct(){

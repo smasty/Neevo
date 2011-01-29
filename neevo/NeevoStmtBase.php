@@ -90,7 +90,7 @@ abstract class NeevoStmtBase {
    * 
    * @param string $expr
    * @param mixed $value
-   * @return NeevoStmt|NeevoResult fluent interface
+   * @return NeevoStmtBase fluent interface
    */
   public function where($expr, $value = true){
     if($this->checkCond()){
@@ -132,7 +132,7 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * @return NeevoStmt|NeevoResult fluent interface
+   * @return NeevoStmtBase fluent interface
    * @internal
    * @throws BadMethodCallException
    * @throws InvalidArgumentException
@@ -172,8 +172,6 @@ abstract class NeevoStmtBase {
         array_pop($conds);
       }
 
-      //reset($conds);
-
       return $this;
 
     }
@@ -194,7 +192,7 @@ abstract class NeevoStmtBase {
   /**
    * Set ORDER clauses. Accepts infinite arguments (rules) or an array.
    * @param string|array $rules Order rules: "column", "col1, col2 DESC", etc.
-   * @return NeevoStmt|NeevoResult fluent interface
+   * @return NeevoStmtBase fluent interface
    */
   public function order($rules){
     if($this->checkCond()){
@@ -212,7 +210,7 @@ abstract class NeevoStmtBase {
 
   /**
    * Alias for NeevoStmtBase::order().
-   * @return NeevoStmt|NeevoResult fluent interface
+   * @return NeevoStmtBase fluent interface
    */
   public function orderBy($rules){
     return $this->order(is_array($rules) ? $rules : func_get_args());
@@ -222,7 +220,7 @@ abstract class NeevoStmtBase {
    * Set LIMIT and OFFSET clause.
    * @param int $limit
    * @param int $offset
-   * @return NeevoStmt|NeevoResult fluent interface
+   * @return NeevoStmtBase fluent interface
    */
   public function limit($limit, $offset = null){
     if($this->checkCond()){
@@ -238,7 +236,7 @@ abstract class NeevoStmtBase {
 
   /**
    * Randomize order. Removes any other order clauses.
-   * @return NeevoStmt|NeevoResult fluent interface
+   * @return NeevoStmtBase fluent interface
    */
   public function rand(){
     if($this->checkCond()){
@@ -252,7 +250,7 @@ abstract class NeevoStmtBase {
   /**
    * Print out syntax highlighted statement.
    * @param bool $return Return the output instead of printing it
-   * @return string|NeevoStmt|NeevoResult fluent interface
+   * @return string|NeevoStmtBase fluent interface
    */
   public function dump($return = false){
     $code = (PHP_SAPI === 'cli') ? $this->parse() : Neevo::highlightSql($this->parse());
@@ -401,6 +399,12 @@ abstract class NeevoStmtBase {
 
   /*  ************  Internal methods  ************  */
 
+  /**
+   * Create clone of object.
+   */
+  public function __clone(){
+    $this->reinit();
+  }
 
   /** @internal */
   protected function realConnect(){
@@ -424,14 +428,14 @@ abstract class NeevoStmtBase {
   }
 
   /** @internal */
-  private function reinit(){
+  public function reinit(){
     $this->performed = false;
+    $this->time = null;
   }
 
   /** @internal */
   protected function getConfig($key = null){
     return $this->connection->getConfig($key);
   }
-
 
 }

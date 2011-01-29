@@ -100,8 +100,9 @@ class NeevoStmt extends NeevoStmtBase {
     return $this->values;
   }
 
-  private function reinit(){
-    $this->performed = false;
+  /** @internal */
+  public function reinit(){
+    parent::reinit();
     $this->affectedRows = null;
   }
   
