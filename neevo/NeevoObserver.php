@@ -67,6 +67,13 @@ interface INeevoObservable{
   public function attachObserver(INeevoObserver $observer);
 
   /**
+   * Detach given observer.
+   * @param INeevoObserver $observer
+   * @return void
+   */
+  public function detachObserver(INeevoObserver $observer);
+
+  /**
    * Notify all attached observers.
    * @param int $event
    * @param NeevoStmtBase $statement
