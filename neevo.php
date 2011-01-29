@@ -45,7 +45,7 @@ spl_autoload_register('_neevo_autoload');
  * @author Martin Srank
  * @package Neevo
  */
-class Neevo {
+class Neevo implements INeevoObservable, INeevoObserver {
 
   private $last, $queries = 0;
 
@@ -56,7 +56,7 @@ class Neevo {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 340;
+  const REVISION = 341;
 
   // Data types
   const BOOL = 'b';
@@ -237,6 +237,17 @@ class Neevo {
     NeevoException::detach($observer);
   }
 
+  public function notifyObservers($event, NeevoStmtBase $statement = null){
+    $this->connection->notifyObservers($event, $statement);
+  }
+
+  public function updateStatus(INeevoObservable $observable, $event, NeevoStmtBase $statement = null){
+    if($statement instanceof NeevoStmtBase){
+      $this->last = (string) $statement;
+      ++$this->queries;
+    }
+  }
+
   /**
    * Current NeevoConnection instance.
    * @return NeevoConnection
@@ -246,21 +257,11 @@ class Neevo {
   }
 
   /**
-   * Last executed query info.
-   * @return array
+   * Last executed query.
+   * @return string
    */
   public function last(){
     return $this->last;
-  }
-
-  /**
-   * Set last executed statement.
-   * @internal
-   */
-  public function setLast(array $last){
-    $this->queries++;
-    $this->last = $last;
-    $this->notify();
   }
 
   /**

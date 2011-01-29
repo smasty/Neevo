@@ -46,7 +46,7 @@ interface INeevoObserver{
    * @param NeevoStmtBase $statement Optional statement instance
    * @return void
    */
-  public function update(INeevoObservable $observable, $event, NeevoStmtBase $statement = null);
+  public function updateStatus(INeevoObservable $observable, $event, NeevoStmtBase $statement = null);
 
 }
 
@@ -155,7 +155,7 @@ class NeevoObserver implements INeevoObserver, IDebugPanel{
    * @param NeevoStmtBase $statement Optional statement instance
    * @return void
    */
-  public function update(INeevoObservable $observable, $event = null, NeevoStmtBase $statement = null){
+  public function updateStatus(INeevoObservable $observable, $event = null, NeevoStmtBase $statement = null){
 
     if($event & $this->filter){
 
