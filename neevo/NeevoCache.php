@@ -44,6 +44,32 @@ interface INeevoCache {
 }
 
 
+
+/**
+ * Default implementation of INeevoCache.
+ * @package NeevoCache
+ */
+class NeevoCache implements INeevoCache {
+
+  private $data = array();
+
+  public function fetch($key){
+    return isset($this->data[$key]) ? $this->data[$key] : null;
+  }
+
+  public function store($key, $value){
+    $this->data[$key] = $value;
+  }
+
+  public function flush(){
+    $this->data = array();
+    return empty($this->data);
+  }
+
+}
+
+
+
 /**
  * Neevo cache using `$_SESSION['NeevoCache']`.
  * @package NeevoCache
@@ -60,10 +86,11 @@ class NeevoCacheSession implements INeevoCache {
 
   public function flush(){
     $_SESSION['NeevoCache'] = array();
-    return true;
+    return empty($_SESSION['NeevoCache']);
   }
 
 }
+
 
 
 /**
@@ -98,6 +125,7 @@ class NeevoCacheFile implements INeevoCache {
 }
 
 
+
 /**
  * Neevo cache using PHP included file.
  */
@@ -126,10 +154,11 @@ class NeevoCacheInclude implements INeevoCache {
 
   public function flush(){
     $this->data = array();
-	  @file_put_contents($this->filename, '<?php return '.var_export($this->data, true).';', LOCK_EX);
+	  return @file_put_contents($this->filename, '<?php return '.var_export($this->data, true).';', LOCK_EX);
   }
 
 }
+
 
 
 /**
@@ -189,6 +218,7 @@ class NeevoCacheDB implements INeevoCache {
 }
 
 
+
 /**
  * Neevo cache using `NeevoCache.` prefix in Memcache.
  * @package NeevoCache
@@ -215,10 +245,12 @@ class NeevoCacheMemcache implements INeevoCache {
     foreach($this->keys as $key){
       $this->memcache->delete($key);
     }
+    $this->keys = array();
     return true;
   }
 
 }
+
 
 
 /**
@@ -246,8 +278,8 @@ class NeevoCacheAPC implements INeevoCache {
     foreach($this->keys as $key){
       apc_delete($key);
     }
+    $this->keys = array();
     return true;
   }
 
 }
-?>

@@ -86,7 +86,7 @@ class Neevo {
   );
 
   // Neevo revision
-  const REVISION = 334;
+  const REVISION = 335;
 
   // Data types
   const BOOL = 'b';
@@ -116,7 +116,7 @@ class Neevo {
    * @throws NeevoException
    */
   public function __construct($config, INeevoCache $cache = null){
-    self::$cache = $cache;
+    self::$cache = $cache ? $cache : new NeevoCache;
     $this->connect($config);
   }
 
@@ -129,11 +129,6 @@ class Neevo {
    */
   public function connect($config){
     $this->connection = new NeevoConnection($config);
-    
-    if($this->connection->getConfig('nettePanel') && class_exists('NeevoDebugPanel')){
-      $panel = new NeevoDebugPanel($this);
-      $this->attach($panel);
-    }
     return $this;
   }
 
