@@ -33,7 +33,7 @@ if(!interface_exists('IDebugPanel')){
   }
 }
 
-// Neevo class autoloader
+// Neevo classes autoloader
 spl_autoload_register(array('Neevo', '_autoload'));
 
 @set_magic_quotes_runtime(FALSE);
@@ -45,7 +45,7 @@ spl_autoload_register(array('Neevo', '_autoload'));
  * @author Martin Srank
  * @package Neevo
  */
-class Neevo implements INeevoObservable {
+class Neevo {
 
   private $last, $queries = 0;
 
@@ -84,7 +84,7 @@ class Neevo implements INeevoObservable {
   );
 
   // Neevo revision
-  const REVISION = 337;
+  const REVISION = 338;
 
   // Data types
   const BOOL = 'b';
@@ -263,10 +263,6 @@ class Neevo implements INeevoObservable {
   public function detachObserver(INeevoObserver $observer){
     $this->connection->detachObserver($observer);
     NeevoException::detach($observer);
-  }
-
-  public function notifyObservers($event, NeevoStmtBase $statement = null){
-    $this->connection->notifyObservers($event, $statement);
   }
 
   /**
