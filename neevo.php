@@ -34,7 +34,7 @@ if(!interface_exists('IDebugPanel')){
 }
 
 // Neevo classes autoloader
-spl_autoload_register(array('Neevo', '_autoload'));
+spl_autoload_register('_neevo_autoload');
 
 @set_magic_quotes_runtime(FALSE);
 
@@ -54,34 +54,6 @@ class Neevo {
 
   /** @var string Default Neevo driver */
   public static $defaultDriver = 'mysql';
-
-  /** @var array path to Neevo classes (for autoloader) */
-  private static $classes = array(
-    'neevo' => '',
-    'neevoliteral' => '',
-    'neevoexception' => '/neevo/NeevoException.php',
-    'neevodriverexception' => '/neevo/NeevoException.php',
-    'neevoimplementationexception' => '/neevo/NeevoException.php',
-    'neevoconnection' => '/neevo/NeevoConnection.php',
-    'ineevocache' => '/neevo/NeevoCache.php',
-    'neevocache' => '/neevo/NeevoCache.php',
-    'neevocacheapc' => '/neevo/NeevoCache.php',
-    'neevocachedb' => '/neevo/NeevoCache.php',
-    'neevocachefile' => '/neevo/NeevoCache.php',
-    'neevocacheinclude' => '/neevo/NeevoCache.php',
-    'neevocachememcache' => '/neevo/NeevoCache.php',
-    'neevocachesession' => '/neevo/NeevoCache.php',
-    'neevostmtbase' => '/neevo/NeevoStmtBase.php',
-    'neevostmtparser' => '/neevo/NeevoStmtParser.php',
-    'neevostmt' => '/neevo/NeevoStmt.php',
-    'neevoresult' => '/neevo/NeevoResult.php',
-    'neevoresultiterator' => '/neevo/NeevoResultIterator.php',
-    'neevorow' => '/neevo/NeevoRow.php',
-    'ineevodriver' => '/neevo/INeevoDriver.php',
-    'ineevoobserver' => '/neevo/NeevoObserver.php',
-    'neevoobserver' => '/neevo/NeevoObserver.php',
-    'ineevoobservable' => '/neevo/NeevoObserver.php'
-  );
 
   // Neevo revision
   const REVISION = 340;
@@ -359,21 +331,6 @@ class Neevo {
     } catch(NeevoImplemenationException $e){}
   }
 
-  /**
-   * Neevo autoloader
-   * @param string $class
-   * @return bool
-   * @internal
-   */
-  public static function _autoload($class){
-    $class = strtolower($class);
-    
-    if(isset(self::$classes[$class])){
-      return include_once dirname(__FILE__).self::$classes[$class];
-    }
-    return false;
-  }
-
 }
 
 
@@ -388,4 +345,41 @@ class NeevoLiteral {
   public function __construct($value) {
     $this->value = $value;
   }
+}
+
+
+
+function _neevo_autoload($class){
+  static $classes = array(
+    'neevo' => 'neevo.php',
+    'neevoliteral' => 'neevo.php',
+    'neevoexception' => '/neevo/NeevoException.php',
+    'neevodriverexception' => '/neevo/NeevoException.php',
+    'neevoimplementationexception' => '/neevo/NeevoException.php',
+    'neevoconnection' => '/neevo/NeevoConnection.php',
+    'ineevocache' => '/neevo/NeevoCache.php',
+    'neevocache' => '/neevo/NeevoCache.php',
+    'neevocacheapc' => '/neevo/NeevoCache.php',
+    'neevocachedb' => '/neevo/NeevoCache.php',
+    'neevocachefile' => '/neevo/NeevoCache.php',
+    'neevocacheinclude' => '/neevo/NeevoCache.php',
+    'neevocachememcache' => '/neevo/NeevoCache.php',
+    'neevocachesession' => '/neevo/NeevoCache.php',
+    'neevostmtbase' => '/neevo/NeevoStmtBase.php',
+    'neevostmtparser' => '/neevo/NeevoStmtParser.php',
+    'neevostmt' => '/neevo/NeevoStmt.php',
+    'neevoresult' => '/neevo/NeevoResult.php',
+    'neevoresultiterator' => '/neevo/NeevoResultIterator.php',
+    'neevorow' => '/neevo/NeevoRow.php',
+    'ineevodriver' => '/neevo/INeevoDriver.php',
+    'ineevoobserver' => '/neevo/NeevoObserver.php',
+    'neevoobserver' => '/neevo/NeevoObserver.php',
+    'ineevoobservable' => '/neevo/NeevoObserver.php'
+  );
+  $class = strtolower($class);
+
+  if(isset($classes[$class])){
+    return include_once dirname(__FILE__).$classes[$class];
+  }
+  return false;
 }
