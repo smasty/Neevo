@@ -192,7 +192,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
    */
   public function begin($savepoint = null){
     $this->driver()->begin($savepoint);
-    $this->connection->notifyObservers(INeevoObserver::BEGIN);
+    $this->notifyObservers(INeevoObserver::BEGIN);
   }
 
   /**
@@ -202,7 +202,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
    */
   public function commit($savepoint = null){
     $this->driver()->commit($savepoint);
-    $this->connection->notifyObservers(INeevoObserver::COMMIT);
+    $this->notifyObservers(INeevoObserver::COMMIT);
   }
 
   /**
@@ -212,7 +212,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
    */
   public function rollback($savepoint = null){
     $this->driver()->rollback($savepoint);
-    $this->connection->notifyObservers(INeevoObserver::ROLLBACK);
+    $this->notifyObservers(INeevoObserver::ROLLBACK);
   }
 
   /**
