@@ -13,25 +13,26 @@
  *
  */
 
+
 // PHP compatibility
 if(version_compare(PHP_VERSION, '5.2.0', '<')){
   trigger_error('Neevo requires PHP version 5.2.0 or newer', E_USER_ERROR);
 }
+
 
 // Nette Framework compatibility
 if(interface_exists('Nette\IDebugPanel')){
   class_alias('Nette\IDebugPanel', 'IDebugPanel');
 }
 if(!interface_exists('IDebugPanel')){
-  /**
-   * Nette Framework compatibility.
-   */
+  /** Nette Framework compatibility. */
   interface IDebugPanel{
     function getId();
     function getTab();
     function getPanel();
   }
 }
+
 
 // Neevo classes autoloader
 spl_autoload_register('_neevo_autoload');
@@ -47,7 +48,11 @@ spl_autoload_register('_neevo_autoload');
  */
 class Neevo implements INeevoObservable, INeevoObserver {
 
-  private $last, $queries = 0;
+  /** @var string */
+  private $last;
+
+  /** @var int */
+  private $queries = 0;
 
   /** @var NeevoConnection */
   private $connection;
@@ -78,7 +83,6 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
   /**
    * Configure Neevo and establish a connection.
-   *
    * Configuration can be different - see the API for your driver.
    * @param mixed $config Connection configuration.
    * @param INeevoCache $cache Cache to use.
@@ -92,11 +96,11 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
   /**
    * Establish a new connection.
-   *
    * Configuration can be different - see the API for your driver.
    * @param mixed $config Connection configuration.
    * @param INeevoCache $cache Cache to use.
    * @return Neevo fluent interface
+   * @throws NeevoException
    */
   public function connect($config, INeevoCache $cache = null){
     $this->connection = new NeevoConnection($config, $cache);
@@ -105,8 +109,8 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
   /**
    * SELECT statement factory.
-   * @param string|array $columns array or comma-separated list
-   * @param string $table Table name
+   * @param string|array $columns Array or comma-separated list (optional)
+   * @param string $table
    * @return NeevoResult fluent interface
    */
   public function select($columns = null, $table = null){
@@ -115,8 +119,8 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
   /**
    * INSERT statement factory.
-   * @param string $table Table name
-   * @param array $values Values to insert
+   * @param string $table
+   * @param array $values
    * @return int|NeevoStmt Last inserted ID or NeevoStmt on lazy connection
    */
   public function insert($table, array $values){
@@ -127,17 +131,9 @@ class Neevo implements INeevoObservable, INeevoObserver {
   }
 
   /**
-   * Alias for Neevo::insert().
-   * @return int|NeevoStmt
-   */
-  public function insertInto($table, array $values){
-    return $this->insert($table, $values);
-  }
-
-  /**
    * UPDATE statement factory.
-   * @param string $table Table name
-   * @param array $data Data to update
+   * @param string $table
+   * @param array $data
    * @return NeevoStmt fluent interface
    */
   public function update($table, array $data){
@@ -147,7 +143,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
   /**
    * DELETE statement factory.
-   * @param string $table Table name
+   * @param string $table
    * @return NeevoStmt fluent interface
    */
   public function delete($table){
@@ -158,7 +154,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
   /**
    * Import a SQL dump from given file.
    * @param string $filename
-   * @return int number of commands executed
+   * @return int Number of executed commands
    */
   public function loadFile($filename){
     $this->connection->realConnect();
@@ -266,24 +262,11 @@ class Neevo implements INeevoObservable, INeevoObserver {
   }
 
   /**
-   * Get amount of executed queries.
+   * Get number of executed queries.
    * @return int
    */
   public function queries(){
     return $this->queries;
-  }
-
-  /**
-   * Neevo revision.
-   * @return int
-   */
-  public function revision(){
-    return self::REVISION;
-  }
-
-  /** @internal */
-  public function version(){
-    return self::REVISION;
   }
 
   /**
@@ -301,8 +284,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
     return '<code style="color:#555" class="sql-dump">' . $sql . "</code>\n";
   }
 
-  /** @internal */
-  protected static function _highlightCallback($match){
+  private static function _highlightCallback($match){
     if(!empty($match[1])){ // Basic keywords
       return '<strong style="color:#e71818">'.$match[1].'</strong>';
     }
@@ -355,6 +337,7 @@ class NeevoLiteral {
  * Neevo classes autoloader.
  * @param string $class
  * @return bool
+ * @author Martin Srank
  */
 function _neevo_autoload($class){
   static $classes = array(

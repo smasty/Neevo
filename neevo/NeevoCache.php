@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * Interface for NeevoCache classes.
  * @author Martin Srank
@@ -52,6 +53,7 @@ interface INeevoCache {
  */
 class NeevoCache implements INeevoCache {
 
+  /** @var array */
   private $data = array();
 
   public function fetch($key){
@@ -102,7 +104,11 @@ class NeevoCacheSession implements INeevoCache {
  */
 class NeevoCacheFile implements INeevoCache {
 
-  private $filename, $data = array();
+  /** @var string */
+  private $filename;
+
+  /** @var array */
+  private $data = array();
 
   public function __construct($filename){
     $this->filename = $filename;
@@ -136,7 +142,11 @@ class NeevoCacheFile implements INeevoCache {
  */
 class NeevoCacheInclude implements INeevoCache {
 
-  private $filename, $data = array();
+  /** @var string */
+  private $filename;
+
+  /** @var array */
+  private $data = array();
 
   public function __construct($filename){
 		$this->filename = $filename;
@@ -232,7 +242,11 @@ class NeevoCacheDB implements INeevoCache {
  */
 class NeevoCacheMemcache implements INeevoCache {
 
-  private $memcache, $keys = array();
+  /** @var Memcache */
+  private $memcache;
+
+  /** @var array */
+  private $keys = array();
 
   public function __construct(Memcache $memcache){
     $this->memcache = $memcache;
@@ -267,6 +281,7 @@ class NeevoCacheMemcache implements INeevoCache {
  */
 class NeevoCacheAPC implements INeevoCache {
 
+  /** @var array */
   private $keys = array();
 
   public function fetch($key){

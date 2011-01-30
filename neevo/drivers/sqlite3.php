@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * Neevo SQLite 3 driver (PHP extension 'sqlite3')
  *
@@ -33,12 +34,28 @@
  */
 class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
 
-  private $dbCharset, $charset, $updateLimit, $resource, $affectedRows, $tblData;
+  /** @var string */
+  private $dbCharset;
+  
+  /** @var string */
+  private $charset;
+  
+  /** @var bool */
+  private $updateLimit;
+
+  /** @var SQLite3Result */
+  private $resource;
+  
+  /** @var int */
+  private $affectedRows;
+
+  /** @var array */
+  private $tblData = array();
 
   /**
    * Check for required PHP extension.
-   * @throws NeevoException
    * @return void
+   * @throws NeevoException
    */
   public function  __construct(){
     if(!extension_loaded("sqlite3")){
@@ -49,8 +66,8 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
   /**
    * Create connection to database.
    * @param array $config Configuration options
-   * @throws NeevoException
    * @return void
+   * @throws NeevoException
    */
   public function connect(array $config){
     NeevoConnection::alias($config, 'database', 'file');
@@ -113,9 +130,9 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Execute given SQL statement.
-   * @param string $queryString Query-string.
-   * @throws NeevoException
+   * @param string $queryString
    * @return SQLite3Result|bool
+   * @throws NeevoException
    */
   public function query($queryString){
 
@@ -163,7 +180,7 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Fetch row from given result set as an associative array.
-   * @param SQLite3Result $resultSet Result set
+   * @param SQLite3Result $resultSet
    * @return array
    */
   public function fetch($resultSet){
@@ -206,7 +223,8 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Randomize result order.
-   * @param NeevoStmtBase $statement
+   * @param NeevoStmtBase $tatement
+   * @return void
    */
   public function rand(NeevoStmtBase $statement){
     $statement->order('RANDOM()');
@@ -235,7 +253,7 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
   /**
    * Escape given value.
    * @param mixed $value
-   * @param string $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param string $type
    * @throws InvalidArgumentException
    * @return mixed
    */
@@ -271,7 +289,7 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Get the PRIMARY KEY column for given table.
-   * @param $table string
+   * @param string $table
    * @return string
    */
   public function getPrimaryKey($table){

@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * Neevo SQLite driver (PHP extension 'sqlite')
  *
@@ -32,13 +33,31 @@
  */
 class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
 
-  private $charset, $dbCharset, $updateLimit, $resource, $unbuffered;
-  private $affectedRows, $tblData = array();
+  /** @var string */
+  private $charset;
+  
+  /** @var string */
+  private $dbCharset;
+
+  /** @var bool */
+  private $updateLimit;
+  
+  /** @var resource */
+  private $resource;
+
+  /** @var bool */
+  private $unbuffered;
+
+  /** @var int */
+  private $affectedRows;
+
+  /** @var array */
+  private $tblData = array();
 
   /**
    * Check for required PHP extension.
-   * @throws NeevoException
    * @return void
+   * @throws NeevoException
    */
   public function  __construct(){
     if(!extension_loaded("sqlite")){
@@ -49,8 +68,8 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
   /**
    * Create connection to database.
    * @param array $config Configuration options
-   * @throws NeevoException
    * @return void
+   * @throws NeevoException
    */
   public function connect(array $config){
     NeevoConnection::alias($config, 'database', 'file');
@@ -108,7 +127,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Free memory used by given result set.
-   * @param SQLiteResult $resultSet
+   * @param resource $resultSet
    * @return bool
    */
   public function free($resultSet){
@@ -117,9 +136,9 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Execute given SQL statement.
-   * @param string $queryString Query-string.
+   * @param string $queryString
+   * @return resource|bool
    * @throws NeevoException
-   * @return SQLiteResult|bool
    */
   public function query($queryString){
 
@@ -171,7 +190,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Fetch row from given result set as an associative array.
-   * @param resource $resultSet Result set
+   * @param resource $resultSet
    * @return array
    */
   public function fetch($resultSet){
@@ -198,7 +217,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Move internal result pointer.
-   * @param SQLiteResult $resultSet
+   * @param resource $resultSet
    * @param int $offset
    * @return bool
    * @throws NeevoDriverException
@@ -229,7 +248,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Get the number of rows in the given result set.
-   * @param SQLiteResult $resultSet
+   * @param resource $resultSet
    * @return int|FALSE
    * @throws NeevoDriverException
    */
@@ -251,9 +270,9 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
   /**
    * Escape given value.
    * @param mixed $value
-   * @param string $type Type of value (Neevo::TEXT, Neevo::BOOL...)
-   * @throws InvalidArgumentException
+   * @param string $type
    * @return mixed
+   * @throws InvalidArgumentException
    */
   public function escape($value, $type){
     switch($type){
@@ -277,6 +296,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
    * @param mixed $value
    * @param string $type
    * @return mixed
+   * @throws InvalidArgumentException
    */
   public function unescape($value, $type){
     if($type === Neevo::BINARY){
@@ -287,7 +307,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Get the PRIMARY KEY column for given table.
-   * @param $table string
+   * @param string $table
    * @return string
    */
   public function getPrimaryKey($table){
@@ -317,7 +337,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
 
   /**
    * Get types of columns in given result set.
-   * @param SQLiteResult $resultSet
+   * @param resource $resultSet
    * @param string $table
    * @return array
    */

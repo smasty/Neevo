@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * NeevoStmt to SQL command parser.
  * @author Martin Srank
@@ -22,6 +23,8 @@ class NeevoStmtParser {
 
   /** @var NeevoStmtBase */
   protected $stmt;
+
+  /** @var array */
   protected $clauses = array();
 
   /**
@@ -232,6 +235,11 @@ class NeevoStmtParser {
     return ' GROUP BY ' . $this->stmt->getGrouping() . $having;
   }
 
+  /**
+   * Parse column name.
+   * @param string $col
+   * @return string
+   */
   protected function parseColName($col){
     if($col instanceof NeevoLiteral){
       return $col->value;

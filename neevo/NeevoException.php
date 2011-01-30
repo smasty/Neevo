@@ -32,6 +32,7 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable{
    * @param string $message
    * @param int $code
    * @param string $sql Optional SQL command
+   * @return void
    */
   public function __construct($message = '', $code = 0, $sql = null){
 
@@ -96,7 +97,7 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable{
   public function notifyObservers($event = INeevoObserver::EXCEPTION, NeevoStmtBase $statement = null){
     if(!self::$observers) return;
     foreach(self::$observers as $observer){
-      $observer->update($this, $event);
+      $observer->updateStatus($this, $event);
     }
   }
 

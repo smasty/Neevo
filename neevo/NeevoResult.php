@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * Represents a result. Can be iterated, counted and provides fluent interface.
  * @author Martin Srank
@@ -20,30 +21,54 @@
  */
 class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable {
 
-  protected $resultSet, $numRows, $grouping, $having = null, $columns = array();
-  private $join, $rowClass = 'NeevoRow', $columnTypes = array(), $detectTypes;
+  /** @var resource */
+  protected $resultSet;
+  
+  /** @var int */
+  protected $numRows;
+
+  /** @var string */
+  protected $grouping;
+  
+  /** @var string */
+  protected $having = null;
+
+  /** @var array */
+  protected $columns = array();
+
+  /** @var string */
+  private $join;
+
+  /** @var string */
+  private $rowClass = 'NeevoRow';
+  
+  /** @var array */
+  private $columnTypes = array();
+
+  /** @var bool */
+  private $detectTypes;
 
   /**
    * Create SELECT statement.
    * @param NeevoConnection $connection
-   * @param string|array $cols Columns to select (array or comma-separated list)
-   * @param string $table Table name
-   * @throws InvalidArgumentException
+   * @param string|array $columns
+   * @param string $table
    * @return void
+   * @throws InvalidArgumentException
    */
-  public function  __construct(NeevoConnection $connection, $cols = null, $table = null){
+  public function  __construct(NeevoConnection $connection, $columns = null, $table = null){
     parent::__construct($connection);
 
-    if($cols == null && $table == null){
+    if($columns == null && $table == null){
       throw new InvalidArgumentException('Missing argument 2 for '.__METHOD__.'.');
     }
     if(func_get_arg(2) == null){
-      $cols = '*';
+      $columns = '*';
       $table = func_get_arg(1);
     }
     $this->reinit();
     $this->type = Neevo::STMT_SELECT;
-    $this->columns = is_string($cols) ? explode(',', $cols) : $cols;
+    $this->columns = is_string($columns) ? explode(',', $columns) : $columns;
     $this->tableName = $table;
     $this->detectTypes = (bool) $this->getConfig('detectTypes');
 
@@ -53,7 +78,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /**
    * Set GROUP BY clause with optional HAVING.
    * @param string $rule
-   * @param string $having Optional HAVING
+   * @param string $having
    * @return NeevoResult fluent interface
    */
   public function group($rule, $having = null){
@@ -78,9 +103,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
   /**
    * Perform JOIN on tables.
-   * @param string $table Join table
-   * @throws InvalidArgumentException
+   * @param string $table
    * @return NeevoResult fluent interface
+   * @throws InvalidArgumentException
    */
   public function join($table, $type = null){
     if($this->checkCond()){
@@ -101,8 +126,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
   /**
    * Perform LEFT JOIN on tables.
-   * @param string $table Join table
-   * @param string $expr Join expression
+   * @param string $table
    * @return NeevoResult fluent interface
    */
   public function leftJoin($table){
@@ -111,7 +135,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
   /**
    * Perform INNER JOIN on tables.
-   * @param string $table Join table
+   * @param string $table
    * @return NeevoResult fluent interface
    */
   public function innerJoin($table){
@@ -186,8 +210,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
    * Fetch all rows in result set.
    * @param int $limit Limit number of returned rows
    * @param int $offset Seek to offset (fails on unbuffered results)
-   * @throws NeevoException
    * @return array
+   * @throws NeevoException
    */
   public function fetchAll($limit = null, $offset = null){
     $limit = ($limit === null) ? -1 : (int) $limit;
@@ -240,7 +264,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /**
    * Fetch rows as $key=>$value pairs.
    * @param string $key Key column
-   * @param string|NULL $value Value column. NULL for all specified columns.
+   * @param string $value Value column. NULL for all specified columns.
    * @return array
    */
   public function fetchPairs($key, $value = null){
@@ -267,6 +291,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
   /**
    * Free result set resource.
+   * @return void
    */
   private function free(){
     try{
@@ -278,8 +303,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /**
    * Move internal result pointer.
    * @param int $offset
-   * @throws NeevoException
    * @return bool
+   * @throws NeevoException
    */
   public function seek($offset){
     $this->performed || $this->run();
@@ -328,7 +353,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /**
    * Set column type.
    * @param string $column
-   * @param string $type use constants: Neevo::TEXT, etc.
+   * @param string $type
    * @return NeevoResult fluent interface
    */
   public function setType($column, $type){
@@ -338,7 +363,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
   /**
    * Set multiple column types at once.
-   * @param array $types Associative array column => type
+   * @param array $types
    * @return NeevoResult fluent interface
    */
   public function setTypes(array $types){
@@ -372,7 +397,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   }
 
   /**
-   * Resolve vendor column type
+   * Resolve vendor column type.
    * @param string $type
    * @return string
    */
@@ -443,7 +468,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 
   /**
-   * Get the result iterator
+   * Get the result iterator.
    * @return NeevoResultIterator
    */
   public function  getIterator(){

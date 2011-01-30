@@ -105,7 +105,17 @@ class NeevoObserver implements INeevoObserver, IDebugPanel{
     INeevoObserver::EXCEPTION => 'ERROR'
   );
 
-  private $file, $totalTime, $numQueries, $tickets = array();
+  /** @var string */
+  private $file;
+
+  /** @var float */
+  private $totalTime;
+  
+  /** @var int */
+  private $numQueries;
+
+  /** @var array */
+  private $tickets = array();
 
   /** @var int */
   private $filter = INeevoObserver::ALL;

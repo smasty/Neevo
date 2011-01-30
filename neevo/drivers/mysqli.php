@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * Neevo MySQLi driver (PHP extension 'mysqli')
  *
@@ -35,12 +36,19 @@
  */
 class NeevoDriverMySQLi implements INeevoDriver{
 
-  private $resource, $unbuffered, $affectedRows;
+  /** @var mysqli_result */
+  private $resource;
+  
+  /** @var bool */
+  private $unbuffered;
+
+  /** @var int */
+  private $affectedRows;
 
   /**
    * Check for required PHP extension.
-   * @throws NeevoException
    * @return void
+   * @throws NeevoException
    */
   public function  __construct(){
     if(!extension_loaded("mysqli")){
@@ -51,8 +59,8 @@ class NeevoDriverMySQLi implements INeevoDriver{
   /**
    * Create connection to database.
    * @param array $config Configuration options
-   * @throws NeevoException
    * @return void
+   * @throws NeevoException
    */
   public function connect(array $config){
 
@@ -113,7 +121,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Execute given SQL statement.
-   * @param string $queryString Query-string.
+   * @param string $queryString
    * @return mysqli_result|bool
    * @throws NeevoException
    */
@@ -160,7 +168,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Fetch row from given result set as an associative array.
-   * @param mysqli_result $resultSet Result set
+   * @param mysqli_result $resultSet
    * @return array
    */
   public function fetch($resultSet){
@@ -170,7 +178,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
   /**
    * Move internal result pointer.
    * @param mysqli_result $resultSet
-   * @param int $offset
+   * @param int
    * @return bool
    * @throws NeevoDriverException
    */
@@ -225,9 +233,9 @@ class NeevoDriverMySQLi implements INeevoDriver{
   /**
    * Escape given value.
    * @param mixed $value
-   * @param string $type Type of value (Neevo::TEXT, Neevo::BOOL...)
-   * @throws InvalidArgumentException
+   * @param string $type
    * @return mixed
+   * @throws InvalidArgumentException
    */
   public function escape($value, $type){
     switch($type){
@@ -252,6 +260,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
    * @param mixed $value
    * @param string $type
    * @return mixed
+   * @throws InvalidArgumentException
    */
   public function unescape($value, $type){
     if($type === Neevo::BINARY){
@@ -262,7 +271,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Get the PRIMARY KEY column for given table.
-   * @param $table string
+   * @param string $table
    * @return string
    */
   public function getPrimaryKey($table){
@@ -278,7 +287,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
   /**
    * Get types of columns in given result set.
-   * @param mysqli_result $resultSet
+   * @param mysqli_result $resultset
    * @param string $table
    * @return array
    */

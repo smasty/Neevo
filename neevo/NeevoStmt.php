@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * Class for non-retriveing statements.
  * @author Martin Srank
@@ -20,13 +21,16 @@
  */
 class NeevoStmt extends NeevoStmtBase {
 
-  protected $affectedRows, $values = array();
+  /** @var int */
+  protected $affectedRows;
 
+  /** @var array */
+  protected $values = array();
   
   /**
    * Create UPDATE statement.
-   * @param string $table Table name
-   * @param array $data Data to update
+   * @param string $table
+   * @param array $data
    * @return NeevoStmt fluent interface
    */
   public function update($table, array $data){
@@ -39,8 +43,8 @@ class NeevoStmt extends NeevoStmtBase {
 
   /**
    * Create INSERT statement.
-   * @param string $table Table name
-   * @param array $values Values to insert
+   * @param string $table
+   * @param array $values
    * @return NeevoStmt fluent interface
    */
   public function insert($table, array $values){
@@ -53,7 +57,7 @@ class NeevoStmt extends NeevoStmtBase {
 
   /**
    * Create DELETE statement.
-   * @param string $table Table name
+   * @param string $table
    * @return NeevoStmt fluent interface
    */
   public function delete($table){
@@ -89,13 +93,7 @@ class NeevoStmt extends NeevoStmtBase {
     return $this->affectedRows = $this->driver()->affectedRows();
   }
 
-  /**
-   * Statement values fraction for INSERT/UPDATE statements.
-   *
-   * [INSERT INTO tbl] (col1, col2, ...) VALUES (val1, val2, ...) or
-   * [UPDATE tbl] SET col1 = val1,  col2 = val2, ...
-   * @return array
-   */
+  /** @return array */
   public function getValues(){
     return $this->values;
   }

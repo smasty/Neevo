@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * Neevo statement abstract base ancestor.
  *
@@ -28,8 +29,31 @@
  */
 abstract class NeevoStmtBase {
 
-  protected $tableName, $type, $limit, $offset, $time, $performed;
-  protected $whereFilters = array(), $ordering = array();
+  /** @var string */
+  protected $tableName;
+
+  /** @var string */
+  protected $type;
+
+  /** @var int */
+  protected $limit;
+
+  /** @var int */
+  protected $offset;
+
+  /** @var float */
+  protected $time;
+
+  /** @var bool */
+  protected $performed;
+
+  /** @var array */
+  protected $whereFilters = array();
+
+  /** @var array */
+  protected $ordering = array();
+
+  /** @var array */
   protected $conditions = array();
 
   /** @var NeevoConnection */
@@ -194,8 +218,8 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * Set ORDER clauses. Accepts infinite arguments (rules) or an array.
-   * @param string|array $rules Order rules: "column", "col1, col2 DESC", etc.
+   * Set ORDER clause. Accepts infinite arguments or an array.
+   * @param string|array $rules
    * @return NeevoStmtBase fluent interface
    */
   public function order($rules){
@@ -221,7 +245,7 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * Set LIMIT and OFFSET clause.
+   * Set LIMIT and OFFSET clauses.
    * @param int $limit
    * @param int $offset
    * @return NeevoStmtBase fluent interface
@@ -239,7 +263,7 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * Randomize order. Removes any other order clauses.
+   * Randomize order. Removes any other order clause.
    * @return NeevoStmtBase fluent interface
    */
   public function rand(){
@@ -253,7 +277,7 @@ abstract class NeevoStmtBase {
 
   /**
    * Print out syntax highlighted statement.
-   * @param bool $return Return the output instead of printing it
+   * @param bool $return
    * @return string|NeevoStmtBase fluent interface
    */
   public function dump($return = false){
@@ -316,7 +340,7 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * If query was performed, returns true.
+   * If query was performed.
    * @return bool
    */
   public function isPerformed(){
@@ -348,7 +372,7 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * Statement LIMIT fraction.
+   * Statement LIMIT clause.
    * @return int
    */
   public function getLimit(){
@@ -356,7 +380,7 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * Statement OFFSET fraction.
+   * Statement OFFSET clause.
    * @return int
    */
   public function getOffset(){
@@ -364,7 +388,7 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * Statement WHERE conditions.
+   * Statement WHERE clause.
    * @return array
    */
   public function getConditions(){
@@ -372,7 +396,7 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * Statement ORDER BY fraction.
+   * Statement ORDER BY clause.
    * @return array
    */
   public function getOrdering(){
@@ -405,6 +429,7 @@ abstract class NeevoStmtBase {
 
   /**
    * Create clone of object.
+   * @return void
    */
   public function __clone(){
     $this->reinit();
@@ -416,16 +441,16 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * @internal
    * @return NeevoConnection
+   * @internal
    */
   public function connection(){
     return $this->connection;
   }
 
   /**
-   * @internal
    * @return INeevoDriver
+   * @internal
    */
   public function driver(){
     return $this->connection->driver();

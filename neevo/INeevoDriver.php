@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * Interface implemented by all Neevo drivers.
  *
@@ -28,17 +29,17 @@
  * When the driver needs to rewrite default output of SQL commands, it **must**
  * extend **NeevoStmtParser** class.
  * Then following methods can be used to rewrite the SQL command:
- * - **parseSelectStmt()** - SELECT statements
- * - **parseInsertStmt()** - INSERT statements
- * - **parseUpdateStmt()** - UPDATE statements
- * - **parseDeleteStmt()** - DELETE statements
- * - **parseJoin()**       - JOIN clause
- * - **parseWhere()**      - WHERE clause
- * - **parseOrdering()**   - ORDER BY clause
- * - **parseGrouping()**   - GROUP BY clause
- * - **parseLimit()**      - LIMIT/OFFSET clause
- * - **parseColName()**    - Column names, including table.column syntax
- * - **parse()**           - Various parsing conditions
+ * - **parseSelectStmt()** => SELECT statements
+ * - **parseInsertStmt()** => INSERT statements
+ * - **parseUpdateStmt()** => UPDATE statements
+ * - **parseDeleteStmt()** => DELETE statements
+ * - **parseJoin()**       => JOIN clause
+ * - **parseWhere()**      => WHERE clause
+ * - **parseOrdering()**   => ORDER BY clause
+ * - **parseGrouping()**   => GROUP BY clause
+ * - **parseLimit()**      => LIMIT/OFFSET clause
+ * - **parseColName()**    => Column names, including table.column syntax
+ * - **parse()**           => Various parsing conditions
  * 
  * For proper use, see "source of **NeevoStmtParser** class":./source-neevo.NeevoStmtParser.php.html.
  *
@@ -50,8 +51,8 @@ interface INeevoDriver {
 
   /**
    * Check for required PHP extension.
-   * @throws NeevoException
    * @return void
+   * @throws NeevoException
    */
   public function  __construct();
 
@@ -61,7 +62,6 @@ interface INeevoDriver {
    * @return void
    */
   public function connect(array $config);
-
 
   /**
    * Close the connection.
@@ -78,7 +78,7 @@ interface INeevoDriver {
 
   /**
    * Execute given SQL statement.
-   * @param string $queryString Query-string.
+   * @param string $queryString
    * @return resource|bool
    */
   public function query($queryString);
@@ -92,7 +92,7 @@ interface INeevoDriver {
 
   /**
    * Commit statements in a transaction.
-   * @param string $savepoint
+   * @param string $avepoint
    * @return void
    */
   public function commit($savepoint = null);
@@ -106,7 +106,7 @@ interface INeevoDriver {
 
   /**
    * Fetch row from given result set as an associative array.
-   * @param resource $resultSet Result set
+   * @param resource $resultSet
    * @return array
    */
   public function fetch($resultSet);
@@ -128,6 +128,7 @@ interface INeevoDriver {
   /**
    * Randomize result order.
    * @param NeevoStmtBase $statement
+   * @return void
    */
   public function rand(NeevoStmtBase $statement);
 
@@ -147,7 +148,7 @@ interface INeevoDriver {
   /**
    * Escape given value.
    * @param mixed $value
-   * @param string $type Type of value (Neevo::TEXT, Neevo::BOOL...)
+   * @param string $type
    * @return mixed
    */
   public function escape($value, $type);
@@ -162,8 +163,8 @@ interface INeevoDriver {
 
   /**
    * Get the PRIMARY KEY column for given table.
-   * @param $table string
-   * @return string|null
+   * @param string $table
+   * @return string|NULL
    */
   public function getPrimaryKey($table);
 

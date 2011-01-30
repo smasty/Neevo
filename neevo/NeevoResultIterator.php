@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * Result set iterator.
  * @author Martin Srank
@@ -35,7 +36,6 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 
   /**
    * Rewind the iterator.
-   *
    * Force execution for future iterations.
    * @return void
    */
@@ -83,8 +83,8 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 
   /**
    * Implementation of Countable.
-   * @throws NeevoDriverException on unbuffered result.
    * @return int
+   * @throws NeevoDriverException on unbuffered result.
    */
   public function count(){
     return $this->result->rows();
@@ -92,8 +92,8 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 
   /**
    * Implementation of SeekableIterator
-   * @throws NeevoDriverException on unbuffered result.
    * @param int $offset
+   * @throws NeevoDriverException on unbuffered result.
    */
   public function seek($offset){
     $this->result->seek($offset);

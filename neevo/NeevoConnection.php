@@ -13,6 +13,7 @@
  *
  */
 
+
 /**
  * Representation of database connection.
  *
@@ -28,7 +29,11 @@
  */
 class NeevoConnection implements INeevoObservable {
 
-  private $config, $connected = false;
+  /** @var array */
+  private $config;
+
+  /** @var bool */
+  private $connected = false;
 
   /** @var INeevoDriver */
   private $driver;
@@ -46,8 +51,8 @@ class NeevoConnection implements INeevoObservable {
    * Establish a connection.
    * @param array|string|Traversable $config
    * @param INeevoCache $cache
-   * @throws InvalidArgumentException
    * @return void
+   * @throws InvalidArgumentException
    */
   public function __construct($config, INeevoCache $cache = null){
     $this->observers = new SplObjectStorage;
@@ -101,7 +106,7 @@ class NeevoConnection implements INeevoObservable {
   }
 
   /**
-   * Get configuration
+   * Get configuration.
    * @param string $key
    * @return mixed
    */
@@ -113,7 +118,7 @@ class NeevoConnection implements INeevoObservable {
   }
 
   /**
-   * Get defined table prefix
+   * Get defined table prefix.
    * @return string
    */
   public function prefix(){
@@ -199,10 +204,10 @@ class NeevoConnection implements INeevoObservable {
   }
 
   /**
-   * Set the driver and statement builder.
-   * @param string $driver Driver name
-   * @throws NeevoException
+   * Set the driver and statement parser.
+   * @param string $driver
    * @return void
+   * @throws NeevoException
    */
   private function setDriver($driver){
     $class = "NeevoDriver$driver";
@@ -217,7 +222,7 @@ class NeevoConnection implements INeevoObservable {
 
     $this->driver = new $class;
 
-    // Set stmtBuilder
+    // Set statement parser
     if(in_array('NeevoStmtParser', class_parents($class))){
       $this->stmtParser = $this->driver;
     }

@@ -13,8 +13,9 @@
  *
  */
 
+
 if(PHP_SAPI !== 'cli'){
-  trigger_error("This script should be run from CLI (command-line interface) only.", E_USER_ERROR);
+  trigger_error("This script should be run from command-line only.", E_USER_ERROR);
 }
 
 $args = getopt('d:hqr');
@@ -95,9 +96,7 @@ class Compiler{
     return $drivers;
   }
 
-  /**
-   * @return string Message
-   */
+  /** @return string Message */
   public function revision(){
     $source = @file_get_contents($this->file);
 
@@ -114,9 +113,7 @@ class Compiler{
     return 'const REVISION = ' . self::$newRevision . ';';
   }
 
-  /**
-   * @return string Message
-   */
+  /** @return string Message */
   public function minify(){
     $path = pathinfo($this->file);
     // Generate name for minified file
@@ -158,9 +155,7 @@ class Compiler{
     return str_replace($last_line, "$license\n", $content);
   }
 
-  /**
-   * @return string
-   */
+  /** @return string */
   private function driversToPath(){
     if($this->allDrivers){
       return '';
@@ -174,7 +169,7 @@ class Compiler{
 
   /**
    * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
-   * @param string $path
+   * @param string
    * @return string
    */
   private function includeFile($path) {
@@ -186,7 +181,7 @@ class Compiler{
 
   /**
    * @copyright Jakub Vrana, http://php.vrana.cz. Used with permission.
-   * @param string $input
+   * @param string
    * @return string
    */
   private function phpShrink($input){

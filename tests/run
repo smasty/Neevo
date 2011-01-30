@@ -45,5 +45,5 @@ foreach(glob(dirname(__FILE__).'/*.phpt') as $test){
 
 if($errcount === 0){
   echo "\nTests passed successfully.";
-  printf("\n%.3F sec, %d KB\n", microtime(true) - $start, memory_get_peak_usage() / 1024);
+  printf("\n%d queries, %.3F sec, %d KB\n", $db->queries(), microtime(true) - $start, memory_get_peak_usage() / 1024);
 }
