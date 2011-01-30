@@ -87,6 +87,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
    */
   public function __construct($config, INeevoCache $cache = null){
     $this->connect($config, $cache);
+    $this->connection->attachObserver($this);
   }
 
   /**
@@ -350,6 +351,11 @@ class NeevoLiteral {
 
 
 
+/**
+ * Neevo classes autoloader.
+ * @param string $class
+ * @return bool
+ */
 function _neevo_autoload($class){
   static $classes = array(
     'neevo' => 'neevo.php',
