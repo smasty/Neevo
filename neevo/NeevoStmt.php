@@ -15,7 +15,7 @@
 
 
 /**
- * Class for non-retriveing statements.
+ * Class for data manipulation statements (INSERT, UPDATE, DELETE)
  * @author Martin Srank
  * @package Neevo
  */
