@@ -61,7 +61,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 343;
+  const REVISION = 344;
 
   // Data types
   const BOOL = 'b';
@@ -106,8 +106,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
     $this->connection->attachObserver($this);
 
     // Nette Framework
-    $cfg = $this->connection->getConfig('observer');
-    if($cfg !== false && defined('NETTE')){
+    if($this->connection->getConfig('observer') !== false && defined('NETTE')){
       $this->attachObserver(new NeevoObserver);
     }
     return $this;

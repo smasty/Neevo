@@ -94,6 +94,7 @@ class NeevoConnection implements INeevoObservable {
     self::alias($config, 'tablePrefix', 'table_prefix');
     self::alias($config, 'tablePrefix', 'prefix');
     self::alias($config, 'charset', 'encoding');
+    self::alias($config, 'observer', 'profiler');
 
     $config += $defaults;
 
