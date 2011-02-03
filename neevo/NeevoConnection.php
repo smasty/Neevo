@@ -21,8 +21,9 @@
  * - tablePrefix => prefix for table names
  * - lazy (bool) => If TRUE, connection will be established only when required.
  * - detectTypes (bool) => Detect column types automatically
- * - formatDateTime => date/time format ("U" for timestamp. If empty, DateTime object used)
+ * - formatDateTime => Date/time format ("U" for timestamp. If empty, DateTime object used).
  * - rowClass => Name of class to use as a row class.
+ * - observer => Instance of INeevoObserver for profiling.
  *
  * @author Martin Srank
  * @package Neevo
@@ -64,12 +65,10 @@ class NeevoConnection implements INeevoObservable {
       parse_str($config, $config);
     }
     elseif($config instanceof Traversable){
-      foreach($config as $key => $val){
-        $config[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
-      }
+      $config = iterator_to_array($config);
     }
     elseif(!is_array($config)){
-      throw new InvalidArgumentException('Options must be an array, string or Traversable object.');
+      throw new InvalidArgumentException('Configuration must be an array, string or instance of Traversable.');
     }
 
     // Defaults
@@ -79,7 +78,8 @@ class NeevoConnection implements INeevoObservable {
       'tablePrefix' => '',
       'formatDateTime' => '',
       'detectTypes' => false,
-      'rowClass' => 'NeevoRow'
+      'rowClass' => 'NeevoRow',
+      'observer' => null
     );
 
     // Aliases
@@ -98,6 +98,11 @@ class NeevoConnection implements INeevoObservable {
     $config += $defaults;
 
     $this->setDriver($config['driver']);
+
+    if($config['observer'] instanceof INeevoObserver){
+      $this->attachObserver($config['observer']);
+    }
+
     $this->config = $config;
 
     if($config['lazy'] === false){

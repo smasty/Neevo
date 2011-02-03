@@ -135,7 +135,7 @@ class NeevoObserver implements INeevoObserver, IDebugPanel{
       $config = ($config instanceof Traversable ? iterator_to_array($config) : $config);
 
       if(!is_array($config))
-        throw new InvalidArgumentException('$config must be an array or Traversable.');
+        throw new InvalidArgumentException('Configuration must be an array or instance of Traversable.');
 
       if(isset($config['file'])){
         $this->file = $config['file'];
@@ -146,7 +146,7 @@ class NeevoObserver implements INeevoObserver, IDebugPanel{
       }
     }
 
-    // Try register Nette Debug Panel
+    // Try register Nette\Debug Panel
     if(is_callable('Nette\Debug::addPanel')){
       call_user_func('Nette\Debug::addPanel', $this);
     }
