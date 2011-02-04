@@ -2,14 +2,16 @@
 error_reporting(E_ALL | E_STRICT);
 $start = microtime(true);
 
-$opts = getopt('d:b');
+$opts = getopt('d:bq');
 
 $driver = isset($opts['d'])
   ? strtolower($opts['d']) : 'mysql';
 
 include_once dirname(__FILE__) . '/connect.php';
 
-echo "Driver: $driver\n";
+if(!isset($opts['q'])){
+  echo "Driver: $driver\n";
+}
 
 $err = 0;
 foreach(glob(dirname(__FILE__).'/*.phpt') as $test){
@@ -39,7 +41,8 @@ foreach(glob(dirname(__FILE__).'/*.phpt') as $test){
 
 }
 
-if(!$err){
+if(!$err && !isset($opts['q'])){
   echo "\nTests passed successfully.";
   printf("\n%d queries, %.3F sec, %d KB\n", $db->queries(), microtime(true) - $start, memory_get_peak_usage() / 1024);
 }
+else exit(1);
