@@ -45,4 +45,4 @@ if(!$err && !isset($opts['q'])){
   echo "\nTests passed successfully.";
   printf("\n%d queries, %.3F sec, %d KB\n", $db->queries(), microtime(true) - $start, memory_get_peak_usage() / 1024);
 }
-else exit(1);
+if($err) exit(1);
