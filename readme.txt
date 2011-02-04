@@ -13,8 +13,6 @@ Info
 About Neevo
 ===========
 
-First of all, thank you for using Neevo!
-
 Neevo is a very small, fully object-oriented database abstraction layer for PHP.
 It's open-source and released under the terms and conditions of the MIT license.
 
@@ -37,6 +35,8 @@ Features
  - More ways to fetch your data: as objects, arrays, key=>value pairs, single row...
  - Dump queries
  - Query debugging
+ - Conditional statements
+ - Column type detection
  - One-file-only minified version
     (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
 
@@ -44,7 +44,7 @@ Features
 Supported drivers
 =================
 
- - MySQL (PHP extension 'mysql')
+ - MySQL
  - MySQLi
  - SQLite
  - SQLite 3
