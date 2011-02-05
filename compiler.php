@@ -18,7 +18,7 @@ if(PHP_SAPI !== 'cli'){
   trigger_error("This script should be run from command-line only.", E_USER_ERROR);
 }
 
-$args = getopt('d:hqr');
+$args = getopt('md:hqr');
 
 // Quiet mode
 if(isset($args['q'])){
@@ -48,8 +48,10 @@ if(isset($args['r'])){
   echo $compiler->revision();
 }
 
-echo $compiler->minify(), "\n";
-
+// Minify
+if(isset($args['m'])){
+  echo $compiler->minify(), "\n";
+}
 
 // Quiet mode
 if(isset($args['q'])){
@@ -241,10 +243,11 @@ class Compiler{
 
   public static function getHelp(){
     echo "Usage:
-  $ php ".basename(__FILE__)." [-d <drivers>] [-r] [-h] [-q]
+  $ php ".basename(__FILE__)." [-m] [-d <drivers>] [-r] [-h] [-q]
 
 Options:
 
+  -m            Creates minified one-file version.
   -d <drivers>  Comma-separated list of drivers to include -
                 defaults to all drivers.
   -r            Increments revision number.
