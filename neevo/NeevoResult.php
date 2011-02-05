@@ -60,7 +60,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
     parent::__construct($connection);
 
     if($columns == null && $table == null){
-      throw new InvalidArgumentException('Missing argument 2 for '.__METHOD__.'.');
+      throw new InvalidArgumentException('Select table missing.');
     }
     if(func_get_arg(2) == null){
       $columns = '*';
