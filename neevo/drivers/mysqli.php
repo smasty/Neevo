@@ -244,7 +244,12 @@ class NeevoDriverMySQLi implements INeevoDriver{
 
       case Neevo::TEXT:
         return "'". $this->resource->real_escape_string($value) ."'";
-        break;
+
+      case Neevo::IDENTIFIER:
+        return '`'. str_replace('.', '`.`', str_replace('`', '``', $value)) .'`';
+
+      case Neevo::BINARY:
+        return "_binary'" . mysqli_real_escape_string($this->resource, $value) . "'";
 
       case Neevo::DATETIME:
         return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
