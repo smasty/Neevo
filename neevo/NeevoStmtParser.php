@@ -35,7 +35,7 @@ class NeevoStmtParser {
   public function parse(NeevoStmtBase $statement){
     $this->stmt = $statement;
     $where = $order = $group = $limit = $q = '';
-    $table = $statement->getTable();
+    $table = $this->escapeValue($statement->getTable(), Neevo::IDENTIFIER);
 
     if($this->stmt instanceof NeevoResult && $this->stmt->getJoin()){
       $table = $table .' '. $this->parseJoin();
@@ -67,10 +67,10 @@ class NeevoStmtParser {
     elseif($statement->getType() == Neevo::STMT_DELETE){
       $q = $this->parseDeleteStmt();
     }
-
+    
     $this->stmt = null;
     $this->clauses = array();
-    
+
     return $q . ';';
   }
 
@@ -79,14 +79,14 @@ class NeevoStmtParser {
    * @return string
    */
   protected function parseSelectStmt(){
-    $cols = array();
+    $cols = $this->stmt->getColumns();
     list($table, $where, $group, $order, $limit) = $this->clauses;
-    foreach ($this->stmt->getColumns() as $col) {
-      $cols[] = $this->parseColName($col);
+    foreach($cols as $key => $col){
+      $cols[$key] = $this->parseFieldName($col);
     }
     $cols = join(', ', $cols);
 
-    return "SELECT $cols FROM " .$table.$where.$group.$order.$limit;
+    return "SELECT $cols FROM " . $table . $where . $group . $order . $limit;
   }
 
   /**
@@ -95,8 +95,8 @@ class NeevoStmtParser {
    */
   protected function parseInsertStmt(){
     $cols = array();
-    foreach($this->_escapeArray($this->stmt->getValues()) as $col => $value){
-      $cols[] = $this->parseColName($col);
+    foreach($this->escapeValue($this->stmt->getValues()) as $col => $value){
+      $cols[] = $this->parseFieldName($col);
       $values[] = $value;
     }
     $data = ' (' . join(', ',$cols) . ') VALUES (' . join(', ',$values). ')';
@@ -111,12 +111,12 @@ class NeevoStmtParser {
   protected function parseUpdateStmt(){
     $values = array();
     list($table, $where, , $order, $limit) = $this->clauses;
-    foreach($this->_escapeArray($this->stmt->getValues()) as $col => $value){
-      $values[] = $this->parseColName($col) . ' = ' . $value;
+    foreach($this->escapeValue($this->stmt->getValues()) as $col => $value){
+      $values[] = $this->parseFieldName($col) . ' = ' . $value;
     }
     $data = ' SET ' . join(', ', $values);
 
-    return 'UPDATE ' .$table.$data.$where.$order.$limit;
+    return 'UPDATE ' . $table . $data . $where . $order . $limit;
   }
 
   /**
@@ -126,7 +126,7 @@ class NeevoStmtParser {
   protected function parseDeleteStmt(){
     list($table, $where, , $order, $limit) = $this->clauses;
     
-    return 'DELETE FROM ' .$table.$where.$order.$limit;
+    return 'DELETE FROM ' . $table . $where . $order . $limit;
   }
 
   /**
@@ -136,8 +136,7 @@ class NeevoStmtParser {
    */
   protected function parseJoin(){
     $join = $this->stmt->getJoin();
-    $prefix = $this->stmt->connection()->prefix();
-    $join['expr'] = preg_replace('~(\w+)\.(\w+)~i', "$1.$prefix$2", $join['expr']);
+    $join['expr'] = preg_replace_callback('~:(\S+)~', array($this, 'parseFieldName'), $join['expr']);
     $type = strtoupper(substr($join['type'], 5));
 
     if($type !== ''){
@@ -153,7 +152,7 @@ class NeevoStmtParser {
       throw new NeevoException('JOIN operator not specified.');
     }
     
-    return $type.'JOIN '.$join['table'].$expr;
+    return $type . 'JOIN ' . $join['table'] . $expr;
   }
 
   /**
@@ -169,44 +168,42 @@ class NeevoStmtParser {
     $conditions = array();
     foreach($conds as $cond){
 
-      // Conditions with placeholders
+      // Conditions with modifiers
       if($cond['simple'] === false){
-        $expr = str_replace('::', $this->stmt->connection()->prefix(),$cond['expr']);
-        $s = '('.str_replace($cond['placeholders'], $this->_escapeArray($cond['values']), $expr).')';
+        $values = $this->escapeValue($cond['values'], $cond['types']);
+        $s = '(' . $this->applyModifiers($cond['expr'], $cond['modifiers'], $values) . ')';
         if(isset($cond['glue'])){
-          $s .= ' '.$cond['glue'];
+          $s .= ' ' . $cond['glue'];
         }
+
         $conditions[] = $s;
         continue;
       }
 
       // Simple conditions
-      $field = $this->parseColName($cond['field']);
+      $field = $this->parseFieldName($cond['field']);
       $operator = '';
       $value = $cond['value'];
       if($value === null){ // field IS NULL
-        $operator = ' IS';
-        $value = ' NULL';
+          $value = ' IS NULL';
       } elseif($value === true){  // field
-        $value = '';
+          $value = '';
       } elseif($value === false){ // NOT field
-        $value = $field;
-        $field = 'NOT ';
+          $value = $field;
+          $field = 'NOT ';
       } elseif(is_array($value)){ // field IN (array)
-        $operator = ' IN';
-        $value = '(' . join(', ', $this->_escapeArray($value)) . ')';
+          $value = ' IN ' . $this->escapeValue($value, Neevo::ARR);
       } elseif($value instanceof NeevoLiteral){ // field = SQL literal
-        $operator = ' = ';
-        $value = $value->value;
+          $operator = ' = ';
+          $value = $this->escapeValue($value, Neevo::LITERAL);
       } elseif($value instanceof DateTime){ // field = DateTime
-        $operator = ' = ';
-        $value = $this->stmt->driver()->escape($value, Neevo::DATETIME);
+          $operator = ' = ';
+          $value = $this->escapeValue($value, Neevo::DATETIME);
       } else{ // field = value
-        $operator = ' = ';
-        $value = (is_numeric($value) && !is_string($value))
-          ? $value : $this->stmt->driver()->escape($value, Neevo::TEXT);
+          $operator = ' = ';
+          $value = $this->escapeValue($value);
       }
-      $s = "($field$operator$value)";
+      $s = '(' . $field . $operator . $value . ')';
       if(isset($cond['glue'])){
         $s .= ' '.$cond['glue'];
       }
@@ -237,20 +234,36 @@ class NeevoStmtParser {
 
   /**
    * Parse column name.
-   * @param string $col
+   * @param string|array|NeevoLiteral $field
    * @return string
    */
-  protected function parseColName($col){
-    if($col instanceof NeevoLiteral){
-      return $col->value;
+  protected function parseFieldName($field){
+    // preg_replace callback behaviour
+    if(is_array($field)){
+      $field = $field[0];
     }
-    $col = trim(str_replace('::', '', $col));
-    $col = preg_replace('#(\S+)\s+(as)\s+(\S+)#i', '$1 AS $3',  $col);
+    if($field instanceof NeevoLiteral){
+      return $field->value;
+    }
 
-    if(preg_match('#[^.]+\.[^.]+#', $col)){
-      return $this->stmt->connection()->prefix() . $col;
+    $field = trim($field);
+
+    if($field == '*'){
+      return $field;
     }
-    return $col;
+
+    if(strpos($field, ' ')){
+      return $field;
+    }
+
+    $field = str_replace(':', '', $field);
+
+    if(strpos($field, '.') !== false){
+      $prefix = $this->stmt->connection()->prefix();
+      $field = $prefix . $field;
+    }
+
+    return $this->stmt->driver()->escape($field, Neevo::IDENTIFIER);
   }
 
   /**
@@ -259,58 +272,73 @@ class NeevoStmtParser {
    */
   protected function parseLimit(){
     $limit = ' LIMIT '. (int) $this->stmt->getLimit();
-    if($o = $this->stmt->getOffset()){
-      $limit .= ' OFFSET '. (int) $o;
+    if($offset = $this->stmt->getOffset()){
+      $limit .= ' OFFSET '. (int) $offset;
     }
     return $limit;
   }
 
+  /**
+   * Escape given value.
+   * @param mixed|array $value
+   * @param string|array|null $type
+   * @return mixed|array
+   */
+  protected function escapeValue($value, $type = null){
+    if($value === null){
+      return 'NULL';
+    }
+    if(is_array($type)){
+      $values = array();
+      foreach($value as $key => $val){
+        $values[$key] = $this->escapeValue($val, $type[$key]);
+      }
+      return $values;
+    }
 
-  /*  ************  Internal methods  ************  */
-  
+    if(is_array($value) && $type === null){
+      $values = array();
+      foreach($value as $key => $val){
+        $values[$key] = $this->escapeValue($val);
+      }
+      return $values;
+    }
+
+    if($type === Neevo::INT){
+        return (int) $value;
+    } elseif($type === Neevo::FLOAT){
+        return (float) $value;
+    } elseif($type === Neevo::ARR){
+        $array = ($value instanceof Traversable) ? iterator_to_array($value) : (array) $value;
+        return '(' . join(', ', $this->escapeValue($array)) . ')';
+    } elseif($type === Neevo::LITERAL){
+        return $value instanceof NeevoLiteral ? $value->value : $value;
+    } elseif($type === null || $type === ''){
+        if($value instanceof DateTime){
+            return $this->escapeValue($value, Neevo::DATETIME);
+        } elseif($value instanceof NeevoLiteral){
+            return $value->value;
+        } else{
+            return is_numeric($value) ? $value : $this->stmt->driver()->escape($value, Neevo::TEXT);
+        }
+    } else{
+        return $this->stmt->driver()->escape($value, $type);
+    }
+  }
 
   /**
-   * Escape whole array for use in SQL.
-   * @param array $array
-   * @return array
-   * @internal
+   * Apply modifiers to expression.
+   * @param string $expr
+   * @param array $modifiers
+   * @param array $values
+   * @return string
    */
-  protected function _escapeArray(array $array){
-    foreach($array as &$value){
-      if(is_null($value)){
-        $value = 'NULL';
-      }
-      elseif(is_bool($value)){
-        $value = $this->stmt->driver()->escape($value, Neevo::BOOL);
-      }
-      elseif(is_numeric($value)){
-        if(is_int($value)){
-          $value = intval($value);
-        }
-        elseif(is_float($value)){
-          $value = floatval($value);
-        }
-        else{
-          $value = intval($value);
-        }
-      }
-      elseif(is_string($value)){
-        $value = $this->stmt->driver()->escape($value, Neevo::TEXT);
-      }
-      elseif($value instanceof DateTime){
-        $value = $this->stmt->driver()->escape($value, Neevo::DATETIME);
-      }
-      elseif($value instanceof NeevoLiteral){
-        $value = $value->value;
-      }
-      elseif(is_array($value)){
-        $value = 'IN(' . join(', ', $this->_escapeArray($value)) . ')';
-      }
-      else{
-        $value = $this->stmt->driver()->escape((string) $value, Neevo::TEXT);
-      }
+  protected function applyModifiers($expr, array $modifiers, array $values){
+    foreach($modifiers as &$mod){
+      $mod = "/$mod/";
     }
-    return $array;
+    $expr = preg_replace_callback('~:(\S+)~', array($this, 'parseFieldName'), $expr);
+    return preg_replace($modifiers, $values, $expr, 1);
   }
-  
+
 }

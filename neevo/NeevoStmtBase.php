@@ -127,7 +127,7 @@ abstract class NeevoStmtBase {
     $this->reinit();
 
     // Simple format
-    if(!preg_match('~%\d+~', $expr)){
+    if(strpos($expr, '%') === false){
       $field = trim($expr);
       $this->whereFilters[] = array(
         'simple' => true,
@@ -138,22 +138,16 @@ abstract class NeevoStmtBase {
       return $this;
     }
 
-    // Format with placeholders
-    $values = func_get_args();
-    unset($values[0]);
-    preg_match_all("~%\d+~", $expr, $match);
-    $keys = array_flip($match[0]);
-    $placeholders = array();
-    foreach($values as $k => $v){
-      if(isset($keys["%$k"])){
-        $placeholders[] = $match[0][$keys["%$k"]];
-      }
-    }
+    // Format with modifiers
+    $args = func_get_args();
+    array_shift($args);
+    preg_match_all('~%(b|i|f|s|bin|d|a|l)?~i', $expr, $matches);
     $this->whereFilters[] = array(
       'simple' => false,
       'expr' => $expr,
-      'placeholders' => $placeholders,
-      'values' => $values,
+      'modifiers' => $matches[0],
+      'types' => $matches[1],
+      'values' => $args,
       'glue' => 'AND'
     );
     return $this;

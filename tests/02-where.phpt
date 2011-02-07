@@ -5,14 +5,14 @@ WHERE test coverage
 
 foreach(array(
   array('id', 1),
-  array('id != %1', 1),
-  array('title LIKE %1', 'Nee%'),
+  array('id != %i', 1),
+  array('title LIKE %s', 'Nee%'),
   array('id', true),
   array('id', false),
   array('id', null),
-  array('id IS NOT %1', null),
+  array('id IS NOT %', null),
   array('id', array(1, 2)),
-  array('id NOT %1', array(1, 2)),
+  array('id NOT IN %a', array(1, 2)),
   array('id', new NeevoLiteral(99))
 ) as $cond){
 

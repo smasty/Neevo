@@ -280,7 +280,11 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
         return $value ? 1 :0;
 
       case Neevo::TEXT:
+      case Neevo::BINARY:
         return "'". sqlite_escape_string($value) ."'";
+
+      case Neevo::IDENTIFIER:
+        return '['. str_replace('.', '].[', strtr($value, '[]', '  ')) .']';
 
       case Neevo::DATETIME:
         return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
@@ -373,12 +377,12 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
   protected function parseUpdateStmt(){
     $values = array();
     list($table, $where, , $order, $limit) = $this->clauses;
-    foreach($this->_escapeArray($this->stmt->getValues()) as $col => $value){
-      $values[] = $this->parseColName($col) . ' = ' . $value;
+    foreach($this->escapeValue($this->stmt->getValues()) as $col => $value){
+      $values[] = $this->parseFieldName($col) . ' = ' . $value;
     }
     $data = ' SET ' . join(', ', $values);
 
-    return 'UPDATE ' .$table.$data.$where. ($this->updateLimit ? $order.$limit : '');
+    return 'UPDATE ' . $table . $data . $where . ($this->updateLimit ? $order . $limit : '');
   }
 
   /**
@@ -388,7 +392,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
   protected function parseDeleteStmt(){
     list($table, $where, , $order, $limit) = $this->clauses;
 
-    return 'DELETE FROM ' .$table.$where. ($this->updateLimit ? $order.$limit : '');
+    return 'DELETE FROM ' . $table . $where . ($this->updateLimit ? $order . $limit : '');
   }
 
 }
