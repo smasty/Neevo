@@ -104,12 +104,12 @@ abstract class NeevoStmtBase {
    * | `where('field', array(1, 2))` | `field IN(1, 2)`
    * | `where('field', new NeevoLiteral('NOW()'))` | `field = NOW()`
    * |-------------------------------
-   * | Condition (with placeholders)
+   * | Condition with modifiers
    * |-------------------------------
-   * | `where('::field != %1', 'x')` | `filed != 'x'`
-   * | `where('::field != %1 OR ::field < %2', 'x', 15)` | `filed != 'x' OR field < 15`
-   * | `where('::field LIKE %1', '%x%')` | `field LIKE '%x%'`
-   * | `where('::field NOT %1', array(1, 2))` | `field NOT IN(1, 2)`
+   * | `where(':field != %s', 'x')` | `field != 'x'`
+   * | `where(':field != %s OR :field < %i', 'x', 15)` | `field != 'x' OR field < 15`
+   * | `where(':field LIKE %s', '%x%')` | `field LIKE '%x%'`
+   * | `where(':field NOT IN %a', array(1, 2))` | `field NOT IN(1, 2)`
    * <br>
    * 
    * @param string $expr
