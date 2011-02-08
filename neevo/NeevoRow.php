@@ -26,9 +26,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
   /** @var string */
   private $primaryKey;
-  
-  /** @var string */
-  private $table;
 
   /** @var array */
   private $data = array();
@@ -39,8 +36,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   /** @var array */
   private $iterable = array();
 
-  /** @var NeevoConnection */
-  private $connection;
+  /** @var NeevoResult */
+  private $result;
 
   /**
    * Create a row instance.
@@ -51,9 +48,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   public function __construct(array $data, NeevoResult $result){
     $this->data = $data;
     $this->iterable = $this->data;
-    $this->connection = $result->connection();
+    $this->result = $result;
     $this->primaryKey = $result->getPrimaryKey();
-    $this->table = $result->getTable();
 
     if(!isset($this->data[$this->primaryKey])){
       $this->freeze = true;
@@ -70,8 +66,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
      throw new NeevoException('Update disabled - cannot get primary key.');
     }
     if(!empty($this->modified) && $this->data != $this->iterable){
-      $stmt = new NeevoStmt($this->connection);
-      return $stmt->update($this->table, $this->modified)
+      $stmt = new NeevoStmt($this->result->connection());
+      return $stmt->update($this->result->getTable(), $this->modified)
         ->where($this->primaryKey, $this->data[$this->primaryKey])
         ->limit(1)->affectedRows();
     }
@@ -84,12 +80,20 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
    */
   public function delete(){
     if(!$this->freeze){
-      $stmt = new NeevoStmt($this->connection);
-      return $stmt->delete($this->table)
+      $stmt = new NeevoStmt($this->result->connection());
+      return $stmt->delete($this->result->getTable())
         ->where($this->primaryKey, $this->data[$this->primaryKey])
         ->limit(1)->affectedRows();
     }
     throw new NeevoException('Delete disabled - cannot get primary key.');
+  }
+
+  public function related($table, $column = null){
+    if($column === null){
+      $column = $this->result->getTable() . '_' . $this->primaryKey;
+    }
+    
+    return $this->result->getRelatedRow($table, $column, $this->data[$column]);
   }
 
   /**

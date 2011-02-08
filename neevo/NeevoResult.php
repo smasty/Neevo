@@ -48,6 +48,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /** @var bool */
   private $detectTypes;
 
+  /** @var array */
+  private $relatedResults;
+
   /**
    * Create SELECT statement.
    * @param NeevoConnection $connection
@@ -195,7 +198,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
         }
       }
     }
-
     return new $this->rowClass($row, $this);
   }
 
@@ -461,6 +463,29 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
       default:
         return $value;
     }
+  }
+
+
+
+  private function getRelatedResult($table, $column){
+    $clone = clone $this;
+    $clone->columns = array($column);
+    $keys = $clone->fetchPairs($column, $column);
+    $result = new NeevoResult($this->connection, '*', $table);
+    return $result->where($result->getPrimaryKey(), $keys);
+  }
+
+
+  public function getRelatedRow($table, $column, $value){
+    $relatedResult = & $this->relatedResults[$table][$column];
+    if(empty($relatedResult)){
+      $result = $this->getRelatedResult($table, $column);
+      $relatedResult = $result->fetchPairs($result->getPrimaryKey());
+    }
+    if(isset($relatedResult[$value])){
+      return $relatedResult[$value];
+    }
+    return null;
   }
 
 
