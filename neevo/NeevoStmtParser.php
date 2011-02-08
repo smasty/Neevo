@@ -137,6 +137,7 @@ class NeevoStmtParser {
   protected function parseJoin(){
     $join = $this->stmt->getJoin();
     $join['expr'] = $this->quoteIdentifiers($join['expr']);
+    $join['table'] = $this->quoteIdentifiers($join['table']);
     $type = strtoupper(substr($join['type'], 5));
 
     if($type !== ''){
