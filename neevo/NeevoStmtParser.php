@@ -82,7 +82,7 @@ class NeevoStmtParser {
     $cols = $this->stmt->getColumns();
     list($table, $where, $group, $order, $limit) = $this->clauses;
     foreach($cols as $key => $col){
-      $cols[$key] = $this->parseFieldName($col);
+      $cols[$key] = $this->quoteIdentifiers($col);
     }
     $cols = join(', ', $cols);
 
@@ -136,7 +136,7 @@ class NeevoStmtParser {
    */
   protected function parseJoin(){
     $join = $this->stmt->getJoin();
-    $join['expr'] = preg_replace_callback('~:(\S+)~', array($this, 'parseFieldName'), $join['expr']);
+    $join['expr'] = $this->quoteIdentifiers($join['expr']);
     $type = strtoupper(substr($join['type'], 5));
 
     if($type !== ''){
@@ -220,7 +220,7 @@ class NeevoStmtParser {
    * @return string
    */
   protected function parseOrdering(){
-    return ' ORDER BY ' . join(', ', $this->stmt->getOrdering());
+    return ' ORDER BY ' . join(', ', $this->quoteIdentifiers($this->stmt->getOrdering()));
   }
 
   /**
@@ -228,8 +228,9 @@ class NeevoStmtParser {
    * @return string
    */
   protected function parseGrouping(){
-    $having = $this->stmt->getHaving() ? ' HAVING ' . (string) $this->stmt->getHaving() : '';
-    return ' GROUP BY ' . $this->stmt->getGrouping() . $having;
+    $having = $this->stmt->getHaving()
+      ? ' HAVING ' . (string) $this->stmt->getHaving() : '';
+    return $this->quoteIdentifiers(' GROUP BY ' . $this->stmt->getGrouping() . $having);
   }
 
   /**
@@ -337,8 +338,12 @@ class NeevoStmtParser {
     foreach($modifiers as &$mod){
       $mod = "/$mod/";
     }
-    $expr = preg_replace_callback('~:(\S+)~', array($this, 'parseFieldName'), $expr);
+    $expr = $this->quoteIdentifiers($expr);
     return preg_replace($modifiers, $values, $expr, 1);
+  }
+
+  protected function quoteIdentifiers($expr){
+    return preg_replace_callback('~:([a-z_][a-z0-9._]*)~', array($this, 'parseFieldName'), $expr);
   }
 
 }
