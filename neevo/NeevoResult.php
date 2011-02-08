@@ -49,7 +49,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   private $detectTypes;
 
   /** @var array */
-  private $relatedResults;
+  private $referenced;
 
   /**
    * Create SELECT statement.
@@ -465,25 +465,28 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
     }
   }
 
+  /**
+   * Get referenced row from given table.
+   * @param string $table
+   * @param NeevoResult $row
+   * @param string $foreign
+   * @return NeevoRow|null
+   */
+  public function getReferencedRow($table, & $row, $foreign = null){
+    $foreign = $foreign === null ? $this->getForeignKey($table) : $foreign;
+    $rowID = $row->$foreign;
+    $referenced = & $this->referenced[$table];
 
-
-  private function getRelatedResult($table, $column){
-    $clone = clone $this;
-    $clone->columns = array($column);
-    $keys = $clone->fetchPairs($column, $column);
-    $result = new NeevoResult($this->connection, '*', $table);
-    return $result->where($result->getPrimaryKey(), $keys);
-  }
-
-
-  public function getRelatedRow($table, $column, $value){
-    $relatedResult = & $this->relatedResults[$table][$column];
-    if(empty($relatedResult)){
-      $result = $this->getRelatedResult($table, $column);
-      $relatedResult = $result->fetchPairs($result->getPrimaryKey());
+    if(empty($referenced)){
+      $clone = clone $this;
+      $clone->columns = array($foreign);
+      $keys = $clone->fetchPairs($foreign, $foreign);
+      $result = new NeevoResult($this->connection, '*', $table);
+      $primary = $result->getPrimaryKey();
+      $referenced = $result->where($primary, $keys)->fetchPairs($primary);
     }
-    if(isset($relatedResult[$value])){
-      return $relatedResult[$value];
+    if(isset($referenced[$rowID])){
+      return $referenced[$rowID];
     }
     return null;
   }

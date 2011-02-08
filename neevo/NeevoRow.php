@@ -88,12 +88,14 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     throw new NeevoException('Delete disabled - cannot get primary key.');
   }
 
-  public function related($table, $column = null){
-    if($column === null){
-      $column = $this->result->getTable() . '_' . $this->primaryKey;
-    }
-    
-    return $this->result->getRelatedRow($table, $column, $this->data[$column]);
+  /**
+   * Get referenced row from given table.
+   * @param string $table
+   * @param string $column Optional foreign key, defaults to table_primaryKey.
+   * @return NeevoResult|null
+   */
+  public function ref($table, $column = null){
+    return $this->result->getReferencedRow($table, $this, $column);
   }
 
   /**
@@ -102,6 +104,10 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
    */
   public function toArray(){
     return $this->iterable;
+  }
+
+  public function __call($table, $column){
+    return $this->ref($table, isset($column[0]) ? $column[0] : null);
   }
 
   public function __get($name){

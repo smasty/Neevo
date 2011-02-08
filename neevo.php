@@ -61,7 +61,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 357;
+  const REVISION = 358;
 
   // Data types
   const BOOL = 'b';
