@@ -4,12 +4,12 @@ ORDER BY test coverage
 <?php
 
 foreach(array(
-  'id ASC',
-  'id DESC',
-  array('aid DESC', 'web'),
-  array('aid', 'web')
+  ':id ASC',
+  ':id DESC',
+  array(':author_id DESC', ':url'),
+  array(':author_id', ':url')
 ) as $order){
-  foreach($db->select('id', 'software')->order($order) as $result){
+  foreach($db->select(':id', ':software')->order($order) as $result){
     if(isset($result['id'])){
       echo $result['id'];
     }
@@ -20,7 +20,7 @@ foreach(array(
 
 ?>
 --EXPECT--
-1,2,3,4,
-4,3,2,1,
-4,2,3,1,
-3,1,4,2,
+1,2,3,4,5,6,
+6,5,4,3,2,1,
+5,6,4,3,2,1,
+2,1,4,3,5,6,

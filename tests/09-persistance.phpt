@@ -6,26 +6,41 @@ Persistance - insert/update/delete
 // Insert
 $db->insert('software',
   array(
-    'id' => 5,
-    'title' => 'Debian',
-    'web' => 'http://debian.org'
+    'title' => 'dibi',
+    'author_id' => 13,
+    'url' => 'http://dibiphp.com'
   ));
 
 // Check insertion
-echo $db->select('title', 'software')->where('id', 5)->limit(1)->fetchSingle() . "\n";
+echo $db->select(':url', 'software')
+        ->where('title', 'dibi')
+        ->limit(1)
+        ->fetchSingle() . "\n";
 
 // Update
-$db->update('software', array('slogan' => 'Lorem Ipsum-'.  rand(111, 999)))->exec();
+$db->update('software', array('title' => 'dibi database layer'))
+   ->where('title', 'dibi')
+   ->run();
+
 // Check update
-echo substr($db->select('slogan', 'software')->where('id', 5)->fetchSingle(), 0, -3) . "\n";
+echo $db->select(':title', 'software')
+        ->where('url', 'http://dibiphp.com')
+        ->fetchSingle() . "\n";
 
 // Delete
-$db->delete('software')->where('id', 5)->exec();
-// Check delete
-echo $db->select('title', 'software')->where('id', 5)->fetchSingle() ? 'delete failed' : 'delete ok';
+$db->delete('software')
+   ->where('url', 'http://dibiphp.com')
+   ->run();
 
+// Check delete
+echo $db->select(':title', 'software')
+        ->where('url', 'http://dibiphp.com')
+        ->fetchSingle()
+     ? 'delete failed' : 'delete ok';
+
+echo "\n";
 ?>
 --EXPECT--
-Debian
-Lorem Ipsum-
+http://dibiphp.com
+dibi database layer
 delete ok
