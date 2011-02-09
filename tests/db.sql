@@ -1,31 +1,51 @@
-CREATE TABLE `author` (
-  `id` int(11) NOT NULL,
-  `name` varchar(256) COLLATE utf8_bin NOT NULL,
-  `web` varchar(256) COLLATE utf8_bin NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-INSERT INTO `author` (`id`, `name`, `web`) VALUES
-(11,	'Martin Srank',	'http://smasty.net'),
-(12,	'Linus Torvalds',	'http://torvalds-family.blogspot.com');
+-- MySQL table schema
+CREATE TABLE `author` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_bin NOT NULL,
+  `url` varchar(255) COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
 
 CREATE TABLE `software` (
-  `id` int(11) NOT NULL,
-  `aid` int(11) NOT NULL,
-  `title` varchar(256) COLLATE utf8_bin NOT NULL,
-  `web` varchar(256) COLLATE utf8_bin NOT NULL,
-  `slogan` varchar(256) COLLATE utf8_bin NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
-INSERT INTO `software` (`id`, `aid`, `title`, `web`, `slogan`) VALUES
-(1,	11,	'Neevo',	'http://neevo.smasty.net',	'Lorem Ipsum-686'),
-(2,	12,	'Linux kernel',	'http://linux.org',	'Lorem Ipsum-686'),
-(3,	11,	'Blabshare',	'http://labs.smasty.net',	'Lorem Ipsum-686'),
-(4,	12,	'Git',	'http://git-scm.com',	'Lorem Ipsum-686');
-
-CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `mail` varchar(128) COLLATE utf8_bin NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `author_id` int(11) NOT NULL,
+  `title` varchar(255) COLLATE utf8_bin NOT NULL,
+  `url` varchar(255) COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `author_id` (`author_id`),
+  CONSTRAINT `software_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `author` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
+
+-- SQLite table schema
+CREATE TABLE "author" (
+  "id" integer NOT NULL PRIMARY KEY,
+  "name" text NOT NULL,
+  "url" text NOT NULL
+);
+
+CREATE TABLE "software" (
+  "id" integer NOT NULL PRIMARY KEY,
+  "author_id" integer NOT NULL,
+  "title" text NOT NULL,
+  "url" text NOT NULL,
+  FOREIGN KEY ("author_id") REFERENCES "author" ("id")
+);
+
+
+
+
+-- Table data
+INSERT INTO author (id, name, url) VALUES (11, 'Linus Torvalds', 'http://en.wikipedia.org/wiki/Linus_Torvalds');
+INSERT INTO author (id, name, url) VALUES (12, 'Dries Buytaert', 'http://buytaert.net');
+INSERT INTO author (id, name, url) VALUES (13, 'David Grudl', 'http://davidgrudl.com');
+
+INSERT INTO software (id, author_id, title, url) VALUES (1, 11, 'Linux kernel', 'http://kernel.org');
+INSERT INTO software (id, author_id, title, url) VALUES (2, 11, 'Git', 'http://git-scm.com');
+INSERT INTO software (id, author_id, title, url) VALUES (3, 12, 'Drupal', 'http://drupal.org');
+INSERT INTO software (id, author_id, title, url) VALUES (4, 12, 'Acquia', 'http://acquia.com');
+INSERT INTO software (id, author_id, title, url) VALUES (5, 13, 'Nette Framework', 'http://nette.org');
+INSERT INTO software (id, author_id, title, url) VALUES (6, 13, 'Texy!', 'http://texy.info');

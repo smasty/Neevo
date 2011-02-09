@@ -48,6 +48,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /** @var bool */
   private $detectTypes;
 
+  /** @var array */
+  private $referenced;
+
   /**
    * Create SELECT statement.
    * @param NeevoConnection $connection
@@ -195,7 +198,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
         }
       }
     }
-
     return new $this->rowClass($row, $this);
   }
 
@@ -461,6 +463,32 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
       default:
         return $value;
     }
+  }
+
+  /**
+   * Get referenced row from given table.
+   * @param string $table
+   * @param NeevoResult $row
+   * @param string $foreign
+   * @return NeevoRow|null
+   */
+  public function getReferencedRow($table, & $row, $foreign = null){
+    $foreign = $foreign === null ? $this->getForeignKey($table) : $foreign;
+    $rowID = $row->$foreign;
+    $referenced = & $this->referenced[$table];
+
+    if(empty($referenced)){
+      $clone = clone $this;
+      $clone->columns = array($foreign);
+      $keys = $clone->fetchPairs($foreign, $foreign);
+      $result = new NeevoResult($this->connection, '*', $table);
+      $primary = $result->getPrimaryKey();
+      $referenced = $result->where($primary, $keys)->fetchPairs($primary);
+    }
+    if(isset($referenced[$rowID])){
+      return $referenced[$rowID];
+    }
+    return null;
   }
 
 

@@ -3,13 +3,15 @@ Basic Join test
 --FILE--
 <?php
 
-foreach($db->select('author')->leftJoin('software')->on('author.id = software.aid') as $r){
+foreach($db->select('author')->leftJoin('software')->on(':author.id = :software.author_id') as $r){
   echo "$r->name - $r->title\n";
 }
 
 ?>
 --EXPECT--
-Martin Srank - Neevo
-Martin Srank - Blabshare
 Linus Torvalds - Linux kernel
 Linus Torvalds - Git
+Dries Buytaert - Drupal
+Dries Buytaert - Acquia
+David Grudl - Nette Framework
+David Grudl - Texy!

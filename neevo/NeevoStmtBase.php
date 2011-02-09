@@ -418,6 +418,11 @@ abstract class NeevoStmtBase {
     return $cached === '' ? null : $cached;
   }
 
+  public function getForeignKey($table){
+    $primary = $this->getPrimaryKey();
+    return $table . '_' . ($primary !== null ? $primary : 'id' );
+  }
+
 
   /*  ************  Internal methods  ************  */
 

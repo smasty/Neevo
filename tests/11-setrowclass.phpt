@@ -12,13 +12,13 @@ class Row{
 }
 
 // Try setting existing class
-$row = $db->select('id, title', 'software')->limit(1)->setRowClass('Row')->fetchRow();
+$row = $db->select(':id, :title', 'software')->limit(1)->setRowClass('Row')->fetchRow();
 echo ($row instanceof Row ? 'set ok' : 'set fail') . "\n";
 unset($row);
 
 // Try setting class which does not exist.
 try{
-  $row = $db->select('id, title', 'software')->limit(1)->setRowClass('NoClass')->fetchRow();
+  $row = $db->select(':id, :title', 'software')->limit(1)->setRowClass('NoClass')->fetchRow();
 } catch(NeevoException $e){
     echo (strstr($e->getMessage(), 'NoClass') ? 'catch ok' : 'catch fail') . "\n";
 }

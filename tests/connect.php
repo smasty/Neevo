@@ -21,7 +21,7 @@ elseif($driver == 'mysqli'){
 }
 
 elseif($driver == 'sqlite'){
-  $db = new Neevo( array(
+  $db = new Neevo(array(
     'driver' => 'SQLite',
     'file' => 'tests/neevo.sqlite',
     'charset' => 'UTF-8',

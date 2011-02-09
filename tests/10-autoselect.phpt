@@ -4,7 +4,7 @@ SELECT with only table name passed.
 <?php
 
 echo join(',', array_keys($db->select('software')
-  ->order('id')->limit(1)->fetch()->toArray())) . "\n";
+  ->order(':id')->limit(1)->fetch()->toArray())) . "\n";
 
 try{
   $db->select();
@@ -13,5 +13,5 @@ try{
 }
 ?>
 --EXPECT--
-id,aid,title,web,slogan
+id,author_id,title,url
 catched
