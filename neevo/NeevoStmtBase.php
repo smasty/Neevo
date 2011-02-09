@@ -349,11 +349,8 @@ abstract class NeevoStmtBase {
     if($table === null){
       $table = $this->tableName;
     }
-    $table = str_replace('::', '', $table);
+    $table = str_replace(':', '', $table);
     $prefix = $this->connection->prefix();
-    if(preg_match('~([^.]+)(\.)([^.]+)~', $table)){
-      return str_replace('.', ".$prefix", $table);
-    }
     return $prefix.$table;
   }
 

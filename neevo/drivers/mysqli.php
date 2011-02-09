@@ -246,7 +246,7 @@ class NeevoDriverMySQLi implements INeevoDriver{
         return "'". $this->resource->real_escape_string($value) ."'";
 
       case Neevo::IDENTIFIER:
-        return '`'. str_replace('.', '`.`', str_replace('`', '``', $value)) .'`';
+        return str_replace('`*`', '*', '`' . str_replace('.', '`.`', str_replace('`', '``', $value)) . '`');
 
       case Neevo::BINARY:
         return "_binary'" . mysqli_real_escape_string($this->resource, $value) . "'";

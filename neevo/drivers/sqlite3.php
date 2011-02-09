@@ -266,7 +266,7 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
         return "'". $this->resource->escapeString($value) ."'";
 
       case Neevo::IDENTIFIER:
-        return '['. str_replace('.', '].[', strtr($value, '[]', '  ')) .']';
+        return str_replace('[*]', '*', '[' . str_replace('.', '].[', $value) . ']');
 
       case Neevo::BINARY:
         return "X'" . bin2hex((string) $value) . "'";

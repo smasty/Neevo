@@ -35,7 +35,7 @@ class NeevoStmtParser {
   public function parse(NeevoStmtBase $statement){
     $this->stmt = $statement;
     $where = $order = $group = $limit = $q = '';
-    $table = $this->escapeValue(str_replace(':', '', $statement->getTable()), Neevo::IDENTIFIER);
+    $table = $this->escapeValue($statement->getTable(), Neevo::IDENTIFIER);
 
     if($this->stmt instanceof NeevoResult && $this->stmt->getJoin()){
       $table = $table .' '. $this->parseJoin();
@@ -344,7 +344,10 @@ class NeevoStmtParser {
   }
 
   protected function tryDelimite($expr){
-    return preg_replace_callback('~:([a-z_][a-z0-9._]*)~', array($this, 'parseFieldName'), $expr);
+    if($expr instanceof NeevoLiteral){
+      return $expr->value;
+    }
+    return preg_replace_callback('~:([a-z_\*][a-z0-9._\*]*)~', array($this, 'parseFieldName'), $expr);
   }
 
 }

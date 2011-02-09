@@ -284,7 +284,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
         return "'". sqlite_escape_string($value) ."'";
 
       case Neevo::IDENTIFIER:
-        return '['. str_replace('.', '].[', strtr($value, '[]', '  ')) .']';
+        return str_replace('[*]', '*', '[' . str_replace('.', '].[', $value) . ']');
 
       case Neevo::DATETIME:
         return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
