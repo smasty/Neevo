@@ -306,3 +306,46 @@ class NeevoCacheAPC implements INeevoCache {
   }
 
 }
+
+/**
+ * Neevo cache using Nette Framework cache.
+ * @author Martin Srank
+ * @package NeevoCache
+ */
+class NeevoCacheNette implements INeevoCache {
+
+  /** @var Nette\Caching\Cache */
+  private $cache;
+
+  private $conds = array('tags' => array('NeevoCache'));
+
+  public function __construct(){
+    $cache = null;
+    if(is_callable('Nette\Environment::getCache')){
+      $cache = call_user_func('Nette\Environment::getCache');
+    }
+    elseif(is_callable('NEnvironment::getCache')){
+      $cache = NEnvironment::getCache();
+    }
+    elseif(is_callable('Environment::getCache')){
+      $cache = Environment::getCache();
+    }
+    $this->cache = $cache;
+  }
+
+  public function fetch($key){
+    if($this->cache === null) return;
+    return $this->cache[$key];
+  }
+
+  public function store($key, $value){
+    if($this->cache === null) return;
+    $this->cache->save($key, $value, $this->conds);
+  }
+
+  public function flush(){
+    $this->cache->clean($this->conds);
+    return true;
+  }
+
+}
