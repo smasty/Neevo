@@ -61,7 +61,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 363;
+  const REVISION = 364;
 
   // Data types
   const BOOL = 'b';
@@ -166,10 +166,13 @@ class Neevo implements INeevoObservable, INeevoObserver {
    */
   public function loadFile($filename){
     $this->connection->realConnect();
+    $abort = ignore_user_abort();
     @set_time_limit(0);
+    ignore_user_abort(true);
 
     $handle = @fopen($filename, 'r');
     if($handle === false){
+      ignore_user_abort($abort);
       throw new NeevoException("Cannot open file '$filename'.");
     }
 
@@ -186,6 +189,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
       }
     }
     fclose($handle);
+    ignore_user_abort($abort);
     return $count;
   }
 
