@@ -61,7 +61,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 361;
+  const REVISION = 362;
 
   // Data types
   const BOOL = 'b';
@@ -363,6 +363,7 @@ function _neevo_autoload($class){
     'neevocacheinclude' => '/neevo/NeevoCache.php',
     'neevocachememcache' => '/neevo/NeevoCache.php',
     'neevocachesession' => '/neevo/NeevoCache.php',
+    'neevocachenette' => '/neevo/NeevoCache.php',
     'neevostmtbase' => '/neevo/NeevoStmtBase.php',
     'neevostmtparser' => '/neevo/NeevoStmtParser.php',
     'neevostmt' => '/neevo/NeevoStmt.php',

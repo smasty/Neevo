@@ -258,7 +258,7 @@ class NeevoDriverMySQL implements INeevoDriver{
   public function escape($value, $type){
     switch($type){
       case Neevo::BOOL:
-        return $value ? 1 :0;
+        return $value ? 1 : 0;
 
       case Neevo::TEXT:
         return "'". mysql_real_escape_string($value, $this->resource) ."'";

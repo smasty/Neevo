@@ -125,7 +125,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
   }
 
   public function __unset($name){
-    $this->modified[$offset] = null;
+    $this->modified[$name] = null;
     $this->iterable = array_merge($this->data, $this->modified);
   }
 
