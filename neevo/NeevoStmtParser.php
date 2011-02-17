@@ -84,7 +84,7 @@ class NeevoStmtParser {
     foreach($cols as $key => $col){
       $cols[$key] = $this->tryDelimite($col);
     }
-    $cols = join(', ', $cols);
+    $cols = implode(', ', $cols);
 
     return "SELECT $cols FROM " . $table . $where . $group . $order . $limit;
   }
@@ -99,7 +99,7 @@ class NeevoStmtParser {
       $cols[] = $this->parseFieldName($col);
       $values[] = $value;
     }
-    $data = ' (' . join(', ',$cols) . ') VALUES (' . join(', ',$values). ')';
+    $data = ' (' . implode(', ',$cols) . ') VALUES (' . implode(', ',$values). ')';
 
     return 'INSERT INTO '.$this->clauses[0].$data;
   }
@@ -114,7 +114,7 @@ class NeevoStmtParser {
     foreach($this->escapeValue($this->stmt->getValues()) as $col => $value){
       $values[] = $this->parseFieldName($col) . ' = ' . $value;
     }
-    $data = ' SET ' . join(', ', $values);
+    $data = ' SET ' . implode(', ', $values);
 
     return 'UPDATE ' . $table . $data . $where . $order . $limit;
   }
@@ -213,7 +213,7 @@ class NeevoStmtParser {
 
     }
 
-    return ' WHERE ' . join(' ', $conditions);
+    return ' WHERE ' . implode(' ', $conditions);
   }
 
   /**
@@ -221,7 +221,7 @@ class NeevoStmtParser {
    * @return string
    */
   protected function parseOrdering(){
-    return ' ORDER BY ' . join(', ', $this->tryDelimite($this->stmt->getOrdering()));
+    return ' ORDER BY ' . implode(', ', $this->tryDelimite($this->stmt->getOrdering()));
   }
 
   /**
@@ -312,7 +312,7 @@ class NeevoStmtParser {
         return (float) $value;
     } elseif($type === Neevo::ARR){
         $array = ($value instanceof Traversable) ? iterator_to_array($value) : (array) $value;
-        return '(' . join(', ', $this->escapeValue($array)) . ')';
+        return '(' . implode(', ', $this->escapeValue($array)) . ')';
     } elseif($type === Neevo::LITERAL){
         return $value instanceof NeevoLiteral ? $value->value : $value;
     } elseif($type === null || $type === ''){

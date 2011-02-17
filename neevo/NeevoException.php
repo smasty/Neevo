@@ -19,7 +19,7 @@
  * @author Martin Srank
  * @package NeevoExceptions
  */
-class NeevoException extends Exception implements IDebugPanel, INeevoObservable{
+class NeevoException extends Exception implements IDebugPanel, INeevoObservable {
 
   /** @var string */
   protected $sql;

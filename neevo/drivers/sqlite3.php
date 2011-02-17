@@ -364,7 +364,7 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver{
     foreach($this->escapeValue($this->stmt->getValues()) as $col => $value){
       $values[] = $this->parseFieldName($col) . ' = ' . $value;
     }
-    $data = ' SET ' . join(', ', $values);
+    $data = ' SET ' . implode(', ', $values);
 
     return 'UPDATE ' . $table . $data . $where . ($this->updateLimit ? $order . $limit : '');
   }
