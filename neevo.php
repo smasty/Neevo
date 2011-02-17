@@ -61,7 +61,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 365;
+  const REVISION = 366;
 
   // Data types
   const BOOL = 'b';
@@ -291,29 +291,23 @@ class Neevo implements INeevoObservable, INeevoObserver {
     $keywords2 = 'RANDOM|RAND|ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
 
     $sql = str_replace("\\'", '\\&#39;', $sql);
-    $sql = preg_replace_callback("~($keywords1)|($keywords2)|('[^']+'|[0-9]+)|(/\*.*\*/)|(--\s?[^;]+)|(#[^;]+)~", array('Neevo', '_highlightCallback'), $sql);
+    $sql = preg_replace_callback("~(/\\*.*\\*/)|($keywords1)|($keywords2)|('[^']+'|[0-9]+)~i", array('Neevo', '_highlightCallback'), $sql);
     $sql = str_replace('\\&#39;', "\\'", $sql);
-    return '<code style="color:#555" class="sql-dump">' . $sql . "</code>\n";
+    return '<pre style="color:#555" class="sql-dump">' . $sql . "</pre>\n";
   }
 
   private static function _highlightCallback($match){
-    if(!empty($match[1])){ // Basic keywords
-      return '<strong style="color:#e71818">'.$match[1].'</strong>';
+    if(!empty($match[1])){ // /* comment */
+      return '<em style="color:#999">'.$match[1].'</em>';
     }
-    if(!empty($match[2])){ // Other keywords
-      return '<strong style="color:#d59401">'.$match[2].'</strong>';
+    if(!empty($match[2])){ // Basic keywords
+      return '<strong style="color:#e71818">'.$match[2].'</strong>';
     }
-    if(!empty($match[3])){ // Values
-      return '<em style="color:#008000">'.$match[3].'</em>';
+    if(!empty($match[3])){ // Other keywords
+      return '<strong style="color:#d59401">'.$match[3].'</strong>';
     }
-    if(!empty($match[4])){ // /* comment */
-      return '<em style="color:#999">'.$match[4].'</em>';
-    }
-    if(!empty($match[5])){ // -- comment
-      return '<em style="color:#999">'.$match[5].'</em>';
-    }
-    if(!empty($match[6])){ // # comment
-      return '<em style="color:#999">'.$match[6].'</em>';
+    if(!empty($match[4]) || $match[4] === '0'){ // Values
+      return '<em style="color:#008000">'.$match[4].'</em>';
     }
   }
 

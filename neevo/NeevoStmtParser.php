@@ -316,6 +316,7 @@ class NeevoStmtParser {
     } elseif($type === Neevo::LITERAL){
         return $value instanceof NeevoLiteral ? $value->value : $value;
     } elseif($type === null || $type === ''){
+
         if($value instanceof DateTime){
             return $this->escapeValue($value, Neevo::DATETIME);
         } elseif($value instanceof NeevoLiteral){
@@ -323,6 +324,7 @@ class NeevoStmtParser {
         } else{
             return is_numeric($value) ? $value : $this->stmt->driver()->escape($value, Neevo::TEXT);
         }
+
     } else{
         return $this->stmt->driver()->escape($value, $type);
     }

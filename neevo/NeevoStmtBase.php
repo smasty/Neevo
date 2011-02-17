@@ -275,11 +275,11 @@ abstract class NeevoStmtBase {
    * @return string|NeevoStmtBase fluent interface
    */
   public function dump($return = false){
-    $code = (PHP_SAPI === 'cli') ? $this->parse() : Neevo::highlightSql($this->parse());
+    $sql = (PHP_SAPI === 'cli') ? $this->parse() : Neevo::highlightSql($this->parse());
     if(!$return){
-      echo $code;
+      echo $sql;
     }
-    return $return ? $code : $this;
+    return $return ? $sql : $this;
   }
 
   /**
