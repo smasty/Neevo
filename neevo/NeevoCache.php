@@ -249,6 +249,9 @@ class NeevoCacheMemcache implements INeevoCache {
   private $keys = array();
 
   public function __construct(Memcache $memcache){
+    if(!extension_loaded("memcache")){
+      throw new NeevoException("PHP extension 'memecache' not loaded.");
+    }
     $this->memcache = $memcache;
   }
 
@@ -283,6 +286,12 @@ class NeevoCacheAPC implements INeevoCache {
 
   /** @var array */
   private $keys = array();
+
+  public function __construct(){
+    if(!extension_loaded("apc")){
+      throw new NeevoException("PHP extension 'apc' not loaded.");
+    }
+  }
 
   public function fetch($key){
     $value = apc_fetch("NeevoCache.$key", $success);
