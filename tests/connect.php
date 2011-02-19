@@ -23,7 +23,7 @@ elseif($driver == 'mysqli'){
 elseif($driver == 'sqlite'){
   $db = new Neevo(array(
     'driver' => 'SQLite',
-    'file' => 'tests/neevo.sqlite',
+    'file' => dirname(__FILE__) . '/neevo.sqlite',
     'charset' => 'UTF-8',
     'dbcharset' => 'UTF-8'
   ));
@@ -32,7 +32,7 @@ elseif($driver == 'sqlite'){
 elseif($driver == 'sqlite3'){
   $db = new Neevo(array(
     'driver' => 'SQLite3',
-    'file' => 'tests/neevo.sqlite3',
+    'file' => dirname(__FILE__) . '/neevo.sqlite3',
     'charset' => 'UTF-8',
     'dbcharset' => 'UTF-8'
   ));
