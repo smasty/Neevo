@@ -61,7 +61,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 369;
+  const REVISION = 370;
 
   // Data types
   const BOOL = 'b';
@@ -129,13 +129,11 @@ class Neevo implements INeevoObservable, INeevoObserver {
    * INSERT statement factory.
    * @param string $table
    * @param array $values
-   * @return int|NeevoStmt Last inserted ID or NeevoStmt on lazy connection
+   * @return NeevoStmt fluent interface
    */
   public function insert($table, array $values){
     $q = new NeevoStmt($this->connection);
-    $ins = $q->insert($table, $values);
-    return $this->connection->getConfig('lazy')
-      ? $ins : $ins->insertId();
+    return $q->insert($table, $values);
   }
 
   /**

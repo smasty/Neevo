@@ -9,7 +9,7 @@ $db->insert('software',
     'title' => 'dibi',
     'author_id' => 13,
     'url' => 'http://dibiphp.com'
-  ));
+  ))->run();
 
 // Check insertion
 echo $db->select(':url', 'software')

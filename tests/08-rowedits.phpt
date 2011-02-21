@@ -7,7 +7,7 @@ $db->insert('software', array(
   'title' => 'Debian Linux',
   'author_id' => 11,
   'url' => 'http://example.com'
-));
+))->run();
 
 $row = $db->select('software')->where('title', 'Debian Linux')->fetch();
 $row->url = 'http://debian.org';
