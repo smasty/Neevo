@@ -67,6 +67,18 @@ class NeevoStmt extends NeevoStmtBase {
     return $this;
   }
 
+  public function run(){
+    $result = parent::run();
+
+    try{
+      $this->affectedRows = $this->driver()->affectedRows();
+    } catch(NeevoException $e){
+        $this->affectedRows = false;
+    }
+
+    return $result;
+  }
+
   /**
    * Get the ID generated in the last INSERT statement.
    * @return int|FALSE
@@ -90,7 +102,10 @@ class NeevoStmt extends NeevoStmtBase {
    */
   public function affectedRows(){
     $this->performed || $this->run();
-    return $this->affectedRows = $this->driver()->affectedRows();
+    if($this->affectedRows === false){
+      throw new NeevoException('Affected rows not supported by this driver');
+    }
+    return $this->affectedRows;
   }
 
   /** @return array */
