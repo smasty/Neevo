@@ -114,7 +114,7 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable 
 
   public function getPanel(){
     if($this->sql === null) return;
-    return '<pre>' . Neevo::highlightSql($this->sql) . '</pre>';
+    return Neevo::highlightSql($this->sql);
   }
 
 }

@@ -38,7 +38,7 @@ class NeevoStmtParser {
     $table = $this->escapeValue($statement->getTable(), Neevo::IDENTIFIER);
 
     if($this->stmt instanceof NeevoResult && $this->stmt->getJoin()){
-      $table = $table .' '. $this->parseJoin();
+      $table = $table . ' ' . $this->parseJoin();
     }
     if($this->stmt->getConditions()){
       $where = $this->parseWhere();
@@ -49,11 +49,8 @@ class NeevoStmtParser {
     if($this->stmt->getOrdering()){
       $order = $this->parseOrdering();
     }
-    if($this->stmt->getLimit() || $this->stmt->getOffset()){
-      $limit = $this->parseLimit();
-    }
 
-    $this->clauses = array($table, $where, $group, $order, $limit);
+    $this->clauses = array($table, $where, $group, $order);
 
     if($this->stmt->getType() == Neevo::STMT_SELECT){
       $q = $this->parseSelectStmt();
@@ -80,13 +77,13 @@ class NeevoStmtParser {
    */
   protected function parseSelectStmt(){
     $cols = $this->stmt->getColumns();
-    list($table, $where, $group, $order, $limit) = $this->clauses;
+    list($table, $where, $group, $order) = $this->clauses;
     foreach($cols as $key => $col){
       $cols[$key] = $this->tryDelimite($col);
     }
     $cols = implode(', ', $cols);
 
-    return "SELECT $cols FROM " . $table . $where . $group . $order . $limit;
+    return $this->applyLimit("SELECT $cols FROM " . $table . $where . $group . $order);
   }
 
   /**
@@ -99,9 +96,9 @@ class NeevoStmtParser {
       $cols[] = $this->parseFieldName($col);
       $values[] = $value;
     }
-    $data = ' (' . implode(', ',$cols) . ') VALUES (' . implode(', ',$values). ')';
+    $data = ' (' . implode(', ', $cols) . ') VALUES (' . implode(', ', $values). ')';
 
-    return 'INSERT INTO '.$this->clauses[0].$data;
+    return 'INSERT INTO ' . $this->clauses[0] . $data;
   }
 
   /**
@@ -110,13 +107,13 @@ class NeevoStmtParser {
    */
   protected function parseUpdateStmt(){
     $values = array();
-    list($table, $where, , $order, $limit) = $this->clauses;
+    list($table, $where, , $order) = $this->clauses;
     foreach($this->escapeValue($this->stmt->getValues()) as $col => $value){
       $values[] = $this->parseFieldName($col) . ' = ' . $value;
     }
     $data = ' SET ' . implode(', ', $values);
 
-    return 'UPDATE ' . $table . $data . $where . $order . $limit;
+    return $this->applyLimit('UPDATE ' . $table . $data . $where . $order);
   }
 
   /**
@@ -124,9 +121,9 @@ class NeevoStmtParser {
    * @return string
    */
   protected function parseDeleteStmt(){
-    list($table, $where, , $order, $limit) = $this->clauses;
+    list($table, $where, , $order) = $this->clauses;
     
-    return 'DELETE FROM ' . $table . $where . $order . $limit;
+    return $this->applyLimit('DELETE FROM ' . $table . $where . $order);
   }
 
   /**
@@ -269,15 +266,21 @@ class NeevoStmtParser {
   }
 
   /**
-   * Parse LIMIT/OFFSET clause.
+   * Apply LIMIT/OFFSET to SQL command.
+   * @param string $sql SQL command
    * @return string
    */
-  protected function parseLimit(){
-    $limit = ' LIMIT '. (int) $this->stmt->getLimit();
-    if($offset = $this->stmt->getOffset()){
-      $limit .= ' OFFSET '. (int) $offset;
+  protected function applyLimit($sql){
+    $limit = (int) $this->stmt->getLimit();
+    $offset = (int) $this->stmt->getOffset();
+
+    if($limit > 0){
+      $sql .= " LIMIT $limit";
+      if($offset > 0){
+        $sql .= " OFFSET $offset";
+      }
     }
-    return $limit;
+    return $sql;
   }
 
   /**

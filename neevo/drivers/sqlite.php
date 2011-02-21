@@ -48,6 +48,9 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
   /** @var bool */
   private $unbuffered;
 
+  /** @var bool */
+  private $persistent;
+
   /** @var int */
   private $affectedRows;
 
@@ -121,7 +124,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
    */
   public function close(){
     if(!$this->persistent){
-      sqlite_close($this->resource);
+      @sqlite_close($this->resource);
     }
   }
 
@@ -375,14 +378,11 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
    * @return string
    */
   protected function parseUpdateStmt(){
-    $values = array();
-    list($table, $where, , $order, $limit) = $this->clauses;
-    foreach($this->escapeValue($this->stmt->getValues()) as $col => $value){
-      $values[] = $this->parseFieldName($col) . ' = ' . $value;
+    $sql = parent::parseUpdateStmt();
+    if(!$this->updateLimit){
+      $sql = preg_replace('~\s*(ORDER\s+BY|LIMIT).*~i', '', $sql);
     }
-    $data = ' SET ' . implode(', ', $values);
-
-    return 'UPDATE ' . $table . $data . $where . ($this->updateLimit ? $order . $limit : '');
+    return $sql;
   }
 
   /**
@@ -390,9 +390,11 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
    * @return string
    */
   protected function parseDeleteStmt(){
-    list($table, $where, , $order, $limit) = $this->clauses;
-
-    return 'DELETE FROM ' . $table . $where . ($this->updateLimit ? $order . $limit : '');
+    $sql = parent::parseDeleteStmt();
+    if(!$this->updateLimit){
+      $sql = preg_replace('~\s*(ORDER\s+BY|LIMIT).*~i', '', $sql);
+    }
+    return $sql;
   }
 
 }
