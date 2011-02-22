@@ -33,7 +33,7 @@
  * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverMySQL implements INeevoDriver{
+class NeevoDriverMySQL extends NeevoStmtParser implements INeevoDriver{
 
   /** @var resource */
   private $resource;
@@ -322,6 +322,27 @@ class NeevoDriverMySQL implements INeevoDriver{
       $cols[$field->name] = $field->type;
     }
     return $cols;
+  }
+
+
+  /*  ============  NeevoStmtParser overrides  ============  */
+
+  /**
+   * Parse UPDATE statement.
+   * @return string
+   */
+  protected function parseUpdateStmt(){
+    $sql = parent::parseUpdateStmt();
+    return $this->applyLimit($sql . $this->clauses[3]);
+  }
+
+  /**
+   * Parse DELETE statement.
+   * @return string
+   */
+  protected function parseDeleteStmt(){
+    $sql = parent::parseDeleteStmt();
+    return $this->applyLimit($sql . $this->clauses[3]);
   }
 
 }

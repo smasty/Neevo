@@ -379,8 +379,8 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
    */
   protected function parseUpdateStmt(){
     $sql = parent::parseUpdateStmt();
-    if(!$this->updateLimit){
-      $sql = preg_replace('~\s*(ORDER\s+BY|LIMIT).*~i', '', $sql);
+    if($this->updateLimit){
+      $sql = $this->applyLimit($sql . $this->clauses[3]);
     }
     return $sql;
   }
@@ -391,8 +391,8 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver{
    */
   protected function parseDeleteStmt(){
     $sql = parent::parseDeleteStmt();
-    if(!$this->updateLimit){
-      $sql = preg_replace('~\s*(ORDER\s+BY|LIMIT).*~i', '', $sql);
+    if($this->updateLimit){
+      $sql = $this->applyLimit($sql . $this->clauses[3]);
     }
     return $sql;
   }
