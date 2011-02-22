@@ -157,7 +157,7 @@ class NeevoConnection implements INeevoObservable {
   public static function alias(&$config, $key, $alias){
     if(isset($config[$alias]) && !isset($config[$key])){
       $config[$key] = $config[$alias];
-      unset($config[$alias]);
+      //unset($config[$alias]);
     }
   }
 
