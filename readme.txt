@@ -1,4 +1,5 @@
 Neevo - Tiny open-source database layer for PHP
+===============================================
 
 
 Info
@@ -16,13 +17,11 @@ About Neevo
 Neevo is a very small, fully object-oriented database abstraction layer for PHP.
 It's open-source and released under the terms and conditions of the MIT license.
 
-Neevo allows you to easily write SQL queries for different SQL drivers
-in unified syntax with the use of Object-oriented PHP and fluent interfaces.
-Of course, Neevo automatically escapes all code to avoid SQL Injection attacs, etc.
-
-Neevo currently supports five drivers: MySQL, MySQLi, SQLite, SQLite 3, PostgreSQL.
-Neevo also offers an Interface and Public API for other programmers, so new drivers
-can be easily added.
+Neevo simplifies your daily work with databases - you can use the same code across
+various supported SQL database systems without noticing any differences.
+Thanks to the use of PHP's object-oriented features, manipulating with databases
+was never simpler then now with Neevo. Do not bother about SQL injection attacks,
+Neevo handles this too.
 
 
 Features
@@ -31,14 +30,15 @@ Features
  - Easy and intuitive manipulation
  - SELECT, INSERT, UPDATE, DELTE queires (with JOIN support)
  - Transaction support
- - Multiple drivers support
+ - Multiple database drivers
+ - Column type detection
+ - Conditional statements
  - More ways to fetch your data: as objects, arrays, key=>value pairs, single row...
  - Dump queries
  - Query debugging
- - Conditional statements
- - Column type detection
  - One-file-only minified version
     (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
+ And much more...
 
 
 Supported drivers
