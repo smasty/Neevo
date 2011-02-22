@@ -3,7 +3,10 @@ Basic Join test
 --FILE--
 <?php
 
-foreach($db->select('author')->leftJoin('software')->on(':author.id = :software.author_id') as $r){
+foreach($db->select('author')->leftJoin('software')
+           ->on(':author.id = :software.author_id')
+           ->order(':software.id ASC')
+        as $r){
   echo "$r->name - $r->title\n";
 }
 

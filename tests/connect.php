@@ -38,6 +38,15 @@ elseif($driver == 'sqlite3'){
   ));
 }
 
+elseif($driver == 'pgsql'){
+  $db = new Neevo(array(
+    'driver' => 'pgsql',
+    'user' => 'root',
+    'dbname' => 'neevo',
+    'charset' => 'utf8'
+  ));
+}
+
 else{
   fwrite(STDERR, "Driver '$driver' is not available.\n");
   exit(1);

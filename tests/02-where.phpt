@@ -7,8 +7,8 @@ foreach(array(
   array(':id', 1),
   array(':id != %i', 1),
   array(':title LIKE %s', 'Drup%'),
-  array(':id', true),
-  array(':id', false),
+  //array(':id', true),
+  //array(':id', false),
   array(':id', null),
   array(':id IS NOT %', null),
   array(':id', array(1, 2)),
@@ -35,8 +35,6 @@ foreach(array(
 1,
 2,3,4,5,6,
 3,
-1,2,3,4,5,6,
-
 
 1,2,3,4,5,6,
 1,2,
