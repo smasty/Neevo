@@ -21,7 +21,6 @@
  * @method NeevoStmtBase or($expr, $value = true)
  * @method NeevoStmtBase if($condition)
  * @method NeevoStmtBase else()
- * @method NeevoStmtBase elseif($condition)
  * @method NeevoStmtBase end()
  *
  * @author Martin Srank
