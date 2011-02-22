@@ -107,13 +107,13 @@ class NeevoStmtParser {
    */
   protected function parseUpdateStmt(){
     $values = array();
-    list($table, $where, , $order) = $this->clauses;
+    list($table, $where) = $this->clauses;
     foreach($this->escapeValue($this->stmt->getValues()) as $col => $value){
       $values[] = $this->parseFieldName($col) . ' = ' . $value;
     }
     $data = ' SET ' . implode(', ', $values);
 
-    return $this->applyLimit('UPDATE ' . $table . $data . $where . $order);
+    return 'UPDATE ' . $table . $data . $where;
   }
 
   /**
@@ -121,9 +121,9 @@ class NeevoStmtParser {
    * @return string
    */
   protected function parseDeleteStmt(){
-    list($table, $where, , $order) = $this->clauses;
+    list($table, $where) = $this->clauses;
     
-    return $this->applyLimit('DELETE FROM ' . $table . $where . $order);
+    return 'DELETE FROM ' . $table . $where;
   }
 
   /**
