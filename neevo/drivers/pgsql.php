@@ -285,6 +285,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 
   /**
    * Get the PRIMARY KEY column for given table.
+   *
+   * Experimental implementation!
    * @param string $table
    * @return string
    */

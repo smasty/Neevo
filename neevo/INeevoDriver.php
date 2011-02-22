@@ -37,7 +37,7 @@
  * - **parseWhere()**      => WHERE clause
  * - **parseOrdering()**   => ORDER BY clause
  * - **parseGrouping()**   => GROUP BY clause
- * - **parseLimit()**      => LIMIT/OFFSET clause
+ * - **applyLimit()**      => LIMIT/OFFSET clause
  * - **parseColName()**    => Column names, including table.column syntax
  * - **parse()**           => Various parsing conditions
  * 

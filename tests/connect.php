@@ -2,6 +2,8 @@
 
 include_once dirname(__FILE__). '/../neevo.php';
 
+$db_dir = realpath(dirname(__FILE__) . '/../../databases');
+
 if($driver == 'mysql'){
   $db = new Neevo(array(
     'driver' => 'MySQL',
@@ -23,7 +25,7 @@ elseif($driver == 'mysqli'){
 elseif($driver == 'sqlite'){
   $db = new Neevo(array(
     'driver' => 'SQLite',
-    'file' => dirname(__FILE__) . '/neevo.sqlite',
+    'file' => $db_dir . '/sqlite.db',
     'charset' => 'UTF-8',
     'dbcharset' => 'UTF-8'
   ));
@@ -32,7 +34,7 @@ elseif($driver == 'sqlite'){
 elseif($driver == 'sqlite3'){
   $db = new Neevo(array(
     'driver' => 'SQLite3',
-    'file' => dirname(__FILE__) . '/neevo.sqlite3',
+    'file' => $db_dir . '/sqlite3.db',
     'charset' => 'UTF-8',
     'dbcharset' => 'UTF-8'
   ));
