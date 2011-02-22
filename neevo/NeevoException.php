@@ -126,7 +126,7 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable 
  * @author Martin Srank
  * @package NeevoExceptions
  */
-class NeevoImplemenationException extends NeevoException{}
+class NeevoImplementationException extends NeevoException{}
 
 
 

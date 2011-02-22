@@ -61,7 +61,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
   public static $defaultDriver = 'mysql';
 
   // Neevo revision
-  const REVISION = 373;
+  const REVISION = 375;
 
   // Data types
   const BOOL = 'b';
@@ -289,7 +289,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
     $keywords2 = 'RANDOM|RAND|ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
 
     $sql = str_replace("\\'", '\\&#39;', $sql);
-    $sql = preg_replace_callback("~(/\\*.*\\*/)|($keywords1)|($keywords2)|('[^']+'|[0-9]+)~i", array('Neevo', '_highlightCallback'), $sql);
+    $sql = preg_replace_callback("~(/\\*.*\\*/)|($keywords1)|($keywords2)|('[^']+'|[0-9]+)~", array('Neevo', '_highlightCallback'), $sql);
     $sql = str_replace('\\&#39;', "\\'", $sql);
     return '<pre style="color:#555" class="sql-dump">' . $sql . "</pre>\n";
   }
