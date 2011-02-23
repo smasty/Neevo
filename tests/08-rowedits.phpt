@@ -10,13 +10,18 @@ $db->insert('software', array(
 ))->run();
 
 $row = $db->select('software')->where('title', 'Debian Linux')->fetch();
-$row->url = 'http://debian.org';
 
-// Update
-echo $row->update() ? "update ok\n" : "update failed\n";
+if($row instanceof NeevoRow){
 
-// Delete
-echo $row->delete() ? "delete ok\n" : "delete failed\n";
+  $row->url = 'http://debian.org';
+
+  // Update
+  echo $row->update() ? "update ok\n" : "update failed\n";
+
+  // Delete
+  echo $row->delete() ? "delete ok\n" : "delete failed\n";
+
+}
 
 unset($row);
 ?>
