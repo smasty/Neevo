@@ -231,6 +231,10 @@ abstract class NeevoStmtBase {
     return $this;
   }
 
+  /**
+   * @deprecated
+   * @internal
+   */
   public function orderBy(){
     return call_user_func_array(array($this, 'order'), func_get_args());
   }

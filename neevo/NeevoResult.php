@@ -97,11 +97,11 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   }
 
   /**
-   * Alias for NeevoResult::group().
-   * @return NeevoResult fluent interface
+   * @deprecated
+   * @internal
    */
-  public function groupBy($rule, $having = null){
-    return $this->group($rule, $having);
+  public function groupBy(){
+    return call_user_func_array(array($this, 'group'), func_get_args());
   }
 
   /**
