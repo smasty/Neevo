@@ -211,30 +211,28 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * Set ORDER clause. Accepts infinite arguments or an array.
-   * @param string|array $rules
+   * Defines order. More calls append rules.
+   * @param string|array $rule
+   * @param string $order Use constants - Neevo::ASC, Neevo::DESC
    * @return NeevoStmtBase fluent interface
    */
-  public function order($rules){
+  public function order($rule, $order = null){
     if($this->checkCond()){
       return $this;
     }
-    $this->reinit();
-    if(is_array($rules)){
-      $this->ordering = $rules;
+    if(is_array($rule)){
+      foreach($rule as $key => $val){
+        $this->order($key, $val);
+      }
+      return $this;
     }
-    else{
-      $this->ordering = func_get_args();
-    }
+    $this->ordering[] = array($rule, $order);
+
     return $this;
   }
 
-  /**
-   * Alias for NeevoStmtBase::order().
-   * @return NeevoStmtBase fluent interface
-   */
-  public function orderBy($rules){
-    return $this->order(is_array($rules) ? $rules : func_get_args());
+  public function orderBy(){
+    return call_user_func_array(array($this, 'order'), func_get_args());
   }
 
   /**

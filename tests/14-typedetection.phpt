@@ -5,6 +5,7 @@ Type detection - automated and user-defined
 
 // Automated detection
 $a = $db->select(':id, :author_id, :title', 'software')->detectTypes()->fetch();
+
 echo (is_int($a->id) && is_int($a->author_id) && is_string($a->title))
   ? "auto-detection ok\n" : "auto-detection failed\n";
 

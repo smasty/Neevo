@@ -218,7 +218,12 @@ class NeevoStmtParser {
    * @return string
    */
   protected function parseOrdering(){
-    return ' ORDER BY ' . implode(', ', $this->tryDelimite($this->stmt->getOrdering()));
+    $order = array();
+    foreach($this->stmt->getOrdering() as $rule){
+      list($field, $type) = $rule;
+      $order[] = $this->tryDelimite($field) . ($type !== null ? ' ' . $type : '');
+    }
+    return ' ORDER BY ' . implode(', ', $order);
   }
 
   /**
