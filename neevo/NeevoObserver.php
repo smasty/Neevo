@@ -260,8 +260,7 @@ class NeevoObserver implements INeevoObserver, IDebugPanel{
           ."<h1 style=\"padding-right:2em\">Queries: $this->numQueries"
           .($this->totalTime ? ', time: ' . sprintf('%0.1f', $this->totalTime * 1000) . ' ms' : '')
           .'</h1><table><tr><th>Time</th><th>SQL</th><th>Rows</th></tr>'
-          .$s.'</table>'
-          .'<p style="margin:1em 0 0;font-size:1ex"><a href="http://neevo.smasty.net" target="_blank">Neevo  – Tiny database layer</a></p>';
+          .$s.'</table>';
   }
 
   private function formatSql($sql, $len = 100){
