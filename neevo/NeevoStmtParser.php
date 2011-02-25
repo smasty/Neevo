@@ -37,8 +37,8 @@ class NeevoStmtParser {
     $where = $order = $group = $limit = $q = '';
     $table = $this->escapeValue($statement->getTable(), Neevo::IDENTIFIER);
 
-    if($this->stmt instanceof NeevoResult && $this->stmt->getJoin()){
-      $table = $table . ' ' . $this->parseJoin();
+    if($this->stmt instanceof NeevoResult && $this->stmt->getJoins()){
+      $table = $table . $this->parseJoin();
     }
     if($this->stmt->getConditions()){
       $where = $this->parseWhere();
@@ -132,25 +132,14 @@ class NeevoStmtParser {
    * @return string
    */
   protected function parseJoin(){
-    $join = $this->stmt->getJoin();
-    $join['expr'] = $this->tryDelimite($join['expr']);
-    $join['table'] = $this->tryDelimite($join['table']);
-    $type = strtoupper(substr($join['type'], 5));
-
-    if($type !== ''){
-      $type .= ' ';
+    $result = '';
+    foreach($this->stmt->getJoins() as $join){
+      list($table, $cond, $type) = $join;
+      $type = strtoupper(substr($type, 5));
+      $type .= ($type === '') ? '' : ' ';
+      $result .= "\n{$type}JOIN $table ON $cond";
     }
-    if($join['operator'] === 'ON'){
-      $expr = " ON $join[expr]";
-    }
-    elseif($join['operator'] === 'USING'){
-      $expr = " USING($join[expr])";
-    }
-    else{
-      throw new NeevoException('JOIN operator not specified.');
-    }
-    
-    return $type . 'JOIN ' . $join['table'] . $expr;
+    return $this->tryDelimite($result);
   }
 
   /**

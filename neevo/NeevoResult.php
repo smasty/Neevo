@@ -36,8 +36,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /** @var array */
   protected $columns = array();
 
-  /** @var string */
-  private $join;
+  /** @var array */
+  private $joins;
 
   /** @var string */
   private $rowClass = 'NeevoRow';
@@ -79,9 +79,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   }
 
   /**
-   * Set GROUP BY clause with optional HAVING.
+   * Define grouping rules.
    * @param string $rule
-   * @param string $having
+   * @param string $having Optional
    * @return NeevoResult fluent interface
    */
   public function group($rule, $having = null){
@@ -107,72 +107,39 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   /**
    * Perform JOIN on tables.
    * @param string $table
+   * @param string $condition
    * @return NeevoResult fluent interface
-   * @throws InvalidArgumentException
    */
-  public function join($table, $type = null){
+  public function join($table, $condition){
     if($this->checkCond()){
       return $this;
     }
     $this->reinit();
+    $type = (func_num_args() > 2) ? func_get_arg(2) : '';
 
-    if(!in_array($type, array(null, Neevo::JOIN_LEFT, Neevo::JOIN_INNER))){
-      throw new InvalidArgumentException('Argument 2 passed to '.__METHOD__.' must be valid JOIN type or NULL.');
-    }
-    
-    $this->join = array(
-      'type' => $type,
-      'table' => $this->getTable($table)
-    );
+    $this->joins[] = array($table, $condition, $type);
+
     return $this;
   }
 
   /**
    * Perform LEFT JOIN on tables.
    * @param string $table
+   * @param string $condition
    * @return NeevoResult fluent interface
    */
-  public function leftJoin($table){
-    return $this->join($table, Neevo::JOIN_LEFT);
+  public function leftJoin($table, $condition){
+    return $this->join($table, $condition, Neevo::JOIN_LEFT);
   }
 
   /**
    * Perform INNER JOIN on tables.
    * @param string $table
+   * @param string $condition
    * @return NeevoResult fluent interface
    */
-  public function innerJoin($table){
-    return $this->join($table, Neevo::JOIN_INNER);
-  }
-
-  /**
-   * Set JOIN operator 'ON'.
-   * @param string $expr
-   * @return NeevoResult fluent interface
-   */
-  public function on($expr){
-    if($this->checkCond()){
-      return $this;
-    }
-    $this->join['operator'] = 'ON';
-    $this->join['expr'] = $expr;
-
-    return $this;
-  }
-
-  /**
-   * Set JOIN operator 'USING'
-   * @param string $expr
-   * @return NeevoResult fluent interface
-   */
-  public function using($expr){
-    if($this->checkCond()){
-      return $this;
-    }
-    $this->join['operator'] = 'USING';
-    $this->join['expr'] = $expr;
-
-    return $this;
+  public function innerJoin($table, $condition){
+    return $this->join($table, $condition, Neevo::JOIN_INNER);
   }
 
   /**
@@ -515,9 +482,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
     return $this->columns;
   }
 
-  public function getJoin(){
-    if(!empty($this->join)){
-      return $this->join;
+  public function getJoins(){
+    if(!empty($this->joins)){
+      return $this->joins;
     }
     return false;
   }
