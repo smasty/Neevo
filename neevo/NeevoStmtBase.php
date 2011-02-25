@@ -211,7 +211,7 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * Defines order. More calls append rules.
+   * Define order. More calls append rules.
    * @param string|array $rule
    * @param string $order Use constants - Neevo::ASC, Neevo::DESC
    * @return NeevoStmtBase fluent interface
@@ -220,6 +220,8 @@ abstract class NeevoStmtBase {
     if($this->checkCond()){
       return $this;
     }
+    $this->reinit();
+    
     if(is_array($rule)){
       foreach($rule as $key => $val){
         $this->order($key, $val);
