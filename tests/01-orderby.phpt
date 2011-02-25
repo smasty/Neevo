@@ -4,12 +4,18 @@ ORDER BY test coverage
 <?php
 
 foreach(array(
-  ':id ASC',
-  ':id DESC',
-  array(':author_id DESC', ':url'),
-  array(':author_id', ':url')
+
+  array(':id', Neevo::ASC),
+  array(':id', Neevo::DESC),
+  array(array(
+    ':author_id' => 'DESC',
+    ':url' => null), null),
+  array(array(
+    ':author_id' => null,
+    ':url' => null), null)
+
 ) as $order){
-  foreach($db->select(':id', ':software')->order($order) as $result){
+  foreach($db->select(':id', ':software')->order($order[0], $order[1]) as $result){
     if(isset($result['id'])){
       echo $result['id'];
     }

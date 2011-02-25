@@ -4,7 +4,7 @@ NeevoResult->fetchRow()
 <?php
 
 print_r($db->select(':id, :name, :url', 'author')
-           ->order('id')
+           ->order(':id')
            ->limit(1)
            ->fetch()
              ->toArray());

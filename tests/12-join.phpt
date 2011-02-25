@@ -5,7 +5,7 @@ Basic Join test
 
 foreach($db->select('author')->leftJoin('software')
            ->on(':author.id = :software.author_id')
-           ->order(':software.id ASC')
+           ->order(':software.id', Neevo::ASC)
         as $r){
   echo "$r->name - $r->title\n";
 }
