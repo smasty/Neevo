@@ -6,9 +6,11 @@ $start = microtime(true);
 include_once __DIR__ . '/../neevo.php';
 
 function parse_ini($file){
-  $content = file_get_contents($file);
-  $config = str_replace('%dbPath%', realpath(__DIR__ . '/../../databases'), $content);
-  return parse_ini_string($config, true);
+  $config = $c = parse_ini_file($file, true);
+  array_walk_recursive($config, function(&$value, $key) use($c){
+    $value = str_replace('%dbPath%', realpath(__DIR__ . $c['dbPath']), $value);
+  });
+  return $config;
 }
 
 function error($message, $exit = true){
@@ -26,11 +28,10 @@ $driver = isset($args['d']) ? strtolower($args['d']) : $config['default'];
 if(!isset($config[$driver]))
   error("Driver '$driver' is not available");
 
-$db = new Neevo($config[$driver]);
-
-echo "Driver: $driver\n";
-
 try{
+
+  $db = new Neevo($config[$driver]);
+  echo "Driver: $driver\n";
 
   foreach(glob(__DIR__ . '/*.phpt') as $test){
     ob_start();
