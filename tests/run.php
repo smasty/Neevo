@@ -5,21 +5,6 @@ $start = microtime(true);
 
 include_once __DIR__ . '/../neevo.php';
 
-function parse_ini($file){
-  $config = $c = parse_ini_file($file, true);
-  array_walk_recursive($config, function(&$value, $key) use($c){
-    $value = str_replace('%dbPath%', realpath(__DIR__ . $c['dbPath']), $value);
-  });
-  return $config;
-}
-
-function error($message, $exit = true){
-  global $error;
-  fwrite(STDERR, "Error: $message\n");
-  $error++;
-  if($exit) exit(1);
-}
-
 $args = getopt('d:v');
 $config = parse_ini(__DIR__ . '/config.ini');
 
@@ -53,3 +38,29 @@ try{
 
 printf("\n%d queries, %.3F sec, %d KB\n", $db->queries(), microtime(true) - $start, memory_get_peak_usage() / 1024);
 if($error) exit(1);
+
+
+/**
+ * Parse INI file and expand %% variables.
+ * @param string $file
+ * @return array
+ */
+function parse_ini($file){
+  $config = $c = parse_ini_file($file, true);
+  array_walk_recursive($config, function(&$value, $key) use($c){
+    $value = str_replace('%dbPath%', realpath(__DIR__ . $c['dbPath']), $value);
+  });
+  return $config;
+}
+
+/**
+ * Write error on STDERR and exit with given code.
+ * @param string $message
+ * @param int $exit_code
+ */
+function error($message, $exit_code = 1){
+  global $error;
+  fwrite(STDERR, "Error: $message\n");
+  $error++;
+  if($exit_code) exit($exit_code);
+}
