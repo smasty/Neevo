@@ -284,45 +284,49 @@ class NeevoStmtParser {
    * @return mixed|array
    */
   protected function escapeValue($value, $type = null){
-    if($value === null){
-      return 'NULL';
-    }
-    if(is_array($type)){
-      $values = array();
-      foreach($value as $key => $val){
-        $values[$key] = $this->escapeValue($val, $type[$key]);
+    if(!$type){
+      // NULL type
+      if($value === null)
+        return 'NULL';
+
+      // Multiple values w/o types
+      elseif(is_array($value)){
+        foreach($value as $k => $v)
+          $value[$k] = $this->escapeValue($v);
+        return $value;
       }
-      return $values;
+
+      // Value w/o type
+      else{
+        if($value instanceof DateTime)
+          return $this->escapeValue($value, Neevo::DATETIME);
+        elseif($value instanceof NeevoLiteral)
+          return $value->value;
+        else
+          return is_numeric($value) ? $value : $this->stmt->driver()->escape($value, Neevo::TEXT);
+      }
     }
 
-    if(is_array($value) && $type === null){
-      $values = array();
-      foreach($value as $key => $val){
-        $values[$key] = $this->escapeValue($val);
-      }
-      return $values;
+    // Multiple values w/ types
+    elseif(is_array($type)){
+      foreach($value as $k => $v)
+        $value[$k] = $this->escapeValue($v, $type[$k]);
+      return $value;
     }
 
-    if($type === Neevo::INT){
+    // Single value vith type
+    elseif($type !== null){
+      if($type === Neevo::INT)
         return (int) $value;
-    } elseif($type === Neevo::FLOAT){
+      elseif($type === Neevo::FLOAT)
         return (float) $value;
-    } elseif($type === Neevo::ARR){
-        $array = ($value instanceof Traversable) ? iterator_to_array($value) : (array) $value;
-        return '(' . implode(', ', $this->escapeValue($array)) . ')';
-    } elseif($type === Neevo::LITERAL){
-        return $value instanceof NeevoLiteral ? $value->value : $value;
-    } elseif($type === null || $type === ''){
-
-        if($value instanceof DateTime){
-            return $this->escapeValue($value, Neevo::DATETIME);
-        } elseif($value instanceof NeevoLiteral){
-            return $value->value;
-        } else{
-            return is_numeric($value) ? $value : $this->stmt->driver()->escape($value, Neevo::TEXT);
-        }
-
-    } else{
+      elseif($type === Neevo::ARR){
+        $arr = ($value instanceof Traversable) ? iterator_to_array($value) : (array) $value;
+        return '(' . implode(', ', $this->escapeValue($value)) . ')';
+      }
+      elseif($type === Neevo::LITERAL)
+        return ($value instanceof NeevoLiteral) ? $value->value : $value;
+      else
         return $this->stmt->driver()->escape($value, $type);
     }
   }
