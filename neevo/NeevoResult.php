@@ -297,12 +297,53 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
   }
 
   /**
-   * Implementation of Countable.
+   * Count number of rows.
+   * @param string $column
    * @return int
    * @throws NeevoDriverException
    */
-  public function count(){
-    return $this->rows();
+  public function count($column = null){
+    if($column === null)
+      return $this->rows();
+    return $this->aggregation("COUNT(:$column)");
+  }
+
+  /**
+   * Execute aggregation function.
+   * @param string $function
+   * @return mixed
+   */
+  public function aggregation($function){
+    $clone = clone $this;
+    $clone->columns = (array) $function;
+    return $clone->fetchSingle();
+  }
+
+  /**
+   * Get the sum of column a values.
+   * @param string $column
+   * @return mixed
+   */
+  public function sum($column){
+    return $this->aggregation("SUM(:$column)");
+  }
+
+  /**
+   * Get the minimum value of column.
+   * @param string $column
+   * @return mixed
+   */
+  public function min($column){
+    return $this->aggregation("MIN(:$column)");
+  }
+
+  /**
+   * Get the maximum value of column.
+   * @param string $column
+   * @return mixed
+   */
+  public function max($column){
+    return $this->aggregation("MAX(:$column)");
   }
 
   /**
