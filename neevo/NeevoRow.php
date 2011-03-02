@@ -106,8 +106,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
     return $this->iterable;
   }
 
-  public function __call($table, $column){
-    return $this->ref($table, isset($column[0]) ? $column[0] : null);
+  public function __call($table, $args){
+    return $this->ref($table, isset($args[0]) ? $args[0] : null);
   }
 
   public function __get($name){
