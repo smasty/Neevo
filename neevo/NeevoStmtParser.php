@@ -220,9 +220,8 @@ class NeevoStmtParser {
    * @return string
    */
   protected function parseGrouping(){
-    $having = $this->stmt->getHaving()
-      ? ' HAVING ' . (string) $this->stmt->getHaving() : '';
-    return $this->tryDelimite(' GROUP BY ' . $this->stmt->getGrouping() . $having);
+    list($group, $having) = $this->stmt->getGrouping();
+    return $this->tryDelimite(" GROUP BY $group" . ($having !== null ? " HAVING $having" : ""));
   }
 
   /**
@@ -265,13 +264,12 @@ class NeevoStmtParser {
    * @return string
    */
   protected function applyLimit($sql){
-    $limit = (int) $this->stmt->getLimit();
-    $offset = (int) $this->stmt->getOffset();
+    list($limit, $offset) = $this->stmt->getLimit();
 
-    if($limit > 0){
-      $sql .= " LIMIT $limit";
-      if($offset > 0){
-        $sql .= " OFFSET $offset";
+    if((int) $limit > 0){
+      $sql .= ' LIMIT ' . (int) $limit;
+      if((int) $offset > 0){
+        $sql .= ' OFFSET ' . (int) $offset;
       }
     }
     return $sql;

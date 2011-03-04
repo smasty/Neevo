@@ -252,10 +252,7 @@ abstract class NeevoStmtBase {
       return $this;
     }
     $this->reinit();
-    $this->limit = $limit;
-    if(isset($offset) && $this->type == Neevo::STMT_SELECT){
-      $this->offset = $offset;
-    }
+    $this->limit = array($limit, ($offset !== null && $this->type === Neevo::STMT_SELECT) ? $offset : null);
     return $this;
   }
 
@@ -366,19 +363,11 @@ abstract class NeevoStmtBase {
   }
 
   /**
-   * Statement LIMIT clause.
+   * Get LIMIT and OFFSET clauses.
    * @return int
    */
   public function getLimit(){
     return $this->limit;
-  }
-
-  /**
-   * Statement OFFSET clause.
-   * @return int
-   */
-  public function getOffset(){
-    return $this->offset;
   }
 
   /**

@@ -89,10 +89,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
       return $this;
     }
     $this->reinit();
-    $this->grouping = $rule;
-    if(is_string($having)){
-      $this->having = $having;
-    }
+    $this->grouping = array($rule, $having);
     return $this;
   }
 
@@ -521,10 +518,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
   public function getGrouping(){
     return $this->grouping;
-  }
-
-  public function getHaving(){
-    return $this->having;
   }
 
   public function getColumns(){
