@@ -392,17 +392,19 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
     $this->performed || $this->run();
 
     // Try fetch from cache
-    $cached = $this->connection->cache()->fetch($table . '_detectedTypes');
-    $types = $cached !== null
-      ? $cached : $this->driver()->getColumnTypes($this->resultSet, $table);
+    $types = (array) $this->connection->cache()->fetch($table . '_detectedTypes');
 
-    foreach($types as $col => $type){
-      $this->columnTypes[$col] = $cached !== null ? $type : $this->resolveType($type);
+    if(empty($types)){
+      try{
+        $types = $this->driver()->getColumnTypes($this->resultSet, $table);
+      } catch(NeevoException $e){}
     }
-    // Store in cache
-    if($cached === null){
-      $this->connection->cache()->store($table . '_detectedTypes', $this->columnTypes);
+
+    foreach((array) $types as $col => $type){
+      $this->columnTypes[$col] = $this->resolveType($type);
     }
+    
+    $this->connection->cache()->store($table . '_detectedTypes', $this->columnTypes);
     return $this;
   }
 
@@ -429,6 +431,12 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
     return Neevo::TEXT;
   }
 
+  /**
+   * Convert value to a specified type.
+   * @param mixed $value
+   * @param string $type
+   * @return mixed
+   */
   private function convertType($value, $type){
     $dateFormat = $this->getConfig('formatDateTime');
     if($value === null || $value === false){

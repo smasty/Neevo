@@ -303,7 +303,7 @@ class NeevoStmtParser {
         elseif($value instanceof NeevoLiteral)
           return $value->value;
         else
-          return is_numeric($value) ? $value : $this->stmt->driver()->escape($value, Neevo::TEXT);
+          return is_numeric($value) ? 1 * $value : $this->stmt->driver()->escape($value, Neevo::TEXT);
       }
     }
 
