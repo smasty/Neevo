@@ -8,8 +8,8 @@
  * with this package in the file license.txt.
  *
  * @author   Martin Srank (http://smasty.net)
- * @license  http://neevo.smasty.net/license  MIT license
- * @link     http://neevo.smasty.net/
+ * @license  http://neevo.smasty.net/license MIT license
+ * @link      http://neevo.smasty.net/
  *
  */
 
@@ -21,82 +21,92 @@
  */
 class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 
-  /** @var int */
-  private $pointer;
 
-  /** @var NeevoResult */
-  private $result;
+    /** @var int */
+    private $pointer;
 
-  /** @var NeevoRow */
-  private $row;
+    /** @var NeevoResult */
+    private $result;
 
-  public function __construct(NeevoResult $result){
-    $this->result = $result;
-  }
+    /** @var NeevoRow */
+    private $row;
 
-  /**
-   * Rewind the iterator.
-   * Force execution for future iterations.
-   * @return void
-   */
-  public function rewind(){
-    if($this->row){
-      $this->result->reinit();
+
+    public function __construct(NeevoResult $result){
+        $this->result = $result;
     }
 
-    $this->pointer = 0;
-    $this->row = $this->result->fetch();
-  }
 
-  /**
-   * Move to next row.
-   * @return void
-   */
-  public function next(){
-    $this->pointer++;
-    $this->row = $this->result->fetch();
-  }
+    /**
+     * Rewind the iterator.
+     * Force execution for future iterations.
+     * @return void
+     */
+    public function rewind(){
+        if($this->row){
+            $this->result->reinit();
+        }
 
-  /**
-   * Check for valid current row.
-   * @return bool
-   */
-  public function valid(){
-    return $this->row !== false;
-  }
+        $this->pointer = 0;
+        $this->row = $this->result->fetch();
+    }
 
-  /**
-   * Return the current row.
-   * @return NeevoRow
-   */
-  public function current(){
-    return $this->row;
-  }
 
-  /**
-   * Return the key of current row.
-   * @return int
-   */
-  public function key(){
-    return $this->pointer;
-  }
+    /**
+     * Move to next row.
+     * @return void
+     */
+    public function next(){
+        $this->pointer++;
+        $this->row = $this->result->fetch();
+    }
 
-  /**
-   * Implementation of Countable.
-   * @return int
-   * @throws NeevoDriverException on unbuffered result.
-   */
-  public function count(){
-    return $this->result->rows();
-  }
 
-  /**
-   * Implementation of SeekableIterator
-   * @param int $offset
-   * @throws NeevoDriverException on unbuffered result.
-   */
-  public function seek($offset){
-    $this->result->seek($offset);
-  }
+    /**
+     * Check for valid current row.
+     * @return bool
+     */
+    public function valid(){
+        return $this->row !== false;
+    }
+
+
+    /**
+     * Return the current row.
+     * @return NeevoRow
+     */
+    public function current(){
+        return $this->row;
+    }
+
+
+    /**
+     * Return the key of current row.
+     * @return int
+     */
+    public function key(){
+        return $this->pointer;
+    }
+
+
+    /**
+     * Implementation of Countable.
+     * @return int
+     * @throws NeevoDriverException on unbuffered result.
+     */
+    public function count(){
+        return $this->result->rows();
+    }
+
+
+    /**
+     * Implementation of SeekableIterator
+     * @param int $offset
+     * @throws NeevoDriverException on unbuffered result.
+     */
+    public function seek($offset){
+        $this->result->seek($offset);
+    }
+
 
 }
