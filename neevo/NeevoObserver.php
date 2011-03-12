@@ -19,7 +19,7 @@
  * @author Martin Srank
  * @package Neevo
  */
-interface INeevoObserver{
+interface INeevoObserver {
 
     // Event types
     const CONNECT = 2;
@@ -58,7 +58,7 @@ interface INeevoObserver{
  * @author Martin Srank
  * @package Neevo
  */
-interface INeevoObservable{
+interface INeevoObservable {
 
 
     /**
@@ -95,7 +95,7 @@ interface INeevoObservable{
  * @package Neevo
  * @author Martin Srank
  */
-class NeevoObserver implements INeevoObserver, IDebugPanel{
+class NeevoObserver implements INeevoObserver, IDebugPanel {
 
 
     /** @var array Event type conversion table */
