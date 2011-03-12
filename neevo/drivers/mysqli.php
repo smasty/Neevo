@@ -37,324 +37,324 @@
 class NeevoDriverMySQLi extends NeevoStmtParser implements INeevoDriver {
 
 
-    /** @var mysqli_result */
-    private $resource;
+	/** @var mysqli_result */
+	private $resource;
 
-    /** @var bool */
-    private $unbuffered;
+	/** @var bool */
+	private $unbuffered;
 
-    /** @var int */
-    private $affectedRows;
-
-
-    /**
-     * Check for required PHP extension.
-     * @return void
-     * @throws NeevoException
-     */
-    public function __construct(){
-        if(!extension_loaded("mysqli")){
-            throw new NeevoException("PHP extension 'mysqli' not loaded.");
-        }
-    }
+	/** @var int */
+	private $affectedRows;
 
 
-    /**
-     * Create connection to database.
-     * @param array $config Configuration options
-     * @return void
-     * @throws NeevoException
-     */
-    public function connect(array $config){
-
-        // Defaults
-        $defaults = array(
-            'resource' => null,
-            'charset' => 'utf8',
-            'username' => ini_get('mysqli.default_user'),
-            'password' => ini_get('mysqli.default_pw'),
-            'socket' => ini_get('mysqli.default_socket'),
-            'port' => ini_get('mysqli.default_port'),
-            'host' => ini_get('mysqli.default_host'),
-            'persistent' => false,
-            'unbuffered' => false
-        );
-
-        $config += $defaults;
-
-        // Connect
-        if($config['resource'] instanceof mysqli){
-            $this->resource = $config['resource'];
-        } else{
-            $this->resource = new mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
-        }
-
-        if($this->resource->connect_errno){
-            throw new NeevoException($this->resource->connect_error, $this->resource->connect_errno);
-        }
-
-        // Set charset
-        if($this->resource instanceof mysqli){
-            $ok = @$this->resource->set_charset($config['charset']);
-            if(!$ok){
-                $this->query("SET NAMES ".$config['charset']);
-            }
-        }
-
-        $this->unbuffered = $config['unbuffered'];
-    }
+	/**
+	 * Check for required PHP extension.
+	 * @return void
+	 * @throws NeevoException
+	 */
+	public function __construct(){
+		if(!extension_loaded("mysqli")){
+			throw new NeevoException("PHP extension 'mysqli' not loaded.");
+		}
+	}
 
 
-    /**
-     * Close the connection.
-     * @return void
-     */
-    public function close(){
-        @$this->resource->close();
-    }
+	/**
+	 * Create connection to database.
+	 * @param array $config Configuration options
+	 * @return void
+	 * @throws NeevoException
+	 */
+	public function connect(array $config){
+
+		// Defaults
+		$defaults = array(
+			'resource' => null,
+			'charset' => 'utf8',
+			'username' => ini_get('mysqli.default_user'),
+			'password' => ini_get('mysqli.default_pw'),
+			'socket' => ini_get('mysqli.default_socket'),
+			'port' => ini_get('mysqli.default_port'),
+			'host' => ini_get('mysqli.default_host'),
+			'persistent' => false,
+			'unbuffered' => false
+		);
+
+		$config += $defaults;
+
+		// Connect
+		if($config['resource'] instanceof mysqli){
+			$this->resource = $config['resource'];
+		} else{
+			$this->resource = new mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
+		}
+
+		if($this->resource->connect_errno){
+			throw new NeevoException($this->resource->connect_error, $this->resource->connect_errno);
+		}
+
+		// Set charset
+		if($this->resource instanceof mysqli){
+			$ok = @$this->resource->set_charset($config['charset']);
+			if(!$ok){
+				$this->query("SET NAMES ".$config['charset']);
+			}
+		}
+
+		$this->unbuffered = $config['unbuffered'];
+	}
 
 
-    /**
-     * Free memory used by given result set.
-     * @param mysqli_result $resultSet
-     * @return bool
-     */
-    public function free($resultSet){
-        return true;
-    }
+	/**
+	 * Close the connection.
+	 * @return void
+	 */
+	public function close(){
+		@$this->resource->close();
+	}
 
 
-    /**
-     * Execute given SQL statement.
-     * @param string $queryString
-     * @return mysqli_result|bool
-     * @throws NeevoException
-     */
-    public function query($queryString){
-
-        $this->affectedRows = false;
-        $result = $this->resource->query($queryString, $this->unbuffered ? MYSQLI_USE_RESULT : MYSQLI_STORE_RESULT);
-
-        $error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $this->resource->error);
-        if($error && $result === false){
-            throw new NeevoException("Query failed. $error", $this->resource->errno, $queryString);
-        }
-
-        $this->affectedRows = $this->resource->affected_rows;
-        return $result;
-    }
+	/**
+	 * Free memory used by given result set.
+	 * @param mysqli_result $resultSet
+	 * @return bool
+	 */
+	public function free($resultSet){
+		return true;
+	}
 
 
-    /**
-     * Begin a transaction if supported.
-     * @param string $savepoint
-     * @return void
-     */
-    public function begin($savepoint = null){
-        $this->query($savepoint ? "SAVEPOINT $savepoint" : 'START TRANSACTION');
-    }
+	/**
+	 * Execute given SQL statement.
+	 * @param string $queryString
+	 * @return mysqli_result|bool
+	 * @throws NeevoException
+	 */
+	public function query($queryString){
+
+		$this->affectedRows = false;
+		$result = $this->resource->query($queryString, $this->unbuffered ? MYSQLI_USE_RESULT : MYSQLI_STORE_RESULT);
+
+		$error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $this->resource->error);
+		if($error && $result === false){
+			throw new NeevoException("Query failed. $error", $this->resource->errno, $queryString);
+		}
+
+		$this->affectedRows = $this->resource->affected_rows;
+		return $result;
+	}
 
 
-    /**
-     * Commit statements in a transaction.
-     * @param string $savepoint
-     * @return void
-     */
-    public function commit($savepoint = null){
-        $this->query($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
-    }
+	/**
+	 * Begin a transaction if supported.
+	 * @param string $savepoint
+	 * @return void
+	 */
+	public function begin($savepoint = null){
+		$this->query($savepoint ? "SAVEPOINT $savepoint" : 'START TRANSACTION');
+	}
 
 
-    /**
-     * Rollback changes in a transaction.
-     * @param string $savepoint
-     * @return void
-     */
-    public function rollback($savepoint = null){
-        $this->query($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
-    }
+	/**
+	 * Commit statements in a transaction.
+	 * @param string $savepoint
+	 * @return void
+	 */
+	public function commit($savepoint = null){
+		$this->query($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
+	}
 
 
-    /**
-     * Fetch row from given result set as an associative array.
-     * @param mysqli_result $resultSet
-     * @return array
-     */
-    public function fetch($resultSet){
-        return $resultSet->fetch_assoc();
-    }
+	/**
+	 * Rollback changes in a transaction.
+	 * @param string $savepoint
+	 * @return void
+	 */
+	public function rollback($savepoint = null){
+		$this->query($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
+	}
 
 
-    /**
-     * Move internal result pointer.
-     * @param mysqli_result $resultSet
-     * @param int
-     * @return bool
-     * @throws NeevoDriverException
-     */
-    public function seek($resultSet, $offset){
-        if($this->unbuffered){
-            throw new NeevoDriverException('Cannot seek on unbuffered result.');
-        }
-        return $resultSet->data_seek($offset);
-    }
+	/**
+	 * Fetch row from given result set as an associative array.
+	 * @param mysqli_result $resultSet
+	 * @return array
+	 */
+	public function fetch($resultSet){
+		return $resultSet->fetch_assoc();
+	}
 
 
-    /**
-     * Get the ID generated in the INSERT statement.
-     * @return int
-     */
-    public function insertId(){
-        return $this->resource->insert_id;
-    }
+	/**
+	 * Move internal result pointer.
+	 * @param mysqli_result $resultSet
+	 * @param int
+	 * @return bool
+	 * @throws NeevoDriverException
+	 */
+	public function seek($resultSet, $offset){
+		if($this->unbuffered){
+			throw new NeevoDriverException('Cannot seek on unbuffered result.');
+		}
+		return $resultSet->data_seek($offset);
+	}
 
 
-    /**
-     * Randomize result order.
-     * @param NeevoStmtBase $statement
-     * @return void
-     */
-    public function rand(NeevoStmtBase $statement){
-        $statement->order('RAND()');
-    }
+	/**
+	 * Get the ID generated in the INSERT statement.
+	 * @return int
+	 */
+	public function insertId(){
+		return $this->resource->insert_id;
+	}
 
 
-    /**
-     * Get the number of rows in the given result set.
-     * @param mysqli_result $resultSet
-     * @return int|FALSE
-     * @throws NeevoDriverException
-     */
-    public function rows($resultSet){
-        if($this->unbuffered){
-            throw new NeevoDriverException('Cannot seek on unbuffered result.');
-        }
-        if($resultSet instanceof mysqli_result){
-            return $resultSet->num_rows;
-        }
-        return false;
-    }
+	/**
+	 * Randomize result order.
+	 * @param NeevoStmtBase $statement
+	 * @return void
+	 */
+	public function rand(NeevoStmtBase $statement){
+		$statement->order('RAND()');
+	}
 
 
-    /**
-     * Get the number of affected rows in previous operation.
-     * @return int
-     */
-    public function affectedRows(){
-        return $this->affectedRows;
-    }
+	/**
+	 * Get the number of rows in the given result set.
+	 * @param mysqli_result $resultSet
+	 * @return int|FALSE
+	 * @throws NeevoDriverException
+	 */
+	public function rows($resultSet){
+		if($this->unbuffered){
+			throw new NeevoDriverException('Cannot seek on unbuffered result.');
+		}
+		if($resultSet instanceof mysqli_result){
+			return $resultSet->num_rows;
+		}
+		return false;
+	}
 
 
-    /**
-     * Escape given value.
-     * @param mixed $value
-     * @param string $type
-     * @return mixed
-     * @throws InvalidArgumentException
-     */
-    public function escape($value, $type){
-        switch($type){
-            case Neevo::BOOL:
-                return $value ? 1 :0;
-
-            case Neevo::TEXT:
-                return "'". $this->resource->real_escape_string($value) ."'";
-
-            case Neevo::IDENTIFIER:
-                return str_replace('`*`', '*', '`' . str_replace('.', '`.`', str_replace('`', '``', $value)) . '`');
-
-            case Neevo::BINARY:
-                return "_binary'" . mysqli_real_escape_string($this->resource, $value) . "'";
-
-            case Neevo::DATETIME:
-                return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
-
-            default:
-                throw new InvalidArgumentException('Unsupported data type.');
-                break;
-        }
-    }
+	/**
+	 * Get the number of affected rows in previous operation.
+	 * @return int
+	 */
+	public function affectedRows(){
+		return $this->affectedRows;
+	}
 
 
-    /**
-     * Decode given value.
-     * @param mixed $value
-     * @param string $type
-     * @return mixed
-     * @throws InvalidArgumentException
-     */
-    public function unescape($value, $type){
-        if($type === Neevo::BINARY){
-            return $value;
-        }
-        throw new InvalidArgumentException('Unsupported data type.');
-    }
+	/**
+	 * Escape given value.
+	 * @param mixed $value
+	 * @param string $type
+	 * @return mixed
+	 * @throws InvalidArgumentException
+	 */
+	public function escape($value, $type){
+		switch($type){
+			case Neevo::BOOL:
+				return $value ? 1 :0;
+
+			case Neevo::TEXT:
+				return "'". $this->resource->real_escape_string($value) ."'";
+
+			case Neevo::IDENTIFIER:
+				return str_replace('`*`', '*', '`' . str_replace('.', '`.`', str_replace('`', '``', $value)) . '`');
+
+			case Neevo::BINARY:
+				return "_binary'" . mysqli_real_escape_string($this->resource, $value) . "'";
+
+			case Neevo::DATETIME:
+				return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
+
+			default:
+				throw new InvalidArgumentException('Unsupported data type.');
+				break;
+		}
+	}
 
 
-    /**
-     * Get the PRIMARY KEY column for given table.
-     * @param string $table
-     * @return string
-     */
-    public function getPrimaryKey($table){
-        $key = '';
-        $q = $this->query('SHOW FULL COLUMNS FROM '.$table);
-        while($col = $this->fetch($q)){
-            if(strtolower($col['Key']) === 'pri' && $key === ''){
-                $key = $col['Field'];
-            }
-        }
-        return $key;
-    }
+	/**
+	 * Decode given value.
+	 * @param mixed $value
+	 * @param string $type
+	 * @return mixed
+	 * @throws InvalidArgumentException
+	 */
+	public function unescape($value, $type){
+		if($type === Neevo::BINARY){
+			return $value;
+		}
+		throw new InvalidArgumentException('Unsupported data type.');
+	}
 
 
-    /**
-     * Get types of columns in given result set.
-     * @param mysqli_result $resultset
-     * @param string $table
-     * @return array
-     */
-    public function getColumnTypes($resultSet, $table){
-        static $colTypes;
-        if(empty($colTypes)){
-            $constants = get_defined_constants(true);
-            foreach($constants['mysqli'] as $type => $code){
-                if(strncmp($type, 'MYSQLI_TYPE_', 12) === 0){
-                    $colTypes[$code] = strtolower(substr($type, 12));
-                }
-            }
-            $colTypes[MYSQLI_TYPE_LONG] = $colTypes[MYSQLI_TYPE_SHORT] = $colTypes[MYSQLI_TYPE_TINY] = 'int';
-        }
-
-        $cols = array();
-        while($field = $resultSet->fetch_field()){
-            $cols[$field->name] = $colTypes[$field->type];
-        }
-        return $cols;
-    }
+	/**
+	 * Get the PRIMARY KEY column for given table.
+	 * @param string $table
+	 * @return string
+	 */
+	public function getPrimaryKey($table){
+		$key = '';
+		$q = $this->query('SHOW FULL COLUMNS FROM '.$table);
+		while($col = $this->fetch($q)){
+			if(strtolower($col['Key']) === 'pri' && $key === ''){
+				$key = $col['Field'];
+			}
+		}
+		return $key;
+	}
 
 
-    /*    ============    NeevoStmtParser overrides    ============    */
+	/**
+	 * Get types of columns in given result set.
+	 * @param mysqli_result $resultset
+	 * @param string $table
+	 * @return array
+	 */
+	public function getColumnTypes($resultSet, $table){
+		static $colTypes;
+		if(empty($colTypes)){
+			$constants = get_defined_constants(true);
+			foreach($constants['mysqli'] as $type => $code){
+				if(strncmp($type, 'MYSQLI_TYPE_', 12) === 0){
+					$colTypes[$code] = strtolower(substr($type, 12));
+				}
+			}
+			$colTypes[MYSQLI_TYPE_LONG] = $colTypes[MYSQLI_TYPE_SHORT] = $colTypes[MYSQLI_TYPE_TINY] = 'int';
+		}
+
+		$cols = array();
+		while($field = $resultSet->fetch_field()){
+			$cols[$field->name] = $colTypes[$field->type];
+		}
+		return $cols;
+	}
 
 
-    /**
-     * Parse UPDATE statement.
-     * @return string
-     */
-    protected function parseUpdateStmt(){
-        $sql = parent::parseUpdateStmt();
-        return $this->applyLimit($sql . $this->clauses[3]);
-    }
+	/*  ============  NeevoStmtParser overrides  ============  */
 
 
-    /**
-     * Parse DELETE statement.
-     * @return string
-     */
-    protected function parseDeleteStmt(){
-        $sql = parent::parseDeleteStmt();
-        return $this->applyLimit($sql . $this->clauses[3]);
-    }
+	/**
+	 * Parse UPDATE statement.
+	 * @return string
+	 */
+	protected function parseUpdateStmt(){
+		$sql = parent::parseUpdateStmt();
+		return $this->applyLimit($sql . $this->clauses[3]);
+	}
+
+
+	/**
+	 * Parse DELETE statement.
+	 * @return string
+	 */
+	protected function parseDeleteStmt(){
+		$sql = parent::parseDeleteStmt();
+		return $this->applyLimit($sql . $this->clauses[3]);
+	}
 
 
 }

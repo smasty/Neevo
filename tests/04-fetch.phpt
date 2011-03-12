@@ -4,7 +4,7 @@ NeevoResult->fetch() and iterating
 <?php
 
 foreach($db->select(':id, :name', 'author')->order(':id')->limit(2) as $row){
-  echo "$row->name ($row->id)\n";
+	echo "$row->name ($row->id)\n";
 }
 
 ?>

@@ -7,7 +7,7 @@ NeevoResult->fetchPairs() key=>value test, key=>row test.
 print_r($db->select(':url', 'author')->order(':id')->limit(2)->fetchPairs('id', 'name'));
 
 foreach($db->select('author')->order(':id')->limit(2)->fetchPairs('id') as $r){
-  print_r($r->toArray());
+	print_r($r->toArray());
 }
 ?>
 --EXPECT--

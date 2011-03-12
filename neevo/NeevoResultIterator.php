@@ -22,91 +22,91 @@
 class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 
 
-    /** @var int */
-    private $pointer;
+	/** @var int */
+	private $pointer;
 
-    /** @var NeevoResult */
-    private $result;
+	/** @var NeevoResult */
+	private $result;
 
-    /** @var NeevoRow */
-    private $row;
-
-
-    public function __construct(NeevoResult $result){
-        $this->result = $result;
-    }
+	/** @var NeevoRow */
+	private $row;
 
 
-    /**
-     * Rewind the iterator.
-     * Force execution for future iterations.
-     * @return void
-     */
-    public function rewind(){
-        if($this->row){
-            $this->result->reinit();
-        }
-
-        $this->pointer = 0;
-        $this->row = $this->result->fetch();
-    }
+	public function __construct(NeevoResult $result){
+		$this->result = $result;
+	}
 
 
-    /**
-     * Move to next row.
-     * @return void
-     */
-    public function next(){
-        $this->pointer++;
-        $this->row = $this->result->fetch();
-    }
+	/**
+	 * Rewind the iterator.
+	 * Force execution for future iterations.
+	 * @return void
+	 */
+	public function rewind(){
+		if($this->row){
+			$this->result->reinit();
+		}
+
+		$this->pointer = 0;
+		$this->row = $this->result->fetch();
+	}
 
 
-    /**
-     * Check for valid current row.
-     * @return bool
-     */
-    public function valid(){
-        return $this->row !== false;
-    }
+	/**
+	 * Move to next row.
+	 * @return void
+	 */
+	public function next(){
+		$this->pointer++;
+		$this->row = $this->result->fetch();
+	}
 
 
-    /**
-     * Return the current row.
-     * @return NeevoRow
-     */
-    public function current(){
-        return $this->row;
-    }
+	/**
+	 * Check for valid current row.
+	 * @return bool
+	 */
+	public function valid(){
+		return $this->row !== false;
+	}
 
 
-    /**
-     * Return the key of current row.
-     * @return int
-     */
-    public function key(){
-        return $this->pointer;
-    }
+	/**
+	 * Return the current row.
+	 * @return NeevoRow
+	 */
+	public function current(){
+		return $this->row;
+	}
 
 
-    /**
-     * Implementation of Countable.
-     * @return int
-     * @throws NeevoDriverException on unbuffered result.
-     */
-    public function count(){
-        return $this->result->rows();
-    }
+	/**
+	 * Return the key of current row.
+	 * @return int
+	 */
+	public function key(){
+		return $this->pointer;
+	}
 
 
-    /**
-     * Implementation of SeekableIterator
-     * @param int $offset
-     * @throws NeevoDriverException on unbuffered result.
-     */
-    public function seek($offset){
-        $this->result->seek($offset);
-    }
+	/**
+	 * Implementation of Countable.
+	 * @return int
+	 * @throws NeevoDriverException on unbuffered result.
+	 */
+	public function count(){
+		return $this->result->rows();
+	}
+
+
+	/**
+	 * Implementation of SeekableIterator
+	 * @param int $offset
+	 * @throws NeevoDriverException on unbuffered result.
+	 */
+	public function seek($offset){
+		$this->result->seek($offset);
+	}
 
 
 }

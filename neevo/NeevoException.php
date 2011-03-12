@@ -22,120 +22,120 @@
 class NeevoException extends Exception implements IDebugPanel, INeevoObservable {
 
 
-    /** @var string */
-    protected $sql;
+	/** @var string */
+	protected $sql;
 
-    /** @var SplObjectStorage */
-    protected static $observers;
-
-
-    /**
-     * Construct exception.
-     * @param string $message
-     * @param int $code
-     * @param string $sql Optional SQL command
-     * @return void
-     */
-    public function __construct($message = '', $code = 0, $sql = null){
-
-        parent::__construct($message, (int) $code);
-        $this->sql = $sql;
-        $this->notifyObservers(INeevoObserver::EXCEPTION);
-    }
+	/** @var SplObjectStorage */
+	protected static $observers;
 
 
-    /**
-     * String representation of exception.
-     * @return string
-     */
-    public function __toString(){
-        return (string) parent::__toString() . ($this->sql ? "\nSQL: $this->sql" : '');
-    }
+	/**
+	 * Construct exception.
+	 * @param string $message
+	 * @param int $code
+	 * @param string $sql Optional SQL command
+	 * @return void
+	 */
+	public function __construct($message = '', $code = 0, $sql = null){
+
+		parent::__construct($message, (int) $code);
+		$this->sql = $sql;
+		$this->notifyObservers(INeevoObserver::EXCEPTION);
+	}
 
 
-    /**
-     * Get given SQL command.
-     * @return string
-     */
-    public function getSql(){
-        return $this->sql;
-    }
+	/**
+	 * String representation of exception.
+	 * @return string
+	 */
+	public function __toString(){
+		return (string) parent::__toString() . ($this->sql ? "\nSQL: $this->sql" : '');
+	}
 
 
-    /*    ============    Implementation of INeevoObservable    ============    */
+	/**
+	 * Get given SQL command.
+	 * @return string
+	 */
+	public function getSql(){
+		return $this->sql;
+	}
 
 
-    /**
-     * Attach given observer. Static for attachObserver().
-     * @param INeevoObserver $observer
-     * @return void
-     */
-    public static function attach(INeevoObserver $observer){
-        if(!self::$observers){
-            self::$observers = new SplObjectStorage;
-        }
-        self::$observers->attach($observer);
-    }
+	/*  ============  Implementation of INeevoObservable  ============  */
 
 
-    /**
-     * Detach given observer. Static for detachObserver().
-     * @param INeevoObserver $observer
-     * @return void
-     */
-    public static function detach(INeevoObserver $observer){
-        if(!self::$observers){
-            return;
-        }
-        self::$observers->detach($observer);
-    }
+	/**
+	 * Attach given observer. Static for attachObserver().
+	 * @param INeevoObserver $observer
+	 * @return void
+	 */
+	public static function attach(INeevoObserver $observer){
+		if(!self::$observers){
+			self::$observers = new SplObjectStorage;
+		}
+		self::$observers->attach($observer);
+	}
 
 
-    public function attachObserver(INeevoObserver $observer){
-        self::attach($observer);
-    }
+	/**
+	 * Detach given observer. Static for detachObserver().
+	 * @param INeevoObserver $observer
+	 * @return void
+	 */
+	public static function detach(INeevoObserver $observer){
+		if(!self::$observers){
+			return;
+		}
+		self::$observers->detach($observer);
+	}
 
 
-    public function detachObserver(INeevoObserver $observer){
-        self::detach($observer);
-    }
+	public function attachObserver(INeevoObserver $observer){
+		self::attach($observer);
+	}
 
 
-    /**
-     * Notify attached observers.
-     * @param int $event
-     * @param NeevoStmtBase $statement
-     * @return void
-     */
-    public function notifyObservers($event, NeevoStmtBase $statement = null){
-        if(!self::$observers){
-            return;
-        }
-        foreach(self::$observers as $observer){
-            $observer->updateStatus($this, $event);
-        }
-    }
+	public function detachObserver(INeevoObserver $observer){
+		self::detach($observer);
+	}
 
 
-    /*    ============    Implementation of Nette\IDebugPanel    ============    */
+	/**
+	 * Notify attached observers.
+	 * @param int $event
+	 * @param NeevoStmtBase $statement
+	 * @return void
+	 */
+	public function notifyObservers($event, NeevoStmtBase $statement = null){
+		if(!self::$observers){
+			return;
+		}
+		foreach(self::$observers as $observer){
+			$observer->updateStatus($this, $event);
+		}
+	}
 
 
-    public function getId(){
-        return __CLASS__;
-    }
+	/*  ============  Implementation of Nette\IDebugPanel  ============  */
 
 
-    public function getTab(){
-        return 'SQL';
-    }
+	public function getId(){
+		return __CLASS__;
+	}
 
 
-    public function getPanel(){
-        if($this->sql === null){
-            return;
-        }
-        return Neevo::highlightSql($this->sql);
-    }
+	public function getTab(){
+		return 'SQL';
+	}
+
+
+	public function getPanel(){
+		if($this->sql === null){
+			return;
+		}
+		return Neevo::highlightSql($this->sql);
+	}
 
 
 }

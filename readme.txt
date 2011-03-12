@@ -37,7 +37,7 @@ Features
  - Dump queries
  - Query debugging
  - One-file-only minified version
-    (Thanks to Jakub Vrana - http://php.vrana.cz and his Adminer - http://adminer.org)
+   (Thanks to Jakub Vrana - http://php.vrana.cz)
  And much more...
 
 

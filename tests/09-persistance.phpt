@@ -5,38 +5,38 @@ Persistance - insert/update/delete
 
 // Insert
 $db->insert('software',
-  array(
-    'title' => 'dibi',
-    'author_id' => 13,
-    'url' => 'http://dibiphp.com'
-  ))->run();
+	array(
+		'title' => 'dibi',
+		'author_id' => 13,
+		'url' => 'http://dibiphp.com'
+	))->run();
 
 // Check insertion
 echo $db->select(':url', 'software')
-        ->where('title', 'dibi')
-        ->limit(1)
-        ->fetchSingle() . "\n";
+		->where('title', 'dibi')
+		->limit(1)
+		->fetchSingle() . "\n";
 
 // Update
 $db->update('software', array('title' => 'dibi database layer'))
-   ->where('title', 'dibi')
-   ->run();
+	->where('title', 'dibi')
+	->run();
 
 // Check update
 echo $db->select(':title', 'software')
-        ->where('url', 'http://dibiphp.com')
-        ->fetchSingle() . "\n";
+		->where('url', 'http://dibiphp.com')
+		->fetchSingle() . "\n";
 
 // Delete
 $db->delete('software')
-   ->where('url', 'http://dibiphp.com')
-   ->run();
+	->where('url', 'http://dibiphp.com')
+	->run();
 
 // Check delete
 echo $db->select(':title', 'software')
-        ->where('url', 'http://dibiphp.com')
-        ->fetchSingle()
-     ? 'delete failed' : 'delete ok';
+		->where('url', 'http://dibiphp.com')
+		->fetchSingle()
+		? 'delete failed' : 'delete ok';
 
 echo "\n";
 ?>

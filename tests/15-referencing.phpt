@@ -4,7 +4,7 @@ Referencing rows (1:N)
 <?php
 
 foreach($db->select('software')->order(':id') as $sw){
-  echo "$sw->title - {$sw->author()->name}\n";
+	echo "$sw->title - {$sw->author()->name}\n";
 }
 
 ?>
