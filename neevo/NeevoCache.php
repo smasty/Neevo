@@ -258,7 +258,7 @@ class NeevoCacheDB implements INeevoCache {
             return (bool) $this->driver->query("DELETE FROM neevo_cache");
         } catch(Exception $e){
             return false;
-          }
+        }
     }
 
 
@@ -379,11 +379,9 @@ class NeevoCacheNette implements INeevoCache {
         $cache = null;
         if(is_callable('Nette\Environment::getCache')){
             $cache = call_user_func('Nette\Environment::getCache');
-        }
-        elseif(is_callable('NEnvironment::getCache')){
+        } elseif(is_callable('NEnvironment::getCache')){
             $cache = NEnvironment::getCache();
-        }
-        elseif(is_callable('Environment::getCache')){
+        } elseif(is_callable('Environment::getCache')){
             $cache = Environment::getCache();
         }
         $this->cache = $cache;
@@ -391,18 +389,25 @@ class NeevoCacheNette implements INeevoCache {
 
 
     public function fetch($key){
-        if($this->cache === null) return;
+        if($this->cache === null){
+            return;
+        }
         return $this->cache[$key];
     }
 
 
     public function store($key, $value){
-        if($this->cache === null) return;
+        if($this->cache === null){
+            return;
+        }
         $this->cache->save($key, $value, $this->conds);
     }
 
 
     public function flush(){
+        if($this->cache === null){
+            return true;
+        }
         $this->cache->clean($this->conds);
         return true;
     }

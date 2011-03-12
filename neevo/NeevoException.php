@@ -71,7 +71,9 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable 
      * @return void
      */
     public static function attach(INeevoObserver $observer){
-        if(!self::$observers) self::$observers = new SplObjectStorage;
+        if(!self::$observers){
+            self::$observers = new SplObjectStorage;
+        }
         self::$observers->attach($observer);
     }
 
@@ -82,7 +84,9 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable 
      * @return void
      */
     public static function detach(INeevoObserver $observer){
-        if(!self::$observers) return;
+        if(!self::$observers){
+            return;
+        }
         self::$observers->detach($observer);
     }
 
@@ -104,7 +108,9 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable 
      * @return void
      */
     public function notifyObservers($event, NeevoStmtBase $statement = null){
-        if(!self::$observers) return;
+        if(!self::$observers){
+            return;
+        }
         foreach(self::$observers as $observer){
             $observer->updateStatus($this, $event);
         }
@@ -125,7 +131,9 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable 
 
 
     public function getPanel(){
-        if($this->sql === null) return;
+        if($this->sql === null){
+            return;
+        }
         return Neevo::highlightSql($this->sql);
     }
 

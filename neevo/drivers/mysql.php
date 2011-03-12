@@ -81,17 +81,16 @@ class NeevoDriverMySQL extends NeevoStmtParser implements INeevoDriver {
         $config += $defaults;
         if(isset($config['port'])){
             $host = $config['host'] .':'. $config['port'];
+        } else{
+            $host = $config['host'];
         }
-        else $host = $config['host'];
 
         // Connect
         if(is_resource($config['resource'])){
             $connection = $config['resource'];
-        }
-        elseif($config['persistent']){
+        } elseif($config['persistent']){
             $connection = @mysql_pconnect($host, $config['username'], $config['password']);
-        }
-        else{
+        } else{
             $connection = @mysql_connect($host, $config['username'], $config['password']);
         }
 
@@ -113,8 +112,7 @@ class NeevoDriverMySQL extends NeevoStmtParser implements INeevoDriver {
         if(is_resource($connection)){
             if(function_exists('mysql_set_charset')){
                 @mysql_set_charset($config['charset'], $connection);
-            }
-            else{
+            } else{
                 $this->query("SET NAMES ".$config['charset']);
             }
         }

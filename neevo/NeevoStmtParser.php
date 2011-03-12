@@ -56,14 +56,11 @@ class NeevoStmtParser {
 
         if($this->stmt->getType() == Neevo::STMT_SELECT){
             $q = $this->parseSelectStmt();
-        }
-        elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
+        } elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
             $q = $this->parseInsertStmt();
-        }
-        elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
+        } elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
             $q = $this->parseUpdateStmt();
-        }
-        elseif($statement->getType() == Neevo::STMT_DELETE){
+        } elseif($statement->getType() == Neevo::STMT_DELETE){
             $q = $this->parseDeleteStmt();
         }
 
@@ -180,23 +177,23 @@ class NeevoStmtParser {
             $operator = '';
             $value = $cond['value'];
             if($value === null){ // field IS NULL
-                    $value = ' IS NULL';
+                $value = ' IS NULL';
             } elseif($value === true){    // field
-                    $value = '';
+                $value = '';
             } elseif($value === false){ // NOT field
-                    $value = $field;
-                    $field = 'NOT ';
+                $value = $field;
+                $field = 'NOT ';
             } elseif(is_array($value)){ // field IN (array)
-                    $value = ' IN ' . $this->escapeValue($value, Neevo::ARR);
+                $value = ' IN ' . $this->escapeValue($value, Neevo::ARR);
             } elseif($value instanceof NeevoLiteral){ // field = SQL literal
-                    $operator = ' = ';
-                    $value = $this->escapeValue($value, Neevo::LITERAL);
+                $operator = ' = ';
+                $value = $this->escapeValue($value, Neevo::LITERAL);
             } elseif($value instanceof DateTime){ // field = DateTime
-                    $operator = ' = ';
-                    $value = $this->escapeValue($value, Neevo::DATETIME);
+                $operator = ' = ';
+                $value = $this->escapeValue($value, Neevo::DATETIME);
             } else{ // field = value
-                    $operator = ' = ';
-                    $value = $this->escapeValue($value);
+                $operator = ' = ';
+                $value = $this->escapeValue($value);
             }
             $s = '(' . $field . $operator . $value . ')';
             if(isset($cond['glue'])){
@@ -309,13 +306,14 @@ class NeevoStmtParser {
 
             // Value w/o type
             else{
-                if($value instanceof DateTime)
+                if($value instanceof DateTime){
                     return $this->escapeValue($value, Neevo::DATETIME);
-                elseif($value instanceof NeevoLiteral)
+                } elseif($value instanceof NeevoLiteral){
                     return $value->value;
-                else
+                } else{
                     return is_numeric($value)
                         ? 1 * $value : $this->stmt->driver()->escape($value, Neevo::TEXT);
+                }
             }
         }
 
@@ -328,18 +326,18 @@ class NeevoStmtParser {
 
         // Single value vith type
         elseif($type !== null){
-            if($type === Neevo::INT)
+            if($type === Neevo::INT){
                 return (int) $value;
-            elseif($type === Neevo::FLOAT)
+            } elseif($type === Neevo::FLOAT){
                 return (float) $value;
-            elseif($type === Neevo::ARR){
+            } elseif($type === Neevo::ARR){
                 $arr = ($value instanceof Traversable) ? iterator_to_array($value) : (array) $value;
                 return '(' . implode(', ', $this->escapeValue($value)) . ')';
-            }
-            elseif($type === Neevo::LITERAL)
+            } elseif($type === Neevo::LITERAL){
                 return ($value instanceof NeevoLiteral) ? $value->value : $value;
-            else
+            } else{
                 return $this->stmt->driver()->escape($value, $type);
+            }
         }
     }
 

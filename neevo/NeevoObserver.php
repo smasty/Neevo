@@ -100,15 +100,15 @@ class NeevoObserver implements INeevoObserver, IDebugPanel {
 
     /** @var array Event type conversion table */
     private static $eventTable = array(
-        INeevoObserver::CONNECT => 'Connect',
-        INeevoObserver::SELECT => 'SELECT',
-        INeevoObserver::INSERT => 'INSERT',
-        INeevoObserver::UPDATE => 'UPDATE',
-        INeevoObserver::DELETE => 'DELETE',
-        INeevoObserver::BEGIN => 'BEGIN',
-        INeevoObserver::COMMIT => 'COMMIT',
-        INeevoObserver::ROLLBACK => 'ROLLBACK',
-        INeevoObserver::EXCEPTION => 'ERROR'
+        self::CONNECT => 'Connect',
+        self::SELECT => 'SELECT',
+        self::INSERT => 'INSERT',
+        self::UPDATE => 'UPDATE',
+        self::DELETE => 'DELETE',
+        self::BEGIN => 'BEGIN',
+        self::COMMIT => 'COMMIT',
+        self::ROLLBACK => 'ROLLBACK',
+        self::EXCEPTION => 'ERROR'
     );
 
     /** @var string */
@@ -124,7 +124,7 @@ class NeevoObserver implements INeevoObserver, IDebugPanel {
     private $tickets = array();
 
     /** @var int */
-    private $filter = INeevoObserver::ALL;
+    private $filter = self::ALL;
 
 
     /**
@@ -156,11 +156,9 @@ class NeevoObserver implements INeevoObserver, IDebugPanel {
         // Try register Nette\Debug Panel
         if(is_callable('Nette\Debug::addPanel')){
             call_user_func('Nette\Debug::addPanel', $this);
-        }
-        elseif(is_callable('NDebug::addPanel')){
+        } elseif(is_callable('NDebug::addPanel')){
             NDebug::addPanel($this);
-        }
-        elseif(is_callable('Debug::addPanel')){
+        } elseif(is_callable('Debug::addPanel')){
             Debug::addPanel($this);
         }
     }
@@ -188,8 +186,7 @@ class NeevoObserver implements INeevoObserver, IDebugPanel {
                 } catch(Exception $e){
                     $rows = '?';
                 }
-            }
-            else $rows = '-';
+            } else $rows = '-';
 
             $this->tickets[] = $ticket = array($observable, $event, $statement instanceof NeevoStmtBase
                 ? array((string) $statement, $statement->time(), $rows) : null);
@@ -212,8 +209,8 @@ class NeevoObserver implements INeevoObserver, IDebugPanel {
         $s = date('Y-m-d H:i:s: ') . self::$eventTable[$event];
 
         if($o instanceof NeevoException){
-            $s .= "\n--msg: {$o->getMessage()}\n--file: {$o->getFile()} L#{$o->getLine()}\n--sql: {$o->getSql()}";
-            $s .= "\n--trace: " . str_replace("\n", "\n        ", $o->getTraceAsString());
+            $s .= "\n--msg: {$o->getMessage()}\n--file: {$o->getFile()} L#{$o->getLine()}\n--sql: {$o->getSql()}"
+                . "\n--trace: " . str_replace("\n", "\n        ", $o->getTraceAsString());
         }
         if($stmt !== null){
             list($sql, $time, $rows) = $stmt;
@@ -248,10 +245,10 @@ class NeevoObserver implements INeevoObserver, IDebugPanel {
 
     public function getTab(){
         return '<span title="Neevo database layer (rev. #'.Neevo::REVISION.')">'
-                    .'<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAFmSURBVBgZBcHPa85xAAfw1/Psy9bEFE+MgwyzrLS4KqUQRauVODohB/+As7OzGilZrpQki4OLgyiEImFWmqb5sfZ4vt/P2+vVitn+nMyZMpZdKeV1PpTpMjvZALQe7clMZ+9mawyKJb99sfA0p6e+AR4+/pySJEmSJOnlRe7cjIhoZ3wTAICtyjGAqojvBvRbJZYt+maHAqAqovLTiqj90lWJAqCK6DOgUumpBTPqDkBVRK2n1tJ477tRI+LKoe71pQdXz7eLaNRqjcaCA2LEqLHZY9uac8cHqyJ6ehp9Gpux5LEB+zSGbtxfbhdFrdaIuzYa9spFnYW3y1tMnL2QdmNRRz/4a1HXBvN60vttzry+qTdfJ9urh3WsM+GHrvWe5V/G1zXuTy8cbsWt7eVymWoPDaq9c9Anu634aMS0uaoVwLW19c66PL/05+zQif33fnh5unt7+dGToyIiIiIiTuVIIiL+A271xrBxnHZ+AAAAAElFTkSuQmCC">'
-                    .($this->numQueries ? $this->numQueries : 'No') . ' queries'
-                    .($this->totalTime ? ' / ' . sprintf('%0.1f', $this->totalTime * 1000) . ' ms' : '')
-                    .'</span>';
+             . '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAFmSURBVBgZBcHPa85xAAfw1/Psy9bEFE+MgwyzrLS4KqUQRauVODohB/+As7OzGilZrpQki4OLgyiEImFWmqb5sfZ4vt/P2+vVitn+nMyZMpZdKeV1PpTpMjvZALQe7clMZ+9mawyKJb99sfA0p6e+AR4+/pySJEmSJOnlRe7cjIhoZ3wTAICtyjGAqojvBvRbJZYt+maHAqAqovLTiqj90lWJAqCK6DOgUumpBTPqDkBVRK2n1tJ477tRI+LKoe71pQdXz7eLaNRqjcaCA2LEqLHZY9uac8cHqyJ6ehp9Gpux5LEB+zSGbtxfbhdFrdaIuzYa9spFnYW3y1tMnL2QdmNRRz/4a1HXBvN60vttzry+qTdfJ9urh3WsM+GHrvWe5V/G1zXuTy8cbsWt7eVymWoPDaq9c9Anu634aMS0uaoVwLW19c66PL/05+zQif33fnh5unt7+dGToyIiIiIiTuVIIiL+A271xrBxnHZ+AAAAAElFTkSuQmCC">'
+             . ($this->numQueries ? $this->numQueries : 'No') . ' queries'
+             . ($this->totalTime ? ' / ' . sprintf('%0.1f', $this->totalTime * 1000) . ' ms' : '')
+             . '</span>';
     }
 
 
@@ -270,10 +267,10 @@ class NeevoObserver implements INeevoObserver, IDebugPanel {
         }
 
         return "<style> #nette-debug-NeevoObserver td.sql { background: white !important } </style>"
-                    ."<h1 style=\"padding-right:2em\">Queries: $this->numQueries"
-                    .($this->totalTime ? ', time: ' . sprintf('%0.1f', $this->totalTime * 1000) . ' ms' : '')
-                    .'</h1><table><tr><th>Time</th><th>SQL</th><th>Rows</th></tr>'
-                    .$s.'</table>';
+             . "<h1 style=\"padding-right:2em\">Queries: $this->numQueries"
+             . ($this->totalTime ? ', time: ' . sprintf('%0.1f', $this->totalTime * 1000) . ' ms' : '')
+             . '</h1><table><tr><th>Time</th><th>SQL</th><th>Rows</th></tr>'
+             . $s . '</table>';
     }
 
 

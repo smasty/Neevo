@@ -71,8 +71,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
         if(!empty($this->modified) && $this->data != $this->iterable){
             $stmt = new NeevoStmt($this->result->connection());
             return $stmt->update($this->result->getTable(), $this->modified)
-                ->where($this->primaryKey, $this->data[$this->primaryKey])
-                ->limit(1)->affectedRows();
+                        ->where($this->primaryKey, $this->data[$this->primaryKey])
+                        ->limit(1)->affectedRows();
         }
     }
 
@@ -86,8 +86,8 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
         if(!$this->freeze){
             $stmt = new NeevoStmt($this->result->connection());
             return $stmt->delete($this->result->getTable())
-                ->where($this->primaryKey, $this->data[$this->primaryKey])
-                ->limit(1)->affectedRows();
+                        ->where($this->primaryKey, $this->data[$this->primaryKey])
+                        ->limit(1)->affectedRows();
         }
         throw new NeevoException('Delete disabled - cannot get primary key.');
     }

@@ -85,8 +85,7 @@ class NeevoDriverMySQLi extends NeevoStmtParser implements INeevoDriver {
         // Connect
         if($config['resource'] instanceof mysqli){
             $this->resource = $config['resource'];
-        }
-        else{
+        } else{
             $this->resource = new mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
         }
 

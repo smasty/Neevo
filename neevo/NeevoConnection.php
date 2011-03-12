@@ -65,11 +65,9 @@ class NeevoConnection implements INeevoObservable {
         // Parse
         if(is_string($config)){
             parse_str($config, $config);
-        }
-        elseif($config instanceof Traversable){
+        } elseif($config instanceof Traversable){
             $config = iterator_to_array($config);
-        }
-        elseif(!is_array($config)){
+        } elseif(!is_array($config)){
             throw new InvalidArgumentException('Configuration must be an array, string or instance of Traversable.');
         }
 
@@ -132,8 +130,7 @@ class NeevoConnection implements INeevoObservable {
      * @return string
      */
     public function prefix(){
-        return isset($this->config['tablePrefix'])
-            ? $this->config['tablePrefix'] : '';
+        return isset($this->config['tablePrefix']) ? $this->config['tablePrefix'] : '';
     }
 
 
@@ -165,7 +162,6 @@ class NeevoConnection implements INeevoObservable {
     public static function alias(&$config, $key, $alias){
         if(isset($config[$alias]) && !isset($config[$key])){
             $config[$key] = $config[$alias];
-            //unset($config[$alias]);
         }
     }
 
@@ -244,8 +240,7 @@ class NeevoConnection implements INeevoObservable {
         // Set statement parser
         if(in_array('NeevoStmtParser', class_parents($class))){
             $this->stmtParser = $this->driver;
-        }
-        else{
+        } else{
             $this->stmtParser = new NeevoStmtParser;
         }
     }

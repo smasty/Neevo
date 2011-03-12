@@ -95,11 +95,9 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver {
         // Connect
         if(is_resource($config['resource'])){
             $connection = $config['resource'];
-        }
-        elseif($config['persistent']){
+        } elseif($config['persistent']){
             $connection = @sqlite_popen($config['database'], 0666, $error);
-        }
-        else{
+        } else{
             $connection = @sqlite_open($config['database'], 0666, $error);
         }
 
@@ -346,7 +344,9 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver {
         } else{
             $q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
             $r = $this->fetch($q);
-            if($r === false) return '';
+            if($r === false){
+                return '';
+            }
             $this->tblData[$table] = $sql = $r['sql'];
         }
 
@@ -373,7 +373,9 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver {
         } else{
             $q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
             $r = $this->fetch($q);
-            if($r === false) return array();
+            if($r === false){
+                return array();
+            }
             $this->tblData[$table] = $sql = $r['sql'];
         }
         $sql = explode("\n", $sql);

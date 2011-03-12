@@ -78,7 +78,7 @@ class NeevoStmt extends NeevoStmtBase {
         try{
             $this->affectedRows = $this->driver()->affectedRows();
         } catch(NeevoException $e){
-                $this->affectedRows = false;
+            $this->affectedRows = false;
         }
 
         return $result;

@@ -190,11 +190,9 @@ abstract class NeevoStmtBase {
             $conds = & $this->conditions;
             if($name == 'if'){
                 $conds[] = (bool) $args[0];
-            }
-            elseif($name == 'else'){
+            } elseif($name == 'else'){
                 $conds[ count($conds)-1 ] = !end($conds);
-            }
-            elseif($name == 'end'){
+            } elseif($name == 'end'){
                 array_pop($conds);
             }
 

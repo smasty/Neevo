@@ -222,7 +222,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
         $this->performed || $this->run();
         $row = $this->driver()->fetch($this->resultSet);
 
-        if(!$row) return false;
+        if(!$row){
+            return false;
+        }
         $value = reset($row);
 
         // Type converting
@@ -261,7 +263,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
         $rows = array();
         while($row = $clone->fetch()){
-            if(!$row) return array();
+            if(!$row){
+                return array();
+            }
             $rows[$row[$key]] = $value === null ? $row : $row->$value;
         }
 
@@ -277,6 +281,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
         try{
             $this->driver()->free($this->resultSet);
         } catch(NeevoImplemenationException $e){}
+
         $this->resultSet = null;
     }
 
@@ -317,8 +322,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
      * @throws NeevoDriverException
      */
     public function count($column = null){
-        if($column === null)
+        if($column === null){
             return $this->rows();
+        }
         return $this->aggregation("COUNT(:$column)");
     }
 
@@ -485,17 +491,13 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
             case Neevo::DATETIME:
                 if((int) $value === 0){
                     return null;
-                }
-                elseif(!$dateFormat){
+                } elseif(!$dateFormat){
                     return new DateTime(is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value);
-                }
-                elseif($dateFormat == 'U'){
+                } elseif($dateFormat == 'U'){
                     return is_numeric($value) ? (int) $value : strtotime($value);
-                }
-                elseif(is_numeric($value)){
+                } elseif(is_numeric($value)){
                     return date($dateFormat, $value);
-                }
-                else{
+                } else{
                     $d = new DateTime($value);
                     return $d->format($value);
                 }
@@ -540,7 +542,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
      * Get the result iterator.
      * @return NeevoResultIterator
      */
-    public function    getIterator(){
+    public function getIterator(){
         return new NeevoResultIterator($this);
     }
 
@@ -574,7 +576,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
     }
 
     
-    public function    __destruct(){
+    public function __destruct(){
         $this->free();
     }
 

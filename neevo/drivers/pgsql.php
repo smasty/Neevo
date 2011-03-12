@@ -73,8 +73,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 
         if(isset($config['string'])){
             $string = $config['string'];
-        }
-        else{
+        } else{
             // String generation
             $string = '';
             foreach(array('host', 'hostaddr', 'port', 'dbname', 'user', 'password', 'connect_timeout', 'options', 'sslmode', 'service') as $cfg){
@@ -87,11 +86,9 @@ class NeevoDriverPgSQL implements INeevoDriver {
         // Connect
         if(is_resource($config['resource'])){
             $connection = $config['resource'];
-        }
-        elseif($config['persistent']){
+        } elseif($config['persistent']){
             $connection = @pg_pconnect($string, PGSQL_CONNECT_FORCE_NEW);
-        }
-        else{
+        } else{
             $connection = @pg_connect($string, PGSQL_CONNECT_FORCE_NEW);
         }
 
@@ -118,7 +115,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
      * @return void
      */
     public function close(){
-            @pg_close($this->resource);
+        @pg_close($this->resource);
     }
 
 
@@ -208,7 +205,9 @@ class NeevoDriverPgSQL implements INeevoDriver {
      */
     public function insertId(){
         $result = $this->query("SELECT LASTVAL()");
-        if(!$result) return false;
+        if(!$result){
+            return false;
+        }
 
         $r = $this->fetch($result);
         return is_array($r) ? reset($r) : false;
@@ -260,16 +259,14 @@ class NeevoDriverPgSQL implements INeevoDriver {
             case Neevo::TEXT:
                 if($this->escapeMethod){
                     return "'" . pg_escape_string($this->resource, $value) . "'";
-                }
-                else{
+                } else{
                     return "'" . pg_escape_string($value) . "'";
                 }
 
             case Neevo::BINARY:
                 if($this->escapeMethod){
                     return "'" . pg_escape_bytea($this->resource, $value) . "'";
-                }
-                else{
+                } else{
                     return "'" . pg_escape_bytea($value) . "'";
                 }
 
