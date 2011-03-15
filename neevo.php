@@ -20,19 +20,10 @@ if(version_compare(PHP_VERSION, '5.1.2', '<')){
 }
 
 
-// Nette Framework compatibility
-if(interface_exists('Nette\IDebugPanel')){
-	class_alias('Nette\IDebugPanel', 'IDebugPanel');
-}
-if(!interface_exists('IDebugPanel')){
-	/** Nette Framework compatibility. */
-	interface IDebugPanel{}
-}
-
-
+// Turn magic quotes off - Neevo handles SQL quoting.
 @set_magic_quotes_runtime(false);
 
 
-// Register Neevo autoloader
+// Register autoloader responsible for loading Neevo classes and interfaces.
 require_once dirname(__FILE__) . '/neevo/NeevoLoader.php';
 NeevoLoader::getInstance()->register();

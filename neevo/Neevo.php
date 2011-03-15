@@ -14,6 +14,16 @@
  */
 
 
+// Nette Framework compatibility
+if(interface_exists('Nette\IDebugPanel')){
+	class_alias('Nette\IDebugPanel', 'IDebugPanel');
+}
+if(!interface_exists('IDebugPanel')){
+	interface IDebugPanel{}
+}
+
+
+
 /**
  * Core Neevo class.
  * @author Martin Srank
