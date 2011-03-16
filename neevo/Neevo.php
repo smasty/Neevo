@@ -42,7 +42,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 396;
+	const REVISION = 397;
 
 	// Data types
 	const BOOL = 'b';
@@ -95,8 +95,10 @@ class Neevo implements INeevoObservable, INeevoObserver {
 		$this->connection = new NeevoConnection($config, $cache);
 		$this->connection->attachObserver($this);
 
-		// Nette Framework
-		if($this->connection->getConfig('observer') !== false && defined('NETTE')){
+		// @nette Nette Framework compatiblility
+		if($this->connection->getConfig('observer') !== false
+			&& defined('NETTE_VERSION_ID') && NETTE_VERSION_ID >= 20000
+		){
 			$this->attachObserver(new NeevoObserver);
 		}
 		return $this;

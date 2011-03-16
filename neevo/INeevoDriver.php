@@ -23,21 +23,8 @@
  * the driver should throw NeevoDriverException.
  *
  * When the driver needs to rewrite default output of SQL commands, it **must**
- * extend **NeevoStmtParser** class.
- * Then following methods can be used to rewrite the SQL command:
- * - **parseSelectStmt()** => SELECT statements
- * - **parseInsertStmt()** => INSERT statements
- * - **parseUpdateStmt()** => UPDATE statements
- * - **parseDeleteStmt()** => DELETE statements
- * - **parseJoin()**       => JOIN clause
- * - **parseWhere()**      => WHERE clause
- * - **parseOrdering()**   => ORDER BY clause
- * - **parseGrouping()**   => GROUP BY clause
- * - **applyLimit()**      => LIMIT/OFFSET clause
- * - **parseColName()**    => Column names, including table.column syntax
- * - **parse()**           => Various parsing conditions
- * 
- * For proper use, see "source of **NeevoStmtParser** class":./source-neevo.NeevoStmtParser.php.html.
+ * extend **NeevoStmtParser** class. For proper use, see
+ * "source of **NeevoStmtParser** class":./source-neevo.NeevoStmtParser.php.html.
  *
  * @author Martin Srank
  * @package NeevoDrivers

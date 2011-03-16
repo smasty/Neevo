@@ -56,7 +56,16 @@ class NeevoConnection implements INeevoObservable {
 	public function __construct($config, INeevoCache $cache = null){
 		$this->observers = new SplObjectStorage;
 
-		$this->cache = $cache ? $cache : (defined('NETTE') ? new NeevoCacheNette : new NeevoCache);
+		if($cache instanceof INeevoCache){
+			$this->cache = $cache;
+		} else{
+			// @nette Nette Framework compatiblility
+			if(defined('NETTE_VERSION_ID') && NETTE_VERSION_ID >= 20000){
+				$this->cache = new NeevoCacheNette;
+			} else{
+				$this->cache = new NeevoCache;
+			}
+		}
 
 		// Parse
 		if(is_string($config)){

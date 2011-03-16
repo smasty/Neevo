@@ -208,10 +208,11 @@ class NeevoCacheNette implements INeevoCache {
 
 
 	public function __construct(){
-		if(!defined('NETTE')){
-			throw new NeevoException('Could not detect Nette Framework.');
+		if(!defined('NETTE_VERSION_ID') || NETTE_VERSION_ID  < 20000){
+			throw new NeevoException('Could not detect Nette Framework 2.0 or greater.');
 		}
 
+		// @nette Nette Framework compatiblility
 		if(is_callable('Nette\Environment::getCache')){
 			$cache = call_user_func('Nette\Environment::getCache');
 			$c = 'Nette\Caching\Cache';

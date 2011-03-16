@@ -149,7 +149,7 @@ class NeevoObserver implements INeevoObserver, IDebugPanel {
 			}
 		}
 
-		// Try register Nette\Debug Panel
+		// @nette Nette Framework compatiblility
 		if(is_callable('Nette\Debug::addPanel')){
 			call_user_func('Nette\Debug::addPanel', $this);
 		} elseif(is_callable('NDebug::addPanel')){
