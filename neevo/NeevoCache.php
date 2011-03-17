@@ -208,7 +208,7 @@ class NeevoCacheNette implements INeevoCache {
 
 
 	public function __construct(){
-		if(!defined('NETTE_VERSION_ID') || NETTE_VERSION_ID  < 20000){
+		if(!(defined('NETTE_VERSION_ID') && NETTE_VERSION_ID  < 20000)){
 			throw new NeevoException('Could not detect Nette Framework 2.0 or greater.');
 		}
 
