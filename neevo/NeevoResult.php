@@ -77,6 +77,15 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
+	public function __destruct(){
+		try{
+			$this->driver()->free($this->resultSet);
+		} catch(NeevoImplemenationException $e){}
+
+		$this->resultSet = null;
+	}
+
+
 	/**
 	 * Define grouping rules.
 	 * @param string $rule
@@ -266,19 +275,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		}
 
 		return $rows;
-	}
-
-
-	/**
-	 * Free result set resource.
-	 * @return void
-	 */
-	private function free(){
-		try{
-			$this->driver()->free($this->resultSet);
-		} catch(NeevoImplemenationException $e){}
-
-		$this->resultSet = null;
 	}
 
 
@@ -569,11 +565,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		parent::reinit();
 		$this->resultSet = null;
 		$this->numRows = null;
-	}
-
-	
-	public function __destruct(){
-		$this->free();
 	}
 
 

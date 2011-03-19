@@ -42,7 +42,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 398;
+	const REVISION = 399;
 
 	// Data types
 	const BOOL = 'b';
@@ -80,6 +80,17 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 */
 	public function __construct($config, INeevoCache $cache = null){
 		$this->connect($config, $cache);
+	}
+
+
+	/**
+	 * Close connection to server.
+	 * @return void
+	 */
+	public function __destruct(){
+		try{
+			$this->connection->driver()->close();
+		} catch(NeevoImplemenationException $e){}
 	}
 
 
@@ -313,17 +324,6 @@ class Neevo implements INeevoObservable, INeevoObserver {
 		if(!empty($match[4]) || $match[4] === '0'){ // Values
 			return '<em style="color:#008000">'.$match[4].'</em>';
 		}
-	}
-
-
-	/**
-	 * Close connection to server.
-	 * @return void
-	 */
-	public function __destruct(){
-		try{
-			$this->connection->driver()->close();
-		} catch(NeevoImplemenationException $e){}
 	}
 
 

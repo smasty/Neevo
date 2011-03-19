@@ -84,6 +84,61 @@ abstract class NeevoStmtBase {
 
 
 	/**
+	 * Create clone of object.
+	 * @return void
+	 */
+	public function __clone(){
+		$this->reinit();
+	}
+
+
+	/**
+	 * @return NeevoStmtBase fluent interface
+	 * @internal
+	 * @throws BadMethodCallException
+	 * @throws InvalidArgumentException
+	 */
+	public function __call($name, $args){
+		$name = strtolower($name);
+
+		// AND/OR where() glues
+		if(in_array($name, array('and', 'or'))){
+			if($this->checkCond()){
+				return $this;
+			}
+			$this->reinit();
+			$this->whereFilters[count($this->whereFilters)-1]['glue'] = strtoupper($name);
+			if(count($args) >= 1){
+				call_user_func_array(array($this, 'where'), $args);
+			}
+			return $this;
+		}
+
+		// Conditional statements
+		elseif(in_array($name, array('if', 'else', 'end'))){
+
+			// Parameter counts
+			if(count($args) < 1 && $name == 'if'){
+				throw new InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
+			}
+
+			$conds = & $this->conditions;
+			if($name == 'if'){
+				$conds[] = (bool) $args[0];
+			} elseif($name == 'else'){
+				$conds[ count($conds)-1 ] = !end($conds);
+			} elseif($name == 'end'){
+				array_pop($conds);
+			}
+
+			return $this;
+
+		}
+		throw new BadMethodCallException('Call to undefined method '.__CLASS__."::$name()");
+	}
+
+
+	/**
 	 * Set WHERE condition. Accepts infinite arguments.
 	 *
 	 * More calls append conditions with 'AND' operator. Conditions can also be specified
@@ -150,64 +205,6 @@ abstract class NeevoStmtBase {
 			'glue' => 'AND'
 		);
 		return $this;
-	}
-
-
-	/**
-	 * @return NeevoStmtBase fluent interface
-	 * @internal
-	 * @throws BadMethodCallException
-	 * @throws InvalidArgumentException
-	 */
-	public function __call($name, $args){
-		$name = strtolower($name);
-
-		// AND/OR where() glues
-		if(in_array($name, array('and', 'or'))){
-			if($this->checkCond()){
-				return $this;
-			}
-			$this->reinit();
-			$this->whereFilters[count($this->whereFilters)-1]['glue'] = strtoupper($name);
-			if(count($args) >= 1){
-				call_user_func_array(array($this, 'where'), $args);
-			}
-			return $this;
-		}
-
-		// Conditional statements
-		elseif(in_array($name, array('if', 'else', 'end'))){
-
-			// Parameter counts
-			if(count($args) < 1 && $name == 'if'){
-				throw new InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
-			}
-
-			$conds = & $this->conditions;
-			if($name == 'if'){
-				$conds[] = (bool) $args[0];
-			} elseif($name == 'else'){
-				$conds[ count($conds)-1 ] = !end($conds);
-			} elseif($name == 'end'){
-				array_pop($conds);
-			}
-
-			return $this;
-
-		}
-		throw new BadMethodCallException('Call to undefined method '.__CLASS__."::$name()");
-	}
-
-
-	/** @internal */
-	protected function checkCond(){
-		if(empty($this->conditions)){
-			return false;
-		}
-		foreach($this->conditions as $cond){
-			if($cond) continue;
-			else return true;
-		}
 	}
 
 
@@ -432,15 +429,6 @@ abstract class NeevoStmtBase {
 	/*	************	Internal methods	************	*/
 
 
-	/**
-	 * Create clone of object.
-	 * @return void
-	 */
-	public function __clone(){
-		$this->reinit();
-	}
-
-
 	/** @internal */
 	protected function realConnect(){
 		return $this->connection->realConnect();
@@ -475,6 +463,18 @@ abstract class NeevoStmtBase {
 	/** @internal */
 	protected function getConfig($key = null){
 		return $this->connection->getConfig($key);
+	}
+
+
+	/** @internal */
+	protected function checkCond(){
+		if(empty($this->conditions)){
+			return false;
+		}
+		foreach($this->conditions as $cond){
+			if($cond) continue;
+			else return true;
+		}
 	}
 
 
