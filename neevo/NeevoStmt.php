@@ -27,44 +27,47 @@ class NeevoStmt extends NeevoStmtBase {
 
 	/**
 	 * Create UPDATE statement.
+	 * @param NeevoConnection $connection
 	 * @param string $table
 	 * @param array $data
 	 * @return NeevoStmt fluent interface
 	 */
-	public function update($table, array $data){
-		$this->reinit();
-		$this->type = Neevo::STMT_UPDATE;
-		$this->tableName = $table;
-		$this->values = $data;
-		return $this;
+	public static function createUpdate(NeevoConnection $connection, $table, array $data){
+		$obj = new self($connection);
+		$obj->type = Neevo::STMT_UPDATE;
+		$obj->tableName = $table;
+		$obj->values = $data;
+		return $obj;
 	}
 
 
 	/**
 	 * Create INSERT statement.
+	 * @param NeevoConnection $connection
 	 * @param string $table
 	 * @param array $values
 	 * @return NeevoStmt fluent interface
 	 */
-	public function insert($table, array $values){
-		$this->reinit();
-		$this->type = Neevo::STMT_INSERT;
-		$this->tableName = $table;
-		$this->values = $values;
-		return $this;
+	public static function createInsert(NeevoConnection $connection, $table, array $values){
+		$obj = new self($connection);
+		$obj->type = Neevo::STMT_INSERT;
+		$obj->tableName = $table;
+		$obj->values = $values;
+		return $obj;
 	}
 
 
 	/**
 	 * Create DELETE statement.
+	 * @param NeevoConnection $connection
 	 * @param string $table
 	 * @return NeevoStmt fluent interface
 	 */
-	public function delete($table){
-		$this->reinit();
-		$this->type = Neevo::STMT_DELETE;
-		$this->tableName = $table;
-		return $this;
+	public static function createDelete(NeevoConnection $connection, $table){
+		$obj = new self($connection);
+		$obj->type = Neevo::STMT_DELETE;
+		$obj->tableName = $table;
+		return $obj;
 	}
 
 

@@ -42,7 +42,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 399;
+	const REVISION = 400;
 
 	// Data types
 	const BOOL = 'b';
@@ -134,8 +134,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return NeevoStmt fluent interface
 	 */
 	public function insert($table, array $values){
-		$q = new NeevoStmt($this->connection);
-		return $q->insert($table, $values);
+		return NeevoStmt::createInsert($this->connection, $table, $values);
 	}
 
 
@@ -146,8 +145,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return NeevoStmt fluent interface
 	 */
 	public function update($table, array $data){
-		$q = new NeevoStmt($this->connection);
-		return $q->update($table, $data);
+		return NeevoStmt::createUpdate($this->connection, $table, $data);
 	}
 
 
@@ -157,8 +155,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return NeevoStmt fluent interface
 	 */
 	public function delete($table){
-		$q = new NeevoStmt($this->connection);
-		return $q->delete($table);
+		return NeevoStmt::createDelete($this->connection, $table);
 	}
 
 
