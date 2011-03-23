@@ -36,7 +36,8 @@ try{
     }
 
 } catch(Exception $e){
-	error(get_class($e) . ': ' . $e->getMessage() . ($e instanceof NeevoException ? "\nSQL: " . $e->getSql() : ''));
+	error(get_class($e) . ': ' . $e->getMessage() . ($e instanceof NeevoException ? "\nSQL: " . $e->getSql() : '')
+	. (isset($args['v']) ? $e->getTraceAsString() : ''));
 }
 
 printf("\n%d queries, %.3F sec, %d KB\n", $db->queries(), microtime(true) - $start, memory_get_peak_usage() / 1024);
