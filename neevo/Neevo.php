@@ -42,7 +42,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 400;
+	const REVISION = 401;
 
 	// Data types
 	const BOOL = 'b';
@@ -259,7 +259,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 	public function updateStatus(INeevoObservable $observable, $event, NeevoStmtBase $statement = null){
 		if($statement instanceof NeevoStmtBase){
-			$this->last = (string) $statement;
+			$this->last = $statement->__toString();
 			++$this->queries;
 		}
 	}

@@ -185,7 +185,7 @@ class NeevoObserver implements INeevoObserver, IDebugPanel {
 			} else $rows = '-';
 
 			$this->tickets[] = $ticket = array($observable, $event, $statement instanceof NeevoStmtBase
-				? array((string) $statement, $statement->time(), $rows) : null);
+				? array($statement->__toString(), $statement->time(), $rows) : null);
 
 			if(isset($this->file)){
 				$this->logFile($ticket);

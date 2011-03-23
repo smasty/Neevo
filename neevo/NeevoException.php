@@ -45,7 +45,7 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable 
 	 * @return string
 	 */
 	public function __toString(){
-		return (string) parent::__toString() . ($this->sql ? "\nSQL: $this->sql" : '');
+		return parent::__toString() . ($this->sql ? "\nSQL: $this->sql" : '');
 	}
 
 
