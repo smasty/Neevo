@@ -36,8 +36,7 @@ Features
  - More ways to fetch your data: as objects, arrays, key=>value pairs, single row...
  - Dump queries
  - Query debugging
- - One-file-only minified version
-   (Thanks to Jakub Vrana - http://php.vrana.cz)
+ - One-file-only minified version (Thanks to Jakub Vrana - http://php.vrana.cz)
  And much more...
 
 
