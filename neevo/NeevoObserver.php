@@ -91,7 +91,7 @@ interface INeevoObservable {
  * @package Neevo
  * @author Martin Srank
  */
-class NeevoObserver implements INeevoObserver, IDebugPanel {
+class NeevoObserver implements IDebugPanel, INeevoObserver {
 
 
 	/** @var array Event type conversion table */

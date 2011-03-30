@@ -15,6 +15,7 @@ if(interface_exists('Nette\IDebugPanel')){
 	class_alias('Nette\IDebugPanel', 'IDebugPanel');
 }
 if(!interface_exists('IDebugPanel')){
+	/** @package PHP */
 	interface IDebugPanel{}
 }
 
@@ -42,7 +43,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 402;
+	const REVISION = 403;
 
 	// Data types
 	const BOOL = 'b';
