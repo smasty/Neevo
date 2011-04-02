@@ -79,7 +79,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 	public function __destruct(){
 		try{
-			$this->driver()->free($this->resultSet);
+			$this->getDriver()->free($this->resultSet);
 		} catch(NeevoImplemenationException $e){}
 
 		$this->resultSet = null;
@@ -93,7 +93,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return NeevoResult fluent interface
 	 */
 	public function group($rule, $having = null){
-		if($this->checkCond()){
+		if($this->validateConditions()){
 			return $this;
 		}
 		$this->reinit();
@@ -118,7 +118,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return NeevoResult fluent interface
 	 */
 	public function join($table, $condition){
-		if($this->checkCond()){
+		if($this->validateConditions()){
 			return $this;
 		}
 		$this->reinit();
@@ -159,7 +159,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	public function fetch(){
 		$this->performed || $this->run();
 
-		$row = $this->driver()->fetch($this->resultSet);
+		$row = $this->getDriver()->fetch($this->resultSet);
 		if(!is_array($row)){
 			return false;
 		}
@@ -225,7 +225,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 */
 	public function fetchSingle(){
 		$this->performed || $this->run();
-		$row = $this->driver()->fetch($this->resultSet);
+		$row = $this->getDriver()->fetch($this->resultSet);
 
 		if(!$row){
 			return false;
@@ -286,7 +286,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 */
 	public function seek($offset){
 		$this->performed || $this->run();
-		$seek = $this->driver()->seek($this->resultSet, $offset);
+		$seek = $this->getDriver()->seek($this->resultSet, $offset);
 		if($seek){
 			return $seek;
 		}
@@ -302,7 +302,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	public function rows(){
 		$this->performed || $this->run();
 
-		$this->numRows = (int) $this->driver()->rows($this->resultSet);
+		$this->numRows = (int) $this->getDriver()->rows($this->resultSet);
 		return $this->numRows;
 	}
 
@@ -412,11 +412,11 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		$this->performed || $this->run();
 
 		// Try fetch from cache
-		$types = (array) $this->connection->cache()->fetch($table . '_detectedTypes');
+		$types = (array) $this->connection->getCache()->fetch($table . '_detectedTypes');
 
 		if(empty($types)){
 			try{
-				$types = $this->driver()->getColumnTypes($this->resultSet, $table);
+				$types = $this->getDriver()->getColumnTypes($this->resultSet, $table);
 			} catch(NeevoException $e){}
 		}
 
@@ -424,7 +424,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 			$this->columnTypes[$col] = $this->resolveType($type);
 		}
 
-		$this->connection->cache()->store($table . '_detectedTypes', $this->columnTypes);
+		$this->connection->getCache()->store($table . '_detectedTypes', $this->columnTypes);
 		return $this;
 	}
 
@@ -478,7 +478,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 				return ((bool) $value) && $value !== 'f' && $value !== 'F';
 
 			case Neevo::BINARY:
-				return $this->driver()->unescape($value, $type);
+				return $this->getDriver()->unescape($value, $type);
 
 			case Neevo::DATETIME:
 				if((int) $value === 0){

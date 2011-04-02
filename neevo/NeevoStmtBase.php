@@ -103,7 +103,7 @@ abstract class NeevoStmtBase {
 
 		// AND/OR where() glues
 		if(in_array($name, array('and', 'or'))){
-			if($this->checkCond()){
+			if($this->validateConditions()){
 				return $this;
 			}
 			$this->reinit();
@@ -175,7 +175,7 @@ abstract class NeevoStmtBase {
 			return call_user_func_array(array($this, 'where'), $expr);
 		}
 
-		if($this->checkCond()){
+		if($this->validateConditions()){
 			return $this;
 		}
 		$this->reinit();
@@ -215,7 +215,7 @@ abstract class NeevoStmtBase {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function order($rule, $order = null){
-		if($this->checkCond()){
+		if($this->validateConditions()){
 			return $this;
 		}
 		$this->reinit();
@@ -248,7 +248,7 @@ abstract class NeevoStmtBase {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function limit($limit, $offset = null){
-		if($this->checkCond()){
+		if($this->validateConditions()){
 			return $this;
 		}
 		$this->reinit();
@@ -262,11 +262,11 @@ abstract class NeevoStmtBase {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function rand(){
-		if($this->checkCond()){
+		if($this->validateConditions()){
 			return $this;
 		}
 		$this->reinit();
-		$this->driver()->rand($this);
+		$this->getDriver()->rand($this);
 		return $this;
 	}
 
@@ -295,7 +295,7 @@ abstract class NeevoStmtBase {
 		$start = -microtime(true);
 
 		$query = $this->performed ?
-			$this->resultSet : $this->driver()->query($this->parse());
+			$this->resultSet : $this->getDriver()->query($this->parse());
 
 		$this->time = $start + microtime(true);
 
@@ -323,7 +323,7 @@ abstract class NeevoStmtBase {
 	 * @internal
 	 */
 	public function parse(){
-		return $this->connection->stmtParser()->parse($this);
+		return $this->connection->getStmtParser()->parse($this);
 	}
 
 
@@ -357,7 +357,7 @@ abstract class NeevoStmtBase {
 			$table = $this->tableName;
 		}
 		$table = str_replace(':', '', $table);
-		$prefix = $this->connection->prefix();
+		$prefix = $this->connection->getPrefix();
 		return $prefix.$table;
 	}
 
@@ -405,15 +405,15 @@ abstract class NeevoStmtBase {
 	public function getPrimaryKey(){
 		$table = $this->getTable();
 		$key = null;
-		$cached = $this->connection->cache()->fetch($table.'_primaryKey');
+		$cached = $this->connection->getCache()->fetch($table.'_primaryKey');
 
 		if($cached === null){
 			try{
-				$key = $this->driver()->getPrimaryKey($table);
+				$key = $this->getDriver()->getPrimaryKey($table);
 			} catch(Exception $e){
 				return null;
 			}
-			$this->connection->cache()->store($table.'_primaryKey', $key);
+			$this->connection->getCache()->store($table.'_primaryKey', $key);
 			return $key === '' ? null : $key;
 		}
 		return $cached === '' ? null : $cached;
@@ -439,7 +439,7 @@ abstract class NeevoStmtBase {
 	 * @return NeevoConnection
 	 * @internal
 	 */
-	public function connection(){
+	public function getConnection(){
 		return $this->connection;
 	}
 
@@ -448,8 +448,8 @@ abstract class NeevoStmtBase {
 	 * @return INeevoDriver
 	 * @internal
 	 */
-	public function driver(){
-		return $this->connection->driver();
+	public function getDriver(){
+		return $this->connection->getDriver();
 	}
 
 
@@ -467,7 +467,7 @@ abstract class NeevoStmtBase {
 
 
 	/** @internal */
-	protected function checkCond(){
+	protected function validateConditions(){
 		if(empty($this->conditions)){
 			return false;
 		}

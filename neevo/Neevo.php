@@ -43,7 +43,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 404;
+	const REVISION = 405;
 
 	// Data types
 	const BOOL = 'b';
@@ -90,7 +90,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 */
 	public function __destruct(){
 		try{
-			$this->connection->driver()->close();
+			$this->connection->getDriver()->close();
 		} catch(NeevoImplemenationException $e){}
 	}
 

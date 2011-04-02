@@ -65,7 +65,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 		 throw new NeevoException('Update disabled - cannot get primary key.');
 		}
 		if(!empty($this->modified) && $this->data != $this->iterable){
-			return NeevoStmt::createUpdate($this->result->connection(), $this->result->getTable(),
+			return NeevoStmt::createUpdate($this->result->getConnection(), $this->result->getTable(),
 					$this->modified)
 					->where($this->primaryKey, $this->data[$this->primaryKey])
 					->limit(1)->affectedRows();
@@ -80,7 +80,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	 */
 	public function delete(){
 		if(!$this->freeze){
-			return NeevoStmt::createDelete($this->result->connection(), $this->result->getTable())
+			return NeevoStmt::createDelete($this->result->getConnection(), $this->result->getTable())
 					->where($this->primaryKey, $this->data[$this->primaryKey])
 					->limit(1)->affectedRows();
 		}
