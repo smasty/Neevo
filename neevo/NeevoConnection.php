@@ -194,12 +194,13 @@ class NeevoConnection implements INeevoObservable {
 	/**
 	 * Notify observers.
 	 * @param int $event
-	 * @param NeevoStmtBase $statement
 	 * @return void
 	 */
-	public function notifyObservers($event, NeevoStmtBase $statement = null){
+	public function notifyObservers($event){
+		$args = func_get_args();
+		array_unshift($args, $this);
 		foreach($this->observers as $observer){
-			$observer->updateStatus($this, $event, $statement);
+			call_user_func_array(array($observer, 'updateStatus'), $args);
 		}
 	}
 

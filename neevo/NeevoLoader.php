@@ -22,8 +22,8 @@ class NeevoLoader {
 	private $list = array(
 		'ineevocache' => '/NeevoCache.php',
 		'ineevodriver' => '/INeevoDriver.php',
-		'ineevoobservable' => '/NeevoObserver.php',
-		'ineevoobserver' => '/NeevoObserver.php',
+		'ineevoobservable' => '/INeevoObservable.php',
+		'ineevoobserver' => '/INeevoObserver.php',
 		'neevo' => '/Neevo.php',
 		'neevocache' => '/NeevoCache.php',
 		'neevocachefile' => '/NeevoCache.php',
@@ -35,7 +35,6 @@ class NeevoLoader {
 		'neevoexception' => '/NeevoException.php',
 		'neevoimplementationexception' => '/NeevoException.php',
 		'neevoliteral' => '/Neevo.php',
-		'neevoobserver' => '/NeevoObserver.php',
 		'neevoresult' => '/NeevoResult.php',
 		'neevoresultiterator' => '/NeevoResultIterator.php',
 		'neevorow' => '/NeevoRow.php',

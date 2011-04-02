@@ -43,7 +43,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 403;
+	const REVISION = 404;
 
 	// Data types
 	const BOOL = 'b';
@@ -106,13 +106,6 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	public function connect($config, INeevoCache $cache = null){
 		$this->connection = new NeevoConnection($config, $cache);
 		$this->connection->attachObserver($this);
-
-		// @nette Nette Framework compatiblility
-		if($this->connection->getConfig('observer') !== false
-			&& defined('NETTE_VERSION_ID') && NETTE_VERSION_ID >= 20000
-		){
-			$this->attachObserver(new NeevoObserver);
-		}
 		return $this;
 	}
 
@@ -253,12 +246,16 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	}
 
 
-	public function notifyObservers($event, NeevoStmtBase $statement = null){
-		$this->connection->notifyObservers($event, $statement);
+	public function notifyObservers($event){
+		call_user_func_array(array($this->connection, 'notifyObservers'), func_get_args());
 	}
 
 
-	public function updateStatus(INeevoObservable $observable, $event, NeevoStmtBase $statement = null){
+	public function updateStatus(INeevoObservable $observable, $event){
+		if(func_num_args() < 3){
+			return;
+		}
+		$statement = func_get_arg(2);
 		if($statement instanceof NeevoStmtBase){
 			$this->last = $statement->__toString();
 			++$this->queries;
