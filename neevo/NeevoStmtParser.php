@@ -259,11 +259,11 @@ class NeevoStmtParser {
 		$field = str_replace(':', '', $field);
 
 		if(strpos($field, '.') !== false){
-			$prefix = $this->stmt->connection()->prefix();
+			$prefix = $this->stmt->getConnection()->getPrefix();
 			$field = $prefix . $field;
 		}
 
-		return $this->stmt->driver()->escape($field, Neevo::IDENTIFIER);
+		return $this->stmt->getDriver()->escape($field, Neevo::IDENTIFIER);
 	}
 
 
@@ -312,7 +312,7 @@ class NeevoStmtParser {
 					return $value->value;
 				} else{
 					return is_numeric($value)
-						? 1 * $value : $this->stmt->driver()->escape($value, Neevo::TEXT);
+						? 1 * $value : $this->stmt->getDriver()->escape($value, Neevo::TEXT);
 				}
 			}
 		}
@@ -336,7 +336,7 @@ class NeevoStmtParser {
 			} elseif($type === Neevo::LITERAL){
 				return ($value instanceof NeevoLiteral) ? $value->value : $value;
 			} else{
-				return $this->stmt->driver()->escape($value, $type);
+				return $this->stmt->getDriver()->escape($value, $type);
 			}
 		}
 	}

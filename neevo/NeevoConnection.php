@@ -56,16 +56,7 @@ class NeevoConnection implements INeevoObservable {
 	public function __construct($config, INeevoCache $cache = null){
 		$this->observers = new SplObjectStorage;
 
-		if($cache instanceof INeevoCache){
-			$this->cache = $cache;
-		} else{
-			// @nette Nette Framework compatiblility
-			if(defined('NETTE_VERSION_ID') && NETTE_VERSION_ID >= 20000){
-				$this->cache = new NeevoCacheNette;
-			} else{
-				$this->cache = new NeevoCache;
-			}
-		}
+		$this->cache = $cache !== null ? $cache : new NeevoCache;
 
 		// Parse
 		if(is_string($config)){
@@ -134,40 +125,35 @@ class NeevoConnection implements INeevoObservable {
 	 * Get defined table prefix.
 	 * @return string
 	 */
-	public function prefix(){
+	public function getPrefix(){
 		return isset($this->config['tablePrefix']) ? $this->config['tablePrefix'] : '';
 	}
 
 
 	/** @return INeevoDriver */
-	public function driver(){
+	public function getDriver(){
 		return $this->driver;
 	}
 
 
 	/** @return NeevoStmtParser */
-	public function stmtParser(){
+	public function getStmtParser(){
 		return $this->stmtParser;
 	}
 
 
 	/** @return INeevoCache */
-	public function cache(){
+	public function getCache(){
 		return $this->cache;
 	}
 
 
 	/**
-	 * Create an alias for configuration value.
-	 * @param array $config Passed by reference
-	 * @param string $key
-	 * @param string $alias Alias of $key
-	 * @return void
+	 * Set the cache storage.
+	 * @param INeevoCache $cache
 	 */
-	public static function alias(&$config, $key, $alias){
-		if(isset($config[$alias]) && !isset($config[$key])){
-			$config[$key] = $config[$alias];
-		}
+	public function setCache(INeevoCache $cache){
+		$this->cache = $cache;
 	}
 
 
@@ -206,6 +192,20 @@ class NeevoConnection implements INeevoObservable {
 
 
 	/*	************	Internal methods ************	*/
+
+
+	/**
+	 * Create an alias for configuration value.
+	 * @param array $config Passed by reference
+	 * @param string $key
+	 * @param string $alias Alias of $key
+	 * @return void
+	 */
+	public static function alias(&$config, $key, $alias){
+		if(isset($config[$alias]) && !isset($config[$key])){
+			$config[$key] = $config[$alias];
+		}
+	}
 
 
 	/** @internal */
