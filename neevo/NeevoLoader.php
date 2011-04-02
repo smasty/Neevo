@@ -28,7 +28,6 @@ class NeevoLoader {
 		'neevocache' => '/NeevoCache.php',
 		'neevocachefile' => '/NeevoCache.php',
 		'neevocachememcache' => '/NeevoCache.php',
-		'neevocachenette' => '/NeevoCache.php',
 		'neevocachesession' => '/NeevoCache.php',
 		'neevoconnection' => '/NeevoConnection.php',
 		'neevodriverexception' => '/NeevoException.php',

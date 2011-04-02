@@ -10,17 +10,6 @@
  */
 
 
-// Nette Framework compatibility
-if(interface_exists('Nette\IDebugPanel')){
-	class_alias('Nette\IDebugPanel', 'IDebugPanel');
-}
-if(!interface_exists('IDebugPanel')){
-	/** @package PHP */
-	interface IDebugPanel{}
-}
-
-
-
 /**
  * Core Neevo class.
  * @author Martin Srank
@@ -43,7 +32,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 405;
+	const REVISION = 406;
 
 	// Data types
 	const BOOL = 'b';

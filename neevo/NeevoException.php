@@ -15,7 +15,7 @@
  * @author Martin Srank
  * @package NeevoExceptions
  */
-class NeevoException extends Exception implements IDebugPanel, INeevoObservable {
+class NeevoException extends Exception implements INeevoObservable {
 
 
 	/** @var string */
@@ -109,27 +109,6 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable 
 		foreach(self::$observers as $observer){
 			$observer->updateStatus($this, $event);
 		}
-	}
-
-
-	/*  ============  Implementation of Nette\IDebugPanel  ============  */
-
-
-	public function getId(){
-		return __CLASS__;
-	}
-
-
-	public function getTab(){
-		return 'SQL';
-	}
-
-
-	public function getPanel(){
-		if($this->sql === null){
-			return;
-		}
-		return Neevo::highlightSql($this->sql);
 	}
 
 
