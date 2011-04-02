@@ -100,10 +100,9 @@ class NeevoException extends Exception implements IDebugPanel, INeevoObservable 
 	/**
 	 * Notify attached observers.
 	 * @param int $event
-	 * @param NeevoStmtBase $statement
 	 * @return void
 	 */
-	public function notifyObservers($event, NeevoStmtBase $statement = null){
+	public function notifyObservers($event){
 		if(!self::$observers){
 			return;
 		}
