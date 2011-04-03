@@ -40,7 +40,7 @@ try{
 	. (isset($args['v']) ? $e->getTraceAsString() : ''));
 }
 
-printf("\n%d queries, %.3F sec, %d KB\n", $db->queries(), microtime(true) - $start, memory_get_peak_usage() / 1024);
+printf("\n%d queries, %.3F sec, %d KB\n", $db->getQueries(), microtime(true) - $start, memory_get_peak_usage() / 1024);
 if($error){
 	exit(1);
 }

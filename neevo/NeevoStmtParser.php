@@ -29,6 +29,9 @@ class NeevoStmtParser {
 	protected $clauses = array();
 
 
+	/*	 ************  Parsing  ************  */
+
+
 	/**
 	 * Parse the instance.
 	 * @param NeevoStmtBase $statement
@@ -285,6 +288,9 @@ class NeevoStmtParser {
 	}
 
 
+	/*	 ************  Escaping, formatting, quoting  ************  */
+
+
 	/**
 	 * Escape given value.
 	 * @param mixed|array $value
@@ -358,6 +364,11 @@ class NeevoStmtParser {
 	}
 
 
+	/**
+	 * Try deimite fields in given expression.
+	 * @param NeevoLiteral $expr
+	 * @return string
+	 */
 	protected function tryDelimite($expr){
 		if($expr instanceof NeevoLiteral){
 			return $expr->value;

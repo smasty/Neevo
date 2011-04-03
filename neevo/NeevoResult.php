@@ -34,7 +34,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	protected $columns = array();
 
 	/** @var array */
-	private $joins;
+	protected $joins;
+
 
 	/** @var string */
 	private $rowClass = 'NeevoRow';
@@ -67,7 +68,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 			$columns = '*';
 			$table = func_get_arg(1);
 		}
-		$this->reinit();
+		$this->resetState();
 		$this->type = Neevo::STMT_SELECT;
 		$this->columns = is_string($columns) ? explode(',', $columns) : $columns;
 		$this->tableName = $table;
@@ -77,6 +78,10 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
+	/**
+	 * Destroy the result set resource and free memory.
+	 * @return void
+	 */
 	public function __destruct(){
 		try{
 			$this->getDriver()->free($this->resultSet);
@@ -86,8 +91,11 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
+	/*	 ************  Statement parts  ************  */
+
+
 	/**
-	 * Define grouping rules.
+	 * Define grouping rule.
 	 * @param string $rule
 	 * @param string $having Optional
 	 * @return NeevoResult fluent interface
@@ -96,18 +104,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		if($this->validateConditions()){
 			return $this;
 		}
-		$this->reinit();
+		$this->resetState();
 		$this->grouping = array($rule, $having);
 		return $this;
-	}
-
-
-	/**
-	 * @deprecated
-	 * @internal
-	 */
-	public function groupBy(){
-		return call_user_func_array(array($this, 'group'), func_get_args());
 	}
 
 
@@ -121,7 +120,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		if($this->validateConditions()){
 			return $this;
 		}
-		$this->reinit();
+		$this->resetState();
 		$type = (func_num_args() > 2) ? func_get_arg(2) : '';
 
 		$this->joins[] = array($table, $condition, $type);
@@ -152,6 +151,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
+	/*	 ************  Result manipulation  ************  */
+
+
 	/**
 	 * Fetch the row on current position.
 	 * @return NeevoRow|FALSE
@@ -176,15 +178,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 			}
 		}
 		return new $this->rowClass($row, $this);
-	}
-
-
-	/**
-	 * @deprecated
-	 * @internal
-	 */
-	public function fetchRow(){
-		return $this->fetch();
 	}
 
 
@@ -307,6 +300,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
+	/*	 ************  Aggregation  ************  */
+
+
 	/**
 	 * Count number of rows.
 	 * @param string $column
@@ -363,19 +359,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
-	/**
-	 * Set class to use as a row class.
-	 * @param string $className
-	 * @return NeevoResult fluent interface
-	 * @throws NeevoException
-	 */
-	public function setRowClass($className){
-		if(!class_exists($className)){
-			throw new NeevoException("Cannot set row class '$className'.");
-		}
-		$this->rowClass = $className;
-		return $this;
-	}
+	/*  ************  Column type detection  ************  */
 
 
 	/**
@@ -500,6 +484,24 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
+	/*  ************  Getters & setters  ************  */
+
+
+	/**
+	 * Set class to use as a row class.
+	 * @param string $className
+	 * @return NeevoResult fluent interface
+	 * @throws NeevoException
+	 */
+	public function setRowClass($className){
+		if(!class_exists($className)){
+			throw new NeevoException("Cannot set row class '$className'.");
+		}
+		$this->rowClass = $className;
+		return $this;
+	}
+
+
 	/**
 	 * Get referenced row from given table.
 	 * @param string $table
@@ -525,9 +527,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		}
 		return null;
 	}
-
-
-	/*	************	Getters	************	*/
 
 
 	/**
@@ -557,14 +556,35 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
-	/*	************	Internal methods	************	*/
+	/*  ************  Internal methods  ************  */
 
 
-	/** @internal */
-	public function reinit(){
-		parent::reinit();
+	/**
+	 * Reset state of the result.
+	 * @return void
+	 */
+	public function resetState(){
+		parent::resetState();
 		$this->resultSet = null;
 		$this->numRows = null;
+	}
+
+
+	/**
+	 * @deprecated
+	 * @internal
+	 */
+	public function groupBy(){
+		return call_user_func_array(array($this, 'group'), func_get_args());
+	}
+
+
+	/**
+	 * @deprecated
+	 * @internal
+	 */
+	public function fetchRow(){
+		return $this->fetch();
 	}
 
 

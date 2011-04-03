@@ -88,7 +88,7 @@ abstract class NeevoStmtBase {
 	 * @return void
 	 */
 	public function __clone(){
-		$this->reinit();
+		$this->resetState();
 	}
 
 
@@ -106,7 +106,7 @@ abstract class NeevoStmtBase {
 			if($this->validateConditions()){
 				return $this;
 			}
-			$this->reinit();
+			$this->resetState();
 			$this->whereFilters[count($this->whereFilters)-1]['glue'] = strtoupper($name);
 			if(count($args) >= 1){
 				call_user_func_array(array($this, 'where'), $args);
@@ -136,6 +136,9 @@ abstract class NeevoStmtBase {
 		}
 		throw new BadMethodCallException('Call to undefined method '.__CLASS__."::$name()");
 	}
+
+
+	/*	 ************  Statement parts  ************  */
 
 
 	/**
@@ -178,7 +181,7 @@ abstract class NeevoStmtBase {
 		if($this->validateConditions()){
 			return $this;
 		}
-		$this->reinit();
+		$this->resetState();
 
 		// Simple format
 		if(strpos($expr, '%') === false){
@@ -218,7 +221,7 @@ abstract class NeevoStmtBase {
 		if($this->validateConditions()){
 			return $this;
 		}
-		$this->reinit();
+		$this->resetState();
 
 		if(is_array($rule)){
 			foreach($rule as $key => $val){
@@ -251,7 +254,7 @@ abstract class NeevoStmtBase {
 		if($this->validateConditions()){
 			return $this;
 		}
-		$this->reinit();
+		$this->resetState();
 		$this->limit = array($limit, ($offset !== null && $this->type === Neevo::STMT_SELECT) ? $offset : null);
 		return $this;
 	}
@@ -265,10 +268,13 @@ abstract class NeevoStmtBase {
 		if($this->validateConditions()){
 			return $this;
 		}
-		$this->reinit();
+		$this->resetState();
 		$this->getDriver()->rand($this);
 		return $this;
 	}
+
+
+	/*	 ************  Statement manipulation  ************  */
 
 
 	/**
@@ -290,7 +296,7 @@ abstract class NeevoStmtBase {
 	 * @return resource|bool
 	 */
 	public function run(){
-		$this->realConnect();
+		$this->getConnection()->connect();
 
 		$start = -microtime(true);
 
@@ -327,7 +333,7 @@ abstract class NeevoStmtBase {
 	}
 
 
-	/*	************	Getters	************	*/
+	/*  ************  Getters  ************  */
 
 
 	/**
@@ -426,18 +432,12 @@ abstract class NeevoStmtBase {
 	}
 
 
-	/*	************	Internal methods	************	*/
-
-
-	/** @internal */
-	protected function realConnect(){
-		return $this->connection->realConnect();
-	}
+	/*  ************  Internal methods  ************  */
 
 
 	/**
+	 * Get the connection instance.
 	 * @return NeevoConnection
-	 * @internal
 	 */
 	public function getConnection(){
 		return $this->connection;
@@ -445,28 +445,38 @@ abstract class NeevoStmtBase {
 
 
 	/**
+	 * Get the driver instance.
 	 * @return INeevoDriver
-	 * @internal
 	 */
 	public function getDriver(){
 		return $this->connection->getDriver();
 	}
 
 
-	/** @internal */
-	public function reinit(){
+	/**
+	 * Reset the state of the statement.
+	 * @return void
+	 */
+	public function resetState(){
 		$this->performed = false;
 		$this->time = null;
 	}
 
 
-	/** @internal */
+	/**
+	 * Get the configuration value(s).
+	 * @param string $key
+	 * @return mixed
+	 */
 	protected function getConfig($key = null){
 		return $this->connection->getConfig($key);
 	}
 
 
-	/** @internal */
+	/**
+	 * Validate the current statement condition.
+	 * @return bool
+	 */
 	protected function validateConditions(){
 		if(empty($this->conditions)){
 			return false;

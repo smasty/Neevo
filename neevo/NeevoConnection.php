@@ -13,7 +13,7 @@
 /**
  * Representation of database connection.
  *
- * Common configuration: (see driver specific configuration too)
+ * Common configuration: (see also driver specific configuration)
  * - tablePrefix => prefix for table names
  * - lazy (bool) => If TRUE, connection will be established only when required.
  * - detectTypes (bool) => Detect column types automatically
@@ -58,7 +58,7 @@ class NeevoConnection implements INeevoObservable {
 
 		$this->cache = $cache !== null ? $cache : new NeevoCache;
 
-		// Parse
+		// Parse config
 		if(is_string($config)){
 			parse_str($config, $config);
 		} elseif($config instanceof Traversable){
@@ -67,7 +67,7 @@ class NeevoConnection implements INeevoObservable {
 			throw new InvalidArgumentException('Configuration must be an array, string or instance of Traversable.');
 		}
 
-		// Defaults
+		// Default values
 		$defaults = array(
 			'driver' => Neevo::$defaultDriver,
 			'lazy' => false,
@@ -78,7 +78,7 @@ class NeevoConnection implements INeevoObservable {
 			'observer' => null
 		);
 
-		// Aliases
+		// Create aliases
 		self::alias($config, 'driver', 'extension');
 		self::alias($config, 'username', 'user');
 		self::alias($config, 'password', 'pass');
@@ -103,7 +103,21 @@ class NeevoConnection implements INeevoObservable {
 		$this->config = $config;
 
 		if($config['lazy'] === false){
-			$this->realConnect();
+			$this->connect();
+		}
+	}
+
+
+	/**
+	 * Perform connection.
+	 * @return void
+	 */
+	public function connect(){
+		if($this->connected === false){
+			$this->driver->connect($this->config);
+			$this->connected = true;
+
+			$this->notifyObservers(INeevoObserver::CONNECT);
 		}
 	}
 
@@ -130,19 +144,28 @@ class NeevoConnection implements INeevoObservable {
 	}
 
 
-	/** @return INeevoDriver */
+	/**
+	 * Get the current driver instance.
+	 * @return INeevoDriver
+	 */
 	public function getDriver(){
 		return $this->driver;
 	}
 
 
-	/** @return NeevoStmtParser */
+	/**
+	 * Get the current statement parser instance.
+	 * @return NeevoStmtParser
+	 */
 	public function getStmtParser(){
 		return $this->stmtParser;
 	}
 
 
-	/** @return INeevoCache */
+	/**
+	 * Get the current cache storage instance.
+	 * @return INeevoCache
+	 */
 	public function getCache(){
 		return $this->cache;
 	}
@@ -178,7 +201,7 @@ class NeevoConnection implements INeevoObservable {
 
 
 	/**
-	 * Notify observers.
+	 * Notify all attached observers.
 	 * @param int $event
 	 * @return void
 	 */
@@ -208,22 +231,6 @@ class NeevoConnection implements INeevoObservable {
 	}
 
 
-	/** @internal */
-	public function realConnect(){
-		if($this->connected === false){
-			$this->driver->connect($this->config);
-			$this->connected = true;
-
-			$this->notifyObservers(INeevoObserver::CONNECT);
-		}
-	}
-
-
-	private function isDriver($class){
-		return (class_exists($class) && in_array('INeevoDriver', class_implements($class)));
-	}
-
-
 	/**
 	 * Set the driver and statement parser.
 	 * @param string $driver
@@ -249,6 +256,16 @@ class NeevoConnection implements INeevoObservable {
 		} else{
 			$this->stmtParser = new NeevoStmtParser;
 		}
+	}
+
+
+	/**
+	 * Check wether the given class is valid Neevo driver.
+	 * @param string $class
+	 * @return bool
+	 */
+	private function isDriver($class){
+		return (class_exists($class) && in_array('INeevoDriver', class_implements($class)));
 	}
 
 

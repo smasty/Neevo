@@ -16,7 +16,7 @@ if(version_compare(PHP_VERSION, '5.1.2', '<')){
 }
 
 
-// Turn magic quotes off - Neevo handles SQL quoting.
+// Try to turn magic quotes off - Neevo handles SQL quoting.
 @set_magic_quotes_runtime(false);
 
 

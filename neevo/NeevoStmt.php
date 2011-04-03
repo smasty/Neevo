@@ -25,6 +25,9 @@ class NeevoStmt extends NeevoStmtBase {
 	protected $values = array();
 
 
+	/*	 ************  Statement factories  ************  */
+
+
 	/**
 	 * Create UPDATE statement.
 	 * @param NeevoConnection $connection
@@ -115,15 +118,21 @@ class NeevoStmt extends NeevoStmtBase {
 	}
 
 
-	/** @return array */
+	/**
+	 * Get values of statement.
+	 * @return array
+	 */
 	public function getValues(){
 		return $this->values;
 	}
 
 
-	/** @internal */
-	public function reinit(){
-		parent::reinit();
+	/**
+	 * Reset state of the statement.
+	 * @return void
+	 */
+	public function resetState(){
+		parent::resetState();
 		$this->affectedRows = null;
 	}
 

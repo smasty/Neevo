@@ -108,6 +108,9 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	}
 
 
+	/*  ************  Magic methods  ************  */
+
+
 	public function __call($table, $args){
 		return $this->ref($table, isset($args[0]) ? $args[0] : null);
 	}
@@ -136,7 +139,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	}
 
 
-	/*	************	Implementation of Array Access	************	*/
+	/*  ************  Implementation of Array Access  ************  */
 
 
 	public function offsetGet($offset){
@@ -159,7 +162,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	}
 
 
-	/*	************	Implementation of Countable	************	*/
+	/*  ************  Implementation of Countable  ************  */
 
 
 	public function count(){
@@ -167,7 +170,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	}
 
 
-	/*	************	Implementation of IteratorAggregate	************	*/
+	/*  ************  Implementation of IteratorAggregate  ************  */
 
 
 	public function getIterator(){

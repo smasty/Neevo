@@ -37,7 +37,6 @@ interface INeevoObservable {
 	/**
 	 * Notify all attached observers.
 	 * @param int $event
-	 * @param NeevoStmtBase $statement
 	 * @return void
 	 */
 	public function notifyObservers($event);

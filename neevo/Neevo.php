@@ -18,6 +18,9 @@
 class Neevo implements INeevoObservable, INeevoObserver {
 
 
+	/** @var string Default Neevo driver */
+	public static $defaultDriver = 'mysql';
+
 	/** @var string */
 	private $last;
 
@@ -27,12 +30,9 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	/** @var NeevoConnection */
 	private $connection;
 
-	/** @var string Default Neevo driver */
-	public static $defaultDriver = 'mysql';
-
 
 	// Neevo revision
-	const REVISION = 406;
+	const REVISION = 407;
 
 	// Data types
 	const BOOL = 'b';
@@ -98,6 +98,8 @@ class Neevo implements INeevoObservable, INeevoObserver {
 		return $this;
 	}
 
+
+	/*  ************  Statement factories  ************  */
 
 	/**
 	 * SELECT statement factory.
@@ -177,6 +179,9 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	}
 
 
+	/*	 ************  Transactions  ************  */
+
+
 	/**
 	 * Begin a transaction if supported.
 	 * @param string $savepoint
@@ -210,6 +215,9 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	}
 
 
+	/*	 ************  Implementation of INeevoObservable & INeevoObserver  ************  */
+
+
 	/**
 	 * Attach an observer for debugging.
 	 * @param INeevoObserver $observer
@@ -235,11 +243,22 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	}
 
 
+	/**
+	 * Notify all attached observers.
+	 * @param int $event
+	 * @return void
+	 */
 	public function notifyObservers($event){
 		call_user_func_array(array($this->connection, 'notifyObservers'), func_get_args());
 	}
 
 
+	/**
+	 * Receive update from observable.
+	 * @param INeevoObservable $observable
+	 * @param int $event Event type
+	 * @return void
+	 */
 	public function updateStatus(INeevoObservable $observable, $event){
 		if(func_num_args() < 3){
 			return;
@@ -256,7 +275,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * Current NeevoConnection instance.
 	 * @return NeevoConnection
 	 */
-	public function connection(){
+	public function getConnection(){
 		return $this->connection;
 	}
 
@@ -265,7 +284,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * Last executed query.
 	 * @return string
 	 */
-	public function last(){
+	public function getLast(){
 		return $this->last;
 	}
 
@@ -274,7 +293,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * Get number of executed queries.
 	 * @return int
 	 */
-	public function queries(){
+	public function getQueries(){
 		return $this->queries;
 	}
 
@@ -322,9 +341,16 @@ class Neevo implements INeevoObservable, INeevoObserver {
  */
 class NeevoLiteral {
 
+
+	/** @var string */
 	public $value;
 
 
+	/**
+	 * Create instance of SQL literal.
+	 * @param string $value
+	 * @return void
+	 */
 	public function __construct($value) {
 		$this->value = $value;
 	}
