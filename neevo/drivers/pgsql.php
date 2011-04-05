@@ -42,11 +42,11 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws NeevoException
+	 * @throws NeevoDriverException
 	 */
 	public function __construct(){
 		if(!extension_loaded("pgsql")){
-			throw new NeevoException("PHP extension 'pgsql' not loaded.");
+			throw new NeevoDriverException("Cannot instantiate Neevo PgSQL driver - PHP extension 'pgsql' not loaded.");
 		}
 	}
 
@@ -224,7 +224,6 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * Get the number of rows in the given result set.
 	 * @param resource $resultSet
 	 * @return int|FALSE
-	 * @throws NeevoDriverException
 	 */
 	public function rows($resultSet){
 		return @pg_num_rows($resultSet);

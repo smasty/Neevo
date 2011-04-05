@@ -235,23 +235,31 @@ class NeevoConnection implements INeevoObservable {
 	 * Set the driver and statement parser.
 	 * @param string $driver
 	 * @return void
-	 * @throws NeevoException
+	 * @throws NeevoDriverException
 	 */
 	private function setDriver($driver){
 		$class = "NeevoDriver$driver";
 
-		if(!$this->isDriver($class)){
-			include_once dirname(__FILE__) . '/drivers/'.strtolower($driver).'.php';
+		if(!class_exists($class)){
+			$file = dirname(__FILE__) . '/drivers/' . strtolower($driver) . '.php';
 
-			if(!$this->isDriver($class)){
-				throw new NeevoException("Unable to create instance of Neevo driver '$driver'.");
+			if(!file_exists($file)){
+				throw new NeevoDriverException("$driver driver file ($file) does not exist.");
 			}
+			if(is_readable($file)){
+				include_once $file;
+			} else{
+				throw new NeevoDriverException("$driver driver file ($file) is not readable.");
+			}
+		}
+		if(!$this->isDriver($class)){
+			throw new NeevoDriverException("Class '$class' is not a valid Neevo driver class.");
 		}
 
 		$this->driver = new $class;
 
 		// Set statement parser
-		if(in_array('NeevoStmtParser', class_parents($class))){
+		if($this->isStmtParser($class)){
 			$this->stmtParser = $this->driver;
 		} else{
 			$this->stmtParser = new NeevoStmtParser;
@@ -265,7 +273,27 @@ class NeevoConnection implements INeevoObservable {
 	 * @return bool
 	 */
 	private function isDriver($class){
-		return (class_exists($class) && in_array('INeevoDriver', class_implements($class)));
+		try{
+			$reflection = new ReflectionClass($class);
+			return $reflection->implementsInterface('INeevoDriver');
+		} catch(ReflectionException $e){
+			return false;
+		}
+	}
+
+
+	/**
+	 * Check wether the given class is valid Neevo statement parser.
+	 * @param string $class
+	 * @return bool
+	 */
+	private function isStmtParser($class){
+		try{
+			$reflection = new ReflectionClass($class);
+			return $reflection->isSubclassOf('NeevoStmtParser');
+		} catch(ReflectionException $e){
+			return false;
+		}
 	}
 
 

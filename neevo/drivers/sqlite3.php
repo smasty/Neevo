@@ -53,11 +53,11 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws NeevoException
+	 * @throws NeevoDriverException
 	 */
 	public function __construct(){
 		if(!extension_loaded("sqlite3")){
-			throw new NeevoException("PHP extension 'sqlite3' not loaded.");
+			throw new NeevoDriverException("Cannot instantiate Neevo SQLite 3 driver - PHP extension 'sqlite3' not loaded.");
 		}
 	}
 
@@ -371,7 +371,7 @@ class NeevoDriverSQLite3 extends NeevoStmtParser implements INeevoDriver {
 	}
 
 
-	/*  ============  NeevoStmtParser overrides  ============  */
+	/*  ************  NeevoStmtParser overrides  ************  */
 
 
 	/**

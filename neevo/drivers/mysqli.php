@@ -46,11 +46,11 @@ class NeevoDriverMySQLi extends NeevoStmtParser implements INeevoDriver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws NeevoException
+	 * @throws NeevoDriverException
 	 */
 	public function __construct(){
 		if(!extension_loaded("mysqli")){
-			throw new NeevoException("PHP extension 'mysqli' not loaded.");
+			throw new NeevoDriverException("Cannot instantiate Neevo MySQLi driver - PHP extension 'mysqli' not loaded.");
 		}
 	}
 
@@ -330,7 +330,7 @@ class NeevoDriverMySQLi extends NeevoStmtParser implements INeevoDriver {
 	}
 
 
-	/*  ============  NeevoStmtParser overrides  ============  */
+	/*  ************  NeevoStmtParser overrides  ************  */
 
 
 	/**

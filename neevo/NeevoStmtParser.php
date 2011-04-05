@@ -29,7 +29,7 @@ class NeevoStmtParser {
 	protected $clauses = array();
 
 
-	/*	 ************  Parsing  ************  */
+	/*  ************  Parsing  ************  */
 
 
 	/**
@@ -288,7 +288,7 @@ class NeevoStmtParser {
 	}
 
 
-	/*	 ************  Escaping, formatting, quoting  ************  */
+	/*  ************  Escaping, formatting, quoting  ************  */
 
 
 	/**

@@ -138,7 +138,7 @@ abstract class NeevoStmtBase {
 	}
 
 
-	/*	 ************  Statement parts  ************  */
+	/*  ************  Statement clauses  ************  */
 
 
 	/**
@@ -274,7 +274,7 @@ abstract class NeevoStmtBase {
 	}
 
 
-	/*	 ************  Statement manipulation  ************  */
+	/*  ************  Statement manipulation  ************  */
 
 
 	/**
@@ -416,7 +416,7 @@ abstract class NeevoStmtBase {
 		if($cached === null){
 			try{
 				$key = $this->getDriver()->getPrimaryKey($table);
-			} catch(Exception $e){
+			} catch(NeevoException $e){
 				return null;
 			}
 			$this->connection->getCache()->store($table.'_primaryKey', $key);

@@ -91,7 +91,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
-	/*	 ************  Statement parts  ************  */
+	/*  ************  Statement clauses  ************  */
 
 
 	/**
@@ -151,7 +151,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
-	/*	 ************  Result manipulation  ************  */
+	/*  ************  Result manipulation  ************  */
 
 
 	/**
@@ -186,7 +186,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @param int $limit Limit number of returned rows
 	 * @param int $offset Seek to offset (fails on unbuffered results)
 	 * @return array
-	 * @throws NeevoException
 	 */
 	public function fetchAll($limit = null, $offset = null){
 		$limit = ($limit === null) ? -1 : (int) $limit;
@@ -300,7 +299,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
-	/*	 ************  Aggregation  ************  */
+	/*  ************  Aggregation  ************  */
 
 
 	/**

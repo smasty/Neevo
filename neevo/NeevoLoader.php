@@ -50,7 +50,7 @@ class NeevoLoader {
 
 
 	/**
-	* Get the signleton instance.
+	* Get the singleton instance.
 	* @return NeevoLoader
 	*/
 	public static function getInstance(){

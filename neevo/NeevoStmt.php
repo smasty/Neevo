@@ -25,7 +25,7 @@ class NeevoStmt extends NeevoStmtBase {
 	protected $values = array();
 
 
-	/*	 ************  Statement factories  ************  */
+	/*  ************  Statement factories  ************  */
 
 
 	/**
@@ -112,7 +112,7 @@ class NeevoStmt extends NeevoStmtBase {
 	public function affectedRows(){
 		$this->performed || $this->run();
 		if($this->affectedRows === false){
-			throw new NeevoException('Affected rows not supported by this driver');
+			throw new NeevoDriverException('Affected rows not supported by this driver');
 		}
 		return $this->affectedRows;
 	}
