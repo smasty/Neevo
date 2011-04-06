@@ -30,7 +30,7 @@
  * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverMySQLi extends NeevoStmtParser implements INeevoDriver {
+class NeevoDriverMySQLi extends NeevoParser implements INeevoDriver {
 
 
 	/** @var mysqli_result */
@@ -330,7 +330,7 @@ class NeevoDriverMySQLi extends NeevoStmtParser implements INeevoDriver {
 	}
 
 
-	/*  ************  NeevoStmtParser overrides  ************  */
+	/*  ************  NeevoParser overrides  ************  */
 
 
 	/**

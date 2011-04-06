@@ -34,12 +34,12 @@ class NeevoLoader {
 		'neevoexception' => '/NeevoException.php',
 		'neevoimplementationexception' => '/NeevoException.php',
 		'neevoliteral' => '/Neevo.php',
+		'neevoparser' => '/NeevoParser.php',
 		'neevoresult' => '/NeevoResult.php',
 		'neevoresultiterator' => '/NeevoResultIterator.php',
 		'neevorow' => '/NeevoRow.php',
 		'neevostmt' => '/NeevoStmt.php',
 		'neevostmtbase' => '/NeevoStmtBase.php',
-		'neevostmtparser' => '/NeevoStmtParser.php',
 	);
 
 	/** @var NeevoLoader */

@@ -31,7 +31,7 @@
  * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver {
+class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 
 
 	/** @var string */
@@ -392,7 +392,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver {
 	}
 
 
-	/*  ************  NeevoStmtParser overrides  ************  */
+	/*  ************  NeevoParser overrides  ************  */
 
 
 	/**
@@ -401,10 +401,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver {
 	 */
 	protected function parseUpdateStmt(){
 		$sql = parent::parseUpdateStmt();
-		if($this->updateLimit){
-			$sql = $this->applyLimit($sql . $this->clauses[3]);
-		}
-		return $sql;
+		return $this->updateLimit ? $this->applyLimit($sql . $this->clauses[3]) : $sql;
 	}
 
 
@@ -414,10 +411,7 @@ class NeevoDriverSQLite extends NeevoStmtParser implements INeevoDriver {
 	 */
 	protected function parseDeleteStmt(){
 		$sql = parent::parseDeleteStmt();
-		if($this->updateLimit){
-			$sql = $this->applyLimit($sql . $this->clauses[3]);
-		}
-		return $sql;
+		return $this->updateLimit ? $this->applyLimit($sql . $this->clauses[3]) : $sql;
 	}
 
 	

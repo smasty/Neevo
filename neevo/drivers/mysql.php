@@ -29,7 +29,7 @@
  * @author Martin Srank
  * @package NeevoDrivers
  */
-class NeevoDriverMySQL extends NeevoStmtParser implements INeevoDriver {
+class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 
 
 	/** @var resource */
@@ -338,7 +338,7 @@ class NeevoDriverMySQL extends NeevoStmtParser implements INeevoDriver {
 	}
 
 
-	/*  ************  NeevoStmtParser overrides  ************  */
+	/*  ************  NeevoParser overrides  ************  */
 
 
 	/**

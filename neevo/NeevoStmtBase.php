@@ -329,7 +329,9 @@ abstract class NeevoStmtBase {
 	 * @internal
 	 */
 	public function parse(){
-		return $this->connection->getStmtParser()->parse($this);
+		$parser = $this->connection->getParser();
+		$instance = new $parser($this);
+		return $instance->parse();
 	}
 
 
