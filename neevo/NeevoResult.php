@@ -61,10 +61,10 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	public function __construct(NeevoConnection $connection, $columns = null, $table = null){
 		parent::__construct($connection);
 
-		if($columns == null && $table == null){
+		if($columns === null && $table === null){
 			throw new InvalidArgumentException('Select table missing.');
 		}
-		if(func_get_arg(2) == null){
+		if($table === null){
 			$columns = '*';
 			$table = func_get_arg(1);
 		}
@@ -551,7 +551,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		if(!empty($this->joins)){
 			return $this->joins;
 		}
-		return false;
+		return array();
 	}
 
 

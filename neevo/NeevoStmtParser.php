@@ -40,11 +40,8 @@ class NeevoStmtParser {
 	public function parse(NeevoStmtBase $statement){
 		$this->stmt = $statement;
 		$where = $order = $group = $limit = $q = '';
-		$table = $this->escapeValue($statement->getTable(), Neevo::IDENTIFIER);
+		$source = $this->parseSource();
 
-		if($this->stmt instanceof NeevoResult && $this->stmt->getJoins()){
-			$table = $table . $this->parseJoin();
-		}
 		if($this->stmt->getConditions()){
 			$where = $this->parseWhere();
 		}
@@ -55,7 +52,7 @@ class NeevoStmtParser {
 			$order = $this->parseOrdering();
 		}
 
-		$this->clauses = array($table, $where, $group, $order);
+		$this->clauses = array($source, $where, $group, $order);
 
 		if($this->stmt->getType() == Neevo::STMT_SELECT){
 			$q = $this->parseSelectStmt();
@@ -80,13 +77,13 @@ class NeevoStmtParser {
 	 */
 	protected function parseSelectStmt(){
 		$cols = $this->stmt->getColumns();
-		list($table, $where, $group, $order) = $this->clauses;
+		list($source, $where, $group, $order) = $this->clauses;
 		foreach($cols as $key => $col){
 			$cols[$key] = $this->tryDelimite($col);
 		}
 		$cols = implode(', ', $cols);
 
-		return $this->applyLimit("SELECT $cols FROM " . $table . $where . $group . $order);
+		return $this->applyLimit("SELECT $cols FROM " . $source . $where . $group . $order);
 	}
 
 
@@ -117,7 +114,6 @@ class NeevoStmtParser {
 			$values[] = $this->parseFieldName($col) . ' = ' . $value;
 		}
 		$data = ' SET ' . implode(', ', $values);
-
 		return 'UPDATE ' . $table . $data . $where;
 	}
 
@@ -128,25 +124,28 @@ class NeevoStmtParser {
 	 */
 	protected function parseDeleteStmt(){
 		list($table, $where) = $this->clauses;
-
 		return 'DELETE FROM ' . $table . $where;
 	}
 
 
 	/**
-	 * Parse JOIN clause.
-	 * @throws NeevoException
+	 * Parse statement source.
+	 * @todo Subquery suppot
 	 * @return string
 	 */
-	protected function parseJoin(){
-		$result = '';
-		foreach($this->stmt->getJoins() as $join){
-			list($table, $cond, $type) = $join;
-			$type = strtoupper(substr($type, 5));
-			$type .= ($type === '') ? '' : ' ';
-			$result .= "\n{$type}JOIN $table ON $cond";
+	protected function parseSource(){
+		$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
+
+		if($this->stmt instanceof NeevoResult){
+			foreach($this->stmt->getJoins() as $join){
+				list($table, $cond, $type) = $join;
+				$type = strtoupper(substr($type, 5));
+				$type .= ($type === '') ? '' : ' ';
+				$source .= "\n{$type}JOIN $table ON $cond";
+			}
+			$source = $this->tryDelimite($source);
 		}
-		return $this->tryDelimite($result);
+		return $source;
 	}
 
 
