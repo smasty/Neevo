@@ -134,7 +134,7 @@ class NeevoParser {
 
 	/**
 	 * Parse statement source.
-	 * @todo Subquery suppot
+	 * @todo Better subquery support - custom table aliases
 	 * @return string
 	 */
 	protected function parseSource(){
