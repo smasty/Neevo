@@ -146,11 +146,14 @@ class NeevoParser {
 				$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
 			}
 
-			foreach($this->stmt->getJoins() as $join){
-				list($table, $cond, $type) = $join;
+			foreach($this->stmt->getJoins() as $key => $join){
+				list($join_source, $cond, $type) = $join;
+				if($join_source instanceof NeevoResult){
+					$join_source = '(' . $join_source . ') tj' . ($key + 1);
+				}
 				$type = strtoupper(substr($type, 5));
 				$type .= ($type === '') ? '' : ' ';
-				$source .= "\n{$type}JOIN $table ON $cond";
+				$source .= "\n{$type}JOIN $join_source ON $cond";
 			}
 			return $this->tryDelimite($source);
 		}

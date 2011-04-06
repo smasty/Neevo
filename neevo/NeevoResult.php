@@ -118,18 +118,21 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 	/**
 	 * Perform JOIN on tables.
-	 * @param string $table
+	 * @param string|NeevoResult $source Table name or subquery
 	 * @param string $condition
 	 * @return NeevoResult fluent interface
 	 */
-	public function join($table, $condition){
+	public function join($source, $condition){
 		if($this->validateConditions()){
 			return $this;
+		}
+		if(!is_string($source) && !($source instanceof self)){
+			throw new InvalidArgumentException('Source must be a string or instance of NeevoResult, ' . gettype($source) . ' given.');
 		}
 		$this->resetState();
 		$type = (func_num_args() > 2) ? func_get_arg(2) : '';
 
-		$this->joins[] = array($table, $condition, $type);
+		$this->joins[] = array($source, $condition, $type);
 
 		return $this;
 	}
@@ -137,23 +140,23 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 	/**
 	 * Perform LEFT JOIN on tables.
-	 * @param string $table
+	 * @param string|NeevoResult $source Table name or subquery
 	 * @param string $condition
 	 * @return NeevoResult fluent interface
 	 */
-	public function leftJoin($table, $condition){
-		return $this->join($table, $condition, Neevo::JOIN_LEFT);
+	public function leftJoin($source, $condition){
+		return $this->join($source, $condition, Neevo::JOIN_LEFT);
 	}
 
 
 	/**
 	 * Perform INNER JOIN on tables.
-	 * @param string $table
+	 * @param string|NeevoResult $source Table name or subquery
 	 * @param string $condition
 	 * @return NeevoResult fluent interface
 	 */
-	public function innerJoin($table, $condition){
-		return $this->join($table, $condition, Neevo::JOIN_INNER);
+	public function innerJoin($source, $condition){
+		return $this->join($source, $condition, Neevo::JOIN_INNER);
 	}
 
 

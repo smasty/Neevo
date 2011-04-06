@@ -32,7 +32,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 413;
+	const REVISION = 414;
 
 	// Data types
 	const BOOL = 'b';
