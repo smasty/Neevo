@@ -26,7 +26,7 @@ abstract class NeevoStmtBase {
 
 
 	/** @var string */
-	protected $tableName;
+	protected $source;
 
 	/** @var string */
 	protected $type;
@@ -357,16 +357,13 @@ abstract class NeevoStmtBase {
 
 
 	/**
-	 * Full table name (with prefix).
+	 * Get full table name (with prefix).
 	 * @return string
 	 */
-	public function getTable($table = null){
-		if($table === null){
-			$table = $this->tableName;
-		}
-		$table = str_replace(':', '', $table);
+	public function getTable(){
+		$table = str_replace(':', '', $this->source);
 		$prefix = $this->connection->getPrefix();
-		return $prefix.$table;
+		return $prefix . $table;
 	}
 
 
@@ -412,6 +409,9 @@ abstract class NeevoStmtBase {
 	 */
 	public function getPrimaryKey(){
 		$table = $this->getTable();
+		if($table === null){
+			return null;
+		}
 		$key = null;
 		$cached = $this->connection->getCache()->fetch($table.'_primaryKey');
 

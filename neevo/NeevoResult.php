@@ -54,25 +54,31 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * Create SELECT statement.
 	 * @param NeevoConnection $connection
 	 * @param string|array $columns
-	 * @param string $table
+	 * @param string|NeevoResult $source Table name or subquery
 	 * @return void
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct(NeevoConnection $connection, $columns = null, $table = null){
+	public function __construct(NeevoConnection $connection, $columns = null, $source = null){
 		parent::__construct($connection);
 
-		if($columns === null && $table === null){
+		if($columns === null && $source === null){
 			throw new InvalidArgumentException('Select table missing.');
 		}
-		if($table === null){
+		if($source === null){
 			$columns = '*';
-			$table = func_get_arg(1);
+			$source = func_get_arg(1);
 		}
+
+		if(!is_string($source) && !($source instanceof self)){
+			throw new InvalidArgumentException('Source must be a string or instance of NeevoResult, ' . gettype($source) . ' given.');
+		}
+
 		$this->resetState();
 		$this->type = Neevo::STMT_SELECT;
 		$this->columns = is_string($columns) ? explode(',', $columns) : $columns;
-		$this->tableName = $table;
-		$this->detectTypes = (bool) $this->getConfig('detectTypes');
+
+		$this->source = $source;
+		$this->detectTypes = ($this->source instanceof self) ? false : (bool) $this->getConfig('detectTypes');
 
 		$this->setRowClass($this->getConfig('rowClass'));
 	}
@@ -552,6 +558,27 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 			return $this->joins;
 		}
 		return array();
+	}
+
+
+	/**
+	 * Get full table name (with prefix) if available.
+	 * @return string|null
+	 */
+	public function getTable(){
+		if($this->source instanceof self){
+			return null;
+		}
+		return parent::getTable();
+	}
+
+
+	/**
+	 * Get the source for the statement.
+	 * @return string|NeevoResult
+	 */
+	public function getSource(){
+		return $this->source;
 	}
 
 
