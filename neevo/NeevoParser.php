@@ -138,9 +138,13 @@ class NeevoParser {
 	 * @return string
 	 */
 	protected function parseSource(){
-		$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
 
 		if($this->stmt instanceof NeevoResult){
+			if($this->stmt->getTable() === null){
+				$source = '(' . $this->stmt->getSource() . ') t';
+			} else{
+				$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
+			}
 
 			foreach($this->stmt->getJoins() as $join){
 				list($table, $cond, $type) = $join;
@@ -150,8 +154,7 @@ class NeevoParser {
 			}
 			return $this->tryDelimite($source);
 		}
-
-		return $source;
+		return $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
 	}
 
 

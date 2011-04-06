@@ -347,6 +347,9 @@ class NeevoDriverSQLite3 extends NeevoParser implements INeevoDriver {
 	 * @return array
 	 */
 	public function getColumnTypes($resultSet, $table){
+		if($table === null){
+			return array();
+		}
 		if(isset($this->tblData[$table])){
 			$sql = $this->tblData[$table];
 		} else{
