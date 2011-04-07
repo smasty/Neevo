@@ -21,17 +21,8 @@
 class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable {
 
 
-	/** @var resource */
-	protected $resultSet;
-
-	/** @var int */
-	protected $numRows;
-
 	/** @var string */
 	protected $grouping;
-
-	/** @var string */
-	protected $having = null;
 
 	/** @var array */
 	protected $columns = array();
@@ -39,9 +30,15 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	/** @var array */
 	protected $joins;
 
+
 	/** @var string */
 	protected $tableAlias;
 
+	/** @var resource */
+	protected $resultSet;
+
+	/** @var int */
+	protected $numRows;
 
 	/** @var string */
 	private $rowClass = 'NeevoRow';
@@ -53,7 +50,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	private $detectTypes;
 
 	/** @var array */
-	private $referenced;
+	private $referencedTables;
 
 
 	/**
@@ -124,7 +121,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return NeevoResult fluent interface
 	 */
 	public function group($rule, $having = null){
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		$this->resetState();
@@ -140,7 +137,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return NeevoResult fluent interface
 	 */
 	public function join($source, $condition){
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		if(!is_string($source) && !($source instanceof self)){
@@ -557,7 +554,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	public function getReferencedRow($table, & $row, $foreign = null){
 		$foreign = $foreign === null ? $this->getForeignKey($table) : $foreign;
 		$rowID = $row->$foreign;
-		$referenced = & $this->referenced[$table];
+		$referenced = & $this->referencedTables[$table];
 
 		if(empty($referenced)){
 			$clone = clone $this;

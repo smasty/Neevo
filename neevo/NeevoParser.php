@@ -55,17 +55,17 @@ class NeevoParser {
 		if($this->stmt instanceof NeevoResult && $this->stmt->getGrouping()){
 			$group = $this->parseGrouping();
 		}
-		if($this->stmt->getOrdering()){
-			$order = $this->parseOrdering();
+		if($this->stmt->getSorting()){
+			$order = $this->parseSorting();
 		}
 
 		$this->clauses = array($source, $where, $group, $order);
 
 		if($this->stmt->getType() == Neevo::STMT_SELECT){
 			$q = $this->parseSelectStmt();
-		} elseif($this->stmt->getType() == Neevo::STMT_INSERT && $this->stmt->getValues()){
+		} elseif($this->stmt->getType() == Neevo::STMT_INSERT){
 			$q = $this->parseInsertStmt();
-		} elseif($this->stmt->getType() == Neevo::STMT_UPDATE && $this->stmt->getValues()){
+		} elseif($this->stmt->getType() == Neevo::STMT_UPDATE){
 			$q = $this->parseUpdateStmt();
 		} elseif($this->stmt->getType() == Neevo::STMT_DELETE){
 			$q = $this->parseDeleteStmt();
@@ -236,9 +236,9 @@ class NeevoParser {
 	 * Parse ORDER BY clause.
 	 * @return string
 	 */
-	protected function parseOrdering(){
+	protected function parseSorting(){
 		$order = array();
-		foreach($this->stmt->getOrdering() as $rule){
+		foreach($this->stmt->getSorting() as $rule){
 			list($field, $type) = $rule;
 			$order[] = $this->tryDelimite($field) . ($type !== null ? ' ' . $type : '');
 		}

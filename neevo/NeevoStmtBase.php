@@ -37,20 +37,17 @@ abstract class NeevoStmtBase {
 	/** @var int */
 	protected $offset;
 
+	/** @var array */
+	protected $conds = array();
+
+	/** @var array */
+	protected $sorting = array();
+
 	/** @var float */
 	protected $time;
 
 	/** @var bool */
 	protected $performed;
-
-	/** @var array */
-	protected $whereFilters = array();
-
-	/** @var array */
-	protected $ordering = array();
-
-	/** @var array */
-	protected $conditions = array();
 
 	/** @var NeevoConnection */
 	protected $connection;
@@ -62,6 +59,9 @@ abstract class NeevoStmtBase {
 		Neevo::STMT_UPDATE => INeevoObserver::UPDATE,
 		Neevo::STMT_DELETE => INeevoObserver::DELETE
 	);
+
+	/** @var array */
+	private $_stmtConds = array();
 
 
 	/**
@@ -103,11 +103,11 @@ abstract class NeevoStmtBase {
 
 		// AND/OR where() glues
 		if(in_array($name, array('and', 'or'))){
-			if($this->validateConditions()){
+			if($this->_validateConditions()){
 				return $this;
 			}
 			$this->resetState();
-			$this->whereFilters[count($this->whereFilters)-1]['glue'] = strtoupper($name);
+			$this->conds[count($this->conds)-1]['glue'] = strtoupper($name);
 			if(count($args) >= 1){
 				call_user_func_array(array($this, 'where'), $args);
 			}
@@ -122,7 +122,7 @@ abstract class NeevoStmtBase {
 				throw new InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
 			}
 
-			$conds = & $this->conditions;
+			$conds = & $this->_stmtConds;
 			if($name == 'if'){
 				$conds[] = (bool) $args[0];
 			} elseif($name == 'else'){
@@ -172,7 +172,7 @@ abstract class NeevoStmtBase {
 			return call_user_func_array(array($this, 'where'), $expr);
 		}
 
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		$this->resetState();
@@ -180,7 +180,7 @@ abstract class NeevoStmtBase {
 		// Simple format
 		if(strpos($expr, '%') === false){
 			$field = trim($expr);
-			$this->whereFilters[] = array(
+			$this->conds[] = array(
 				'simple' => true,
 				'field' => $field,
 				'value' => $value,
@@ -193,7 +193,7 @@ abstract class NeevoStmtBase {
 		$args = func_get_args();
 		array_shift($args);
 		preg_match_all('~%(bin|sub|b|i|f|s|d|a|l)?~i', $expr, $matches);
-		$this->whereFilters[] = array(
+		$this->conds[] = array(
 			'simple' => false,
 			'expr' => $expr,
 			'modifiers' => $matches[0],
@@ -212,7 +212,7 @@ abstract class NeevoStmtBase {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function order($rule, $order = null){
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		$this->resetState();
@@ -223,7 +223,7 @@ abstract class NeevoStmtBase {
 			}
 			return $this;
 		}
-		$this->ordering[] = array($rule, $order);
+		$this->sorting[] = array($rule, $order);
 
 		return $this;
 	}
@@ -245,7 +245,7 @@ abstract class NeevoStmtBase {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function limit($limit, $offset = null){
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		$this->resetState();
@@ -259,7 +259,7 @@ abstract class NeevoStmtBase {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function rand(){
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		$this->resetState();
@@ -384,7 +384,7 @@ abstract class NeevoStmtBase {
 	 * @return array
 	 */
 	public function getConditions(){
-		return $this->whereFilters;
+		return $this->conds;
 	}
 
 
@@ -392,8 +392,8 @@ abstract class NeevoStmtBase {
 	 * Statement ORDER BY clause.
 	 * @return array
 	 */
-	public function getOrdering(){
-		return $this->ordering;
+	public function getSorting(){
+		return $this->sorting;
 	}
 
 
@@ -473,11 +473,11 @@ abstract class NeevoStmtBase {
 	 * Validate the current statement condition.
 	 * @return bool
 	 */
-	protected function validateConditions(){
-		if(empty($this->conditions)){
+	protected function _validateConditions(){
+		if(empty($this->_stmtConds)){
 			return false;
 		}
-		foreach($this->conditions as $cond){
+		foreach($this->_stmtConds as $cond){
 			if($cond) continue;
 			else return true;
 		}

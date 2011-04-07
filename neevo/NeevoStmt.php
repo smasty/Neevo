@@ -18,11 +18,11 @@
 class NeevoStmt extends NeevoStmtBase {
 
 
-	/** @var int */
-	protected $affectedRows;
-
 	/** @var array */
 	protected $values = array();
+
+	/** @var int */
+	protected $affectedRows;
 
 
 	/*  ************  Statement factories  ************  */
