@@ -144,7 +144,7 @@ class NeevoParser {
 				$subq = $this->stmt->getSource();
 				$alias = $this->escapeValue($subq->getAlias()
 					? $subq->getAlias() : '_t', Neevo::IDENTIFIER);
-				$source = "($subq)$alias";
+				$source = "($subq) $alias";
 			} else{
 				$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
 			}
@@ -209,6 +209,9 @@ class NeevoParser {
 			} elseif($value instanceof NeevoLiteral){ // field = SQL literal
 				$operator = ' = ';
 				$value = $this->escapeValue($value, Neevo::LITERAL);
+			} elseif($value instanceof NeevoResult){
+				$operator = ' IN ';
+				$value = $this->escapeValue($value, Neevo::SUBQUERY);
 			} elseif($value instanceof DateTime){ // field = DateTime
 				$operator = ' = ';
 				$value = $this->escapeValue($value, Neevo::DATETIME);
@@ -359,6 +362,8 @@ class NeevoParser {
 				return '(' . implode(', ', $this->escapeValue($value)) . ')';
 			} elseif($type === Neevo::LITERAL){
 				return ($value instanceof NeevoLiteral) ? $value->value : $value;
+			} elseif($type === Neevo::SUBQUERY && ($value instanceof NeevoResult)){
+				return "($value)";
 			} else{
 				return $this->stmt->getDriver()->escape($value, $type);
 			}
