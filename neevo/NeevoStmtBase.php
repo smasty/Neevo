@@ -26,7 +26,7 @@ abstract class NeevoStmtBase {
 
 
 	/** @var string */
-	protected $tableName;
+	protected $source;
 
 	/** @var string */
 	protected $type;
@@ -37,20 +37,17 @@ abstract class NeevoStmtBase {
 	/** @var int */
 	protected $offset;
 
+	/** @var array */
+	protected $conds = array();
+
+	/** @var array */
+	protected $sorting = array();
+
 	/** @var float */
 	protected $time;
 
 	/** @var bool */
 	protected $performed;
-
-	/** @var array */
-	protected $whereFilters = array();
-
-	/** @var array */
-	protected $ordering = array();
-
-	/** @var array */
-	protected $conditions = array();
 
 	/** @var NeevoConnection */
 	protected $connection;
@@ -62,6 +59,9 @@ abstract class NeevoStmtBase {
 		Neevo::STMT_UPDATE => INeevoObserver::UPDATE,
 		Neevo::STMT_DELETE => INeevoObserver::DELETE
 	);
+
+	/** @var array */
+	private $_stmtConds = array();
 
 
 	/**
@@ -103,11 +103,11 @@ abstract class NeevoStmtBase {
 
 		// AND/OR where() glues
 		if(in_array($name, array('and', 'or'))){
-			if($this->validateConditions()){
+			if($this->_validateConditions()){
 				return $this;
 			}
 			$this->resetState();
-			$this->whereFilters[count($this->whereFilters)-1]['glue'] = strtoupper($name);
+			$this->conds[count($this->conds)-1]['glue'] = strtoupper($name);
 			if(count($args) >= 1){
 				call_user_func_array(array($this, 'where'), $args);
 			}
@@ -122,7 +122,7 @@ abstract class NeevoStmtBase {
 				throw new InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
 			}
 
-			$conds = & $this->conditions;
+			$conds = & $this->_stmtConds;
 			if($name == 'if'){
 				$conds[] = (bool) $args[0];
 			} elseif($name == 'else'){
@@ -148,26 +148,20 @@ abstract class NeevoStmtBase {
 	 * by calling and() / or() methods the same way as where().
 	 * Corresponding operator will be used.
 	 *
-	 * **Warning! When using placeholders, field names have to start
-	 * with '::' (double colon) in order to respect defined table prefix!**
+	 * Usage is similar to printf(). Available modifiers are:
+	 * - %b - boolean
+	 * - %i - integer
+	 * - %f - float
+	 * - %s - string
+	 * - %bin - binary data
+	 * - %d - date, time
+	 * - %a - array
+	 * - %l - SQL lieral
+	 * - %id - SQL identifier
+	 * - %sub - subquery
 	 *
-	 * Possible combinations for where conditions:
-	 * | Condition	| SQL code
-	 * |-----------------------
-	 * | `where('field', 'x')` | `field = 'x'`
-	 * | `where('field', true)` | `field`
-	 * | `where('field', false)` | `NOT field`
-	 * | `where('field', null)` | `field IS NULL`
-	 * | `where('field', array(1, 2))` | `field IN(1, 2)`
-	 * | `where('field', new NeevoLiteral('NOW()'))` | `field = NOW()`
-	 * |-------------------------------
-	 * | Condition with modifiers
-	 * |-------------------------------
-	 * | `where(':field != %s', 'x')` | `field != 'x'`
-	 * | `where(':field != %s OR :field < %i', 'x', 15)` | `field != 'x' OR field < 15`
-	 * | `where(':field LIKE %s', '%x%')` | `field LIKE '%x%'`
-	 * | `where(':field NOT IN %a', array(1, 2))` | `field NOT IN(1, 2)`
-	 * <br>
+	 * In simple mode, argument is SQL identifier, second is value:
+	 * true, false, scalar, null, array, NeevoLiteral or NeevoResult.
 	 *
 	 * @param string $expr
 	 * @param mixed $value
@@ -178,7 +172,7 @@ abstract class NeevoStmtBase {
 			return call_user_func_array(array($this, 'where'), $expr);
 		}
 
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		$this->resetState();
@@ -186,7 +180,7 @@ abstract class NeevoStmtBase {
 		// Simple format
 		if(strpos($expr, '%') === false){
 			$field = trim($expr);
-			$this->whereFilters[] = array(
+			$this->conds[] = array(
 				'simple' => true,
 				'field' => $field,
 				'value' => $value,
@@ -198,8 +192,8 @@ abstract class NeevoStmtBase {
 		// Format with modifiers
 		$args = func_get_args();
 		array_shift($args);
-		preg_match_all('~%(b|i|f|s|bin|d|a|l)?~i', $expr, $matches);
-		$this->whereFilters[] = array(
+		preg_match_all('~%(bin|sub|b|i|f|s|d|a|l)?~i', $expr, $matches);
+		$this->conds[] = array(
 			'simple' => false,
 			'expr' => $expr,
 			'modifiers' => $matches[0],
@@ -218,7 +212,7 @@ abstract class NeevoStmtBase {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function order($rule, $order = null){
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		$this->resetState();
@@ -229,7 +223,7 @@ abstract class NeevoStmtBase {
 			}
 			return $this;
 		}
-		$this->ordering[] = array($rule, $order);
+		$this->sorting[] = array($rule, $order);
 
 		return $this;
 	}
@@ -251,7 +245,7 @@ abstract class NeevoStmtBase {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function limit($limit, $offset = null){
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		$this->resetState();
@@ -265,7 +259,7 @@ abstract class NeevoStmtBase {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function rand(){
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		$this->resetState();
@@ -329,7 +323,9 @@ abstract class NeevoStmtBase {
 	 * @internal
 	 */
 	public function parse(){
-		return $this->connection->getStmtParser()->parse($this);
+		$parser = $this->connection->getParser();
+		$instance = new $parser($this);
+		return $instance->parse();
 	}
 
 
@@ -355,16 +351,13 @@ abstract class NeevoStmtBase {
 
 
 	/**
-	 * Full table name (with prefix).
+	 * Get full table name (with prefix).
 	 * @return string
 	 */
-	public function getTable($table = null){
-		if($table === null){
-			$table = $this->tableName;
-		}
-		$table = str_replace(':', '', $table);
+	public function getTable(){
+		$table = str_replace(':', '', $this->source);
 		$prefix = $this->connection->getPrefix();
-		return $prefix.$table;
+		return $prefix . $table;
 	}
 
 
@@ -391,7 +384,7 @@ abstract class NeevoStmtBase {
 	 * @return array
 	 */
 	public function getConditions(){
-		return $this->whereFilters;
+		return $this->conds;
 	}
 
 
@@ -399,8 +392,8 @@ abstract class NeevoStmtBase {
 	 * Statement ORDER BY clause.
 	 * @return array
 	 */
-	public function getOrdering(){
-		return $this->ordering;
+	public function getSorting(){
+		return $this->sorting;
 	}
 
 
@@ -410,6 +403,9 @@ abstract class NeevoStmtBase {
 	 */
 	public function getPrimaryKey(){
 		$table = $this->getTable();
+		if($table === null){
+			return null;
+		}
 		$key = null;
 		$cached = $this->connection->getCache()->fetch($table.'_primaryKey');
 
@@ -477,11 +473,11 @@ abstract class NeevoStmtBase {
 	 * Validate the current statement condition.
 	 * @return bool
 	 */
-	protected function validateConditions(){
-		if(empty($this->conditions)){
+	protected function _validateConditions(){
+		if(empty($this->_stmtConds)){
 			return false;
 		}
-		foreach($this->conditions as $cond){
+		foreach($this->_stmtConds as $cond){
 			if($cond) continue;
 			else return true;
 		}

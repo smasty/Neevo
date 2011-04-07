@@ -319,6 +319,9 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @return array
 	 */
 	public function getColumnTypes($resultSet, $table){
+		if($table === null){
+			return array();
+		}
 		$cols = pg_meta_data($this->resource, $table);
 		foreach($cols as $key => $value){
 			$cols[$key] = preg_replace('~[^a-z]~i', '', $value['type']);

@@ -18,11 +18,11 @@
 class NeevoStmt extends NeevoStmtBase {
 
 
-	/** @var int */
-	protected $affectedRows;
-
 	/** @var array */
 	protected $values = array();
+
+	/** @var int */
+	protected $affectedRows;
 
 
 	/*  ************  Statement factories  ************  */
@@ -38,7 +38,7 @@ class NeevoStmt extends NeevoStmtBase {
 	public static function createUpdate(NeevoConnection $connection, $table, array $data){
 		$obj = new self($connection);
 		$obj->type = Neevo::STMT_UPDATE;
-		$obj->tableName = $table;
+		$obj->source = $table;
 		$obj->values = $data;
 		return $obj;
 	}
@@ -54,7 +54,7 @@ class NeevoStmt extends NeevoStmtBase {
 	public static function createInsert(NeevoConnection $connection, $table, array $values){
 		$obj = new self($connection);
 		$obj->type = Neevo::STMT_INSERT;
-		$obj->tableName = $table;
+		$obj->source = $table;
 		$obj->values = $values;
 		return $obj;
 	}
@@ -69,7 +69,7 @@ class NeevoStmt extends NeevoStmtBase {
 	public static function createDelete(NeevoConnection $connection, $table){
 		$obj = new self($connection);
 		$obj->type = Neevo::STMT_DELETE;
-		$obj->tableName = $table;
+		$obj->source = $table;
 		return $obj;
 	}
 

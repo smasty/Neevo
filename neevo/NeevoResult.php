@@ -12,23 +12,17 @@
 
 /**
  * Represents a result. Can be iterated, counted and provides fluent interface.
+ *
+ * @method NeevoResult as($alias)
+ *
  * @author Martin Srank
  * @package Neevo
  */
 class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable {
 
 
-	/** @var resource */
-	protected $resultSet;
-
-	/** @var int */
-	protected $numRows;
-
 	/** @var string */
 	protected $grouping;
-
-	/** @var string */
-	protected $having = null;
 
 	/** @var array */
 	protected $columns = array();
@@ -36,6 +30,15 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	/** @var array */
 	protected $joins;
 
+
+	/** @var string */
+	protected $tableAlias;
+
+	/** @var resource */
+	protected $resultSet;
+
+	/** @var int */
+	protected $numRows;
 
 	/** @var string */
 	private $rowClass = 'NeevoRow';
@@ -47,31 +50,37 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	private $detectTypes;
 
 	/** @var array */
-	private $referenced;
+	private $referencedTables;
 
 
 	/**
 	 * Create SELECT statement.
 	 * @param NeevoConnection $connection
 	 * @param string|array $columns
-	 * @param string $table
+	 * @param string|NeevoResult $source Table name or subquery
 	 * @return void
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct(NeevoConnection $connection, $columns = null, $table = null){
+	public function __construct(NeevoConnection $connection, $columns = null, $source = null){
 		parent::__construct($connection);
 
-		if($columns === null && $table === null){
+		if($columns === null && $source === null){
 			throw new InvalidArgumentException('Select table missing.');
 		}
-		if($table === null){
+		if($source === null){
 			$columns = '*';
-			$table = func_get_arg(1);
+			$source = func_get_arg(1);
 		}
+
+		if(!is_string($source) && !($source instanceof self)){
+			throw new InvalidArgumentException('Source must be a string or instance of NeevoResult, ' . gettype($source) . ' given.');
+		}
+
 		$this->resetState();
 		$this->type = Neevo::STMT_SELECT;
 		$this->columns = is_string($columns) ? explode(',', $columns) : $columns;
-		$this->tableName = $table;
+
+		$this->source = $source;
 		$this->detectTypes = (bool) $this->getConfig('detectTypes');
 
 		$this->setRowClass($this->getConfig('rowClass'));
@@ -91,6 +100,17 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
+	public function __call($name, $args){
+		$name = strtolower($name);
+
+		if($name === 'as'){
+			return $this->setAlias(isset($args[0]) ? $args[0] : null);
+		}
+
+		return parent::__call($name, $args);
+	}
+
+
 	/*  ************  Statement clauses  ************  */
 
 
@@ -101,7 +121,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return NeevoResult fluent interface
 	 */
 	public function group($rule, $having = null){
-		if($this->validateConditions()){
+		if($this->_validateConditions()){
 			return $this;
 		}
 		$this->resetState();
@@ -112,18 +132,21 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 	/**
 	 * Perform JOIN on tables.
-	 * @param string $table
+	 * @param string|NeevoResult $source Table name or subquery
 	 * @param string $condition
 	 * @return NeevoResult fluent interface
 	 */
-	public function join($table, $condition){
-		if($this->validateConditions()){
+	public function join($source, $condition){
+		if($this->_validateConditions()){
 			return $this;
+		}
+		if(!is_string($source) && !($source instanceof self)){
+			throw new InvalidArgumentException('Source must be a string or instance of NeevoResult, ' . gettype($source) . ' given.');
 		}
 		$this->resetState();
 		$type = (func_num_args() > 2) ? func_get_arg(2) : '';
 
-		$this->joins[] = array($table, $condition, $type);
+		$this->joins[] = array($source, $condition, $type);
 
 		return $this;
 	}
@@ -131,23 +154,23 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 	/**
 	 * Perform LEFT JOIN on tables.
-	 * @param string $table
+	 * @param string|NeevoResult $source Table name or subquery
 	 * @param string $condition
 	 * @return NeevoResult fluent interface
 	 */
-	public function leftJoin($table, $condition){
-		return $this->join($table, $condition, Neevo::JOIN_LEFT);
+	public function leftJoin($source, $condition){
+		return $this->join($source, $condition, Neevo::JOIN_LEFT);
 	}
 
 
 	/**
 	 * Perform INNER JOIN on tables.
-	 * @param string $table
+	 * @param string|NeevoResult $source Table name or subquery
 	 * @param string $condition
 	 * @return NeevoResult fluent interface
 	 */
-	public function innerJoin($table, $condition){
-		return $this->join($table, $condition, Neevo::JOIN_INNER);
+	public function innerJoin($source, $condition){
+		return $this->join($source, $condition, Neevo::JOIN_INNER);
 	}
 
 
@@ -487,6 +510,26 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 
 	/**
+	 * Set table alias to be used when in subquery.
+	 * @param string $alias
+	 * @return NeevoResult fluent interface
+	 */
+	public function setAlias($alias){
+		$this->tableAlias = $alias;
+		return $this;
+	}
+
+
+	/**
+	 * Get table alias used in subquery.
+	 * @return string|null
+	 */
+	public function getAlias(){
+		return $this->tableAlias ? $this->tableAlias : null;
+	}
+
+
+	/**
 	 * Set class to use as a row class.
 	 * @param string $className
 	 * @return NeevoResult fluent interface
@@ -511,7 +554,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	public function getReferencedRow($table, & $row, $foreign = null){
 		$foreign = $foreign === null ? $this->getForeignKey($table) : $foreign;
 		$rowID = $row->$foreign;
-		$referenced = & $this->referenced[$table];
+		$referenced = & $this->referencedTables[$table];
 
 		if(empty($referenced)){
 			$clone = clone $this;
@@ -552,6 +595,27 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 			return $this->joins;
 		}
 		return array();
+	}
+
+
+	/**
+	 * Get full table name (with prefix) if available.
+	 * @return string|null
+	 */
+	public function getTable(){
+		if($this->source instanceof self){
+			return null;
+		}
+		return parent::getTable();
+	}
+
+
+	/**
+	 * Get the source for the statement.
+	 * @return string|NeevoResult
+	 */
+	public function getSource(){
+		return $this->source;
 	}
 
 

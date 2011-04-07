@@ -36,8 +36,8 @@ class NeevoConnection implements INeevoObservable {
 	/** @var INeevoDriver */
 	private $driver;
 
-	/** @var NeevoStmtParser */
-	private $stmtParser;
+	/** @var string */
+	private $parser = 'NeevoParser';
 
 	/** @var SplObjectStorage */
 	private $observers;
@@ -154,11 +154,11 @@ class NeevoConnection implements INeevoObservable {
 
 
 	/**
-	 * Get the current statement parser instance.
-	 * @return NeevoStmtParser
+	 * Get the current parser class name.
+	 * @return string
 	 */
-	public function getStmtParser(){
-		return $this->stmtParser;
+	public function getParser(){
+		return $this->parser;
 	}
 
 
@@ -260,9 +260,7 @@ class NeevoConnection implements INeevoObservable {
 
 		// Set statement parser
 		if($this->isStmtParser($class)){
-			$this->stmtParser = $this->driver;
-		} else{
-			$this->stmtParser = new NeevoStmtParser;
+			$this->parser = $class;
 		}
 	}
 

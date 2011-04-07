@@ -49,7 +49,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 		$this->result = $result;
 		$this->primaryKey = $result->getPrimaryKey();
 
-		if(!isset($this->data[$this->primaryKey])){
+		if($this->primaryKey === null || !isset($this->data[$this->primaryKey])){
 			$this->freeze = true;
 		}
 	}
@@ -95,7 +95,10 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	 * @return NeevoResult|null
 	 */
 	public function ref($table, $column = null){
-		return $this->result->getReferencedRow($table, $this, $column);
+		if(!$this->freeze){
+			return $this->result->getReferencedRow($table, $this, $column);
+		}
+		throw new NeevoException('Referencing disabled - cannot get primary key.');
 	}
 
 

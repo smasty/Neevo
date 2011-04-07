@@ -19,7 +19,7 @@
  * @author Martin Srank
  * @package Neevo
  */
-class NeevoStmtParser {
+class NeevoParser {
 
 
 	/** @var NeevoStmtBase */
@@ -29,16 +29,23 @@ class NeevoStmtParser {
 	protected $clauses = array();
 
 
+	/**
+	 * Instantiate the parser for given statement.
+	 * @param NeevoStmtBase $statement
+	 */
+	public function __construct(NeevoStmtBase $statement){
+		$this->stmt = $statement;
+	}
+
+
 	/*  ************  Parsing  ************  */
 
 
 	/**
-	 * Parse the instance.
-	 * @param NeevoStmtBase $statement
+	 * Parse the given statement.
 	 * @return string The SQL statement
 	 */
-	public function parse(NeevoStmtBase $statement){
-		$this->stmt = $statement;
+	public function parse(){
 		$where = $order = $group = $limit = $q = '';
 		$source = $this->parseSource();
 
@@ -48,26 +55,23 @@ class NeevoStmtParser {
 		if($this->stmt instanceof NeevoResult && $this->stmt->getGrouping()){
 			$group = $this->parseGrouping();
 		}
-		if($this->stmt->getOrdering()){
-			$order = $this->parseOrdering();
+		if($this->stmt->getSorting()){
+			$order = $this->parseSorting();
 		}
 
 		$this->clauses = array($source, $where, $group, $order);
 
 		if($this->stmt->getType() == Neevo::STMT_SELECT){
 			$q = $this->parseSelectStmt();
-		} elseif($statement->getType() == Neevo::STMT_INSERT && $statement->getValues()){
+		} elseif($this->stmt->getType() == Neevo::STMT_INSERT){
 			$q = $this->parseInsertStmt();
-		} elseif($statement->getType() == Neevo::STMT_UPDATE && $statement->getValues()){
+		} elseif($this->stmt->getType() == Neevo::STMT_UPDATE){
 			$q = $this->parseUpdateStmt();
-		} elseif($statement->getType() == Neevo::STMT_DELETE){
+		} elseif($this->stmt->getType() == Neevo::STMT_DELETE){
 			$q = $this->parseDeleteStmt();
 		}
 
-		$this->stmt = null;
-		$this->clauses = array();
-
-		return $q . ';';
+		return $q;
 	}
 
 
@@ -130,22 +134,37 @@ class NeevoStmtParser {
 
 	/**
 	 * Parse statement source.
-	 * @todo Subquery suppot
+	 * @todo Better subquery support - custom table aliases
 	 * @return string
 	 */
 	protected function parseSource(){
-		$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
 
 		if($this->stmt instanceof NeevoResult){
-			foreach($this->stmt->getJoins() as $join){
-				list($table, $cond, $type) = $join;
+			if($this->stmt->getTable() === null){
+				$subq = $this->stmt->getSource();
+				$alias = $this->escapeValue($subq->getAlias()
+					? $subq->getAlias() : '_t', Neevo::IDENTIFIER);
+				$source = "($subq) $alias";
+			} else{
+				$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
+			}
+
+			foreach($this->stmt->getJoins() as $key => $join){
+				list($join_source, $cond, $type) = $join;
+
+				if($join_source instanceof NeevoResult){
+					$join_alias = $this->escapeValue($join_source->getAlias()
+						? $join_source->getAlias() : '_j' . ($key+1), Neevo::IDENTIFIER);
+
+					$join_source = "($join_source) $join_alias";
+				}
 				$type = strtoupper(substr($type, 5));
 				$type .= ($type === '') ? '' : ' ';
-				$source .= "\n{$type}JOIN $table ON $cond";
+				$source .= " {$type}JOIN $join_source ON $cond";
 			}
-			$source = $this->tryDelimite($source);
+			return $this->tryDelimite($source);
 		}
-		return $source;
+		return $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
 	}
 
 
@@ -190,6 +209,9 @@ class NeevoStmtParser {
 			} elseif($value instanceof NeevoLiteral){ // field = SQL literal
 				$operator = ' = ';
 				$value = $this->escapeValue($value, Neevo::LITERAL);
+			} elseif($value instanceof NeevoResult){
+				$operator = ' IN ';
+				$value = $this->escapeValue($value, Neevo::SUBQUERY);
 			} elseif($value instanceof DateTime){ // field = DateTime
 				$operator = ' = ';
 				$value = $this->escapeValue($value, Neevo::DATETIME);
@@ -214,9 +236,9 @@ class NeevoStmtParser {
 	 * Parse ORDER BY clause.
 	 * @return string
 	 */
-	protected function parseOrdering(){
+	protected function parseSorting(){
 		$order = array();
-		foreach($this->stmt->getOrdering() as $rule){
+		foreach($this->stmt->getSorting() as $rule){
 			list($field, $type) = $rule;
 			$order[] = $this->tryDelimite($field) . ($type !== null ? ' ' . $type : '');
 		}
@@ -340,6 +362,8 @@ class NeevoStmtParser {
 				return '(' . implode(', ', $this->escapeValue($value)) . ')';
 			} elseif($type === Neevo::LITERAL){
 				return ($value instanceof NeevoLiteral) ? $value->value : $value;
+			} elseif($type === Neevo::SUBQUERY && ($value instanceof NeevoResult)){
+				return "($value)";
 			} else{
 				return $this->stmt->getDriver()->escape($value, $type);
 			}
