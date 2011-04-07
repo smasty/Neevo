@@ -141,19 +141,26 @@ class NeevoParser {
 
 		if($this->stmt instanceof NeevoResult){
 			if($this->stmt->getTable() === null){
-				$source = '(' . $this->stmt->getSource() . ') t';
+				$subq = $this->stmt->getSource();
+				$alias = $this->escapeValue($subq->getAlias()
+					? $subq->getAlias() : '_t', Neevo::IDENTIFIER);
+				$source = "($subq)$alias";
 			} else{
 				$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
 			}
 
 			foreach($this->stmt->getJoins() as $key => $join){
 				list($join_source, $cond, $type) = $join;
+
 				if($join_source instanceof NeevoResult){
-					$join_source = '(' . $join_source . ') tj' . ($key + 1);
+					$join_alias = $this->escapeValue($join_source->getAlias()
+						? $join_source->getAlias() : '_j' . ($key+1), Neevo::IDENTIFIER);
+
+					$join_source = "($join_source) $join_alias";
 				}
 				$type = strtoupper(substr($type, 5));
 				$type .= ($type === '') ? '' : ' ';
-				$source .= "\n{$type}JOIN $join_source ON $cond";
+				$source .= " {$type}JOIN $join_source ON $cond";
 			}
 			return $this->tryDelimite($source);
 		}

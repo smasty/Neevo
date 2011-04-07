@@ -12,6 +12,9 @@
 
 /**
  * Represents a result. Can be iterated, counted and provides fluent interface.
+ *
+ * @method NeevoResult as($alias)
+ *
  * @author Martin Srank
  * @package Neevo
  */
@@ -35,6 +38,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 	/** @var array */
 	protected $joins;
+
+	/** @var string */
+	protected $tableAlias;
 
 
 	/** @var string */
@@ -94,6 +100,17 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		} catch(NeevoImplemenationException $e){}
 
 		$this->resultSet = null;
+	}
+
+
+	public function __call($name, $args){
+		$name = strtolower($name);
+
+		if($name === 'as'){
+			return $this->setAlias(isset($args[0]) ? $args[0] : null);
+		}
+
+		return parent::__call($name, $args);
 	}
 
 
@@ -493,6 +510,26 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 
 	/*  ************  Getters & setters  ************  */
+
+
+	/**
+	 * Set table alias to be used when in subquery.
+	 * @param string $alias
+	 * @return NeevoResult fluent interface
+	 */
+	public function setAlias($alias){
+		$this->tableAlias = $alias;
+		return $this;
+	}
+
+
+	/**
+	 * Get table alias used in subquery.
+	 * @return string|null
+	 */
+	public function getAlias(){
+		return $this->tableAlias ? $this->tableAlias : null;
+	}
 
 
 	/**
