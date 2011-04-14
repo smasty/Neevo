@@ -7,6 +7,8 @@
  *
  * Copyright (c) 2011 Martin Srank (http://smasty.net)
  *
+ * @todo Subquery tests
+ * @todo PHPUnit tests
  */
 
 
