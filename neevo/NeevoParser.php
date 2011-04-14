@@ -361,7 +361,7 @@ class NeevoParser {
 				return '(' . implode(', ', $this->escapeValue($value)) . ')';
 			} elseif($type === Neevo::LITERAL){
 				return ($value instanceof NeevoLiteral) ? $value->value : $value;
-			} elseif($type === Neevo::SUBQUERY && ($value instanceof NeevoResult)){
+			} elseif($type === Neevo::SUBQUERY && $value instanceof NeevoResult){
 				return "($value)";
 			} else{
 				return $this->stmt->getDriver()->escape($value, $type);
