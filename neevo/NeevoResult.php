@@ -638,6 +638,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @internal
 	 */
 	public function groupBy(){
+		trigger_error(__METHOD__ . ' is deprecated, use ' . __CLASS__ . '::group() instead.', E_USER_WARNING);
 		return call_user_func_array(array($this, 'group'), func_get_args());
 	}
 
@@ -647,6 +648,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @internal
 	 */
 	public function fetchRow(){
+		trigger_error(__METHOD__ . ' is deprecated, use ' . __CLASS__ . '::fetch() instead.', E_USER_WARNING);
 		return $this->fetch();
 	}
 
