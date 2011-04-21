@@ -230,16 +230,6 @@ abstract class NeevoStmtBase {
 
 
 	/**
-	 * @deprecated
-	 * @internal
-	 */
-	public function orderBy(){
-		trigger_error(__METHOD__ . ' is deprecated, use ' . __CLASS__ . '::order() instead.', E_USER_WARNING);
-		return call_user_func_array(array($this, 'order'), func_get_args());
-	}
-
-
-	/**
 	 * Set LIMIT and OFFSET clauses.
 	 * @param int $limit
 	 * @param int $offset
@@ -457,6 +447,16 @@ abstract class NeevoStmtBase {
 	public function resetState(){
 		$this->performed = false;
 		$this->time = null;
+	}
+
+
+	/**
+	 * @deprecated
+	 * @internal
+	 */
+	public function orderBy(){
+		trigger_error(__METHOD__ . ' is deprecated, use ' . __CLASS__ . '::order() instead.', E_USER_WARNING);
+		return call_user_func_array(array($this, 'order'), func_get_args());
 	}
 
 
