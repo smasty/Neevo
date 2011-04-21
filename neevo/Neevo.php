@@ -32,7 +32,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 424;
+	const REVISION = 425;
 
 	// Data types
 	const BOOL = 'b';
@@ -311,7 +311,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 		$sql = str_replace("\\'", '\\&#39;', $sql);
 		$sql = preg_replace_callback("~(/\\*.*\\*/)|($keywords1)|($keywords2)|('[^']+'|[0-9]+)~", array('Neevo', '_highlightCallback'), $sql);
 		$sql = str_replace('\\&#39;', "\\'", $sql);
-		return '<pre style="color:#555" class="sql-dump">' . $sql . "</pre>\n";
+		return '<pre style="color:#555" class="sql-dump">' . trim($sql) . "</pre>\n";
 	}
 
 
@@ -320,7 +320,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 			return '<em style="color:#999">'.$match[1].'</em>';
 		}
 		if(!empty($match[2])){ // Basic keywords
-			return '<strong style="color:#e71818">'.$match[2].'</strong>';
+			return "\n" . '<strong style="color:#e71818">'.$match[2].'</strong>';
 		}
 		if(!empty($match[3])){ // Other keywords
 			return '<strong style="color:#d59401">'.$match[3].'</strong>';
