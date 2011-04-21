@@ -317,16 +317,16 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 	private static function _highlightCallback($match){
 		if(!empty($match[1])){ // /* comment */
-			return '<em style="color:#999">'.$match[1].'</em>';
+			return '<em style="color:#999">' . $match[1] . '</em>';
 		}
 		if(!empty($match[2])){ // Basic keywords
-			return "\n" . '<strong style="color:#e71818">'.$match[2].'</strong>';
+			return "\n" . '<strong style="color:#e71818">' . $match[2] . '</strong>';
 		}
 		if(!empty($match[3])){ // Other keywords
-			return '<strong style="color:#d59401">'.$match[3].'</strong>';
+			return '<strong style="color:#d59401">' . $match[3] . '</strong>';
 		}
 		if(!empty($match[4]) || $match[4] === '0'){ // Values
-			return '<em style="color:#008000">'.$match[4].'</em>';
+			return '<em style="color:#008000">' . $match[4] . '</em>';
 		}
 	}
 
