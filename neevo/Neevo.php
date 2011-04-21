@@ -228,7 +228,9 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	public function attachObserver(INeevoObserver $observer, $exception = true){
 		$this->connection->attachObserver($observer);
 		if($exception){
-			NeevoException::attach($observer);
+			$e = new NeevoException;
+			$e->attachObserver($observer);
+			$e = null;
 		}
 	}
 
@@ -240,7 +242,9 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 */
 	public function detachObserver(INeevoObserver $observer){
 		$this->connection->detachObserver($observer);
-		NeevoException::detach($observer);
+		$e = new NeevoException;
+		$e->detachObserver($observer);
+		$e = null;
 	}
 
 

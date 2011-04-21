@@ -62,11 +62,11 @@ class NeevoException extends Exception implements INeevoObservable {
 
 
 	/**
-	 * Attach given observer. Static for attachObserver().
+	 * Attach given observer.
 	 * @param INeevoObserver $observer
 	 * @return void
 	 */
-	public static function attach(INeevoObserver $observer){
+	public function attachObserver(INeevoObserver $observer){
 		if(!self::$observers){
 			self::$observers = new SplObjectStorage;
 		}
@@ -75,25 +75,15 @@ class NeevoException extends Exception implements INeevoObservable {
 
 
 	/**
-	 * Detach given observer. Static for detachObserver().
+	 * Detach given observer.
 	 * @param INeevoObserver $observer
 	 * @return void
 	 */
-	public static function detach(INeevoObserver $observer){
+	public function detachObserver(INeevoObserver $observer){
 		if(!self::$observers){
 			return;
 		}
 		self::$observers->detach($observer);
-	}
-
-
-	public function attachObserver(INeevoObserver $observer){
-		self::attach($observer);
-	}
-
-
-	public function detachObserver(INeevoObserver $observer){
-		self::detach($observer);
 	}
 
 
