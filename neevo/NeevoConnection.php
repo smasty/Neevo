@@ -24,7 +24,7 @@
  * @author Martin Srank
  * @package Neevo
  */
-class NeevoConnection implements INeevoObservable {
+class NeevoConnection implements INeevoObservable, ArrayAccess {
 
 
 	/** @var array */
@@ -214,6 +214,26 @@ class NeevoConnection implements INeevoObservable {
 	}
 
 
+	/**
+	 * Get configuration value.
+	 * @param string $key
+	 * @return mixed
+	 */
+	public function offsetGet($key){
+		return $this->getConfig($key);
+	}
+
+
+	/**
+	 * Check if configuration value exists.
+	 * @param mixed $key
+	 * @return bool
+	 */
+	public function offsetExists($key){
+		return isset($this->config[$key]);
+	}
+
+
 	/*	************	Internal methods ************	*/
 
 
@@ -229,6 +249,13 @@ class NeevoConnection implements INeevoObservable {
 			$config[$key] = $config[$alias];
 		}
 	}
+
+
+	/** @internal */
+	public function offsetSet($offset, $value){}
+
+	/** @internal */
+	public function offsetUnset($offset){}
 
 
 	/**
