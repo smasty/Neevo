@@ -22,10 +22,6 @@ if(version_compare(PHP_VERSION, '5.1.2', '<')){
 @set_magic_quotes_runtime(false);
 
 
-// Neevo dir
-define('NEEVO_DIR', dirname(__FILE__));
-
-
 // Register autoloader responsible for loading Neevo classes and interfaces.
 require_once dirname(__FILE__) . '/neevo/NeevoLoader.php';
 NeevoLoader::getInstance()->register();
