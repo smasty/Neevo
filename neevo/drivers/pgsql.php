@@ -24,7 +24,7 @@
  *  - lazy, table_prefix... => see NeevoConnection
  *
  * @author Martin Srank
- * @package Neevo\Driver
+ * @package Neevo\Drivers
  */
 class NeevoDriverPgSQL implements INeevoDriver {
 

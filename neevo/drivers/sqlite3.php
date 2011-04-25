@@ -26,7 +26,7 @@
  * is not supported for this driver.
  *
  * @author Martin Srank
- * @package Neevo\Driver
+ * @package Neevo\Drivers
  */
 class NeevoDriverSQLite3 extends NeevoParser implements INeevoDriver {
 

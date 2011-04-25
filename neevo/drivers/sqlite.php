@@ -29,7 +29,7 @@
  *  - lazy, table_prefix... => see NeevoConnection
  *
  * @author Martin Srank
- * @package Neevo\Driver
+ * @package Neevo\Drivers
  */
 class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 

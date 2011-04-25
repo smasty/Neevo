@@ -109,7 +109,7 @@ class NeevoException extends Exception implements INeevoObservable {
 /**
  * Exception for features not implemented by the driver.
  * @author Martin Srank
- * @package Neevo\Driver
+ * @package Neevo\Drivers
  */
 class NeevoImplementationException extends NeevoException {}
 
