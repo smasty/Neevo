@@ -437,6 +437,7 @@ abstract class NeevoStmtBase {
 	 */
 	public function resetState(){
 		$this->performed = false;
+		$this->resultSet = null;
 		$this->time = null;
 	}
 

@@ -37,9 +37,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	/** @var resource */
 	protected $resultSet;
 
-	/** @var int */
-	protected $numRows;
-
 	/** @var string */
 	private $rowClass = 'NeevoRow';
 
@@ -309,16 +306,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
-	/**
-	 * Get the number of rows in the result set.
-	 * @return int
-	 * @throws NeevoDriverException
-	 */
 	public function rows(){
-		$this->performed || $this->run();
-
-		$this->numRows = (int) $this->connection->getDriver()->rows($this->resultSet);
-		return $this->numRows;
+		return $this->count();
 	}
 
 
@@ -333,7 +322,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 */
 	public function count($column = null){
 		if($column === null){
-			return $this->rows();
+			$this->performed || $this->run();
+			return (int) $this->connection->getDriver()->rows($this->resultSet);
 		}
 		return $this->aggregation("COUNT(:$column)");
 	}
@@ -620,17 +610,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 
 	/*  ************  Internal methods  ************  */
-
-
-	/**
-	 * Reset state of the result.
-	 * @return void
-	 */
-	public function resetState(){
-		parent::resetState();
-		$this->resultSet = null;
-		$this->numRows = null;
-	}
 
 
 	/**

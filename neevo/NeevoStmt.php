@@ -79,7 +79,7 @@ class NeevoStmt extends NeevoStmtBase {
 
 		try{
 			$this->affectedRows = $this->connection->getDriver()->affectedRows();
-		} catch(NeevoException $e){
+		} catch(NeevoDriverException $e){
 			$this->affectedRows = false;
 		}
 
@@ -112,7 +112,7 @@ class NeevoStmt extends NeevoStmtBase {
 	public function affectedRows(){
 		$this->performed || $this->run();
 		if($this->affectedRows === false){
-			throw new NeevoDriverException('Affected rows not supported by this driver');
+			throw new NeevoDriverException('Affected rows are not supported by this driver.');
 		}
 		return $this->affectedRows;
 	}
