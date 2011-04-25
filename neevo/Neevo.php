@@ -35,30 +35,30 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	const REVISION = 430;
 
 	// Data types
-	const BOOL = 'b';
-	const INT = 'i';
-	const FLOAT = 'f';
-	const TEXT = 's';
-	const BINARY = 'bin';
-	const DATETIME = 'd';
-	const ARR = 'a';
-	const LITERAL = 'l';
-	const IDENTIFIER = 'id';
-	const SUBQUERY = 'sub';
+	const BOOL = 'b',
+		INT = 'i',
+		FLOAT = 'f',
+		TEXT = 's',
+		BINARY = 'bin',
+		DATETIME = 'd',
+		ARR = 'a',
+		LITERAL = 'l',
+		IDENTIFIER = 'id',
+		SUBQUERY = 'sub';
 
 	// Statement types
-	const STMT_SELECT = 'stmt_select';
-	const STMT_INSERT = 'stmt_insert';
-	const STMT_UPDATE = 'stmt_update';
-	const STMT_DELETE = 'stmt_delete';
+	const STMT_SELECT = 'stmt_select',
+		STMT_INSERT = 'stmt_insert',
+		STMT_UPDATE = 'stmt_update',
+		STMT_DELETE = 'stmt_delete';
 
 	// JOIN types
-	const JOIN_LEFT = 'join_left';
-	const JOIN_INNER = 'join_inner';
+	const JOIN_LEFT = 'join_left',
+		JOIN_INNER = 'join_inner';
 
 	// Order types
-	const ASC = 'ASC';
-	const DESC = 'DESC';
+	const ASC = 'ASC',
+		DESC = 'DESC';
 
 
 	/**

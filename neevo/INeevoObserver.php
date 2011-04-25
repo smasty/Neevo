@@ -18,21 +18,21 @@
 interface INeevoObserver {
 
 	// Event types
-	const CONNECT = 2;
+	const CONNECT = 2,
 
-	const SELECT = 4;
-	const INSERT = 8;
-	const UPDATE = 16;
-	const DELETE = 32;
-	const QUERY = 60; // SELECT, INSERT, UPDATE, DELETE
+		SELECT = 4,
+		INSERT = 8,
+		UPDATE = 16,
+		DELETE = 32,
+		QUERY = 60, // SELECT, INSERT, UPDATE, DELETE
 
-	const BEGIN = 64;
-	const COMMIT = 128;
-	const ROLLBACK = 256;
-	const TRANSACTION = 448; // BEGIN, COMMIT, ROLLBACK
+		BEGIN = 64,
+		COMMIT = 128,
+		ROLLBACK = 256,
+		TRANSACTION = 448, // BEGIN, COMMIT, ROLLBACK
 
-	const EXCEPTION = 512;
-	const ALL = 1022;
+		EXCEPTION = 512,
+		ALL = 1022;
 
 
 	/**

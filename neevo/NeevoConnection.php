@@ -180,6 +180,9 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	}
 
 
+	/*  ************  Implementation of INeevoObservable  ************  */
+
+
 	/**
 	 * Attach given observer.
 	 * @param INeevoObserver $observer
@@ -214,6 +217,9 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	}
 
 
+	/*  ************  Implementation of ArrayAccess  ************  */
+
+
 	/**
 	 * Get configuration value.
 	 * @param string $key
@@ -234,7 +240,14 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	}
 
 
-	/*	************	Internal methods ************	*/
+	/** @internal */
+	public function offsetSet($offset, $value){}
+
+	/** @internal */
+	public function offsetUnset($offset){}
+
+
+	/*  ************  Internal methods  ************  */
 
 
 	/**
@@ -249,13 +262,6 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 			$config[$key] = $config[$alias];
 		}
 	}
-
-
-	/** @internal */
-	public function offsetSet($offset, $value){}
-
-	/** @internal */
-	public function offsetUnset($offset){}
 
 
 	/**
