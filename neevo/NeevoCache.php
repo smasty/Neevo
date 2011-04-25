@@ -13,7 +13,7 @@
 /**
  * Interface for NeevoCache classes.
  * @author Martin Srank
- * @package NeevoCache
+ * @package Neevo\Cache
  */
 interface INeevoCache {
 
@@ -49,7 +49,7 @@ interface INeevoCache {
 /**
  * Default implementation of INeevoCache.
  * @author Martin Srank
- * @package NeevoCache
+ * @package Neevo\Cache
  */
 class NeevoCache implements INeevoCache {
 
@@ -81,7 +81,7 @@ class NeevoCache implements INeevoCache {
 /**
  * Neevo cache using `$_SESSION['NeevoCache']`.
  * @author Martin Srank
- * @package NeevoCache
+ * @package Neevo\Cache
  */
 class NeevoCacheSession implements INeevoCache {
 
@@ -109,7 +109,7 @@ class NeevoCacheSession implements INeevoCache {
 /**
  * Neevo cache using file.
  * @author Martin Srank
- * @package NeevoCache
+ * @package Neevo\Cache
  */
 class NeevoCacheFile implements INeevoCache {
 
@@ -153,7 +153,7 @@ class NeevoCacheFile implements INeevoCache {
 /**
  * Neevo cache using `NeevoCache.` prefix in Memcache.
  * @author Martin Srank
- * @package NeevoCache
+ * @package Neevo\Cache
  */
 class NeevoCacheMemcache implements INeevoCache {
 

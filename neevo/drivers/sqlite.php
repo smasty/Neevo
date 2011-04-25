@@ -23,13 +23,13 @@
  *  - dbcharset => Database character encoding (will be converted to 'charset')
  *  - persistent (bool) => Try to find a persistent link
  *  - unbuffered (bool) => Sends query without fetching and buffering the result
- * 
+ *
  *  - updateLimit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
  *  - resource (type resource) => Existing SQLite link
  *  - lazy, table_prefix... => see NeevoConnection
- * 
+ *
  * @author Martin Srank
- * @package NeevoDrivers
+ * @package Neevo\Driver
  */
 class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 
@@ -417,5 +417,5 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 		return $this->updateLimit ? $this->applyLimit($sql . $this->clauses[3]) : $sql;
 	}
 
-	
+
 }

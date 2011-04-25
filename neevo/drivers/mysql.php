@@ -27,7 +27,7 @@
  *  - lazy, table_prefix... => see NeevoConnection
  *
  * @author Martin Srank
- * @package NeevoDrivers
+ * @package Neevo\Driver
  */
 class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 

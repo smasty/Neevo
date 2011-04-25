@@ -19,12 +19,12 @@
  *  - schema => Schema search path
  *  - charset => Character encoding to set (defaults to utf-8)
  *  - persistent (bool) => Try to find a persistent link
- * 
+ *
  *  - resource (type resource) => Existing SQLite link
  *  - lazy, table_prefix... => see NeevoConnection
- * 
+ *
  * @author Martin Srank
- * @package NeevoDrivers
+ * @package Neevo\Driver
  */
 class NeevoDriverPgSQL implements INeevoDriver {
 

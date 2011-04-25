@@ -27,7 +27,7 @@
  * "source of **NeevoStmtParser** class":./source-neevo.NeevoStmtParser.php.html.
  *
  * @author Martin Srank
- * @package NeevoDrivers
+ * @package Neevo\Driver
  */
 interface INeevoDriver {
 

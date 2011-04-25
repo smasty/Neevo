@@ -17,16 +17,16 @@
  *  - database (or file)
  *  - charset => Character encoding to set (defaults to utf-8)
  *  - dbcharset => Database character encoding (will be converted to 'charset')
- * 
+ *
  *  - updateLimit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
  *  - resource (instance of SQLite3) => Existing SQLite 3 link
  *  - lazy, table_prefix => see NeevoConnection
  *
  * Since SQLite 3 only allows unbuffered queries, number of result rows and seeking
  * is not supported for this driver.
- * 
+ *
  * @author Martin Srank
- * @package NeevoDrivers
+ * @package Neevo\Driver
  */
 class NeevoDriverSQLite3 extends NeevoParser implements INeevoDriver {
 
