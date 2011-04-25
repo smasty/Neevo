@@ -286,7 +286,7 @@ class NeevoParser {
 			$field = $prefix . $field;
 		}
 
-		return $this->stmt->getDriver()->escape($field, Neevo::IDENTIFIER);
+		return $this->stmt->getConnection()->getDriver()->escape($field, Neevo::IDENTIFIER);
 	}
 
 
@@ -338,7 +338,8 @@ class NeevoParser {
 					return $value->value;
 				} else{
 					return is_numeric($value)
-						? 1 * $value : $this->stmt->getDriver()->escape($value, Neevo::TEXT);
+						? 1 * $value
+						: $this->stmt->getConnection()->getDriver()->escape($value, Neevo::TEXT);
 				}
 			}
 		}
@@ -364,7 +365,7 @@ class NeevoParser {
 			} elseif($type === Neevo::SUBQUERY && $value instanceof NeevoResult){
 				return "($value)";
 			} else{
-				return $this->stmt->getDriver()->escape($value, $type);
+				return $this->stmt->getConnection()->getDriver()->escape($value, $type);
 			}
 		}
 	}

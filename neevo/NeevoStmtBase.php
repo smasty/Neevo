@@ -254,7 +254,7 @@ abstract class NeevoStmtBase {
 			return $this;
 		}
 		$this->resetState();
-		$this->getDriver()->rand($this);
+		$this->connection->getDriver()->rand($this);
 		return $this;
 	}
 
@@ -284,7 +284,7 @@ abstract class NeevoStmtBase {
 		$start = -microtime(true);
 
 		$query = $this->performed ?
-			$this->resultSet : $this->getDriver()->query($this->parse());
+			$this->resultSet : $this->connection->getDriver()->query($this->parse());
 
 		$this->time = $start + microtime(true);
 
@@ -402,7 +402,7 @@ abstract class NeevoStmtBase {
 
 		if($cached === null){
 			try{
-				$key = $this->getDriver()->getPrimaryKey($table);
+				$key = $this->connection->getDriver()->getPrimaryKey($table);
 			} catch(NeevoException $e){
 				return null;
 			}
@@ -428,15 +428,6 @@ abstract class NeevoStmtBase {
 	 */
 	public function getConnection(){
 		return $this->connection;
-	}
-
-
-	/**
-	 * Get the driver instance.
-	 * @return INeevoDriver
-	 */
-	public function getDriver(){
-		return $this->connection->getDriver();
 	}
 
 

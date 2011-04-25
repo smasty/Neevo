@@ -78,7 +78,7 @@ class NeevoStmt extends NeevoStmtBase {
 		$result = parent::run();
 
 		try{
-			$this->affectedRows = $this->getDriver()->affectedRows();
+			$this->affectedRows = $this->connection->getDriver()->affectedRows();
 		} catch(NeevoException $e){
 			$this->affectedRows = false;
 		}
@@ -98,7 +98,7 @@ class NeevoStmt extends NeevoStmtBase {
 		}
 		$this->performed || $this->run();
 		try{
-			return $this->getDriver()->insertId();
+			return $this->connection->getDriver()->insertId();
 		} catch(NeevoImplemenationException $e){
 			return false;
 		}

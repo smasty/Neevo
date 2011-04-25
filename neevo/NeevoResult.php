@@ -93,7 +93,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 */
 	public function __destruct(){
 		try{
-			$this->getDriver()->free($this->resultSet);
+			$this->connection->getDriver()->free($this->resultSet);
 		} catch(NeevoImplemenationException $e){}
 
 		$this->resultSet = null;
@@ -184,7 +184,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	public function fetch(){
 		$this->performed || $this->run();
 
-		$row = $this->getDriver()->fetch($this->resultSet);
+		$row = $this->connection->getDriver()->fetch($this->resultSet);
 		if(!is_array($row)){
 			return false;
 		}
@@ -240,7 +240,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 */
 	public function fetchSingle(){
 		$this->performed || $this->run();
-		$row = $this->getDriver()->fetch($this->resultSet);
+		$row = $this->connection->getDriver()->fetch($this->resultSet);
 
 		if(!$row){
 			return false;
@@ -301,7 +301,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 */
 	public function seek($offset){
 		$this->performed || $this->run();
-		$seek = $this->getDriver()->seek($this->resultSet, $offset);
+		$seek = $this->connection->getDriver()->seek($this->resultSet, $offset);
 		if($seek){
 			return $seek;
 		}
@@ -317,7 +317,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	public function rows(){
 		$this->performed || $this->run();
 
-		$this->numRows = (int) $this->getDriver()->rows($this->resultSet);
+		$this->numRows = (int) $this->connection->getDriver()->rows($this->resultSet);
 		return $this->numRows;
 	}
 
@@ -422,7 +422,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 		if(empty($types)){
 			try{
-				$types = $this->getDriver()->getColumnTypes($this->resultSet, $table);
+				$types = $this->connection->getDriver()->getColumnTypes($this->resultSet, $table);
 			} catch(NeevoException $e){}
 		}
 
@@ -484,7 +484,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 				return ((bool) $value) && $value !== 'f' && $value !== 'F';
 
 			case Neevo::BINARY:
-				return $this->getDriver()->unescape($value, $type);
+				return $this->connection->getDriver()->unescape($value, $type);
 
 			case Neevo::DATETIME:
 				if((int) $value === 0){
