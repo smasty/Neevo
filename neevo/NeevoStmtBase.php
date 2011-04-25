@@ -281,8 +281,6 @@ abstract class NeevoStmtBase {
 	 * @return resource|bool
 	 */
 	public function run(){
-		$this->getConnection()->connect();
-
 		$start = -microtime(true);
 
 		$query = $this->performed ?
@@ -314,6 +312,8 @@ abstract class NeevoStmtBase {
 	 * @internal
 	 */
 	public function parse(){
+		$this->connection->connect();
+
 		$parser = $this->connection->getParser();
 		$instance = new $parser($this);
 		return $instance->parse();
@@ -457,16 +457,6 @@ abstract class NeevoStmtBase {
 	public function orderBy(){
 		trigger_error(__METHOD__ . ' is deprecated, use ' . __CLASS__ . '::order() instead.', E_USER_WARNING);
 		return call_user_func_array(array($this, 'order'), func_get_args());
-	}
-
-
-	/**
-	 * Get the configuration value(s).
-	 * @param string $key
-	 * @return mixed
-	 */
-	protected function getConfig($key = null){
-		return $this->connection->getConfig($key);
 	}
 
 

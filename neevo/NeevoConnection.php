@@ -292,7 +292,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 		$this->driver = new $class;
 
 		// Set statement parser
-		if($this->isStmtParser($class)){
+		if($this->isParser($class)){
 			$this->parser = $class;
 		}
 	}
@@ -318,7 +318,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @param string $class
 	 * @return bool
 	 */
-	private function isStmtParser($class){
+	private function isParser($class){
 		try{
 			$reflection = new ReflectionClass($class);
 			return $reflection->isSubclassOf('NeevoStmtParser');

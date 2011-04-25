@@ -81,9 +81,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		$this->columns = is_string($columns) ? explode(',', $columns) : $columns;
 
 		$this->source = $source;
-		$this->detectTypes = (bool) $this->getConfig('detectTypes');
+		$this->detectTypes = (bool) $connection['detectTypes'];
 
-		$this->setRowClass($this->getConfig('rowClass'));
+		$this->setRowClass($connection['rowClass']);
 	}
 
 
@@ -466,7 +466,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return mixed
 	 */
 	private function convertType($value, $type){
-		$dateFormat = $this->getConfig('formatDateTime');
+		$dateFormat = $this->connection['formatDateTime'];
 		if($value === null || $value === false){
 			return null;
 		}
