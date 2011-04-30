@@ -7,8 +7,10 @@
 class NeevoDriverDummyParser extends NeevoParser implements INeevoDriver {
 
 
-	public function __construct(){
-
+	public function __construct(NeevoStmtBase $statement = null){
+		if($statement instanceof NeevoStmtBase){
+			parent::__construct($statement);
+		}
 	}
 
 

@@ -137,7 +137,6 @@ class NeevoParser {
 	 * @return string
 	 */
 	protected function parseSource(){
-
 		if($this->stmt instanceof NeevoResult){
 			if($this->stmt->getTable() === null){
 				$subq = $this->stmt->getSource();
