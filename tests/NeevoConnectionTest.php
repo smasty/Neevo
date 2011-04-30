@@ -1,8 +1,4 @@
 <?php
-/*require_once './mocks/DummyObserver.php';
-require_once './mocks/NeevoDriverDummy.php';
-require_once './mocks/NeevoDriverDummyParser.php';
-require_once './mocks/NeevoDriverWrong.php';*/
 
 use PHPUnit_Framework_Assert as A;
 
