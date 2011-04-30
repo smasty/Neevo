@@ -55,9 +55,12 @@ class NeevoDriverSQLite3 extends NeevoParser implements INeevoDriver {
 	 * @return void
 	 * @throws NeevoDriverException
 	 */
-	public function __construct(){
+	public function __construct(NeevoStmtBase $statement = null){
 		if(!extension_loaded("sqlite3")){
 			throw new NeevoDriverException("Cannot instantiate Neevo SQLite 3 driver - PHP extension 'sqlite3' not loaded.");
+		}
+		if($statement instanceof NeevoStmtBase){
+			parent::__construct($statement);
 		}
 	}
 

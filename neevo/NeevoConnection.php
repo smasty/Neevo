@@ -321,7 +321,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	private function isParser($class){
 		try{
 			$reflection = new ReflectionClass($class);
-			return $reflection->isSubclassOf('NeevoStmtParser');
+			return $reflection->isSubclassOf('NeevoParser');
 		} catch(ReflectionException $e){
 			return false;
 		}

@@ -44,9 +44,12 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @return void
 	 * @throws NeevoDriverException
 	 */
-	public function __construct(){
+	public function __construct(NeevoStmtBase $statement = null){
 		if(!extension_loaded("pgsql")){
 			throw new NeevoDriverException("Cannot instantiate Neevo PgSQL driver - PHP extension 'pgsql' not loaded.");
+		}
+		if($statement instanceof NeevoStmtBase){
+			parent::__construct($statement);
 		}
 	}
 
