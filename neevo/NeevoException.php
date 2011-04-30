@@ -118,6 +118,6 @@ class NeevoImplementationException extends NeevoException {}
 /**
  * Neevo driver exception.
  * @author Martin Srank
- * @package Neevo\Driver
+ * @package Neevo\Drivers
  */
 class NeevoDriverException extends NeevoException {}
