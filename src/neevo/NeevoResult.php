@@ -614,7 +614,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 	/**
 	 * @deprecated
-	 * @internal
 	 */
 	public function groupBy(){
 		trigger_error(__METHOD__ . ' is deprecated, use ' . __CLASS__ . '::group() instead.', E_USER_WARNING);
@@ -624,7 +623,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 	/**
 	 * @deprecated
-	 * @internal
 	 */
 	public function fetchRow(){
 		trigger_error(__METHOD__ . ' is deprecated, use ' . __CLASS__ . '::fetch() instead.', E_USER_WARNING);

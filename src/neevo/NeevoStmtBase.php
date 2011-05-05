@@ -126,7 +126,7 @@ abstract class NeevoStmtBase {
 			if($name == 'if'){
 				$conds[] = (bool) $args[0];
 			} elseif($name == 'else'){
-				$conds[ count($conds)-1 ] = !end($conds);
+				$conds[count($conds)-1] = !end($conds);
 			} elseif($name == 'end'){
 				array_pop($conds);
 			}
@@ -363,7 +363,7 @@ abstract class NeevoStmtBase {
 
 	/**
 	 * Get LIMIT and OFFSET clauses.
-	 * @return int
+	 * @return array
 	 */
 	public function getLimit(){
 		return $this->limit;
@@ -394,11 +394,11 @@ abstract class NeevoStmtBase {
 	 */
 	public function getPrimaryKey(){
 		$table = $this->getTable();
-		if($table === null){
+		if(!$table){
 			return null;
 		}
 		$key = null;
-		$cached = $this->connection->getCache()->fetch($table.'_primaryKey');
+		$cached = $this->connection->getCache()->fetch($table . '_primaryKey');
 
 		if($cached === null){
 			try{
@@ -406,7 +406,7 @@ abstract class NeevoStmtBase {
 			} catch(NeevoException $e){
 				return null;
 			}
-			$this->connection->getCache()->store($table.'_primaryKey', $key);
+			$this->connection->getCache()->store($table . '_primaryKey', $key);
 			return $key === '' ? null : $key;
 		}
 		return $cached === '' ? null : $cached;
@@ -444,7 +444,6 @@ abstract class NeevoStmtBase {
 
 	/**
 	 * @deprecated
-	 * @internal
 	 */
 	public function orderBy(){
 		trigger_error(__METHOD__ . ' is deprecated, use ' . __CLASS__ . '::order() instead.', E_USER_WARNING);
@@ -464,6 +463,7 @@ abstract class NeevoStmtBase {
 			if($cond) continue;
 			else return true;
 		}
+		return false;
 	}
 
 
