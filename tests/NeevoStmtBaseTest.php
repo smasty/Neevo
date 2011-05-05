@@ -3,6 +3,11 @@
 use PHPUnit_Framework_Assert as A;
 
 
+class DummyStmt extends NeevoStmtBase {
+
+}
+
+
 /**
  * Tests for NeevoStmtBase.
  */
@@ -22,24 +27,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 
 	protected function tearDown(){
 		unset($this->stmt);
-	}
-
-
-	/**
-	 * Test conditional statements - true.
-	 */
-	public function testConditionsTrue(){
-		$this->stmt->if(true);
-		A::assertFalse($this->stmt->_validateConditions());
-	}
-
-
-	/**
-	 * Test conditional statements - false.
-	 */
-	public function testConditionsFalse(){
-		$this->stmt->if(false);
-		A::assertTrue($this->stmt->_validateConditions());
 	}
 
 
@@ -200,7 +187,10 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	 * Test LIMIT and OFFSET.
 	 */
 	public function testLimitOffset(){
-		$this->stmt->setType(Neevo::STMT_SELECT);
+		$r = new ReflectionProperty('DummyStmt', 'type');
+		$r->setAccessible(true);
+		$r->setValue($this->stmt, Neevo::STMT_SELECT);
+
 		$this->stmt->limit(5, 10);
 		A::assertEquals(array(5, 10), $this->stmt->getLimit());
 	}
@@ -285,7 +275,10 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	 * Test getTable().
 	 */
 	public function testGetTable(){
-		$this->stmt->setSource(':foo');
+		$r = new ReflectionProperty('DummyStmt', 'source');
+		$r->setAccessible(true);
+		$r->setValue($this->stmt, ':foo');
+
 		A::assertEquals('foo', $this->stmt->getTable());
 	}
 
@@ -294,7 +287,10 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	 * Test primary key detection.
 	 */
 	public function testGetPrimaryKey(){
-		$this->stmt->setSource('table');
+		$r = new ReflectionProperty('DummyStmt', 'source');
+		$r->setAccessible(true);
+		$r->setValue($this->stmt, 'table');
+
 		A::assertEquals('id', $this->stmt->getPrimaryKey());
 	}
 
@@ -311,7 +307,10 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	 * Test primary key retrieve from cache.
 	 */
 	public function testGetPrimaryKeyCached(){
-		$this->stmt->setSource('foo');
+		$r = new ReflectionProperty('DummyStmt', 'source');
+		$r->setAccessible(true);
+		$r->setValue($this->stmt, 'foo');
+
 		$this->stmt->getConnection()->getCache()->store('foo_primaryKey', 'pk');
 		A::assertEquals('pk', $this->stmt->getPrimaryKey());
 	}
@@ -321,7 +320,10 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	 * Test foreign key detection.
 	 */
 	public function testGetForeignKey(){
-		$this->stmt->setSource('foo');
+		$r = new ReflectionProperty('DummyStmt', 'source');
+		$r->setAccessible(true);
+		$r->setValue($this->stmt, 'foo');
+
 		A::assertEquals('bar_id', $this->stmt->getForeignKey('bar'));
 	}
 
@@ -339,7 +341,10 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testIf(){
 		$this->stmt->if(true);
-		A::assertFalse($this->stmt->_validateConditions());
+
+		$r = new ReflectionMethod($this->stmt, '_validateConditions');
+		$r->setAccessible(true);
+		A::assertFalse($r->invoke($this->stmt));
 	}
 
 
@@ -348,7 +353,10 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testIfElse(){
 		$this->stmt->if(true)->else();
-		A::assertTrue($this->stmt->_validateConditions());
+
+		$r = new ReflectionMethod($this->stmt, '_validateConditions');
+		$r->setAccessible(true);
+		A::assertTrue($r->invoke($this->stmt));
 	}
 
 
@@ -357,7 +365,10 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testIfEnd(){
 		$this->stmt->if(true)->end();
-		A::assertFalse($this->stmt->_validateConditions());
+
+		$r = new ReflectionMethod($this->stmt, '_validateConditions');
+		$r->setAccessible(true);
+		A::assertFalse($r->invoke($this->stmt));
 	}
 
 
