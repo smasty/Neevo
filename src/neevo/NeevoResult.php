@@ -57,6 +57,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @param string|NeevoResult $source Table name or subquery
 	 * @return void
 	 * @throws InvalidArgumentException
+	 * @todo empty array
 	 */
 	public function __construct(NeevoConnection $connection, $columns = null, $source = null){
 		parent::__construct($connection);
@@ -79,6 +80,18 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 		$this->source = $source;
 		$this->detectTypes = (bool) $connection['detectTypes'];
+
+		if($connection['autoJoin'] === true){
+			$referenced = array();
+			foreach($this->columns as $col){
+				if(strpos($col, '.') !== false){
+					$referenced[] = trim(str_replace(':', '', substr($col, 0, strpos($col, '.'))));
+				}
+			}
+			foreach(array_unique($referenced) as $ref){
+				$this->leftJoin(":$ref", ":$ref." . $this->getForeignKey($this->getTable()) . " = :" . $this->getTable() . "." . $this->getPrimaryKey());
+			}
+		}
 
 		$this->setRowClass($connection['rowClass']);
 	}
