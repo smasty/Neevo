@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 use PHPUnit_Framework_Assert as A;
 
@@ -27,9 +27,6 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test format of configuration - string.
-	 */
 	public function testConfigFormatString(){
 		$connection = new NeevoConnection('driver=Dummy');
 
@@ -37,9 +34,6 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test format of configuration - Traversable.
-	 */
 	public function testConfigFormatTraversable(){
 		$config = new ArrayObject(array('driver' => 'Dummy'));
 		$connection = new NeevoConnection($config);
@@ -48,9 +42,6 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test format of configuration - other.
-	 */
 	public function testConfigFormatElse(){
 		try{
 			$msg = new NeevoConnection(false);
@@ -62,17 +53,11 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Automatic driver instantiation.
-	 */
 	public function testAutoSetDriver(){
 		A::assertInstanceOf('NeevoDriverDummy', $this->instance->getDriver());
 	}
 
 
-	/**
-	 * Driver instantiation - no file.
-	 */
 	public function testSetDriverNoFile(){
 		try{
 			$msg = new NeevoConnection(array(
@@ -86,9 +71,6 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Driver instantiation - not a driver.
-	 */
 	public function testSetDriverNoDriver(){
 		try{
 			$msg = new NeevoConnection(array(
@@ -102,17 +84,11 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Automatic parser instantiation.
-	 */
 	public function testAutoSetParser(){
 		A::assertEquals($this->instance->getParser(), 'NeevoParser');
 	}
 
 
-	/**
-	 * Custom parser instantiation.
-	 */
 	public function testSetCustomParser(){
 		$connection = new NeevoConnection(array(
 				'driver' => 'DummyParser'
@@ -122,9 +98,6 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Cache instantiaton
-	 */
 	public function testSetCache(){
 		$cache = new NeevoCacheSession;
 		$this->instance->setCache($cache);
@@ -133,26 +106,17 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Automatic cache instantiation.
-	 */
 	public function testAutoSetCache(){
 		A::assertInstanceOf('NeevoCache', $this->instance->getCache());
 	}
 
 
-	/**
-	 * Test config values.
-	 */
 	public function testSetConfig(){
 		A::assertTrue($this->instance->getConfig('testConfig'));
 		A::assertInternalType('array', $this->instance->getConfig());
 	}
 
 
-	/**
-	 * Observer attaching via attachObserver().
-	 */
 	public function testAttachObserver(){
 		$observer = new DummyObserver;
 		$this->instance->attachObserver($observer);
@@ -162,9 +126,6 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Observer attaching via config value.
-	 */
 	public function testAutoAttachObserver(){
 		$observer = new DummyObserver;
 		$conn = new NeevoConnection(array(
@@ -177,9 +138,6 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Observer detaching.
-	 */
 	public function testDetachObserver(){
 		$observer = new DummyObserver;
 		$this->instance->attachObserver($observer);
@@ -212,5 +170,37 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 
 
 }
+
+
+/**
+ * Dummy Neevo driver with custom parser.
+ */
+class NeevoDriverDummyParser extends NeevoParser implements INeevoDriver {
+	function __construct(NeevoStmtBase $statement = null){}
+	function connect(array $config){}
+	function close(){}
+	function free($resultSet){}
+	function query($queryString){}
+	function begin($savepoint = null){}
+	function commit($savepoint = null){}
+	function rollback($savepoint = null){}
+	function fetch($resultSet){}
+	function seek($resultSet, $offset){}
+	function insertId(){}
+	function rand(NeevoStmtBase $statement){}
+	function rows($resultSet){}
+	function affectedRows(){}
+	function escape($value, $type){}
+	function unescape($value, $type){}
+	function getPrimaryKey($table){}
+	function getColumnTypes($resultSet, $table){}
+}
+
+
+
+/**
+ * Class with Neevo driver convention name, but not a driver.
+ */
+class NeevoDriverWrong {}
 
 ?>
