@@ -57,7 +57,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @param string|NeevoResult $source Table name or subquery
 	 * @return void
 	 * @throws InvalidArgumentException
-	 * @todo empty array
 	 */
 	public function __construct(NeevoConnection $connection, $columns = null, $source = null){
 		parent::__construct($connection);
@@ -78,9 +77,14 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		$this->type = Neevo::STMT_SELECT;
 		$this->columns = is_string($columns) ? explode(',', $columns) : $columns;
 
+		if($columns === array()){
+			throw new InvalidArgumentException('No columns given.');
+		}
+
 		$this->source = $source;
 		$this->detectTypes = (bool) $connection['detectTypes'];
 
+		// Experimental feature - may be buggy!
 		if($connection['autoJoin'] === true){
 			$referenced = array();
 			foreach($this->columns as $col){
@@ -221,7 +225,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return array
 	 */
 	public function fetchAll($limit = null, $offset = null){
-		$limit = ($limit === null) ? -1 : (int) $limit;
+		$limit = $limit === null ? -1 : (int) $limit;
 		if($offset !== null){
 			$this->seek((int) $offset);
 		}
@@ -426,7 +430,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		if(empty($types)){
 			try{
 				$types = $this->connection->getDriver()->getColumnTypes($this->resultSet, $table);
-			} catch(NeevoException $e){}
+			} catch(NeevoException $e){
+				return $this;
+			}
 		}
 
 		foreach((array) $types as $col => $type){
@@ -470,7 +476,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 */
 	private function convertType($value, $type){
 		$dateFormat = $this->connection['formatDateTime'];
-		if($value === null || $value === false){
+		if($value === null){
 			return null;
 		}
 		switch($type){
@@ -500,7 +506,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 					return date($dateFormat, $value);
 				} else{
 					$d = new DateTime($value);
-					return $d->format($value);
+					return $d->format($dateFormat);
 				}
 
 			default:
