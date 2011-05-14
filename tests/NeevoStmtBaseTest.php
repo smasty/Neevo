@@ -30,9 +30,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test WHERE - default.
-	 */
 	public function testWhereDefault(){
 		$this->stmt->where('one');
 		A::assertEquals(array(array(
@@ -44,9 +41,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test WHERE - simple value.
-	 */
 	public function testWhereValue(){
 		$this->stmt->where($f = 'two', $v = 'value');
 		A::assertEquals(array(array(
@@ -58,9 +52,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test WHERE - modifiers.
-	 */
 	public function testWhereModifiers(){
 		$this->stmt->where($e = 'one = %s AND two = %i', $a[] = 'one', $a[] = 2);
 		A::assertEquals(array(array(
@@ -74,9 +65,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test WHERE - array.
-	 */
 	public function testWhereArray(){
 		$this->stmt->where($a = array('one', 'value'));
 		A::assertEquals(array(array(
@@ -88,9 +76,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test WHERE - do nothing.
-	 */
 	public function testWhereDoNothing(){
 		$w = $this->stmt->getConditions();
 		$this->stmt->if(false);
@@ -99,9 +84,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test WHERE - and() method.
-	 */
 	public function testWhereAnd(){
 		$this->stmt->where('foo')->and('bar');
 		$w = $this->stmt->getConditions();
@@ -109,9 +91,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test WHERE - or() method.
-	 */
 	public function testWhereOr(){
 		$this->stmt->where('foo')->or('bar');
 		$w = $this->stmt->getConditions();
@@ -119,9 +98,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test WHERE - and() / or() method - do nothing.
-	 */
 	public function testWhereAndOrDoNothing(){
 		$this->stmt->if(true);
 		$w = $this->stmt->getConditions();
@@ -131,18 +107,12 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test ORDER - simple.
-	 */
 	public function testOrderSimple(){
 		$this->stmt->order($r = 'rule', $t = 'type');
 		A::assertEquals(array(array($r, $t)), $this->stmt->getSorting());
 	}
 
 
-	/**
-	 * Test ORDER - array.
-	 */
 	public function testOrderArray(){
 		$this->stmt->order($a = array(
 			'one' => '1',
@@ -154,9 +124,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test ORDER - do nothing.
-	 */
 	public function testOrderDoNothing(){
 		$s = $this->stmt->getSorting();
 		$this->stmt->if(false);
@@ -165,27 +132,12 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test ORDER - orderBy() method - deprecated.
-	 */
-	public function testOrderBy(){
-		@$this->stmt->orderBy('foo');
-		A::assertEquals(array(array('foo', null)), $this->stmt->getSorting());
-	}
-
-
-	/**
-	 * Test LIMIT.
-	 */
 	public function testLimit(){
 		$this->stmt->limit(5);
 		A::assertEquals(array(5, null), $this->stmt->getLimit());
 	}
 
 
-	/**
-	 * Test LIMIT and OFFSET.
-	 */
 	public function testLimitOffset(){
 		$r = new ReflectionProperty('DummyStmt', 'type');
 		$r->setAccessible(true);
@@ -196,18 +148,12 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test LIMIT and OFFSET - do not set offset.
-	 */
 	public function testLimitOffsetNoOffset(){
 		$this->stmt->limit(5, 10);
 		A::assertEquals(array(5, null), $this->stmt->getLimit());
 	}
 
 
-	/**
-	 * Test LIMIT - do nothing.
-	 */
 	public function testLimitDoNothing(){
 		$l = $this->stmt->getLimit();
 		$this->stmt->if(false);
@@ -216,43 +162,28 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test RAND.
-	 */
 	public function testRandom(){
 		$s = $this->stmt->getSorting();
 		A::assertNotEquals($s, $this->stmt->rand());
 	}
 
 
-	/**
-	 * Test RAND - do nothing.
-	 */
 	public function testRandomDoNothing(){
 		$this->stmt->if(false);
 		A::assertEquals($this->stmt, $this->stmt->rand());
 	}
 
 
-	/**
-	 * Test parsing empty.
-	 */
 	public function testParse(){
 		A::assertEmpty($this->stmt->parse());
 	}
 
 
-	/**
-	 * Test dumping empty.
-	 */
 	public function testDump(){
 		A::assertEmpty($this->stmt->dump(true));
 	}
 
 
-	/**
-	 * Test dumping empty with echo.
-	 */
 	public function testDumpEcho(){
 		ob_start();
 		$this->stmt->dump();
@@ -260,9 +191,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test empty run.
-	 */
 	public function testRun(){
 		A::assertFalse($this->stmt->run());
 		A::assertTrue($this->stmt->isPerformed());
@@ -271,9 +199,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test getTable().
-	 */
 	public function testGetTable(){
 		$r = new ReflectionProperty('DummyStmt', 'source');
 		$r->setAccessible(true);
@@ -283,9 +208,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test primary key detection.
-	 */
 	public function testGetPrimaryKey(){
 		$r = new ReflectionProperty('DummyStmt', 'source');
 		$r->setAccessible(true);
@@ -295,17 +217,11 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test primary key detection without table name.
-	 */
 	public function testGetPrimaryKeyNull(){
 		A::assertNull($this->stmt->getPrimaryKey());
 	}
 
 
-	/**
-	 * Test primary key retrieve from cache.
-	 */
 	public function testGetPrimaryKeyCached(){
 		$r = new ReflectionProperty('DummyStmt', 'source');
 		$r->setAccessible(true);
@@ -316,9 +232,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test foreign key detection.
-	 */
 	public function testGetForeignKey(){
 		$r = new ReflectionProperty('DummyStmt', 'source');
 		$r->setAccessible(true);
@@ -328,17 +241,11 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test __toString().
-	 */
 	public function testToString(){
 		A::assertEquals((string) $this->stmt, $this->stmt->parse());
 	}
 
 
-	/**
-	 * Test conditional statements - if().
-	 */
 	public function testIf(){
 		$this->stmt->if(true);
 
@@ -348,9 +255,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test conditional statements - if()->else().
-	 */
 	public function testIfElse(){
 		$this->stmt->if(true)->else();
 
@@ -360,9 +264,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test conditional statements - if()->end().
-	 */
 	public function testIfEnd(){
 		$this->stmt->if(true)->end();
 
@@ -372,30 +273,23 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * Test conditional statements - if() without argument.
-	 */
 	public function testIfException(){
 		try{
 			$this->stmt->if();
-			$exc = false;
 		} catch(InvalidArgumentException $e){
-			$exc = true;
+			return;
 		}
-		A::assertTrue($exc);
+		A::fail();
 	}
 
 
-	/**
-	 * Test call to undefined method.
-	 */
 	public function testBadMethodCall(){
 		try{
 			$this->stmt->foobarbaz();
-			$exc = false;
 		} catch(BadMethodCallException $e){
-			$exc = true;
+			return;
 		}
+		A::fail();
 	}
 
 
