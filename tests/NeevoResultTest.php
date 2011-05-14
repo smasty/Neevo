@@ -28,13 +28,11 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
 	public function testInstantiationNoTable(){
-		try{
-			new NeevoResult($this->connection);
-		} catch(InvalidArgumentException $e){
-			return;
-		}
-		A::fail();
+		new NeevoResult($this->connection);
 	}
 
 
@@ -45,23 +43,19 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
 	public function testInstantiationWrongSource(){
-		try{
-			new NeevoResult($this->connection, new stdClass);
-		} catch(InvalidArgumentException $e){
-			return;
-		}
-		A::fail();
+		new NeevoResult($this->connection, new stdClass);
 	}
 
 
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
 	public function testInstantiationNoCols(){
-		try{
-			new NeevoResult($this->connection, array(), 'table');
-		} catch(InvalidArgumentException $e){
-			return;
-		}
-		A::fail();
+		new NeevoResult($this->connection, array(), 'table');
 	}
 
 
@@ -97,13 +91,11 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
 	public function testJoinWrongSource(){
-		try{
-			$this->result->join(new stdClass, true);
-		} catch(InvalidArgumentException $e){
-			return;
-		}
-		A::fail();
+		$this->result->join(new stdClass, true);
 	}
 
 
@@ -147,8 +139,7 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 
 	public function testFetchAllOffset(){
 		A::assertEquals(
-			array($this->result->getConnection()->getDriver()->getRow(1)),
-			array_map('iterator_to_array', $this->result->fetchAll(1, 1))
+			array($this->result->getConnection()->getDriver()->getRow(1)), array_map('iterator_to_array', $this->result->fetchAll(1, 1))
 		);
 	}
 
@@ -186,19 +177,16 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 	public function testSeek(){
 		$this->result->seek(2);
 		A::assertEquals(
-			$this->result->getConnection()->getDriver()->getRow(2),
-			$this->result->fetch()->toArray()
+			$this->result->getConnection()->getDriver()->getRow(2), $this->result->fetch()->toArray()
 		);
 	}
 
 
+	/**
+	 * @expectedException NeevoException
+	 */
 	public function testSeekOverflow(){
-		try{
-			$this->result->seek(5);
-		} catch(NeevoException $e){
-			return;
-		}
-		A::fail();
+		$this->result->seek(5);
 	}
 
 
@@ -377,13 +365,11 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	/**
+	 * @expectedException NeevoException
+	 */
 	public function testSetRowClassNoClass(){
-		try{
-			$this->result->setRowClass('NoClass');
-		} catch(NeevoException $e){
-			return;
-		}
-		A::fail();
+		$this->result->setRowClass('NoClass');
 	}
 
 

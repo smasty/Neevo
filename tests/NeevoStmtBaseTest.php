@@ -273,23 +273,19 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
 	public function testIfException(){
-		try{
-			$this->stmt->if();
-		} catch(InvalidArgumentException $e){
-			return;
-		}
-		A::fail();
+		$this->stmt->if();
 	}
 
 
+	/**
+	 * @expectedException BadMethodCallException
+	 */
 	public function testBadMethodCall(){
-		try{
-			$this->stmt->foobarbaz();
-		} catch(BadMethodCallException $e){
-			return;
-		}
-		A::fail();
+		$this->stmt->foobarbaz();
 	}
 
 

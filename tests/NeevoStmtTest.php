@@ -60,14 +60,12 @@ class NeevoStmtTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	/**
+	 * @expectedException NeevoException
+	 */
 	public function testInsertIdException(){
 		$stmt = NeevoStmt::createDelete($this->connection, 'table');
-		try{
-			$stmt->insertId();
-		} catch(NeevoException $e){
-			return;
-		}
-		A::fail();
+		$stmt->insertId();
 	}
 
 
