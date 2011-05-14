@@ -1,15 +1,11 @@
 <?php
 /**
- * Neevo - Tiny open-source database abstraction layer for PHP
- *
- * Copyright 2010-2011 Martin Srank (http://smasty.net)
+ * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
  *
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * @author	 Martin Srank (http://smasty.net)
- * @license	http://neevo.smasty.net/license MIT license
- * @link    	 http://neevo.smasty.net/
+ * Copyright (c) 2011 Martin Srank (http://smasty.net)
  *
  */
 
@@ -137,33 +133,32 @@ class NeevoParser {
 	 * @return string
 	 */
 	protected function parseSource(){
-
-		if($this->stmt instanceof NeevoResult){
-			if($this->stmt->getTable() === null){
-				$subq = $this->stmt->getSource();
-				$alias = $this->escapeValue($subq->getAlias()
-					? $subq->getAlias() : '_t', Neevo::IDENTIFIER);
-				$source = "($subq) $alias";
-			} else{
-				$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
-			}
-
-			foreach($this->stmt->getJoins() as $key => $join){
-				list($join_source, $cond, $type) = $join;
-
-				if($join_source instanceof NeevoResult){
-					$join_alias = $this->escapeValue($join_source->getAlias()
-						? $join_source->getAlias() : '_j' . ($key+1), Neevo::IDENTIFIER);
-
-					$join_source = "($join_source) $join_alias";
-				}
-				$type = strtoupper(substr($type, 5));
-				$type .= ($type === '') ? '' : ' ';
-				$source .= " {$type}JOIN $join_source ON $cond";
-			}
-			return $this->tryDelimite($source);
+		if(!($this->stmt instanceof NeevoResult)){
+			return $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
 		}
-		return $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
+		if($this->stmt->getTable() !== null){
+			$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
+		} else{
+			$subq = $this->stmt->getSource();
+			$alias = $this->escapeValue($subq->getAlias()
+				? $subq->getAlias() : '_t', Neevo::IDENTIFIER);
+			$source = "($subq) $alias";
+		}
+
+		foreach($this->stmt->getJoins() as $key => $join){
+			list($join_source, $cond, $type) = $join;
+
+			if($join_source instanceof NeevoResult){
+				$join_alias = $this->escapeValue($join_source->getAlias()
+					? $join_source->getAlias() : '_j' . ($key+1), Neevo::IDENTIFIER);
+
+				$join_source = "($join_source) $join_alias";
+			}
+			$type = strtoupper(substr($type, 5));
+			$type .= ($type === '') ? '' : ' ';
+			$source .= " {$type}JOIN $join_source ON $cond";
+		}
+		return $this->tryDelimite($source);
 	}
 
 
@@ -351,7 +346,7 @@ class NeevoParser {
 			return $value;
 		}
 
-		// Single value vith type
+		// Single value w/ type
 		elseif($type !== null){
 			if($type === Neevo::INT){
 				return (int) $value;
@@ -388,7 +383,7 @@ class NeevoParser {
 
 
 	/**
-	 * Try deimite fields in given expression.
+	 * Try delimite fields in given expression.
 	 * @param NeevoLiteral $expr
 	 * @return string
 	 */

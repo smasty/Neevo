@@ -20,6 +20,7 @@
  * - formatDateTime => Date/time format ("U" for timestamp. If empty, DateTime object used).
  * - rowClass => Name of class to use as a row class.
  * - observer => Instance of INeevoObserver for profiling.
+ * - autoJoin (bool) => Experimental! Automatically create LEFT JOINs when selecting from more tables.
  *
  * @author Martin Srank
  * @package Neevo
@@ -75,7 +76,8 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 			'formatDateTime' => '',
 			'detectTypes' => false,
 			'rowClass' => 'NeevoRow',
-			'observer' => null
+			'observer' => null,
+			'autoJoin' => false
 		);
 
 		// Create aliases
@@ -321,7 +323,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	private function isParser($class){
 		try{
 			$reflection = new ReflectionClass($class);
-			return $reflection->isSubclassOf('NeevoStmtParser');
+			return $reflection->isSubclassOf('NeevoParser');
 		} catch(ReflectionException $e){
 			return false;
 		}

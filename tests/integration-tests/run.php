@@ -3,7 +3,7 @@ error_reporting(E_ALL | E_STRICT);
 $error = 0;
 $start = microtime(true);
 
-include_once __DIR__ . '/../neevo.php';
+include_once __DIR__ . '/../../src/neevo.php';
 
 $args = getopt('d:v');
 $config = parse_ini(__DIR__ . '/config.ini');

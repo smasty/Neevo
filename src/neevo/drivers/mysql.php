@@ -47,9 +47,12 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @return void
 	 * @throws NeevoDriverException
 	 */
-	public function __construct(){
+	public function __construct(NeevoStmtBase $statement = null){
 		if(!extension_loaded("mysql")){
 			throw new NeevoDriverException("Cannot instantiate Neevo MySQL driver - PHP extension 'mysql' not loaded.");
+		}
+		if($statement instanceof NeevoStmtBase){
+			parent::__construct($statement);
 		}
 	}
 
