@@ -91,10 +91,10 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 
 	public function testSetCustomParser(){
 		$connection = new NeevoConnection(array(
-				'driver' => 'DummyParser'
+				'driver' => 'Parser'
 			));
 
-		A::assertEquals($connection->getParser(), 'NeevoDriverDummyParser');
+		A::assertEquals($connection->getParser(), 'NeevoDriverParser');
 	}
 
 
@@ -169,31 +169,6 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-}
-
-
-/**
- * Dummy Neevo driver with custom parser.
- */
-class NeevoDriverDummyParser extends NeevoParser implements INeevoDriver {
-	function __construct(NeevoStmtBase $statement = null){}
-	function connect(array $config){}
-	function close(){}
-	function free($resultSet){}
-	function query($queryString){}
-	function begin($savepoint = null){}
-	function commit($savepoint = null){}
-	function rollback($savepoint = null){}
-	function fetch($resultSet){}
-	function seek($resultSet, $offset){}
-	function insertId(){}
-	function rand(NeevoStmtBase $statement){}
-	function rows($resultSet){}
-	function affectedRows(){}
-	function escape($value, $type){}
-	function unescape($value, $type){}
-	function getPrimaryKey($table){}
-	function getColumnTypes($resultSet, $table){}
 }
 
 
