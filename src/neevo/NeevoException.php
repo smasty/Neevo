@@ -32,9 +32,9 @@ class NeevoException extends Exception implements INeevoObservable {
 	 * @param string $sql Optional SQL command
 	 * @return void
 	 */
-	public function __construct($message = '', $code = 0, $sql = null){
+	public function __construct($message = '', $code = 0, $sql = null, Exception $previous = null){
 
-		parent::__construct($message, (int) $code);
+		parent::__construct($message, (int) $code, $previous);
 		$this->sql = $sql;
 		$this->notifyObservers(INeevoObserver::EXCEPTION);
 	}
