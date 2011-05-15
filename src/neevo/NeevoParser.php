@@ -198,7 +198,7 @@ class NeevoParser {
 			} elseif($value === false){ // NOT field
 				$value = $field;
 				$field = 'NOT ';
-			} elseif(is_array($value)){ // field IN (array)
+			} elseif(is_array($value) || $value instanceof Traversable){ // field IN (array)
 				$value = ' IN ' . $this->escapeValue($value, Neevo::ARR);
 			} elseif($value instanceof NeevoLiteral){ // field = SQL literal
 				$operator = ' = ';
@@ -308,8 +308,8 @@ class NeevoParser {
 
 	/**
 	 * Escape given value.
-	 * @param mixed|array $value
-	 * @param string|array|null $type
+	 * @param mixed|array|Traversable $value
+	 * @param string|array|Traversable|null $type
 	 * @return mixed|array
 	 */
 	protected function escapeValue($value, $type = null){
@@ -319,7 +319,7 @@ class NeevoParser {
 				return 'NULL';
 
 			// Multiple values w/o types
-			elseif(is_array($value)){
+			elseif(is_array($value) || $value instanceof Traversable){
 				foreach($value as $k => $v)
 					$value[$k] = $this->escapeValue($v);
 				return $value;
@@ -340,7 +340,7 @@ class NeevoParser {
 		}
 
 		// Multiple values w/ types
-		elseif(is_array($type)){
+		elseif(is_array($type) || $type instanceof Traversable){
 			foreach($value as $k => $v)
 				$value[$k] = $this->escapeValue($v, $type[$k]);
 			return $value;
@@ -353,10 +353,10 @@ class NeevoParser {
 			} elseif($type === Neevo::FLOAT){
 				return (float) $value;
 			} elseif($type === Neevo::ARR){
-				$arr = ($value instanceof Traversable) ? iterator_to_array($value) : (array) $value;
+				$arr = $value instanceof Traversable ? iterator_to_array($value) : (array) $value;
 				return '(' . implode(', ', $this->escapeValue($value)) . ')';
 			} elseif($type === Neevo::LITERAL){
-				return ($value instanceof NeevoLiteral) ? $value->value : $value;
+				return $value instanceof NeevoLiteral ? $value->value : $value;
 			} elseif($type === Neevo::SUBQUERY && $value instanceof NeevoResult){
 				return "($value)";
 			} else{

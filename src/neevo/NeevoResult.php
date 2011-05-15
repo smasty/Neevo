@@ -53,7 +53,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	/**
 	 * Create SELECT statement.
 	 * @param NeevoConnection $connection
-	 * @param string|array $columns
+	 * @param string|array|Traversable $columns
 	 * @param string|NeevoResult $source Table name or subquery
 	 * @return void
 	 * @throws InvalidArgumentException
@@ -70,7 +70,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		}
 
 		if(!is_string($source) && !($source instanceof self)){
-			throw new InvalidArgumentException('Source must be a string or instance of NeevoResult, ' . gettype($source) . ' given.');
+			throw new InvalidArgumentException('Source must be a string or NeevoResult.');
 		}
 		if($source instanceof self){
 			$this->_subqueries[] = $source;
@@ -78,7 +78,10 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 		$this->resetState();
 		$this->type = Neevo::STMT_SELECT;
-		$this->columns = is_string($columns) ? explode(',', $columns) : $columns;
+		$this->columns = is_string($columns)
+			? explode(',', $columns)
+			: ($columns instanceof Traversable
+				? iterator_to_array($columns) : (array) $columns);
 
 		if($columns === array()){
 			throw new InvalidArgumentException('No columns given.');
@@ -158,7 +161,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 			return $this;
 		}
 		if(!(is_string($source) || $source instanceof self)){
-			throw new InvalidArgumentException('Source must be a string or instance of NeevoResult, ' . gettype($source) . ' given.');
+			throw new InvalidArgumentException('Source must be a string or NeevoResult.');
 		}
 		if($source instanceof self){
 			$this->_subqueries[] = $source;
@@ -411,10 +414,13 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 	/**
 	 * Set multiple column types at once.
-	 * @param array $types
+	 * @param array|Traversable $types
 	 * @return NeevoResult fluent interface
 	 */
-	public function setTypes(array $types){
+	public function setTypes($types){
+		if(!($types instanceof Traversable || is_array($types))){
+			throw new InvalidArgumentException('Types must be an array or Traversable.');
+		}
 		foreach($types as $column => $type){
 			$this->setType($column, $type);
 		}
@@ -562,11 +568,11 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	/**
 	 * Get referenced row from given table.
 	 * @param string $table
-	 * @param NeevoResult $row
+	 * @param NeevoRow $row
 	 * @param string $foreign
 	 * @return NeevoRow|null
 	 */
-	public function getReferencedRow($table, & $row, $foreign = null){
+	public function getReferencedRow($table, NeevoRow $row, $foreign = null){
 		$foreign = $foreign === null ? $this->getForeignKey($table) : $foreign;
 		$rowID = $row->$foreign;
 		$referenced = & $this->referencedTables[$table];

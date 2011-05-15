@@ -32,14 +32,17 @@ class NeevoStmt extends NeevoStmtBase {
 	 * Create UPDATE statement.
 	 * @param NeevoConnection $connection
 	 * @param string $table
-	 * @param array $data
+	 * @param array|Traversable $data
 	 * @return NeevoStmt fluent interface
 	 */
-	public static function createUpdate(NeevoConnection $connection, $table, array $data){
+	public static function createUpdate(NeevoConnection $connection, $table, $data){
+		if(!($data instanceof Traversable || (is_array($data) && !empty($data)))){
+			throw new InvalidArgumentException('Data must be an array or Traversable.');
+		}
 		$obj = new self($connection);
 		$obj->type = Neevo::STMT_UPDATE;
 		$obj->source = $table;
-		$obj->values = $data;
+		$obj->values = $data instanceof Traversable ? iterator_to_array($data) : $data;
 		return $obj;
 	}
 
@@ -52,10 +55,13 @@ class NeevoStmt extends NeevoStmtBase {
 	 * @return NeevoStmt fluent interface
 	 */
 	public static function createInsert(NeevoConnection $connection, $table, array $values){
+		if(!($values instanceof Traversable || (is_array($values) && !empty($values)))){
+			throw new InvalidArgumentException('Values must be an array or Traversable.');
+		}
 		$obj = new self($connection);
 		$obj->type = Neevo::STMT_INSERT;
 		$obj->source = $table;
-		$obj->values = $values;
+		$obj->values = $values instanceof Traversable ? iterator_to_array($values) : $values;
 		return $obj;
 	}
 

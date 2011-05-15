@@ -65,7 +65,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 		} elseif($config instanceof Traversable){
 			$config = iterator_to_array($config);
 		} elseif(!is_array($config)){
-			throw new InvalidArgumentException('Configuration must be an array, string or instance of Traversable.');
+			throw new InvalidArgumentException('Configuration must be an array, string or Traversable.');
 		}
 
 		// Default values

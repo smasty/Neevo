@@ -222,7 +222,7 @@ abstract class NeevoStmtBase {
 
 	/**
 	 * Define order. More calls append rules.
-	 * @param string|array $rule
+	 * @param string|array|Traversable $rule
 	 * @param string $order Use constants - Neevo::ASC, Neevo::DESC
 	 * @return NeevoStmtBase fluent interface
 	 */
@@ -232,7 +232,7 @@ abstract class NeevoStmtBase {
 		}
 		$this->resetState();
 
-		if(is_array($rule)){
+		if(is_array($rule) || $rule instanceof Traversable){
 			foreach($rule as $key => $val){
 				$this->order($key, $val);
 			}
@@ -489,7 +489,7 @@ abstract class NeevoStmtBase {
 	 * Check the query tree for circular references.
 	 * @param NeevoStmtBase $parent
 	 * @param array $visited
-	 * @return bool
+	 * @return bool True if circular reference found.
 	 */
 	protected function hasCircularReferences($parent, $visited = array()){
 		foreach($parent->_subqueries as $child){
