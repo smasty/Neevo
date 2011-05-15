@@ -50,7 +50,7 @@ class NeevoStmtTest extends PHPUnit_Framework_TestCase {
 
 	public function testRun(){
 		$stmt = NeevoStmt::createDelete($this->connection, 'table');
-		A::assertTrue($stmt->run());
+		A::assertInstanceOf('DummyResult', $stmt->run());
 	}
 
 

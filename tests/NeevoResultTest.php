@@ -377,6 +377,7 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 	 * @expectedException RuntimeException
 	 */
 	public function testHasCircularReferences(){
+		$this->markTestIncomplete();
 		$this->result->leftJoin($this->result, 'foo')->dump(true);
 	}
 
@@ -385,6 +386,7 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 	 * @expectedException RuntimeException
 	 */
 	public function testHasCircularReferencesDeeper(){
+		$this->markTestIncomplete();
 		$subquery = new NeevoResult($this->connection, $this->result);
 		$this->result->leftJoin($subquery, 'foo')->dump(true);
 	}
