@@ -122,7 +122,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 		$this->instance->attachObserver($observer);
 		$this->instance->notifyObservers(1);
 
-		A::assertTrue($observer->isFired());
+		A::assertTrue($observer->isNotified());
 	}
 
 
@@ -134,7 +134,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 			));
 		$conn->notifyObservers(1);
 
-		A::assertTrue($observer->isFired());
+		A::assertTrue($observer->isNotified());
 	}
 
 
@@ -144,7 +144,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 		$this->instance->detachObserver($observer);
 		$this->instance->notifyObservers(1);
 
-		A::assertFalse($observer->isFired());
+		A::assertFalse($observer->isNotified());
 	}
 
 

@@ -4,85 +4,121 @@ use PHPUnit_Framework_Assert as A;
 
 
 /**
- * Tests for NeevoStmt.
+ * Tests for Neevo.
  */
-class NeevoStmtTest extends PHPUnit_Framework_TestCase {
+class NeevoTest extends PHPUnit_Framework_TestCase {
 
-
-	/** @var NeevoConnection */
-	private $connection;
+	/** @var Neevo */
+	private $neevo;
 
 
 	protected function setUp(){
-		$this->connection = new NeevoConnection(array(
-				'driver' => 'Dummy'
-			));
+		$this->neevo = new Neevo('driver=Dummy&lazy=1');
 	}
 
 
 	protected function tearDown(){
-		unset($this->stmt);
+		unset($this->neevo);
 	}
 
 
-	public function testCreateUpdate(){
-		$stmt = NeevoStmt::createUpdate($this->connection, $s = 'table', $d = array('column' => 'value'));
-		A::assertEquals($d, $stmt->getValues());
-		A::assertEquals($s, $stmt->getTable());
-		A::assertEquals(Neevo::STMT_UPDATE, $stmt->getType());
+	public function testConnect(){
+		$neevo = new Neevo('driver=Dummy', new NeevoCacheSession);
+		A::assertInstanceOf('NeevoDriverDummy', $neevo->getConnection()->getDriver());
+		A::assertInstanceOf('NeevoCacheSession', $neevo->getConnection()->getCache());
+
+		$r = new ReflectionProperty('NeevoConnection', 'observers');
+		$r->setAccessible(true);
+		A::assertTrue($r->getValue($neevo->getConnection())->contains($neevo));
 	}
 
 
-	public function testCreateInsert(){
-		$stmt = NeevoStmt::createInsert($this->connection, $s = 'table', $d = array('column' => 'value'));
-		A::assertEquals($d, $stmt->getValues());
-		A::assertEquals($s, $stmt->getTable());
-		A::assertEquals(Neevo::STMT_INSERT, $stmt->getType());
+	public function testBeginTransaction(){
+		$this->neevo->begin();
+		A::assertTrue($this->neevo->getConnection()->getDriver()->inTransaction);
 	}
 
 
-	public function testCreateDelete(){
-		$stmt = NeevoStmt::createDelete($this->connection, $s = 'table');
-		A::assertEquals($s, $stmt->getTable());
-		A::assertEquals(Neevo::STMT_DELETE, $stmt->getType());
+	public function testCommitTransaction(){
+		$this->neevo->begin();
+		$this->neevo->commit();
+		A::assertFalse($this->neevo->getConnection()->getDriver()->inTransaction);
 	}
 
 
-	public function testRun(){
-		$stmt = NeevoStmt::createDelete($this->connection, 'table');
-		A::assertTrue($stmt->run());
+	public function testRollbackTransaction(){
+		$this->neevo->begin();
+		$this->neevo->rollback();
+		A::assertFalse($this->neevo->getConnection()->getDriver()->inTransaction);
 	}
 
 
-	public function testInsertId(){
-		$stmt = NeevoStmt::createInsert($this->connection, 'table', array('column', 'value'));
-		A::assertEquals(4, $stmt->insertId());
+	public function testSelect(){
+		$res = $this->neevo->select($c = 'col', $t = 'table');
+		A::assertInstanceOf('NeevoResult', $res);
+		A::assertEquals(Neevo::STMT_SELECT, $res->getType());
+		A::assertEquals(array($c), $res->getColumns());
+		A::assertEquals($t, $res->getSource());
+		A::assertTrue($res->getConnection() === $this->neevo->getConnection());
 	}
 
 
-	/**
-	 * @expectedException NeevoException
-	 */
-	public function testInsertIdException(){
-		$stmt = NeevoStmt::createDelete($this->connection, 'table');
-		$stmt->insertId();
+	public function testInsert(){
+		$ins = $this->neevo->insert($t = 'table', $v = array('val1', 'val2'));
+		A::assertInstanceOf('NeevoStmt', $ins);
+		A::assertEquals(Neevo::STMT_INSERT, $ins->getType());
+		A::assertEquals($t, $ins->getTable());
+		A::assertEquals($v, $ins->getValues());
 	}
 
 
-	public function testAffectedRows(){
-		$stmt = NeevoStmt::createDelete($this->connection, 'table');
-		A::assertEquals(1, $stmt->affectedRows());
+	public function testUpdate(){
+		$upd = $this->neevo->update($t = 'table', $d = array('val1', 'val2'));
+		A::assertInstanceOf('NeevoStmt', $upd);
+		A::assertEquals(Neevo::STMT_UPDATE, $upd->getType());
+		A::assertEquals($t, $upd->getTable());
+		A::assertEquals($d, $upd->getValues());
 	}
 
 
-	public function testResetState(){
-		$stmt = NeevoStmt::createDelete($this->connection, 'table');
-		$stmt->affectedRows();
-		$stmt->resetState();
+	public function testDelete(){
+		$del = $this->neevo->delete($t = 'table');
+		A::assertEquals(Neevo::STMT_DELETE, $del->getType());
+		A::assertInstanceOf('NeevoStmt', $del);
+		A::assertEquals($t, $del->getTable());
+	}
 
-		$aff = new ReflectionProperty('NeevoStmt', 'affectedRows');
-		$aff->setAccessible(true);
-		A::assertNull($aff->getValue($stmt));
+
+	public function testAttachObserver(){
+		$o = new DummyObserver;
+		$this->neevo->attachObserver($o);
+		$this->neevo->notifyObservers(1);
+		A::assertTrue($o->isNotified($e));
+		A::assertEquals(1, $e);
+		$this->neevo->detachObserver($o);
+	}
+
+
+	public function testUpdateStatus(){
+		$r = $this->neevo->select('foo');
+		$sql = (string) $r;
+		$r->run();
+		A::assertEquals($sql, $this->neevo->getLast());
+		A::assertEquals(1, $this->neevo->getQueries());
+	}
+
+
+	public function testHighlightSql(){
+		A::assertEquals(
+			"<pre style=\"color:#555\" class=\"sql-dump\"><strong style=\"color:#e71818\">SELECT</strong> * \n<strong style=\"color:#e71818\">FROM</strong> `table` \n<strong style=\"color:#e71818\">WHERE</strong> <strong style=\"color:#d59401\">RAND</strong>() = <em style=\"color:#008000\">'John Doe'</em>; <em style=\"color:#999\">/* comment */</em></pre>\n",
+			$v=Neevo::highlightSql("SELECT * FROM `table` WHERE RAND() = 'John Doe'; /* comment */")
+		);
+	}
+
+	public function testDestructor(){
+		$closed = $this->neevo->getConnection()->getDriver()->closed;
+		$this->neevo->__destruct();
+		A::assertEquals(!$closed, $this->neevo->getConnection()->getDriver()->closed);
 	}
 
 

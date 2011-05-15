@@ -7,10 +7,8 @@
 class NeevoDriverDummy implements INeevoDriver {
 
 
-	/** @var int */
 	private $cursor = 0;
 
-	/** @var array */
 	private $data = array(
 		array(
 			'id' => '1',
@@ -29,6 +27,10 @@ class NeevoDriverDummy implements INeevoDriver {
 		)
 	);
 
+	public $inTransaction = false;
+
+	public $closed = false;
+
 
 	public function __construct(){
 
@@ -41,6 +43,7 @@ class NeevoDriverDummy implements INeevoDriver {
 
 
 	public function close(){
+		$this->closed = true;
 		return true;
 	}
 
@@ -57,17 +60,17 @@ class NeevoDriverDummy implements INeevoDriver {
 
 
 	public function begin($savepoint = null){
-
+		$this->inTransaction = true;
 	}
 
 
 	public function commit($savepoint = null){
-
+		$this->inTransaction = false;
 	}
 
 
 	public function rollback($savepoint = null){
-
+		$this->inTransaction = false;
 	}
 
 

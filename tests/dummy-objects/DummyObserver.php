@@ -7,16 +7,16 @@
 class DummyObserver implements INeevoObserver {
 
 
-	private $fired = false;
+	private $notified = false;
 
 
 	public function updateStatus(INeevoObservable $observable, $event){
-		$this->fired = true;
+		$this->notified = $event;
 	}
 
 
-	public function isFired(){
-		return (bool) $this->fired;
+	public function isNotified(& $event = null){
+		return (bool) $event = $this->notified;
 	}
 
 
