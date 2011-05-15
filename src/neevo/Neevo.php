@@ -169,7 +169,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 			$sql .= $content;
 			if(substr(rtrim($content), -1) === ';'){
 				// Passed directly to driver without logging.
-				$this->connection->driver()->query($sql);
+				$this->connection->getDriver()->query($sql);
 				$sql = '';
 				$count++;
 			}
@@ -189,7 +189,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return void
 	 */
 	public function begin($savepoint = null){
-		$this->connection->driver()->begin($savepoint);
+		$this->connection->getDriver()->begin($savepoint);
 		$this->notifyObservers(INeevoObserver::BEGIN);
 	}
 
@@ -200,7 +200,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return void
 	 */
 	public function commit($savepoint = null){
-		$this->connection->driver()->commit($savepoint);
+		$this->connection->getDriver()->commit($savepoint);
 		$this->notifyObservers(INeevoObserver::COMMIT);
 	}
 
@@ -211,7 +211,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return void
 	 */
 	public function rollback($savepoint = null){
-		$this->connection->driver()->rollback($savepoint);
+		$this->connection->getDriver()->rollback($savepoint);
 		$this->notifyObservers(INeevoObserver::ROLLBACK);
 	}
 
