@@ -45,6 +45,12 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 	public function rewind(){
 		if($this->row !== null){
 			$this->result->resetState();
+		} else{
+			try{
+				$this->result->seek(0);
+			} catch(NeevoException $e){
+				$this->result->resetState();
+			}
 		}
 
 		$this->pointer = 0;
@@ -95,17 +101,25 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 	 * @throws NeevoDriverException on unbuffered result.
 	 */
 	public function count(){
-		return $this->result->rows();
+		return $this->result->count();
 	}
 
 
 	/**
-	 * Implementation of SeekableIterator
+	 * Implementation of SeekableIterator.
 	 * @param int $offset
-	 * @throws NeevoDriverException on unbuffered result.
+	 * @throws OutOfBoundsException|NeevoDriverException
 	 */
 	public function seek($offset){
-		$this->result->seek($offset);
+		try{
+			$this->result->seek($offset - 1);
+		} catch(NeevoDriverException $e){
+			throw $e;
+		} catch(NeevoException $e){
+			throw new OutOfBoundsException("Cannot seek to offset $offset.", null, $e);
+		}
+		$this->pointer = $offset - 1;
+		$this->row = $this->result->fetch();
 	}
 
 
