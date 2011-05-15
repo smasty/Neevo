@@ -198,14 +198,14 @@ class NeevoParser {
 			} elseif($value === false){ // NOT field
 				$value = $field;
 				$field = 'NOT ';
+			} elseif($value instanceof NeevoResult){
+				$operator = ' IN ';
+				$value = $this->escapeValue($value, Neevo::SUBQUERY);
 			} elseif(is_array($value) || $value instanceof Traversable){ // field IN (array)
 				$value = ' IN ' . $this->escapeValue($value, Neevo::ARR);
 			} elseif($value instanceof NeevoLiteral){ // field = SQL literal
 				$operator = ' = ';
 				$value = $this->escapeValue($value, Neevo::LITERAL);
-			} elseif($value instanceof NeevoResult){
-				$operator = ' IN ';
-				$value = $this->escapeValue($value, Neevo::SUBQUERY);
 			} elseif($value instanceof DateTime){ // field = DateTime
 				$operator = ' = ';
 				$value = $this->escapeValue($value, Neevo::DATETIME);
@@ -352,13 +352,13 @@ class NeevoParser {
 				return (int) $value;
 			} elseif($type === Neevo::FLOAT){
 				return (float) $value;
-			} elseif($type === Neevo::ARR){
-				$arr = $value instanceof Traversable ? iterator_to_array($value) : (array) $value;
-				return '(' . implode(', ', $this->escapeValue($value)) . ')';
-			} elseif($type === Neevo::LITERAL){
-				return $value instanceof NeevoLiteral ? $value->value : $value;
 			} elseif($type === Neevo::SUBQUERY && $value instanceof NeevoResult){
 				return "($value)";
+			} elseif($type === Neevo::ARR){
+				$arr = $value instanceof Traversable ? iterator_to_array($value) : (array) $value;
+				return '(' . implode(', ', $this->escapeValue($arr)) . ')';
+			} elseif($type === Neevo::LITERAL){
+				return $value instanceof NeevoLiteral ? $value->value : $value;
 			} else{
 				return $this->stmt->getConnection()->getDriver()->escape($value, $type);
 			}
