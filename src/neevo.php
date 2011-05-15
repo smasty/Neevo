@@ -8,7 +8,6 @@
  * Copyright (c) 2011 Martin Srank (http://smasty.net)
  *
  * @todo PHPUnit tests
- * @todo Support for Traversable everywhere where array() is needed.
  */
 
 
