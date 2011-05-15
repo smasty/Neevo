@@ -61,7 +61,13 @@ abstract class NeevoStmtBase {
 	);
 
 	/** @var array */
+	protected $_subqueries = array();
+
+	/** @var array */
 	private $_stmtConds = array();
+
+	/** @var string */
+	private $_uniqueId;
 
 
 	/**
@@ -71,6 +77,7 @@ abstract class NeevoStmtBase {
 	 */
 	public function __construct(NeevoConnection $connection){
 		$this->connection = $connection;
+		$this->_uniqueId = uniqid(null, true);
 	}
 
 
@@ -186,6 +193,9 @@ abstract class NeevoStmtBase {
 				'value' => $value,
 				'glue' => 'AND'
 			);
+			if($value instanceof self){
+				$this->_subqueries[] = $value;
+			}
 			return $this;
 		}
 
@@ -201,6 +211,11 @@ abstract class NeevoStmtBase {
 			'values' => $args,
 			'glue' => 'AND'
 		);
+		foreach($args as $arg){
+			if($arg instanceof self){
+				$this->_subqueries[] = $arg;
+			}
+		}
 		return $this;
 	}
 
@@ -312,6 +327,9 @@ abstract class NeevoStmtBase {
 	 * @internal
 	 */
 	public function parse(){
+		if($this->hasCircularReferences($this)){
+			throw new RuntimeException('Circular reference found, aborting.');
+		}
 		$this->connection->connect();
 
 		$parser = $this->connection->getParser();
@@ -462,6 +480,27 @@ abstract class NeevoStmtBase {
 		foreach($this->_stmtConds as $cond){
 			if($cond) continue;
 			else return true;
+		}
+		return false;
+	}
+
+
+	/**
+	 * Check the query tree for circular references.
+	 * @param NeevoStmtBase $parent
+	 * @param array $visited
+	 * @return bool
+	 */
+	protected function hasCircularReferences($parent, $visited = array()){
+		foreach($parent->_subqueries as $child){
+			if(isset($visited[$child->_uniqueId])){
+				return true;
+			}
+			$visited[$child->_uniqueId] = true;
+			if($this->hasCircularReferences($child, $visited)){
+				return true;
+			}
+			array_pop($visited);
 		}
 		return false;
 	}

@@ -72,6 +72,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		if(!is_string($source) && !($source instanceof self)){
 			throw new InvalidArgumentException('Source must be a string or instance of NeevoResult, ' . gettype($source) . ' given.');
 		}
+		if($source instanceof self){
+			$this->_subqueries[] = $source;
+		}
 
 		$this->resetState();
 		$this->type = Neevo::STMT_SELECT;
@@ -154,8 +157,11 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		if($this->_validateConditions()){
 			return $this;
 		}
-		if(!is_string($source) && !($source instanceof self)){
+		if(!(is_string($source) || $source instanceof self)){
 			throw new InvalidArgumentException('Source must be a string or instance of NeevoResult, ' . gettype($source) . ' given.');
+		}
+		if($source instanceof self){
+			$this->_subqueries[] = $source;
 		}
 		$this->resetState();
 		$type = (func_num_args() > 2) ? func_get_arg(2) : '';
