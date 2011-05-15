@@ -9,7 +9,6 @@
  *
  * @todo PHPUnit tests
  * @todo Support for Traversable everywhere where array() is needed.
- * @todo Fix NeevoResult subquery infinite loop.
  */
 
 
