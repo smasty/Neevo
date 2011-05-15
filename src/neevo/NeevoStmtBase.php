@@ -457,6 +457,7 @@ abstract class NeevoStmtBase {
 		$this->performed = false;
 		$this->resultSet = null;
 		$this->time = null;
+		$this->_subqueries = array();
 	}
 
 
