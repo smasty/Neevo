@@ -194,7 +194,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	public function testRun(){
 		A::assertFalse($this->stmt->run());
 		A::assertTrue($this->stmt->isPerformed());
-		A::assertLessThan(1, $this->stmt->time());
+		A::assertLessThan(1, $this->stmt->getTime());
 		A::assertFalse($this->stmt->exec());
 	}
 

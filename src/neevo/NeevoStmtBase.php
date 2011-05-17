@@ -345,7 +345,7 @@ abstract class NeevoStmtBase {
 	 * Query execution time.
 	 * @return int
 	 */
-	public function time(){
+	public function getTime(){
 		return $this->time;
 	}
 
