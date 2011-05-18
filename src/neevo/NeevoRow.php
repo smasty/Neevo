@@ -136,8 +136,9 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 
 	public function __get($name){
-		return isset($this->modified[$name]) ? $this->modified[$name] :
-			isset($this->data[$name]) ? $this->data[$name] : null;
+		return array_key_exists($name, $this->modified)
+				? $this->modified[$name]
+				: (isset($this->data[$name]) ? $this->data[$name] : null);
 	}
 
 
