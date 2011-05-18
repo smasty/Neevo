@@ -59,7 +59,7 @@ class NeevoCache implements INeevoCache {
 
 
 	public function fetch($key){
-		return isset($this->data[$key]) ? $this->data[$key] : null;
+		return array_key_exists($key, $this->data) ? $this->data[$key] : null;
 	}
 
 
@@ -87,7 +87,7 @@ class NeevoCacheSession implements INeevoCache {
 
 
 	public function fetch($key){
-		return isset($_SESSION['NeevoCache'][$key]) ? $_SESSION['NeevoCache'][$key] : null;
+		return array_key_exists($key, $_SESSION['NeevoCache']) ? $_SESSION['NeevoCache'][$key] : null;
 	}
 
 
@@ -123,17 +123,17 @@ class NeevoCacheFile implements INeevoCache {
 
 	public function __construct($filename){
 		$this->filename = $filename;
-		$this->data = unserialize(@file_get_contents($filename));
+		$this->data = (array) unserialize(@file_get_contents($filename));
 	}
 
 
 	public function fetch($key){
-		return isset($this->data[$key]) ? $this->data[$key] : null;
+		return array_key_exists($key, $this->data) ? $this->data[$key] : null;
 	}
 
 
 	public function store($key, $value){
-		if(!isset($this->data[$key]) || $this->data[$key] !== $value){
+		if(!array_key_exists($key, $this->data) || $this->data[$key] !== $value){
 			$this->data[$key] = $value;
 			@file_put_contents($this->filename, serialize($this->data), LOCK_EX);
 		}
@@ -161,33 +161,24 @@ class NeevoCacheMemcache implements INeevoCache {
 	/** @var Memcache */
 	private $memcache;
 
-	/** @var array */
-	private $keys = array();
-
-
 	public function __construct(Memcache $memcache){
 		$this->memcache = $memcache;
 	}
 
 
 	public function fetch($key){
-		$value = $this->memcache->fetch("NeevoCache.$key");
+		$value = $this->memcache->get("NeevoCache.$key");
 		return $value !== false ? $value : null;
 	}
 
 
 	public function store($key, $value){
 		$this->memcache->set("NeevoCache.$key", $value);
-		$this->keys[] = $key;
 	}
 
 
 	public function flush(){
-		foreach($this->keys as $key){
-			$this->memcache->delete($key);
-		}
-		$this->keys = array();
-		return true;
+		return $this->memcache->flush();
 	}
 
 
