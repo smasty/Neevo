@@ -38,11 +38,6 @@ class NeevoRowTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testReferencing(){
-		A::assertEquals($this->row->toArray(), $this->row->author('id')->toArray());
-	}
-
-
 	public function testCount(){
 		A::assertEquals(3, count($this->row));
 	}

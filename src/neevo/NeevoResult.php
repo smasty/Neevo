@@ -566,33 +566,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 
 	/**
-	 * Get referenced row from given table.
-	 * @param string $table
-	 * @param NeevoRow $row
-	 * @param string $foreign
-	 * @return NeevoRow|null
-	 */
-	public function getReferencedRow($table, NeevoRow $row, $foreign = null){
-		$foreign = $foreign === null ? $this->getForeignKey($table) : $foreign;
-		$rowID = $row->$foreign;
-		$referenced = & $this->referencedTables[$table];
-
-		if(empty($referenced)){
-			$clone = clone $this;
-			$clone->columns = array($foreign);
-			$keys = $clone->fetchPairs($foreign, $foreign);
-			$result = new NeevoResult($this->connection, '*', $table);
-			$primary = $result->getPrimaryKey();
-			$referenced = $result->where($primary, $keys)->fetchPairs($primary);
-		}
-		if(isset($referenced[$rowID])){
-			return $referenced[$rowID];
-		}
-		return null;
-	}
-
-
-	/**
 	 * Get the result iterator.
 	 * @return NeevoResultIterator
 	 */

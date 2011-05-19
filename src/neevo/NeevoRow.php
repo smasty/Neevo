@@ -89,20 +89,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 
 	/**
-	 * Get referenced row from given table.
-	 * @param string $table
-	 * @param string $column Optional foreign key, defaults to table_primaryKey.
-	 * @return NeevoResult|null
-	 */
-	public function ref($table, $column = null){
-		if(!$this->freeze){
-			return $this->result->getReferencedRow($table, $this, $column);
-		}
-		throw new NeevoException('Referencing disabled - cannot get primary key.');
-	}
-
-
-	/**
 	 * Return object as an array.
 	 * @return array
 	 */
@@ -128,11 +114,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 
 	/*  ************  Magic methods  ************  */
-
-
-	public function __call($table, $args){
-		return $this->ref($table, isset($args[0]) ? $args[0] : null);
-	}
 
 
 	public function __get($name){

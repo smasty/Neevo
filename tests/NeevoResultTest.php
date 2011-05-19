@@ -256,19 +256,6 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testGetReferencedRow(){
-		$row = new NeevoRow(array('id' => 1), $this->result);
-		$referenced = $this->result->getReferencedRow('foo', $row, 'id')->toArray();
-		A::assertTrue($referenced['id'] === '1');
-	}
-
-
-	public function testGetReferencedRowNull(){
-		$row = new NeevoRow(array('id' => 1), $this->result);
-		A::assertNull($this->result->getReferencedRow('foo', $row, 'row_id'));
-	}
-
-
 	public function testConvertTypeString(){
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
