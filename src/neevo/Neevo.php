@@ -32,7 +32,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 454;
+	const REVISION = 455;
 
 	// Data types
 	const BOOL = 'b',
@@ -142,41 +142,6 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 */
 	public function delete($table){
 		return NeevoStmt::createDelete($this->connection, $table);
-	}
-
-
-	/**
-	 * Import a SQL dump from given file.
-	 * @param string $filename
-	 * @return int Number of executed commands
-	 */
-	public function loadFile($filename){
-		$this->connection->realConnect();
-		$abort = ignore_user_abort();
-		@set_time_limit(0);
-		ignore_user_abort(true);
-
-		$handle = @fopen($filename, 'r');
-		if($handle === false){
-			ignore_user_abort($abort);
-			throw new NeevoException("Cannot open file '$filename'.");
-		}
-
-		$sql = '';
-		$count = 0;
-		while(!feof($handle)){
-			$content = fgets($handle);
-			$sql .= $content;
-			if(substr(rtrim($content), -1) === ';'){
-				// Passed directly to driver without logging.
-				$this->connection->getDriver()->query($sql);
-				$sql = '';
-				$count++;
-			}
-		}
-		fclose($handle);
-		ignore_user_abort($abort);
-		return $count;
 	}
 
 
