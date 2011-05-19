@@ -113,7 +113,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 */
 	public function __destruct(){
 		try{
-			$this->connection->getDriver()->free($this->resultSet);
+			$this->connection->getDriver()->freeResultSet($this->resultSet);
 		} catch(NeevoImplemenationException $e){}
 
 		$this->resultSet = null;
@@ -349,7 +349,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	public function count($column = null){
 		if($column === null){
 			$this->performed || $this->run();
-			return (int) $this->connection->getDriver()->rows($this->resultSet);
+			return (int) $this->connection->getDriver()->getNumRows($this->resultSet);
 		}
 		return $this->aggregation("COUNT(:$column)");
 	}

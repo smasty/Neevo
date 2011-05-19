@@ -21,18 +21,18 @@ class NeevoDriverParser extends NeevoParser implements INeevoDriver {
 	}
 
 	function connect(array $config){}
-	function close(){}
-	function free($resultSet){}
-	function query($queryString){}
-	function begin($savepoint = null){}
-	function commit($savepoint = null){}
-	function rollback($savepoint = null){}
+	function closeConnection(){}
+	function freeResultSet($resultSet){}
+	function runQuery($queryString){}
+	function beginTransaction($savepoint = null){}
+	function commitTransaction($savepoint = null){}
+	function rollbackTransaction($savepoint = null){}
 	function fetch($resultSet){}
 	function seek($resultSet, $offset){}
-	function insertId(){}
-	function rand(NeevoStmtBase $statement){}
-	function rows($resultSet){}
-	function affectedRows(){}
+	function getInsertId(){}
+	function randomizeOrder(NeevoStmtBase $statement){}
+	function getNumRows($resultSet){}
+	function getAffectedRows(){}
 	function getPrimaryKey($table){}
 	function getColumnTypes($resultSet, $table){}
 

@@ -112,7 +112,7 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 			if(function_exists('mysql_set_charset')){
 				@mysql_set_charset($config['charset'], $connection);
 			} else{
-				$this->query("SET NAMES ".$config['charset']);
+				$this->runQuery("SET NAMES ".$config['charset']);
 			}
 		}
 
@@ -124,7 +124,7 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * Close the connection.
 	 * @return void
 	 */
-	public function close(){
+	public function closeConnection(){
 		@mysql_close($this->resource);
 	}
 
@@ -134,7 +134,7 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @param resource $resultSet
 	 * @return bool
 	 */
-	public function free($resultSet){
+	public function freeResultSet($resultSet){
 		return @mysql_free_result($resultSet);
 	}
 
@@ -145,7 +145,7 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @return resource|bool
 	 * @throws NeevoException
 	 */
-	public function query($queryString){
+	public function runQuery($queryString){
 
 		$this->affectedRows = false;
 		if($this->unbuffered){
@@ -169,8 +169,8 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function begin($savepoint = null){
-		$this->query($savepoint ? "SAVEPOINT $savepoint" : 'START TRANSACTION');
+	public function beginTransaction($savepoint = null){
+		$this->runQuery($savepoint ? "SAVEPOINT $savepoint" : 'START TRANSACTION');
 	}
 
 
@@ -179,8 +179,8 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function commit($savepoint = null){
-		$this->query($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
+	public function commitTransaction($savepoint = null){
+		$this->runQuery($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
 	}
 
 
@@ -189,8 +189,8 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function rollback($savepoint = null){
-		$this->query($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
+	public function rollbackTransaction($savepoint = null){
+		$this->runQuery($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
 	}
 
 
@@ -223,7 +223,7 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * Get the ID generated in the INSERT statement.
 	 * @return int
 	 */
-	public function insertId(){
+	public function getInsertId(){
 		return @mysql_insert_id($this->resource);
 	}
 
@@ -233,7 +233,7 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @param NeevoStmtBase $statement
 	 * @return void
 	 */
-	public function rand(NeevoStmtBase $statement){
+	public function randomizeOrder(NeevoStmtBase $statement){
 		$statement->order('RAND()');
 	}
 
@@ -244,7 +244,7 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @return int|FALSE
 	 * @throws NeevoDriverException
 	 */
-	public function rows($resultSet){
+	public function getNumRows($resultSet){
 		if($this->unbuffered){
 			throw new NeevoDriverException('Cannot count rows on unbuffered result.');
 		}
@@ -256,7 +256,7 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * Get the number of affected rows in previous operation.
 	 * @return int
 	 */
-	public function affectedRows(){
+	public function getAffectedRows(){
 		return $this->affectedRows;
 	}
 
@@ -314,7 +314,7 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 */
 	public function getPrimaryKey($table){
 		$key = '';
-		$q = $this->query('SHOW FULL COLUMNS FROM '.$table);
+		$q = $this->runQuery('SHOW FULL COLUMNS FROM '.$table);
 		while($col = $this->fetch($q)){
 			if(strtolower($col['Key']) === 'pri' && $key === ''){
 				$key = $col['Field'];

@@ -127,7 +127,7 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * Close the connection.
 	 * @return void
 	 */
-	public function close(){
+	public function closeConnection(){
 		if(!$this->persistent){
 			@sqlite_close($this->resource);
 		}
@@ -139,7 +139,7 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @param resource $resultSet
 	 * @return bool
 	 */
-	public function free($resultSet){
+	public function freeResultSet($resultSet){
 		return true;
 	}
 
@@ -150,7 +150,7 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @return resource|bool
 	 * @throws NeevoException
 	 */
-	public function query($queryString){
+	public function runQuery($queryString){
 
 		$this->affectedRows = false;
 		if($this->dbCharset !== null){
@@ -177,8 +177,8 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function begin($savepoint = null){
-		$this->query('BEGIN');
+	public function beginTransaction($savepoint = null){
+		$this->runQuery('BEGIN');
 	}
 
 
@@ -187,8 +187,8 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function commit($savepoint = null){
-		$this->query('COMMIT');
+	public function commitTransaction($savepoint = null){
+		$this->runQuery('COMMIT');
 	}
 
 
@@ -197,8 +197,8 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function rollback($savepoint = null){
-		$this->query('ROLLBACK');
+	public function rollbackTransaction($savepoint = null){
+		$this->runQuery('ROLLBACK');
 	}
 
 
@@ -249,7 +249,7 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * Get the ID generated in the INSERT statement.
 	 * @return int
 	 */
-	public function insertId(){
+	public function getInsertId(){
 		return @sqlite_last_insert_rowid($this->resource);
 	}
 
@@ -259,7 +259,7 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @param NeevoStmtBase $statement
 	 * @return void
 	 */
-	public function rand(NeevoStmtBase $statement){
+	public function randomizeOrder(NeevoStmtBase $statement){
 		$statement->order('RANDOM()');
 	}
 
@@ -270,7 +270,7 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @return int|FALSE
 	 * @throws NeevoDriverException
 	 */
-	public function rows($resultSet){
+	public function getNumRows($resultSet){
 		if($this->unbuffered){
 			throw new NeevoDriverException('Cannot seek on unbuffered result.');
 		}
@@ -282,7 +282,7 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * Get the number of affected rows in previous operation.
 	 * @return int
 	 */
-	public function affectedRows(){
+	public function getAffectedRows(){
 		return $this->affectedRows;
 	}
 
@@ -345,7 +345,7 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 		if(isset($this->tblData[$table])){
 			$sql = $this->tblData[$table];
 		} else{
-			$q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
+			$q = $this->runQuery("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
 			$r = $this->fetch($q);
 			if($r === false){
 				return '';
@@ -377,7 +377,7 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 		if(isset($this->tblData[$table])){
 			$sql = $this->tblData[$table];
 		} else{
-			$q = $this->query("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
+			$q = $this->runQuery("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
 			$r = $this->fetch($q);
 			if($r === false){
 				return array();

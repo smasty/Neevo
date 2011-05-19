@@ -44,19 +44,19 @@ class NeevoDriverDummy implements INeevoDriver {
 	}
 
 
-	public function close(){
+	public function closeConnection(){
 		$this->closed = true;
 		return true;
 	}
 
 
-	public function free($resultSet){
+	public function freeResultSet($resultSet){
 		$this->cursor = 0;
 		return true;
 	}
 
 
-	public function query($queryString){
+	public function runQuery($queryString){
 		if($queryString){
 			return new DummyResult($queryString, $this);
 		}
@@ -64,17 +64,17 @@ class NeevoDriverDummy implements INeevoDriver {
 	}
 
 
-	public function begin($savepoint = null){
+	public function beginTransaction($savepoint = null){
 		$this->inTransaction = true;
 	}
 
 
-	public function commit($savepoint = null){
+	public function commitTransaction($savepoint = null){
 		$this->inTransaction = false;
 	}
 
 
-	public function rollback($savepoint = null){
+	public function rollbackTransaction($savepoint = null){
 		$this->inTransaction = false;
 	}
 
@@ -102,17 +102,17 @@ class NeevoDriverDummy implements INeevoDriver {
 	}
 
 
-	public function insertId(){
+	public function getInsertId(){
 		return 4;
 	}
 
 
-	public function rand(NeevoStmtBase $statement){
+	public function randomizeOrder(NeevoStmtBase $statement){
 
 	}
 
 
-	public function rows($resultSet){
+	public function getNumRows($resultSet){
 		if($this->unbuffered){
 			throw new NeevoDriverException('Cannot count rows on unbuffered result.');
 		}
@@ -120,7 +120,7 @@ class NeevoDriverDummy implements INeevoDriver {
 	}
 
 
-	public function affectedRows(){
+	public function getAffectedRows(){
 		return 1;
 	}
 
@@ -178,7 +178,7 @@ class DummyResult {
 
 
 	public function __destruct(){
-		$this->driver->free($this);
+		$this->driver->freeResultSet($this);
 	}
 
 

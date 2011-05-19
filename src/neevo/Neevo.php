@@ -34,7 +34,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo revision
-	const REVISION = 456;
+	const REVISION = 457;
 
 	// Data types
 	const BOOL = 'b',
@@ -82,7 +82,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 */
 	public function __destruct(){
 		try{
-			$this->connection->getDriver()->close();
+			$this->connection->getDriver()->closeConnection();
 		} catch(NeevoImplemenationException $e){}
 	}
 
@@ -156,7 +156,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return void
 	 */
 	public function begin($savepoint = null){
-		$this->connection->getDriver()->begin($savepoint);
+		$this->connection->getDriver()->beginTransaction($savepoint);
 		$this->notifyObservers(INeevoObserver::BEGIN);
 	}
 
@@ -167,7 +167,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return void
 	 */
 	public function commit($savepoint = null){
-		$this->connection->getDriver()->commit($savepoint);
+		$this->connection->getDriver()->commitTransaction($savepoint);
 		$this->notifyObservers(INeevoObserver::COMMIT);
 	}
 
@@ -178,7 +178,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return void
 	 */
 	public function rollback($savepoint = null){
-		$this->connection->getDriver()->rollback($savepoint);
+		$this->connection->getDriver()->rollbackTransaction($savepoint);
 		$this->notifyObservers(INeevoObserver::ROLLBACK);
 	}
 

@@ -269,7 +269,7 @@ abstract class NeevoStmtBase {
 			return $this;
 		}
 		$this->resetState();
-		$this->connection->getDriver()->rand($this);
+		$this->connection->getDriver()->randomizeOrder($this);
 		return $this;
 	}
 
@@ -299,7 +299,7 @@ abstract class NeevoStmtBase {
 		$start = -microtime(true);
 
 		$query = $this->performed ?
-			$this->resultSet : $this->connection->getDriver()->query($this->parse());
+			$this->resultSet : $this->connection->getDriver()->runQuery($this->parse());
 
 		$this->time = $start + microtime(true);
 

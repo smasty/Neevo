@@ -23,8 +23,8 @@
  * the driver should throw NeevoDriverException.
  *
  * When the driver needs to rewrite default output of SQL commands, it **must**
- * extend **NeevoStmtParser** class. For proper use, see
- * "source of **NeevoStmtParser** class":./source-neevo.NeevoStmtParser.php.html.
+ * extend **NeevoParser** class. For proper use, see
+ * "source of **NeevoParser** class":./source-neevo.NeevoParser.php.html.
  *
  * @author Martin Srank
  * @package Neevo\Drivers
@@ -52,7 +52,7 @@ interface INeevoDriver {
 	 * Close the connection.
 	 * @return void
 	 */
-	public function close();
+	public function closeConnection();
 
 
 	/**
@@ -60,7 +60,7 @@ interface INeevoDriver {
 	 * @param resource $resultSet
 	 * @return bool
 	 */
-	public function free($resultSet);
+	public function freeResultSet($resultSet);
 
 
 	/**
@@ -68,7 +68,7 @@ interface INeevoDriver {
 	 * @param string $queryString
 	 * @return resource|bool
 	 */
-	public function query($queryString);
+	public function runQuery($queryString);
 
 
 	/**
@@ -76,7 +76,7 @@ interface INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function begin($savepoint = null);
+	public function beginTransaction($savepoint = null);
 
 
 	/**
@@ -84,7 +84,7 @@ interface INeevoDriver {
 	 * @param string $avepoint
 	 * @return void
 	 */
-	public function commit($savepoint = null);
+	public function commitTransaction($savepoint = null);
 
 
 	/**
@@ -92,7 +92,7 @@ interface INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function rollback($savepoint = null);
+	public function rollbackTransaction($savepoint = null);
 
 
 	/**
@@ -116,7 +116,7 @@ interface INeevoDriver {
 	 * Get the ID generated in the INSERT statement.
 	 * @return int
 	 */
-	public function insertId();
+	public function getInsertId();
 
 
 	/**
@@ -124,7 +124,7 @@ interface INeevoDriver {
 	 * @param NeevoStmtBase $statement
 	 * @return void
 	 */
-	public function rand(NeevoStmtBase $statement);
+	public function randomizeOrder(NeevoStmtBase $statement);
 
 
 	/**
@@ -132,14 +132,14 @@ interface INeevoDriver {
 	 * @param resource $resultSet
 	 * @return int|FALSE
 	 */
-	public function rows($resultSet);
+	public function getNumRows($resultSet);
 
 
 	/**
 	 * Get the number of affected rows in previous operation.
 	 * @return int
 	 */
-	public function affectedRows();
+	public function getAffectedRows();
 
 
 	/**

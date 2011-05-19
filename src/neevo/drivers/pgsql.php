@@ -102,7 +102,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 
 		// Schema
 		 if(isset($config['schema'])){
-			 $this->query('SET search_path TO "' . $config['schema'] . '"');
+			 $this->runQuery('SET search_path TO "' . $config['schema'] . '"');
 		 }
 
 		 $this->escapeMethod = version_compare(PHP_VERSION , '5.2.0', '>=');
@@ -113,7 +113,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * Close the connection.
 	 * @return void
 	 */
-	public function close(){
+	public function closeConnection(){
 		@pg_close($this->resource);
 	}
 
@@ -123,7 +123,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @param resource $resultSet
 	 * @return bool
 	 */
-	public function free($resultSet){
+	public function freeResultSet($resultSet){
 		@pg_free_result($resultSet);
 	}
 
@@ -134,7 +134,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @return resource|bool
 	 * @throws NeevoException
 	 */
-	public function query($queryString){
+	public function runQuery($queryString){
 		$this->affectedRows = false;
 
 		$result = @pg_query($this->resource, $queryString);
@@ -152,8 +152,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function begin($savepoint = null){
-		$this->query($savepoint ? "SAVEPOINT $savepoint" : 'START TRANSACTION');
+	public function beginTransaction($savepoint = null){
+		$this->runQuery($savepoint ? "SAVEPOINT $savepoint" : 'START TRANSACTION');
 	}
 
 
@@ -162,8 +162,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function commit($savepoint = null){
-		$this->query($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
+	public function commitTransaction($savepoint = null){
+		$this->runQuery($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
 	}
 
 
@@ -172,8 +172,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function rollback($savepoint = null){
-		$this->query($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
+	public function rollbackTransaction($savepoint = null){
+		$this->runQuery($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
 	}
 
 
@@ -202,8 +202,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * Get the ID generated in the INSERT statement.
 	 * @return int
 	 */
-	public function insertId(){
-		$result = $this->query("SELECT LASTVAL()");
+	public function getInsertId(){
+		$result = $this->runQuery("SELECT LASTVAL()");
 		if(!$result){
 			return false;
 		}
@@ -218,7 +218,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @param NeevoStmtBase $statement
 	 * @return void
 	 */
-	public function rand(NeevoStmtBase $statement){
+	public function randomizeOrder(NeevoStmtBase $statement){
 		$statement->order('RAND()');
 	}
 
@@ -228,7 +228,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @param resource $resultSet
 	 * @return int|FALSE
 	 */
-	public function rows($resultSet){
+	public function getNumRows($resultSet){
 		return @pg_num_rows($resultSet);
 	}
 
@@ -237,7 +237,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * Get the number of affected rows in previous operation.
 	 * @return int
 	 */
-	public function affectedRows(){
+	public function getAffectedRows(){
 		return $this->affectedRows;
 	}
 
@@ -305,7 +305,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 */
 	public function getPrimaryKey($table){
 		$def = $this->fetch(
-			$this->query("SELECT indexdef FROM pg_indexes WHERE indexname = '{$table}_pkey'")
+			$this->runQuery("SELECT indexdef FROM pg_indexes WHERE indexname = '{$table}_pkey'")
 		);
 		$def = reset($def);
 		if(preg_match("~{$table}_pkey\s+ON\s+{$table}.*\((\w+).*\)~i", $def, $matches)){
