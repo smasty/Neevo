@@ -9,42 +9,22 @@ use PHPUnit_Framework_Assert as A;
 class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 
 
-	protected function setUp(){
-
-	}
-
-
-	protected function tearDown(){
-	}
-
-
-	public function testDefaultCache(){
-		$cache = new NeevoCache;
-		$cache->store($k = 'key', $v = 'value');
-		A::assertEquals($v, $cache->fetch($k));
-
-		$cache->flush();
-		A::assertNull($cache->fetch($k));
-	}
-
-
-	public function testSessionCache(){
-		$_SESSION = array();
-
-		$cache = new NeevoCacheSession;
-		$cache->store($k = 'key', $v = 'value');
-		A::assertEquals($v, $cache->fetch($k));
-
-		$cache->flush();
-		A::assertNull($cache->fetch($k));
-	}
-
-
-	public function testMemcacheCache(){
+	public function getImplementations(){
 		$memcache = new Memcache;
 		$memcache->connect('localhost');
 
-		$cache = new NeevoCacheMemcache($memcache);
+		return array(
+			array(new NeevoCache),
+			array(new NeevoCacheSession),
+			array(new NeevoCacheMemcache($memcache))
+		);
+	}
+
+
+	/**
+	 * @dataProvider getImplementations
+	 */
+	public function testBaseBehaviour(INeevoCache $cache){
 		$cache->store($k = 'key', $v = 'value');
 		A::assertEquals($v, $cache->fetch($k));
 
@@ -53,17 +33,10 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testFileCache(){
-		$file = 'neevo.cache';
-		
-		$cache = new NeevoCacheFile($file);
-		$cache->store($k = 'key', $v = 'value');
-		A::assertEquals($v, $cache->fetch($k));
-
-		$cache->flush();
-		A::assertNull($cache->fetch($k));
-
-		unlink($file);
+	public function testNeevoCacheFile(){
+		$filename = 'neevo.cache';
+		$this->testBaseBehaviour(new NeevoCacheFile($filename));
+		unlink($filename);
 	}
 
 
