@@ -25,8 +25,8 @@ class NeevoDriverParser extends NeevoParser implements INeevoDriver {
 	function freeResultSet($resultSet){}
 	function runQuery($queryString){}
 	function beginTransaction($savepoint = null){}
-	function commitTransaction($savepoint = null){}
-	function rollbackTransaction($savepoint = null){}
+	function commit($savepoint = null){}
+	function rollback($savepoint = null){}
 	function fetch($resultSet){}
 	function seek($resultSet, $offset){}
 	function getInsertId(){}

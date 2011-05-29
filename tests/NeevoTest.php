@@ -35,21 +35,21 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 
 	public function testBeginTransaction(){
 		$this->neevo->begin();
-		A::assertTrue($this->neevo->getConnection()->getDriver()->inTransaction);
+		A::assertEquals(NeevoDriverDummy::TRANSACTION_OPEN, $this->neevo->getConnection()->getDriver()->transactionState());
 	}
 
 
 	public function testCommitTransaction(){
 		$this->neevo->begin();
 		$this->neevo->commit();
-		A::assertFalse($this->neevo->getConnection()->getDriver()->inTransaction);
+		A::assertEquals(NeevoDriverDummy::TRANSACTION_COMMIT, $this->neevo->getConnection()->getDriver()->transactionState());
 	}
 
 
 	public function testRollbackTransaction(){
 		$this->neevo->begin();
 		$this->neevo->rollback();
-		A::assertFalse($this->neevo->getConnection()->getDriver()->inTransaction);
+		A::assertEquals(NeevoDriverDummy::TRANSACTION_ROLLBACK, $this->neevo->getConnection()->getDriver()->transactionState());
 	}
 
 
@@ -116,9 +116,9 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testDestructor(){
-		$closed = $this->neevo->getConnection()->getDriver()->closed;
+		$closed = $this->neevo->getConnection()->getDriver()->isClosed();
 		$this->neevo->__destruct();
-		A::assertEquals(!$closed, $this->neevo->getConnection()->getDriver()->closed);
+		A::assertEquals(!$closed, $this->neevo->getConnection()->getDriver()->isClosed());
 	}
 
 

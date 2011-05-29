@@ -6,32 +6,16 @@
  */
 class NeevoDriverDummy implements INeevoDriver {
 
+	private $unbuffered = false,
+			$connected = false,
+			$closed,
+			$transactions = array();
 
-	private $cursor = 0;
 
-	private $unbuffered = false;
 
-	private $data = array(
-		array(
-			'id' => '1',
-			'name' => 'Jack York',
-			'mail' => 'jack.york@mail.tld'
-		),
-		array(
-			'id' => '2',
-			'name' => 'Nora Frisbie',
-			'mail' => 'nora.friesbie@mail.tld'
-		),
-		array(
-			'id' => '3',
-			'name' => 'John Doe',
-			'mail' => 'john.doe@mail.tld'
-		)
-	);
-
-	public $inTransaction = false;
-
-	public $closed = false;
+	const TRANSACTION_OPEN = 1,
+		TRANSACTION_COMMIT = 2,
+		TRANSACTION_ROLLBACK = 4;
 
 
 	public function __construct(){
@@ -41,17 +25,18 @@ class NeevoDriverDummy implements INeevoDriver {
 
 	public function connect(array $config){
 		$this->unbuffered = $config['unbuffered'];
+		$this->connected = true;
 	}
 
 
 	public function closeConnection(){
-		$this->closed = true;
-		return true;
+		$this->connected = false;
+		return $this->closed = true;
 	}
 
 
 	public function freeResultSet($resultSet){
-		$this->cursor = 0;
+		$resultSet = null;
 		return true;
 	}
 
@@ -65,28 +50,34 @@ class NeevoDriverDummy implements INeevoDriver {
 
 
 	public function beginTransaction($savepoint = null){
-		$this->inTransaction = true;
+		$this->transactions[$savepoint] = self::TRANSACTION_OPEN;
 	}
 
 
-	public function commitTransaction($savepoint = null){
-		$this->inTransaction = false;
+	public function commit($savepoint = null){
+		if(isset($this->transactions[$savepoint])){
+			$this->transactions[$savepoint] = self::TRANSACTION_COMMIT;
+		} elseif($savepoint === null){
+			$this->transactions[count($this->transactions)-1] = self::TRANSACTION_COMMIT;
+		} else{
+			throw new NeevoDriverException("Invalid savepoint '$savepoint'.");
+		}
 	}
 
 
-	public function rollbackTransaction($savepoint = null){
-		$this->inTransaction = false;
+	public function rollback($savepoint = null){
+		if(isset($this->transactions[$savepoint])){
+			$this->transactions[$savepoint] = self::TRANSACTION_ROLLBACK;
+		} elseif($savepoint === null){
+			$this->transactions[count($this->transactions)-1] = self::TRANSACTION_ROLLBACK;
+		} else{
+			throw new NeevoDriverException("Invalid savepoint '$savepoint'.");
+		}
 	}
 
 
 	public function fetch($resultSet){
-		if(!$resultSet){
-			return false;
-		}
-		if($counter < count($this->data)){
-			return $this->data[$this->cursor++];
-		}
-		return false;
+		return $resultSet->fetch();
 	}
 
 
@@ -94,11 +85,7 @@ class NeevoDriverDummy implements INeevoDriver {
 		if($this->unbuffered){
 			throw new NeevoDriverException('Cannot seek on unbuffered result.');
 		}
-		if($resultSet && $offset < count($this->data)){
-			$this->cursor = $offset;
-			return true;
-		}
-		return false;
+		return $resultSet->seek($offset);
 	}
 
 
@@ -108,7 +95,7 @@ class NeevoDriverDummy implements INeevoDriver {
 
 
 	public function randomizeOrder(NeevoStmtBase $statement){
-
+		$statement->order('RANDOM()');
 	}
 
 
@@ -153,12 +140,27 @@ class NeevoDriverDummy implements INeevoDriver {
 
 	public function getRow($i = null){
 		if($i === null){
-			return $this->data;
+			return DummyResult::$data;
 		}
-		if(isset($this->data[$i])){
-			return $this->data[$i];
+		if(isset(DummyResult::$data[$i])){
+			return DummyResult::$data[$i];
 		}
 		return false;
+	}
+
+
+	public function isClosed(){
+		return (bool) $this->closed;
+	}
+
+
+	public function isConnected(){
+		return (bool) $this->connected;
+	}
+
+
+	public function transactionState(){
+		return end($this->transactions);
 	}
 
 
@@ -168,7 +170,25 @@ class NeevoDriverDummy implements INeevoDriver {
 class DummyResult {
 
 
-	private $queryString, $driver;
+	private $queryString, $driver, $cursor = 0;
+
+	public static $data = array(
+		array(
+			'id' => '1',
+			'name' => 'Jack York',
+			'mail' => 'jack.york@mail.tld'
+		),
+		array(
+			'id' => '2',
+			'name' => 'Nora Frisbie',
+			'mail' => 'nora.friesbie@mail.tld'
+		),
+		array(
+			'id' => '3',
+			'name' => 'John Doe',
+			'mail' => 'john.doe@mail.tld'
+		)
+	);
 
 
 	public function __construct($queryString, NeevoDriverDummy $driver){
@@ -181,5 +201,21 @@ class DummyResult {
 		$this->driver->freeResultSet($this);
 	}
 
+
+	public function fetch(){
+		if($this->cursor >= count(self::$data)){
+			return false;
+		}
+		return self::$data[$this->cursor++];
+	}
+
+
+	public function seek($offset){
+		if($offset >= count(self::$data)){
+			return false;
+		}
+		$this->cursor = $offset;
+		return true;
+	}
 
 }
