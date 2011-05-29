@@ -84,7 +84,7 @@ interface INeevoDriver {
 	 * @param string $avepoint
 	 * @return void
 	 */
-	public function commitTransaction($savepoint = null);
+	public function commit($savepoint = null);
 
 
 	/**
@@ -92,7 +92,7 @@ interface INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function rollbackTransaction($savepoint = null);
+	public function rollback($savepoint = null);
 
 
 	/**

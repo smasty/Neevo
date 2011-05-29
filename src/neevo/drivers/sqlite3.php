@@ -172,7 +172,7 @@ class NeevoDriverSQLite3 extends NeevoParser implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function commitTransaction($savepoint = null){
+	public function commit($savepoint = null){
 		$this->runQuery($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
 	}
 
@@ -182,7 +182,7 @@ class NeevoDriverSQLite3 extends NeevoParser implements INeevoDriver {
 	 * @param string $savepoint
 	 * @return void
 	 */
-	public function rollbackTransaction($savepoint = null){
+	public function rollback($savepoint = null){
 		$this->runQuery($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
 	}
 

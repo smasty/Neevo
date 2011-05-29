@@ -167,7 +167,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return void
 	 */
 	public function commit($savepoint = null){
-		$this->connection->getDriver()->commitTransaction($savepoint);
+		$this->connection->getDriver()->commit($savepoint);
 		$this->notifyObservers(INeevoObserver::COMMIT);
 	}
 
@@ -178,7 +178,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return void
 	 */
 	public function rollback($savepoint = null){
-		$this->connection->getDriver()->rollbackTransaction($savepoint);
+		$this->connection->getDriver()->rollback($savepoint);
 		$this->notifyObservers(INeevoObserver::ROLLBACK);
 	}
 
