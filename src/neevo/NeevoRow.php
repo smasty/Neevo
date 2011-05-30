@@ -19,22 +19,22 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 
 	/** @var bool */
-	private $freeze;
+	protected $freeze;
 
 	/** @var string */
-	private $primaryKey;
+	protected $primaryKey;
 
 	/** @var array */
-	private $data = array();
+	protected $data = array();
 
 	/** @var array */
-	private $modified = array();
+	protected $modified = array();
 
 	/** @var array */
-	private $iterable = array();
+	protected $iterable = array();
 
 	/** @var NeevoResult */
-	private $result;
+	protected $result;
 
 
 	/**
