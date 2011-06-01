@@ -397,6 +397,23 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	}
 
 
+	/**
+	 * Explain performed query.
+	 * @return array
+	 */
+	public function explain(){
+		$driver = $this->getConnection()->getDriver();
+		$query = $driver->runQuery("EXPLAIN $this");
+
+		$rows = array();
+		while($row = $driver->fetch($query)){
+			$rows[] = $row;
+		}
+
+		return $rows;
+	}
+
+
 	/*  ************  Column type detection  ************  */
 
 
