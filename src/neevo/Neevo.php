@@ -33,8 +33,9 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	private $connection;
 
 
-	// Neevo revision
-	const REVISION = 461;
+	// Neevo version
+	const VERSION = '1.0-dev',
+		REVISION = '@VCREV@ released on @VCDATE@';
 
 	// Data types
 	const BOOL = 'b',

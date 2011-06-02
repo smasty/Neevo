@@ -71,6 +71,15 @@ class NeevoLoader {
 
 
 	/**
+	 * Unregister the autoloader.
+	 * @return void
+	 */
+	public function unregister(){
+		spl_autoload_unregister(array($this, 'tryLoad'));
+	}
+
+
+	/**
 	 * Try load Neevo class/interface.
 	 * @param string $type
 	 * @return bool
