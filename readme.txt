@@ -28,7 +28,7 @@ Features
 ========
 
  - Easy and intuitive manipulation
- - SELECT, INSERT, UPDATE, DELTE queires (with JOIN support)
+ - SELECT, INSERT, UPDATE, DELTE queries (with JOIN support)
  - Transaction support
  - Multiple database drivers
  - Column type detection
@@ -48,4 +48,3 @@ Supported drivers
  - SQLite
  - SQLite 3
  - PostgreSQL
- 
