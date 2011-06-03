@@ -7,8 +7,6 @@
  *
  * Copyright (c) 2011 Martin Srank (http://smasty.net)
  *
- * @todo INeevoDriver refactoring
- *
  */
 
 
@@ -73,7 +71,8 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @throws NeevoException
 	 */
 	public function __construct($config, INeevoCache $cache = null){
-		$this->connect($config, $cache);
+		$this->connection = new NeevoConnection($config, $cache);
+		$this->connection->attachObserver($this);
 	}
 
 
@@ -85,21 +84,6 @@ class Neevo implements INeevoObservable, INeevoObserver {
 		try{
 			$this->connection->getDriver()->closeConnection();
 		} catch(NeevoImplemenationException $e){}
-	}
-
-
-	/**
-	 * Establish a new connection.
-	 * Configuration can be different - see the API for your driver.
-	 * @param mixed $config Connection configuration.
-	 * @param INeevoCache $cache Cache to use.
-	 * @return Neevo fluent interface
-	 * @throws NeevoException
-	 */
-	public function connect($config, INeevoCache $cache = null){
-		$this->connection = new NeevoConnection($config, $cache);
-		$this->connection->attachObserver($this);
-		return $this;
 	}
 
 
