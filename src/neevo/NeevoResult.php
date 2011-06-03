@@ -296,20 +296,21 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 		// If executed w/o needed cols, force exec w/ them.
 		if(!in_array('*', $clone->columns)){
-			if(!in_array($key, $clone->columns)){
+			if($value !== null){
+				$clone->columns = array($key, $value);
+			} elseif(!in_array($key, $clone->columns)){
 				$clone->columns[] = $key;
 			}
-			if($value !== null && !in_array($value, $clone->columns)){
-				$clone->columns[] = $value;
-			}
 		}
+		$k = substr($key, ($pk = strrpos($key, '.')) ? $pk+1 : 0);
+		$v = $value === null ? null : substr($value, ($pv = strrpos($value, '.')) ? $pv+1 : 0);
 
 		$rows = array();
 		while($row = $clone->fetch()){
 			if(!$row){
 				return array();
 			}
-			$rows[$row[$key]] = $value === null ? $row : $row->$value;
+			$rows[$row[$k]] = $value === null ? $row : $row->$v;
 		}
 
 		return $rows;
