@@ -485,15 +485,6 @@ abstract class NeevoStmtBase implements INeevoObservable {
 
 
 	/**
-	 * @deprecated
-	 */
-	public function orderBy(){
-		trigger_error(__METHOD__ . ' is deprecated, use ' . __CLASS__ . '::order() instead.', E_USER_WARNING);
-		return call_user_func_array(array($this, 'order'), func_get_args());
-	}
-
-
-	/**
 	 * Validate the current statement condition.
 	 * @return bool
 	 */
