@@ -42,7 +42,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testWhereValue(){
-		$this->stmt->where($f = 'two', $v = 'value');
+		$this->stmt->where($f = 'two', $v = new DummyStmt(new NeevoConnection('driver=Dummy')));
 		A::assertEquals(array(array(
 				'simple' => true,
 				'field' => $f,
@@ -53,12 +53,13 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testWhereModifiers(){
-		$this->stmt->where($e = 'one = %s AND two = %i', $a[] = 'one', $a[] = 2);
+		$this->stmt->where($e = 'one = %s AND two = %i AND three = %sub', $a[] = 'one', $a[] = 2,
+			$a[] = new DummyStmt(new NeevoConnection('driver=Dummy')));
 		A::assertEquals(array(array(
 				'simple' => false,
 				'expr' => $e,
-				'modifiers' => array('%s', '%i'),
-				'types' => array(Neevo::TEXT, Neevo::INT),
+				'modifiers' => array('%s', '%i', '%sub'),
+				'types' => array(Neevo::TEXT, Neevo::INT, Neevo::SUBQUERY),
 				'values' => $a,
 				'glue' => 'AND'
 			)), $this->stmt->getConditions());

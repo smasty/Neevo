@@ -22,7 +22,7 @@ class NeevoException extends Exception implements INeevoObservable {
 	protected $sql;
 
 	/** @var SplObjectStorage */
-	protected static $observers;
+	private $observers;
 
 
 	/**
@@ -36,6 +36,7 @@ class NeevoException extends Exception implements INeevoObservable {
 
 		parent::__construct($message, (int) $code, $previous);
 		$this->sql = $sql;
+		$this->observers = new SplObjectStorage;
 		$this->notifyObservers(INeevoObserver::EXCEPTION);
 	}
 
@@ -67,10 +68,7 @@ class NeevoException extends Exception implements INeevoObservable {
 	 * @return void
 	 */
 	public function attachObserver(INeevoObserver $observer){
-		if(!self::$observers){
-			self::$observers = new SplObjectStorage;
-		}
-		self::$observers->attach($observer);
+		$this->observers->attach($observer);
 	}
 
 
@@ -80,10 +78,7 @@ class NeevoException extends Exception implements INeevoObservable {
 	 * @return void
 	 */
 	public function detachObserver(INeevoObserver $observer){
-		if(!self::$observers){
-			return;
-		}
-		self::$observers->detach($observer);
+		$this->observers->detach($observer);
 	}
 
 
@@ -93,10 +88,7 @@ class NeevoException extends Exception implements INeevoObservable {
 	 * @return void
 	 */
 	public function notifyObservers($event){
-		if(!self::$observers){
-			return;
-		}
-		foreach(self::$observers as $observer){
+		foreach($this->observers as $observer){
 			$observer->updateStatus($this, $event);
 		}
 	}

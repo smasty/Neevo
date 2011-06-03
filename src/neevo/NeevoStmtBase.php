@@ -22,7 +22,7 @@
  * @author Martin Srank
  * @package Neevo
  */
-abstract class NeevoStmtBase {
+abstract class NeevoStmtBase implements INeevoObservable {
 
 
 	/** @var string */
@@ -69,6 +69,9 @@ abstract class NeevoStmtBase {
 	/** @var string */
 	private $_uniqueId;
 
+	/** @var SplObjectStorage */
+	private $observers;
+
 
 	/**
 	 * Create statement.
@@ -78,6 +81,7 @@ abstract class NeevoStmtBase {
 	public function __construct(NeevoConnection $connection){
 		$this->connection = $connection;
 		$this->_uniqueId = uniqid(null, true);
+		$this->observers = new SplObjectStorage;
 	}
 
 
@@ -306,7 +310,7 @@ abstract class NeevoStmtBase {
 		$this->performed = true;
 		$this->resultSet = $query;
 
-		$this->connection->notifyObservers(self::$eventTable[$this->type], $this);
+		$this->notifyObservers(self::$eventTable[$this->type]);
 
 		return $query;
 	}
@@ -335,6 +339,26 @@ abstract class NeevoStmtBase {
 		$parser = $this->connection->getParser();
 		$instance = new $parser($this);
 		return $instance->parse();
+	}
+
+
+	/*	 * ***********  INeevoObservable implementation  ************  */
+
+
+	public function attachObserver(INeevoObserver $observer){
+		$this->observers->attach($observer);
+	}
+
+
+	public function detachObserver(INeevoObserver $observer){
+		$this->observers->detach($observer);
+	}
+
+
+	public function notifyObservers($event){
+		foreach($this->observers as $observer){
+			call_user_func(array($observer, 'updateStatus'), $this, $event);
+		}
 	}
 
 

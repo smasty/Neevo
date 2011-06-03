@@ -205,10 +205,8 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @return void
 	 */
 	public function notifyObservers($event){
-		$args = func_get_args();
-		array_unshift($args, $this);
 		foreach($this->observers as $observer){
-			call_user_func_array(array($observer, 'updateStatus'), $args);
+			call_user_func(array($observer, 'updateStatus'), $this, $event);
 		}
 	}
 
