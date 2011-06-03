@@ -126,18 +126,6 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testAutoAttachObserver(){
-		$observer = new DummyObserver;
-		$conn = new NeevoConnection(array(
-				'driver' => 'Dummy',
-				'observer' => $observer
-			));
-		$conn->notifyObservers(1);
-
-		A::assertTrue($observer->isNotified());
-	}
-
-
 	public function testDetachObserver(){
 		$observer = new DummyObserver;
 		$this->instance->attachObserver($observer);

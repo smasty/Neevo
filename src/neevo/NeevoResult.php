@@ -368,7 +368,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 
 	/**
-	 * Get the sum of column a values.
+	 * Get the sum of column values.
 	 * @param string $column
 	 * @return mixed
 	 */
