@@ -46,9 +46,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	/** @var bool */
 	private $detectTypes;
 
-	/** @var array */
-	private $referencedTables;
-
 
 	/**
 	 * Create SELECT statement.
@@ -89,19 +86,6 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 		$this->source = $source;
 		$this->detectTypes = (bool) $connection['detectTypes'];
-
-		// Experimental feature - may be buggy!
-		if($connection['autoJoin'] === true){
-			$referenced = array();
-			foreach($this->columns as $col){
-				if(strpos($col, '.') !== false){
-					$referenced[] = trim(str_replace(':', '', substr($col, 0, strpos($col, '.'))));
-				}
-			}
-			foreach(array_unique($referenced) as $ref){
-				$this->leftJoin(":$ref", ":$ref." . $this->getForeignKey($this->getTable()) . " = :" . $this->getTable() . "." . $this->getPrimaryKey());
-			}
-		}
 
 		$this->setRowClass($connection['rowClass']);
 	}

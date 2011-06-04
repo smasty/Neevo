@@ -74,8 +74,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 			'tablePrefix' => '',
 			'formatDateTime' => '',
 			'detectTypes' => false,
-			'rowClass' => 'NeevoRow',
-			'autoJoin' => false
+			'rowClass' => 'NeevoRow'
 		);
 
 		// Create aliases
