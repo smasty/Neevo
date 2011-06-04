@@ -3,6 +3,12 @@ Basic Join test
 --FILE--
 <?php
 
+require __DIR__ . '/../../src/neevo.php';
+$db = new Neevo(array(
+	'driver' => 'sqlite',
+	'file' => __DIR__ . '/sqlite.db'
+));
+
 foreach($db->select('author')
 			->leftJoin(':software', ':author.id = :software.author_id')
 			->order(':software.id', Neevo::ASC)
