@@ -108,7 +108,7 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 	/**
 	 * Implementation of SeekableIterator.
 	 * @param int $offset
-	 * @throws OutOfBoundsException|NeevoDriverException
+	 * @throws OutOfRangeException|NeevoDriverException
 	 */
 	public function seek($offset){
 		try{
@@ -116,7 +116,7 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 		} catch(NeevoDriverException $e){
 			throw $e;
 		} catch(NeevoException $e){
-			throw new OutOfBoundsException("Cannot seek to offset $offset.", null, $e);
+			throw new OutOfRangeException("Cannot seek to offset $offset.", null, $e);
 		}
 		$this->pointer = $offset - 1;
 		$this->row = $this->result->fetch();
