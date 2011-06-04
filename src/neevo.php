@@ -11,8 +11,8 @@
 
 
 // PHP compatibility
-if(version_compare(PHP_VERSION, '5.1.2', '<')){
-	trigger_error('Neevo requires PHP version 5.1.2 or newer', E_USER_ERROR);
+if(version_compare(PHP_VERSION, '5.2', '<')){
+	trigger_error('Neevo requires PHP version 5.2 or newer', E_USER_ERROR);
 }
 
 
