@@ -35,7 +35,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	// Neevo version
-	const VERSION = '1.0-dev',
+	const VERSION = '1.1-dev',
 		REVISION = '@VCREV@ released on @VCDATE@';
 
 	// Data types
