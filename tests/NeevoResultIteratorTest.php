@@ -56,7 +56,7 @@ class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
 
 
 	/**
-	 * @expectedException OutOfBoundsException
+	 * @expectedException OutOfRangeException
 	 */
 	public function testSeekOutOfBounds(){
 		$iterator = $this->result->getIterator();

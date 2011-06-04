@@ -19,11 +19,12 @@ interface INeevoObservable {
 
 
 	/**
-	 * Attach given observer.
+	 * Attach given observer to given event.
 	 * @param INeevoObserver $observer
+	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(INeevoObserver $observer);
+	public function attachObserver(INeevoObserver $observer, $event);
 
 
 	/**
@@ -35,7 +36,7 @@ interface INeevoObservable {
 
 
 	/**
-	 * Notify all attached observers.
+	 * Notify all observers attached to given event.
 	 * @param int $event
 	 * @return void
 	 */

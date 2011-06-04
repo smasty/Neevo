@@ -21,8 +21,8 @@ class NeevoException extends Exception implements INeevoObservable {
 	/** @var string */
 	protected $sql;
 
-	/** @var SplObjectStorage */
-	private $observers;
+	/** @var NeevoObserverMap */
+	protected static $observers;
 
 
 	/**
@@ -30,13 +30,14 @@ class NeevoException extends Exception implements INeevoObservable {
 	 * @param string $message
 	 * @param int $code
 	 * @param string $sql Optional SQL command
+	 * @param Exception $previous
 	 * @return void
 	 */
 	public function __construct($message = '', $code = 0, $sql = null, Exception $previous = null){
 
 		parent::__construct($message, (int) $code, $previous);
 		$this->sql = $sql;
-		$this->observers = new SplObjectStorage;
+		self::$observers = new NeevoObserverMap;
 		$this->notifyObservers(INeevoObserver::EXCEPTION);
 	}
 
@@ -63,12 +64,13 @@ class NeevoException extends Exception implements INeevoObservable {
 
 
 	/**
-	 * Attach given observer.
+	 * Attach given observer to given event.
 	 * @param INeevoObserver $observer
+	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(INeevoObserver $observer){
-		$this->observers->attach($observer);
+	public function attachObserver(INeevoObserver $observer, $event){
+		self::$observers->attach($observer, $event);
 	}
 
 
@@ -78,18 +80,20 @@ class NeevoException extends Exception implements INeevoObservable {
 	 * @return void
 	 */
 	public function detachObserver(INeevoObserver $observer){
-		$this->observers->detach($observer);
+		self::$observers->detach($observer);
 	}
 
 
 	/**
-	 * Notify attached observers.
+	 * Notify all observers attached to given event.
 	 * @param int $event
 	 * @return void
 	 */
 	public function notifyObservers($event){
-		foreach($this->observers as $observer){
-			$observer->updateStatus($this, $event);
+		foreach(self::$observers as $observer){
+			if($event & self::$observers->getEvent()){
+				$observer->updateStatus($this, $event);
+			}
 		}
 	}
 
