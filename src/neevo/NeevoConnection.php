@@ -39,7 +39,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	/** @var string */
 	private $parser = 'NeevoParser';
 
-	/** @var SplObjectStorage */
+	/** @var NeevoObserverMap */
 	private $observers;
 
 	/** @var INeevoCache */
@@ -54,7 +54,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct($config, INeevoCache $cache = null){
-		$this->observers = new SplObjectStorage;
+		$this->observers = new NeevoObserverMap;
 
 		$this->cache = $cache !== null ? $cache : new NeevoCache;
 
@@ -180,12 +180,13 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 
 
 	/**
-	 * Attach given observer.
+	 * Attach given observer to given $event.
 	 * @param INeevoObserver $observer
+	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(INeevoObserver $observer){
-		$this->observers->attach($observer);
+	public function attachObserver(INeevoObserver $observer, $event){
+		$this->observers->attach($observer, $event);
 	}
 
 
@@ -200,13 +201,15 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 
 
 	/**
-	 * Notify all attached observers.
+	 * Notify all observers attached to given event.
 	 * @param int $event
 	 * @return void
 	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
-			call_user_func(array($observer, 'updateStatus'), $this, $event);
+			if($event & $this->observers->getEvent()){
+				$observer->updateStatus($this, $event);
+			}
 		}
 	}
 

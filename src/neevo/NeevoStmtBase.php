@@ -63,14 +63,14 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	/** @var array */
 	protected $_subqueries = array();
 
+	/** @var NeevoObserverMap */
+	protected $observers;
+
 	/** @var array */
 	private $_stmtConds = array();
 
 	/** @var string */
 	private $_uniqueId;
-
-	/** @var SplObjectStorage */
-	private $observers;
 
 
 	/**
@@ -81,7 +81,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	public function __construct(NeevoConnection $connection){
 		$this->connection = $connection;
 		$this->_uniqueId = uniqid(null, true);
-		$this->observers = new SplObjectStorage;
+		$this->observers = new NeevoObserverMap;
 	}
 
 
@@ -345,19 +345,37 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	/*	 * ***********  INeevoObservable implementation  ************  */
 
 
-	public function attachObserver(INeevoObserver $observer){
-		$this->observers->attach($observer);
+	/**
+	 * Attach given observer to given event.
+	 * @param INeevoObserver $observer
+	 * @param int $event
+	 * @return void
+	 */
+	public function attachObserver(INeevoObserver $observer, $event){
+		$this->observers->attach($observer, $event);
 	}
 
 
+	/**
+	 * Detach given observer.
+	 * @param INeevoObserver $observer
+	 * @return void
+	 */
 	public function detachObserver(INeevoObserver $observer){
 		$this->observers->detach($observer);
 	}
 
 
+	/**
+	 * Notify all observers attached to given event.
+	 * @param type $event
+	 * @return void
+	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
-			call_user_func(array($observer, 'updateStatus'), $this, $event);
+			if($event & $this->observers->getEvent()){
+				$observer->updateStatus($this, $event);
+			}
 		}
 	}
 

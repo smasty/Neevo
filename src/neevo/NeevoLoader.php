@@ -34,6 +34,7 @@ class NeevoLoader {
 		'neevoexception' => '/NeevoException.php',
 		'neevoimplementationexception' => '/NeevoException.php',
 		'neevoliteral' => '/Neevo.php',
+		'neevoobservermap' => '/NeevoObserverMap.php',
 		'neevoparser' => '/NeevoParser.php',
 		'neevoresult' => '/NeevoResult.php',
 		'neevoresultiterator' => '/NeevoResultIterator.php',

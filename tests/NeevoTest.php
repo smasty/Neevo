@@ -91,7 +91,7 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 
 	public function testAttachObserver(){
 		$o = new DummyObserver;
-		$this->neevo->attachObserver($o);
+		$this->neevo->attachObserver($o, 1);
 		$this->neevo->notifyObservers(1);
 		A::assertTrue($o->isNotified($e));
 		A::assertEquals(1, $e);

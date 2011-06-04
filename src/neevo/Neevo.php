@@ -30,7 +30,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	/** @var NeevoConnection */
 	private $connection;
 
-	/** @var SplObjectStorage */
+	/** @var NeevoObserverMap */
 	private $observers;
 
 
@@ -75,8 +75,8 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 */
 	public function __construct($config, INeevoCache $cache = null){
 		$this->connection = new NeevoConnection($config, $cache);
-		$this->observers = new SplObjectStorage;
-		$this->attachObserver($this);
+		$this->observers = new NeevoObserverMap;
+		$this->attachObserver($this, self::QUERY);
 	}
 
 
@@ -102,7 +102,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	public function select($columns = null, $table = null){
 		$result = new NeevoResult($this->connection, $columns, $table);
 		foreach($this->observers as $observer){
-			$result->attachObserver($observer);
+			$result->attachObserver($observer, $this->observers->getEvent());
 		}
 		return $result;
 	}
@@ -117,7 +117,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	public function insert($table, array $values){
 		$statement = NeevoStmt::createInsert($this->connection, $table, $values);
 		foreach($this->observers as $observer){
-			$statement->attachObserver($observer);
+			$statement->attachObserver($observer, $this->observers->getEvent());
 		}
 		return $statement;
 	}
@@ -132,7 +132,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	public function update($table, array $data){
 		$statement = NeevoStmt::createUpdate($this->connection, $table, $data);
 		foreach($this->observers as $observer){
-			$statement->attachObserver($observer);
+			$statement->attachObserver($observer, $this->observers->getEvent());
 		}
 		return $statement;
 	}
@@ -146,7 +146,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	public function delete($table){
 		$statement = NeevoStmt::createDelete($this->connection, $table);
 		foreach($this->observers as $observer){
-			$statement->attachObserver($observer);
+			$statement->attachObserver($observer, $this->observers->getEvent());
 		}
 		return $statement;
 	}
@@ -194,13 +194,14 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	/**
 	 * Attach an observer for debugging.
 	 * @param INeevoObserver $observer
+	 * @param int $event Event to attach the observer to.
 	 * @return void
 	 */
-	public function attachObserver(INeevoObserver $observer){
-		$this->observers->attach($observer);
-		$this->connection->attachObserver($observer);
+	public function attachObserver(INeevoObserver $observer, $event){
+		$this->observers->attach($observer, $event);
+		$this->connection->attachObserver($observer, $event);
 		$e = new NeevoException;
-		$e->attachObserver($observer);
+		$e->attachObserver($observer, $event);
 	}
 
 
@@ -218,12 +219,16 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	/**
-	 * Notify all attached observers.
+	 * Notify all observers attached to given event.
 	 * @param int $event
 	 * @return void
 	 */
 	public function notifyObservers($event){
-		call_user_func_array(array($this->connection, 'notifyObservers'), func_get_args());
+		foreach($this->observers as $observer){
+			if($event & $this->observers->getEvent()){
+				$observer->updateStatus($this, $event);
+			}
+		}
 	}
 
 
@@ -234,10 +239,8 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * @return void
 	 */
 	public function updateStatus(INeevoObservable $observable, $event){
-		if($observable instanceof NeevoStmtBase && $event & self::QUERY){
-			$this->last = $observable->__toString();
-			++$this->queries;
-		}
+		$this->last = $observable->__toString();
+		++$this->queries;
 	}
 
 
