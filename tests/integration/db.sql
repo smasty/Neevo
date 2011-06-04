@@ -12,8 +12,6 @@ CREATE TABLE software (
   url text NOT NULL,
   FOREIGN KEY (author_id) REFERENCES author (id)
 );
--- PgSQL: replace 'serial' with 'integer' on 'id' columns (Auto-increment)
--- MySQL: add ENGINE=InnoDB (Foreign keys)
 
 
 -- Table data

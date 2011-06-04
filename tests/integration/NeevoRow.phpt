@@ -3,6 +3,12 @@ NeevoRow Update/delete functionality
 --FILE--
 <?php
 
+require __DIR__ . '/../../src/neevo.php';
+$db = new Neevo(array(
+	'driver' => 'sqlite',
+	'file' => __DIR__ . '/sqlite.db'
+));
+
 $db->insert('software', array(
 	'title' => 'Debian Linux',
 	'author_id' => 11,

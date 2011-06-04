@@ -3,6 +3,12 @@ GROUP BY testing
 --FILE--
 <?php
 
+require __DIR__ . '/../../src/neevo.php';
+$db = new Neevo(array(
+	'driver' => 'sqlite',
+	'file' => __DIR__ . '/sqlite.db'
+));
+
 foreach($db->select(':author_id, MAX(:id) as :max', 'software')
 			->group(':author_id')
 			->order(':author_id', Neevo::ASC) as $r){

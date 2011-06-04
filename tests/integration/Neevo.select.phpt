@@ -3,7 +3,13 @@ SELECT with only table name passed.
 --FILE--
 <?php
 
-echo join(',', array_keys($db->select('software')
+require __DIR__ . '/../../src/neevo.php';
+$db = new Neevo(array(
+	'driver' => 'sqlite',
+	'file' => __DIR__ . '/sqlite.db'
+));
+
+echo implode(',', array_keys($db->select('software')
 	->order(':id')
 	->limit(1)
 	->fetch()

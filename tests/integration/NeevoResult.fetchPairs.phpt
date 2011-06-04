@@ -3,6 +3,12 @@ NeevoResult->fetchPairs() key=>value test, key=>row test.
 --FILE--
 <?php
 
+require __DIR__ . '/../../src/neevo.php';
+$db = new Neevo(array(
+	'driver' => 'sqlite',
+	'file' => __DIR__ . '/sqlite.db'
+));
+
 // Also check columns auto-adding
 print_r($db->select(':url', 'author')->order(':id')->limit(2)->fetchPairs('id', 'name'));
 
