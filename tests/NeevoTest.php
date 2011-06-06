@@ -115,11 +115,5 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 		);
 	}
 
-	public function testDestructor(){
-		$closed = $this->neevo->getConnection()->getDriver()->isClosed();
-		$this->neevo->__destruct();
-		A::assertEquals(!$closed, $this->neevo->getConnection()->getDriver()->isClosed());
-	}
-
 
 }

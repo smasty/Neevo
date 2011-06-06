@@ -80,17 +80,6 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	}
 
 
-	/**
-	 * Close connection to server.
-	 * @return void
-	 */
-	public function __destruct(){
-		try{
-			$this->connection->getDriver()->closeConnection();
-		} catch(NeevoImplemenationException $e){}
-	}
-
-
 	/*  ************  Statement factories  ************  */
 
 	/**

@@ -32,7 +32,8 @@ interface INeevoObserver {
 		TRANSACTION = 448, // BEGIN, COMMIT, ROLLBACK
 
 		EXCEPTION = 512,
-		ALL = 1022;
+		DISCONNECT =1024,
+		ALL = 2046;
 
 
 	/**

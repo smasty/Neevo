@@ -157,6 +157,15 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testCloseConnection(){
+		$this->instance->attachObserver($o = new DummyObserver, DummyObserver::DISCONNECT);
+		$this->instance->__destruct();
+
+		A::assertTrue($this->instance->getDriver()->isClosed());
+		A::assertTrue($o->isNotified());
+	}
+
+
 }
 
 

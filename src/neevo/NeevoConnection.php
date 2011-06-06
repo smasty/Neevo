@@ -19,7 +19,6 @@
  * - detectTypes (bool) => Detect column types automatically
  * - formatDateTime => Date/time format ("U" for timestamp. If empty, DateTime object used).
  * - rowClass => Name of class to use as a row class.
- * - autoJoin (bool) => Experimental! Automatically create LEFT JOINs when selecting from more tables.
  *
  * @author Martin Srank
  * @package Neevo
@@ -104,7 +103,22 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 
 
 	/**
-	 * Perform connection.
+	 * Close database connection.
+	 * @return void
+	 */
+	public function __destruct(){
+		try{
+			$this->driver->closeConnection();
+		} catch(NeevoImplementationException $e){
+
+		}
+
+		$this->notifyObservers(INeevoObserver::DISCONNECT);
+	}
+
+
+	/**
+	 * Open database connection.
 	 * @return void
 	 */
 	public function connect(){
