@@ -79,6 +79,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 			? explode(',', $columns)
 			: ($columns instanceof Traversable
 				? iterator_to_array($columns) : (array) $columns);
+		$this->columns = array_map('trim', $this->columns);
 
 		if($columns === array()){
 			throw new InvalidArgumentException('No columns given.');

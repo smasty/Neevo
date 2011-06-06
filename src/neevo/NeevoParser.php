@@ -79,6 +79,7 @@ class NeevoParser {
 		$cols = $this->stmt->getColumns();
 		list($source, $where, $group, $order) = $this->clauses;
 		foreach($cols as $key => $col){
+			$col = preg_match('~^[\w.]+$~', $col) ? ":$col" : $col;
 			$cols[$key] = $this->tryDelimite($col);
 		}
 		$cols = implode(', ', $cols);
