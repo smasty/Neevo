@@ -40,7 +40,8 @@ class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
 	public function testSeek(){
 		$iterator = $this->result->getIterator();
 		$iterator->rewind();
-		$iterator->seek(2);
+		$iterator->seek(1);
+		A::assertTrue($iterator->valid());
 		A::assertEquals('2', $iterator->current()->id);
 	}
 
@@ -58,7 +59,7 @@ class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @expectedException OutOfRangeException
 	 */
-	public function testSeekOutOfBounds(){
+	public function testSeekOutOfRange(){
 		$iterator = $this->result->getIterator();
 		$iterator->rewind();
 		$iterator->seek(50);
@@ -68,8 +69,10 @@ class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
 	public function testDoubleRewind(){
 		$iterator = $this->result->getIterator();
 		$iterator->rewind();
+		A::assertTrue($iterator->valid());
 		$c = $iterator->current();
 		$iterator->rewind();
+		A::assertTrue($iterator->valid());
 		A::assertEquals($c->toArray(), $iterator->current()->toArray());
 	}
 

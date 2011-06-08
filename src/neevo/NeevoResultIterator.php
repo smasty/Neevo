@@ -44,17 +44,16 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 	 */
 	public function rewind(){
 		if($this->row !== null){
-			$this->result->resetState();
+			$this->result = clone $this->result;
 		} else{
 			try{
 				$this->result->seek(0);
 			} catch(NeevoException $e){
-				$this->result->resetState();
+				$this->result = clone $this->result;
 			}
 		}
 
 		$this->pointer = 0;
-		$this->row = $this->result->fetch();
 	}
 
 
@@ -63,8 +62,7 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 	 * @return void
 	 */
 	public function next(){
-		$this->pointer++;
-		$this->row = $this->result->fetch();
+		++$this->pointer;
 	}
 
 
@@ -73,7 +71,7 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 	 * @return bool
 	 */
 	public function valid(){
-		return $this->row !== false;
+		return ($this->row = $this->result->fetch()) !== false;
 	}
 
 
@@ -112,14 +110,13 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 	 */
 	public function seek($offset){
 		try{
-			$this->result->seek($offset - 1);
+			$this->result->seek($offset);
 		} catch(NeevoDriverException $e){
 			throw $e;
 		} catch(NeevoException $e){
 			throw new OutOfRangeException("Cannot seek to offset $offset.", null, $e);
 		}
-		$this->pointer = $offset - 1;
-		$this->row = $this->result->fetch();
+		$this->pointer = $offset;
 	}
 
 
