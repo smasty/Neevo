@@ -69,7 +69,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 		// Default values
 		$defaults = array(
 			'driver' => Neevo::$defaultDriver,
-			'lazy' => false,
+			'lazy' => true,
 			'tablePrefix' => '',
 			'formatDateTime' => '',
 			'detectTypes' => false,
