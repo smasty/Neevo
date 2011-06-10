@@ -181,14 +181,14 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testDump(){
-		A::assertEmpty($this->stmt->dump(true));
+		A::assertEquals("\n", $this->stmt->dump(true));
 	}
 
 
 	public function testDumpEcho(){
 		ob_start();
 		$this->stmt->dump();
-		A::assertEmpty(ob_get_clean());
+		A::assertEquals("\n", ob_get_clean());
 	}
 
 

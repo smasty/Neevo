@@ -128,7 +128,7 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @return void
 	 */
 	public function closeConnection(){
-		if(!$this->persistent){
+		if(!$this->persistent && $this->resource !== null){
 			@sqlite_close($this->resource);
 		}
 	}

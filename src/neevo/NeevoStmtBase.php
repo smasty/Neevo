@@ -287,7 +287,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * @return string|NeevoStmtBase fluent interface
 	 */
 	public function dump($return = false){
-		$sql = (PHP_SAPI === 'cli') ? $this->parse() : Neevo::highlightSql($this->parse());
+		$sql = (PHP_SAPI === 'cli') ? $this->parse() . "\n" : Neevo::highlightSql($this->parse());
 		if(!$return){
 			echo $sql;
 		}
