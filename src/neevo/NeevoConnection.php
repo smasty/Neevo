@@ -16,8 +16,9 @@
  * Common configuration: (see also driver specific configuration)
  * - tablePrefix => prefix for table names
  * - lazy (bool) => If TRUE, connection will be established only when required.
- * - detectTypes (bool) => Detect column types automatically
- * - formatDateTime => Date/time format ("U" for timestamp. If empty, DateTime object used).
+ * - result
+ *   - detectTypes (bool) => Detect column types automatically
+ *   - formatDate => Date/time format (empty for DateTime instance).
  * - rowClass => Name of class to use as a row class.
  *
  * @author Martin Srank
@@ -60,8 +61,14 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 		// Parse config
 		if(is_string($config)){
 			parse_str($config, $config);
+
 		} elseif($config instanceof Traversable){
-			$config = iterator_to_array($config);
+			$tmp = array();
+			foreach($config as $key => $val){
+				$tmp[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
+			}
+			$config = $tmp;
+
 		} elseif(!is_array($config)){
 			throw new InvalidArgumentException('Configuration must be an array, string or Traversable.');
 		}
@@ -69,11 +76,13 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 		// Default values
 		$defaults = array(
 			'driver' => Neevo::$defaultDriver,
-			'lazy' => true,
+			'lazy' => false,
+			'rowClass' => 'NeevoRow',
 			'tablePrefix' => '',
-			'formatDateTime' => '',
-			'detectTypes' => false,
-			'rowClass' => 'NeevoRow'
+			'result' => array(
+				'detectTypes' => false,
+				'formatDate' => '',
+			),
 		);
 
 		// Create aliases
@@ -88,9 +97,10 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 		self::alias($config, 'tablePrefix', 'table_prefix');
 		self::alias($config, 'tablePrefix', 'prefix');
 		self::alias($config, 'charset', 'encoding');
-		self::alias($config, 'observer', 'profiler');
+		self::alias($config, 'result.detectTypes', 'detectTypes');
+		self::alias($config, 'result.formatDate', 'formatDateTime');
 
-		$config += $defaults;
+		$config = array_replace_recursive($defaults, $config);
 
 		$this->setDriver($config['driver']);
 
@@ -268,8 +278,15 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @return void
 	 */
 	public static function alias(&$config, $key, $alias){
-		if(isset($config[$alias]) && !isset($config[$key])){
-			$config[$key] = $config[$alias];
+		if(!isset($config[$alias])){
+			return;
+		}
+		$tmp = & $config;
+		foreach(explode('.', $key) as $key){
+			$tmp = & $tmp[$key];
+		}
+		if(!isset($tmp)){
+			$tmp = $config[$alias];
 		}
 	}
 
