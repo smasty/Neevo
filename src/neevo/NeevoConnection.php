@@ -55,7 +55,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	public function __construct($config, INeevoCache $cache = null){
 		$this->observers = new NeevoObserverMap;
 
-		$this->cache = $cache !== null ? $cache : new NeevoCache;
+		$this->cache = $cache !== null ? $cache : new NeevoCacheMemory;
 
 		// Parse config
 		if(is_string($config)){
