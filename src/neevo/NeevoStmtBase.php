@@ -259,7 +259,8 @@ abstract class NeevoStmtBase implements INeevoObservable {
 			return $this;
 		}
 		$this->resetState();
-		$this->limit = array($limit, ($offset !== null && $this->type === Neevo::STMT_SELECT) ? $offset : null);
+		$this->limit = array($limit,
+			($offset !== null && $this->type === Neevo::STMT_SELECT) ? $offset : null);
 		return $this;
 	}
 
