@@ -473,12 +473,6 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	}
 
 
-	public function getForeignKey($table){
-		$primary = $this->getPrimaryKey();
-		return $table . '_' . ($primary !== null ? $primary : 'id' );
-	}
-
-
 	/*  ************  Internal methods  ************  */
 
 

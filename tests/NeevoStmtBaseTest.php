@@ -233,15 +233,6 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testGetForeignKey(){
-		$r = new ReflectionProperty('DummyStmt', 'source');
-		$r->setAccessible(true);
-		$r->setValue($this->stmt, 'foo');
-
-		A::assertEquals('bar_id', $this->stmt->getForeignKey('bar'));
-	}
-
-
 	public function testToString(){
 		A::assertEquals((string) $this->stmt, $this->stmt->parse());
 	}
