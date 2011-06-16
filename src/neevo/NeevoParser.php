@@ -247,7 +247,7 @@ class NeevoParser {
 	 */
 	protected function parseGrouping(){
 		list($group, $having) = $this->stmt->getGrouping();
-		return $this->tryDelimite(" GROUP BY $group" . ($having !== null ? " HAVING $having" : ""));
+		return $this->tryDelimite(" GROUP BY $group" . ($having !== null ? " HAVING $having" : ''));
 	}
 
 
@@ -310,7 +310,7 @@ class NeevoParser {
 	/**
 	 * Escape given value.
 	 * @param mixed|array|Traversable $value
-	 * @param string|array|Traversable|null $type
+	 * @param string|array|null $type
 	 * @return mixed|array
 	 */
 	protected function escapeValue($value, $type = null){
@@ -341,7 +341,7 @@ class NeevoParser {
 		}
 
 		// Multiple values w/ types
-		elseif(is_array($type) || $type instanceof Traversable){
+		elseif(is_array($type)){
 			foreach($value as $k => $v)
 				$value[$k] = $this->escapeValue($v, $type[$k]);
 			return $value;

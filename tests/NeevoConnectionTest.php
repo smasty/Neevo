@@ -107,7 +107,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testAutoSetCache(){
-		A::assertInstanceOf('NeevoCache', $this->instance->getCache());
+		A::assertInstanceOf('NeevoCacheMemory', $this->instance->getCache());
 	}
 
 

@@ -14,7 +14,7 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 		$memcache->connect('localhost');
 
 		return array(
-			array(new NeevoCache),
+			array(new NeevoCacheMemory),
 			array(new NeevoCacheSession),
 			array(new NeevoCacheMemcache($memcache))
 		);

@@ -158,22 +158,6 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * More calls append conditions with 'AND' operator. Conditions can also be specified
 	 * by calling and() / or() methods the same way as where().
 	 * Corresponding operator will be used.
-	 *
-	 * Usage is similar to printf(). Available modifiers are:
-	 * - %b - boolean
-	 * - %i - integer
-	 * - %f - float
-	 * - %s - string
-	 * - %bin - binary data
-	 * - %d - date, time
-	 * - %a - array
-	 * - %l - SQL lieral
-	 * - %id - SQL identifier
-	 * - %sub - subquery
-	 *
-	 * In simple mode, argument is SQL identifier, second is value:
-	 * true, false, scalar, null, array, NeevoLiteral or NeevoResult.
-	 *
 	 * @param string $expr
 	 * @param mixed $value
 	 * @return NeevoStmtBase fluent interface
@@ -288,7 +272,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * @return string|NeevoStmtBase fluent interface
 	 */
 	public function dump($return = false){
-		$sql = (PHP_SAPI === 'cli') ? $this->parse() . "\n" : Neevo::highlightSql($this->parse());
+		$sql = PHP_SAPI === 'cli' ? $this->parse() . "\n" : Neevo::highlightSql($this->parse());
 		if(!$return){
 			echo $sql;
 		}

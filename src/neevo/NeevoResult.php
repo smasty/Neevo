@@ -273,7 +273,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	/**
 	 * Fetch rows as $key=>$value pairs.
 	 * @param string $key Key column
-	 * @param string $value Value column. NULL for all specified columns.
+	 * @param string $value Value column. NULL for whole row.
 	 * @return array
 	 */
 	public function fetchPairs($key, $value = null){
@@ -359,7 +359,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return mixed
 	 */
 	public function sum($column){
-		return $this->aggregation("SUM(:$column)");
+		return $this->aggregation("SUM($column)");
 	}
 
 
@@ -369,7 +369,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return mixed
 	 */
 	public function min($column){
-		return $this->aggregation("MIN(:$column)");
+		return $this->aggregation("MIN($column)");
 	}
 
 
@@ -379,7 +379,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return mixed
 	 */
 	public function max($column){
-		return $this->aggregation("MAX(:$column)");
+		return $this->aggregation("MAX($column)");
 	}
 
 

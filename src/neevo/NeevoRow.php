@@ -140,7 +140,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	}
 
 
-	/*  ************  Implementation of Array Access  ************  */
+	/*  ************  Implementation of ArrayAccess  ************  */
 
 
 	public function offsetGet($offset){
