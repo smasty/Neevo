@@ -297,7 +297,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @return void
 	 * @throws NeevoDriverException
 	 */
-	private function setDriver($driver){
+	protected function setDriver($driver){
 		$class = "NeevoDriver$driver";
 
 		if(!class_exists($class)){
@@ -330,7 +330,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @param string $class
 	 * @return bool
 	 */
-	private function isDriver($class){
+	protected function isDriver($class){
 		try{
 			$reflection = new ReflectionClass($class);
 			return $reflection->implementsInterface('INeevoDriver');
@@ -345,7 +345,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @param string $class
 	 * @return bool
 	 */
-	private function isParser($class){
+	protected function isParser($class){
 		try{
 			$reflection = new ReflectionClass($class);
 			return $reflection->isSubclassOf('NeevoParser');

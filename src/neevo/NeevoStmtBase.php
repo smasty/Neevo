@@ -69,9 +69,6 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	/** @var array */
 	private $_stmtConds = array();
 
-	/** @var string */
-	private $_uniqueId;
-
 
 	/**
 	 * Create statement.
@@ -80,7 +77,6 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 */
 	public function __construct(NeevoConnection $connection){
 		$this->connection = $connection;
-		$this->_uniqueId = uniqid(null, true);
 		$this->observers = new NeevoObserverMap;
 	}
 
@@ -505,10 +501,10 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 */
 	protected function hasCircularReferences($parent, $visited = array()){
 		foreach($parent->_subqueries as $child){
-			if(isset($visited[$child->_uniqueId])){
+			if(isset($visited[spl_object_hash($child)])){
 				return true;
 			}
-			$visited[$child->_uniqueId] = true;
+			$visited[spl_object_hash($child)] = true;
 			if($this->hasCircularReferences($child, $visited)){
 				return true;
 			}

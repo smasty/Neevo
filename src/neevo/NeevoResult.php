@@ -30,21 +30,20 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	/** @var array */
 	protected $joins;
 
-
 	/** @var string */
 	protected $tableAlias;
 
 	/** @var resource */
 	protected $resultSet;
 
-	/** @var string */
-	private $rowClass = 'NeevoRow';
-
 	/** @var array */
-	private $columnTypes = array();
+	protected $columnTypes = array();
 
 	/** @var bool */
-	private $detectTypes;
+	protected $detectTypes;
+
+	/** @var string */
+	private $rowClass = 'NeevoRow';
 
 
 	/**
@@ -464,7 +463,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @param string $type
 	 * @return string
 	 */
-	private function resolveType($type){
+	protected function resolveType($type){
 		static $patterns = array(
 			'bool|bit' => Neevo::BOOL,
 			'bin|blob|bytea' => Neevo::BINARY,
@@ -489,7 +488,7 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @param string $type
 	 * @return mixed
 	 */
-	private function convertType($value, $type){
+	protected function convertType($value, $type){
 		$dateFormat = $this->connection['result']['formatDate'];
 		if($value === null){
 			return null;
