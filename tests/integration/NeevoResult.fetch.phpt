@@ -2,12 +2,7 @@
 NeevoResult->fetch() and iterating
 --FILE--
 <?php
-
-require __DIR__ . '/../../src/neevo.php';
-$db = new Neevo(array(
-	'driver' => 'sqlite',
-	'file' => __DIR__ . '/sqlite.db'
-));
+require_once __DIR__ . '/config.php';
 
 foreach($db->select(':id, :name', 'author')->order(':id')->limit(2) as $row){
 	echo "$row->name ($row->id)\n";

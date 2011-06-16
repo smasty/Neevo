@@ -2,12 +2,7 @@
 Subquery support
 --FILE--
 <?php
-
-require __DIR__ . '/../../src/neevo.php';
-$db = new Neevo(array(
-	'driver' => 'sqlite',
-	'file' => __DIR__ . '/sqlite.db'
-));
+require_once __DIR__ . '/config.php';
 
 foreach($db->select('software')
 	->where(':id IN %sub',
