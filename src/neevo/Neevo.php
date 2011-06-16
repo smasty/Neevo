@@ -82,6 +82,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 	/*  ************  Statement factories  ************  */
 
+
 	/**
 	 * SELECT statement factory.
 	 * @param string|array $columns Array or comma-separated list (optional)
@@ -147,33 +148,39 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	/**
 	 * Begin a transaction if supported.
 	 * @param string $savepoint
-	 * @return void
+	 * @return Neevo fluent interface
 	 */
 	public function begin($savepoint = null){
 		$this->connection->getDriver()->beginTransaction($savepoint);
 		$this->notifyObservers(INeevoObserver::BEGIN);
+
+		return $this;
 	}
 
 
 	/**
 	 * Commit statements in a transaction.
 	 * @param string $savepoint
-	 * @return void
+	 * @return Neevo fluent interface
 	 */
 	public function commit($savepoint = null){
 		$this->connection->getDriver()->commit($savepoint);
 		$this->notifyObservers(INeevoObserver::COMMIT);
+
+		return $this;
 	}
 
 
 	/**
 	 * Rollback changes in a transaction.
 	 * @param string $savepoint
-	 * @return void
+	 * @return Neevo fluent interface
 	 */
 	public function rollback($savepoint = null){
 		$this->connection->getDriver()->rollback($savepoint);
 		$this->notifyObservers(INeevoObserver::ROLLBACK);
+
+		return $this;
 	}
 
 
