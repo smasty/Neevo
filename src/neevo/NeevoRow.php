@@ -19,10 +19,10 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 
 	/** @var bool */
-	protected $freeze;
+	protected $frozen;
 
 	/** @var string */
-	protected $primaryKey;
+	protected $primary;
 
 	/** @var array */
 	protected $data = array();
@@ -30,11 +30,11 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	/** @var array */
 	protected $modified = array();
 
-	/** @var array */
-	protected $iterable = array();
+	/** @var string */
+	protected $table;
 
-	/** @var NeevoResult */
-	protected $result;
+	/** @var NeevoConnection */
+	protected $connection;
 
 
 	/**
@@ -45,12 +45,12 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	 */
 	public function __construct(array $data, NeevoResult $result){
 		$this->data = $data;
-		$this->iterable = $this->data;
-		$this->result = $result;
-		$this->primaryKey = $result->getPrimaryKey();
+		$this->connection = $result->getConnection();
+		$this->table = $result->getTable();
+		$this->primary = $result->getPrimaryKey();
 
-		if($this->primaryKey === null || !isset($this->data[$this->primaryKey]))
-			$this->freeze = true;
+		if(!$this->table || !$this->primary || !isset($this->data[$this->primary]))
+			$this->frozen = true;
 	}
 
 
@@ -60,14 +60,12 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	 * @return int Number of affected rows.
 	 */
 	public function update(){
-		if($this->freeze)
-			throw new NeevoException('Update disabled - cannot get primary key.');
+		if($this->frozen)
+			throw new NeevoException('Update disabled - cannot get primary key or table.');
 
-		if(!empty($this->modified) && $this->data != $this->iterable){
-			return NeevoStmt::createUpdate($this->result->getConnection(), $this->result->getTable(),
-					$this->modified)
-					->where($this->primaryKey, $this->data[$this->primaryKey])
-					->limit(1)->affectedRows();
+		if(!empty($this->modified)){
+			return NeevoStmt::createUpdate($this->connection, $this->table,	$this->modified)
+					->where($this->primary, $this->data[$this->primary])->limit(1)->affectedRows();
 		}
 	}
 
@@ -78,21 +76,20 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	 * @return int Number of affected rows.
 	 */
 	public function delete(){
-		if($this->freeze)
-			throw new NeevoException('Delete disabled - cannot get primary key.');
+		if($this->frozen)
+			throw new NeevoException('Delete disabled - cannot get primary key or table.');
 
-		return NeevoStmt::createDelete($this->result->getConnection(), $this->result->getTable())
-				->where($this->primaryKey, $this->data[$this->primaryKey])
-				->limit(1)->affectedRows();
+		return NeevoStmt::createDelete($this->connection, $this->table)
+				->where($this->primary, $this->data[$this->primary])->limit(1)->affectedRows();
 	}
 
 
 	/**
-	 * Return object as an array.
+	 * Return values as an array.
 	 * @return array
 	 */
 	public function toArray(){
-		return $this->iterable;
+		return array_merge($this->data, $this->modified);
 	}
 
 
@@ -100,7 +97,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 
 	public function count(){
-		return count($this->iterable);
+		return count(array_merge($this->data, $this->modified));
 	}
 
 
@@ -108,7 +105,12 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 
 	public function getIterator(){
-		return new ArrayIterator($this->iterable);
+		return new ArrayIterator(array_merge($this->data, $this->modified));
+	}
+
+
+	public function isFrozen(){
+		return $this->frozen;
 	}
 
 
@@ -124,18 +126,16 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 	public function __set($name, $value){
 			$this->modified[$name] = $value;
-			$this->iterable = array_merge($this->data, $this->modified);
 	}
 
 
 	public function __isset($name){
-		return isset($this->data[$name]);
+		return isset($this->data[$name]) || isset($this->modified[$name]);
 	}
 
 
 	public function __unset($name){
 		$this->modified[$name] = null;
-		$this->iterable = array_merge($this->data, $this->modified);
 	}
 
 
