@@ -106,9 +106,8 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 
 		$this->config = $config;
 
-		if($config['lazy'] === false){
+		if($config['lazy'] === false)
 			$this->connect();
-		}
 	}
 
 
@@ -132,12 +131,12 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @return void
 	 */
 	public function connect(){
-		if($this->connected === false){
-			$this->driver->connect($this->config);
-			$this->connected = true;
+		if($this->connected !== false)
+			return;
 
-			$this->notifyObservers(INeevoObserver::CONNECT);
-		}
+		$this->driver->connect($this->config);
+		$this->connected = true;
+		$this->notifyObservers(INeevoObserver::CONNECT);
 	}
 
 
@@ -147,9 +146,8 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @return mixed
 	 */
 	public function getConfig($key = null){
-		if($key === null){
+		if($key === null)
 			return $this->config;
-		}
 		return isset($this->config[$key]) ? $this->config[$key] : null;
 	}
 
@@ -230,9 +228,8 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
-			if($event & $this->observers->getEvent()){
+			if($event & $this->observers->getEvent())
 				$observer->updateStatus($this, $event);
-			}
 		}
 	}
 
@@ -278,16 +275,14 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @return void
 	 */
 	public static function alias(&$config, $key, $alias){
-		if(!isset($config[$alias])){
+		if(!isset($config[$alias]))
 			return;
-		}
 		$tmp = & $config;
 		foreach(explode('.', $key) as $key){
 			$tmp = & $tmp[$key];
 		}
-		if(!isset($tmp)){
+		if(!isset($tmp))
 			$tmp = $config[$alias];
-		}
 	}
 
 
@@ -312,16 +307,14 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 				throw new NeevoDriverException("$driver driver file ($file) is not readable.");
 			}
 		}
-		if(!$this->isDriver($class)){
+		if(!$this->isDriver($class))
 			throw new NeevoDriverException("Class '$class' is not a valid Neevo driver class.");
-		}
 
 		$this->driver = new $class;
 
 		// Set statement parser
-		if($this->isParser($class)){
+		if($this->isParser($class))
 			$this->parser = $class;
-		}
 	}
 
 

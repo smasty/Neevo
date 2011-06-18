@@ -241,7 +241,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	public function testIf(){
 		$this->stmt->if(true);
 
-		$r = new ReflectionMethod($this->stmt, '_validateConditions');
+		$r = new ReflectionMethod($this->stmt, 'validateConditions');
 		$r->setAccessible(true);
 		A::assertFalse($r->invoke($this->stmt));
 	}
@@ -250,7 +250,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	public function testIfElse(){
 		$this->stmt->if(true)->else();
 
-		$r = new ReflectionMethod($this->stmt, '_validateConditions');
+		$r = new ReflectionMethod($this->stmt, 'validateConditions');
 		$r->setAccessible(true);
 		A::assertTrue($r->invoke($this->stmt));
 	}
@@ -259,7 +259,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	public function testIfEnd(){
 		$this->stmt->if(true)->end();
 
-		$r = new ReflectionMethod($this->stmt, '_validateConditions');
+		$r = new ReflectionMethod($this->stmt, 'validateConditions');
 		$r->setAccessible(true);
 		A::assertFalse($r->invoke($this->stmt));
 	}

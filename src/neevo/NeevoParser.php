@@ -45,27 +45,23 @@ class NeevoParser {
 		$where = $order = $group = $limit = $q = '';
 		$source = $this->parseSource();
 
-		if($this->stmt->getConditions()){
+		if($this->stmt->getConditions())
 			$where = $this->parseWhere();
-		}
-		if($this->stmt instanceof NeevoResult && $this->stmt->getGrouping()){
+		if($this->stmt instanceof NeevoResult && $this->stmt->getGrouping())
 			$group = $this->parseGrouping();
-		}
-		if($this->stmt->getSorting()){
+		if($this->stmt->getSorting())
 			$order = $this->parseSorting();
-		}
 
 		$this->clauses = array($source, $where, $group, $order);
 
-		if($this->stmt->getType() == Neevo::STMT_SELECT){
+		if($this->stmt->getType() == Neevo::STMT_SELECT)
 			$q = $this->parseSelectStmt();
-		} elseif($this->stmt->getType() == Neevo::STMT_INSERT){
+		elseif($this->stmt->getType() == Neevo::STMT_INSERT)
 			$q = $this->parseInsertStmt();
-		} elseif($this->stmt->getType() == Neevo::STMT_UPDATE){
+		elseif($this->stmt->getType() == Neevo::STMT_UPDATE)
 			$q = $this->parseUpdateStmt();
-		} elseif($this->stmt->getType() == Neevo::STMT_DELETE){
+		elseif($this->stmt->getType() == Neevo::STMT_DELETE)
 			$q = $this->parseDeleteStmt();
-		}
 
 		return $q;
 	}
@@ -134,9 +130,9 @@ class NeevoParser {
 	 * @return string
 	 */
 	protected function parseSource(){
-		if(!($this->stmt instanceof NeevoResult)){
+		if(!($this->stmt instanceof NeevoResult))
 			return $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
-		}
+
 		if($this->stmt->getTable() !== null){
 			$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
 		} else{
@@ -180,9 +176,8 @@ class NeevoParser {
 			if($cond['simple'] === false){
 				$values = $this->escapeValue($cond['values'], $cond['types']);
 				$s = '(' . $this->applyModifiers($cond['expr'], $cond['modifiers'], $values) . ')';
-				if(isset($cond['glue'])){
+				if(isset($cond['glue']))
 					$s .= ' ' . $cond['glue'];
-				}
 
 				$conditions[] = $s;
 				continue;
@@ -215,9 +210,8 @@ class NeevoParser {
 				$value = $this->escapeValue($value);
 			}
 			$s = '(' . $field . $operator . $value . ')';
-			if(isset($cond['glue'])){
+			if(isset($cond['glue']))
 				$s .= ' '.$cond['glue'];
-			}
 
 			$conditions[] = $s;
 
@@ -258,22 +252,18 @@ class NeevoParser {
 	 */
 	protected function parseFieldName($field){
 		// preg_replace callback behaviour
-		if(is_array($field)){
+		if(is_array($field))
 			$field = $field[0];
-		}
-		if($field instanceof NeevoLiteral){
+		if($field instanceof NeevoLiteral)
 			return $field->value;
-		}
 
 		$field = trim($field);
 
-		if($field == '*'){
+		if($field == '*')
 			return $field;
-		}
 
-		if(strpos($field, ' ')){
+		if(strpos($field, ' '))
 			return $field;
-		}
 
 		$field = str_replace(':', '', $field);
 
@@ -296,9 +286,8 @@ class NeevoParser {
 
 		if((int) $limit > 0){
 			$sql .= ' LIMIT ' . (int) $limit;
-			if((int) $offset > 0){
+			if((int) $offset > 0)
 				$sql .= ' OFFSET ' . (int) $offset;
-			}
 		}
 		return $sql;
 	}
@@ -389,9 +378,8 @@ class NeevoParser {
 	 * @return string
 	 */
 	protected function tryDelimite($expr){
-		if($expr instanceof NeevoLiteral){
+		if($expr instanceof NeevoLiteral)
 			return $expr->value;
-		}
 		return preg_replace_callback('~:([a-z_\*][a-z0-9._\*]*)~', array($this, 'parseFieldName'), $expr);
 	}
 

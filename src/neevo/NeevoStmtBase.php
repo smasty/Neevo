@@ -38,7 +38,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	protected $offset;
 
 	/** @var array */
-	protected $conds = array();
+	protected $conditions = array();
 
 	/** @var array */
 	protected $sorting = array();
@@ -61,13 +61,13 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	);
 
 	/** @var array */
-	protected $_subqueries = array();
+	protected $subqueries = array();
 
 	/** @var NeevoObserverMap */
 	protected $observers;
 
 	/** @var array */
-	private $_stmtConds = array();
+	private $stmtConditions = array();
 
 
 	/**
@@ -110,14 +110,13 @@ abstract class NeevoStmtBase implements INeevoObservable {
 
 		// AND/OR where() glues
 		if(in_array($name, array('and', 'or'))){
-			if($this->_validateConditions()){
+			if($this->validateConditions())
 				return $this;
-			}
+
 			$this->resetState();
-			$this->conds[count($this->conds)-1]['glue'] = strtoupper($name);
-			if(count($args) >= 1){
+			$this->conditions[count($this->conditions)-1]['glue'] = strtoupper($name);
+			if(count($args) >= 1)
 				call_user_func_array(array($this, 'where'), $args);
-			}
 			return $this;
 		}
 
@@ -125,18 +124,16 @@ abstract class NeevoStmtBase implements INeevoObservable {
 		elseif(in_array($name, array('if', 'else', 'end'))){
 
 			// Parameter counts
-			if(count($args) < 1 && $name == 'if'){
+			if(count($args) < 1 && $name == 'if')
 				throw new InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
-			}
 
-			$conds = & $this->_stmtConds;
-			if($name == 'if'){
+			$conds = & $this->stmtConditions;
+			if($name == 'if')
 				$conds[] = (bool) $args[0];
-			} elseif($name == 'else'){
+			elseif($name == 'else')
 				$conds[count($conds)-1] = !end($conds);
-			} elseif($name == 'end'){
+			elseif($name == 'end')
 				array_pop($conds);
-			}
 
 			return $this;
 
@@ -159,27 +156,25 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function where($expr, $value = true){
-		if(is_array($expr) && $value === true){
+		if(is_array($expr) && $value === true)
 			return call_user_func_array(array($this, 'where'), $expr);
-		}
 
-		if($this->_validateConditions()){
+		if($this->validateConditions())
 			return $this;
-		}
+
 		$this->resetState();
 
 		// Simple format
 		if(strpos($expr, '%') === false){
 			$field = trim($expr);
-			$this->conds[] = array(
+			$this->conditions[] = array(
 				'simple' => true,
 				'field' => $field,
 				'value' => $value,
 				'glue' => 'AND'
 			);
-			if($value instanceof self){
-				$this->_subqueries[] = $value;
-			}
+			if($value instanceof self)
+				$this->subqueries[] = $value;
 			return $this;
 		}
 
@@ -187,7 +182,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 		$args = func_get_args();
 		array_shift($args);
 		preg_match_all('~%(bin|sub|b|i|f|s|d|a|l)?~i', $expr, $matches);
-		$this->conds[] = array(
+		$this->conditions[] = array(
 			'simple' => false,
 			'expr' => $expr,
 			'modifiers' => $matches[0],
@@ -196,9 +191,8 @@ abstract class NeevoStmtBase implements INeevoObservable {
 			'glue' => 'AND'
 		);
 		foreach($args as $arg){
-			if($arg instanceof self){
-				$this->_subqueries[] = $arg;
-			}
+			if($arg instanceof self)
+				$this->subqueries[] = $arg;
 		}
 		return $this;
 	}
@@ -211,9 +205,9 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function order($rule, $order = null){
-		if($this->_validateConditions()){
+		if($this->validateConditions())
 			return $this;
-		}
+
 		$this->resetState();
 
 		if(is_array($rule) || $rule instanceof Traversable){
@@ -235,9 +229,9 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function limit($limit, $offset = null){
-		if($this->_validateConditions()){
+		if($this->validateConditions())
 			return $this;
-		}
+
 		$this->resetState();
 		$this->limit = array($limit,
 			($offset !== null && $this->type === Neevo::STMT_SELECT) ? $offset : null);
@@ -250,9 +244,9 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * @return NeevoStmtBase fluent interface
 	 */
 	public function rand(){
-		if($this->_validateConditions()){
+		if($this->validateConditions())
 			return $this;
-		}
+
 		$this->resetState();
 		$this->connection->getDriver()->randomizeOrder($this);
 		return $this;
@@ -269,9 +263,8 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 */
 	public function dump($return = false){
 		$sql = PHP_SAPI === 'cli' ? $this->parse() . "\n" : Neevo::highlightSql($this->parse());
-		if(!$return){
+		if(!$return)
 			echo $sql;
-		}
 		return $return ? $sql : $this;
 	}
 
@@ -312,9 +305,9 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * @internal
 	 */
 	public function parse(){
-		if($this->hasCircularReferences($this)){
+		if($this->hasCircularReferences($this))
 			throw new RuntimeException('Circular reference found, aborting.');
-		}
+
 		$this->connection->connect();
 
 		$parser = $this->connection->getParser();
@@ -354,9 +347,8 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
-			if($event & $this->observers->getEvent()){
+			if($event & $this->observers->getEvent())
 				$observer->updateStatus($this, $event);
-			}
 		}
 	}
 
@@ -416,7 +408,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * @return array
 	 */
 	public function getConditions(){
-		return $this->conds;
+		return $this->conditions;
 	}
 
 
@@ -435,9 +427,8 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 */
 	public function getPrimaryKey(){
 		$table = $this->getTable();
-		if(!$table){
+		if(!$table)
 			return null;
-		}
 		$key = null;
 		$cached = $this->connection->getCache()->fetch($table . '_primaryKey');
 
@@ -481,11 +472,10 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * Validate the current statement condition.
 	 * @return bool
 	 */
-	protected function _validateConditions(){
-		if(empty($this->_stmtConds)){
+	protected function validateConditions(){
+		if(empty($this->stmtConditions))
 			return false;
-		}
-		foreach($this->_stmtConds as $cond){
+		foreach($this->stmtConditions as $cond){
 			if($cond) continue;
 			else return true;
 		}
@@ -500,14 +490,12 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * @return bool True if circular reference found.
 	 */
 	protected function hasCircularReferences($parent, $visited = array()){
-		foreach($parent->_subqueries as $child){
-			if(isset($visited[spl_object_hash($child)])){
+		foreach($parent->subqueries as $child){
+			if(isset($visited[spl_object_hash($child)]))
 				return true;
-			}
 			$visited[spl_object_hash($child)] = true;
-			if($this->hasCircularReferences($child, $visited)){
+			if($this->hasCircularReferences($child, $visited))
 				return true;
-			}
 			array_pop($visited);
 		}
 		return false;

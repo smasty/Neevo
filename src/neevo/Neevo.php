@@ -153,7 +153,6 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	public function begin($savepoint = null){
 		$this->connection->getDriver()->beginTransaction($savepoint);
 		$this->notifyObservers(INeevoObserver::BEGIN);
-
 		return $this;
 	}
 
@@ -166,7 +165,6 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	public function commit($savepoint = null){
 		$this->connection->getDriver()->commit($savepoint);
 		$this->notifyObservers(INeevoObserver::COMMIT);
-
 		return $this;
 	}
 
@@ -179,7 +177,6 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	public function rollback($savepoint = null){
 		$this->connection->getDriver()->rollback($savepoint);
 		$this->notifyObservers(INeevoObserver::ROLLBACK);
-
 		return $this;
 	}
 
@@ -221,9 +218,8 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
-			if($event & $this->observers->getEvent()){
+			if($event & $this->observers->getEvent())
 				$observer->updateStatus($this, $event);
-			}
 		}
 	}
 
@@ -284,18 +280,18 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	private static function _highlightCallback($match){
-		if(!empty($match[1])){ // /* comment */
+		// Comment
+		if(!empty($match[1]))
 			return '<em style="color:#999">' . $match[1] . '</em>';
-		}
-		if(!empty($match[2])){ // Basic keywords
+		// Basic keywords
+		if(!empty($match[2]))
 			return "\n" . '<strong style="color:#e71818">' . $match[2] . '</strong>';
-		}
-		if(!empty($match[3])){ // Other keywords
+		// Other keywords
+		if(!empty($match[3]))
 			return '<strong style="color:#d59401">' . $match[3] . '</strong>';
-		}
-		if(!empty($match[4]) || $match[4] === '0'){ // Values
+		// Values
+		if(!empty($match[4]) || $match[4] === '0')
 			return '<em style="color:#008000">' . $match[4] . '</em>';
-		}
 	}
 
 

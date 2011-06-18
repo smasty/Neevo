@@ -91,9 +91,8 @@ class NeevoException extends Exception implements INeevoObservable {
 	 */
 	public function notifyObservers($event){
 		foreach(self::$observers as $observer){
-			if($event & self::$observers->getEvent()){
+			if($event & self::$observers->getEvent())
 				$observer->updateStatus($this, $event);
-			}
 		}
 	}
 

@@ -55,9 +55,8 @@ class NeevoLoader {
 	* @return NeevoLoader
 	*/
 	public static function getInstance(){
-		if(self::$instance === null){
+		if(self::$instance === null)
 			self::$instance = new self;
-		}
 		return self::$instance;
 	}
 
@@ -88,9 +87,8 @@ class NeevoLoader {
 	public function tryLoad($type){
 		$type = trim(strtolower($type), '\\');
 
-		if(isset($this->list[$type])){
+		if(isset($this->list[$type]))
 			return include_once dirname(__FILE__) . $this->list[$type];
-		}
 		return false;
 	}
 

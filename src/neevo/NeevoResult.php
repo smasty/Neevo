@@ -57,36 +57,30 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	public function __construct(NeevoConnection $connection, $columns = null, $source = null){
 		parent::__construct($connection);
 
-		if($columns === null && $source === null){
-			throw new InvalidArgumentException('Select table missing.');
-		}
+		// Input check
+		if($columns === null && $source === null)
+			throw new InvalidArgumentException('Missing select source.');
 		if($source === null){
+			$source = $columns;
 			$columns = '*';
-			$source = func_get_arg(1);
 		}
-
-		if(!is_string($source) && !($source instanceof self)){
+		if(!is_string($source) && !($source instanceof self))
 			throw new InvalidArgumentException('Source must be a string or NeevoResult.');
-		}
-		if($source instanceof self){
-			$this->_subqueries[] = $source;
-		}
 
-		$this->resetState();
-		$this->type = Neevo::STMT_SELECT;
-		$this->columns = is_string($columns)
-			? explode(',', $columns)
-			: ($columns instanceof Traversable
+		$columns = is_string($columns)
+			? explode(',', $columns) : ($columns instanceof Traversable
 				? iterator_to_array($columns) : (array) $columns);
-		$this->columns = array_map('trim', $this->columns);
 
-		if($columns === array()){
+		if(empty($columns))
 			throw new InvalidArgumentException('No columns given.');
-		}
 
+		if($source instanceof self)
+			$this->subqueries[] = $source;
+
+		$this->type = Neevo::STMT_SELECT;
+		$this->columns = array_map('trim', $columns);
 		$this->source = $source;
 		$this->detectTypes = (bool) $connection['result']['detectTypes'];
-
 		$this->setRowClass($connection['rowClass']);
 	}
 
@@ -106,11 +100,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 	public function __call($name, $args){
 		$name = strtolower($name);
-
-		if($name === 'as'){
+		if($name === 'as')
 			return $this->setAlias(isset($args[0]) ? $args[0] : null);
-		}
-
 		return parent::__call($name, $args);
 	}
 
@@ -125,9 +116,9 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return NeevoResult fluent interface
 	 */
 	public function group($rule, $having = null){
-		if($this->_validateConditions()){
+		if($this->validateConditions())
 			return $this;
-		}
+
 		$this->resetState();
 		$this->grouping = array($rule, $having);
 		return $this;
@@ -141,15 +132,15 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return NeevoResult fluent interface
 	 */
 	public function join($source, $condition){
-		if($this->_validateConditions()){
+		if($this->validateConditions())
 			return $this;
-		}
-		if(!(is_string($source) || $source instanceof self)){
+
+		if(!(is_string($source) || $source instanceof self))
 			throw new InvalidArgumentException('Source must be a string or NeevoResult.');
-		}
-		if($source instanceof self){
-			$this->_subqueries[] = $source;
-		}
+
+		if($source instanceof self)
+			$this->subqueries[] = $source;
+
 		$this->resetState();
 		$type = (func_num_args() > 2) ? func_get_arg(2) : '';
 
@@ -192,19 +183,16 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		$this->performed || $this->run();
 
 		$row = $this->connection->getDriver()->fetch($this->resultSet);
-		if(!is_array($row)){
+		if(!is_array($row))
 			return false;
-		}
 
 		// Type converting
-		if($this->detectTypes){
+		if($this->detectTypes)
 			$this->detectTypes();
-		}
 		if(!empty($this->columnTypes)){
 			foreach($this->columnTypes as $col => $type){
-				if(isset($row[$col])){
+				if(isset($row[$col]))
 					$row[$col] = $this->convertType($row[$col], $type);
-				}
 			}
 		}
 		return new $this->rowClass($row, $this);
@@ -219,20 +207,17 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 */
 	public function fetchAll($limit = null, $offset = null){
 		$limit = $limit === null ? -1 : (int) $limit;
-		if($offset !== null){
+		if($offset !== null)
 			$this->seek((int) $offset);
-		}
 
 		$row = $this->fetch();
-		if(!$row){
+		if(!$row)
 			return array();
-		}
 
 		$rows = array();
 		do{
-			if($limit === 0){
+			if($limit === 0)
 				break;
-			}
 			$rows[] = $row;
 			$limit--;
 		} while($row = $this->fetch());
@@ -249,20 +234,17 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		$this->performed || $this->run();
 		$row = $this->connection->getDriver()->fetch($this->resultSet);
 
-		if(!$row){
+		if(!$row)
 			return false;
-		}
 		$value = reset($row);
 
 		// Type converting
-		if($this->detectTypes){
+		if($this->detectTypes)
 			$this->detectTypes();
-		}
 		if(!empty($this->columnTypes)){
 			$key = key($row);
-			if(isset($this->columnTypes[$key])){
+			if(isset($this->columnTypes[$key]))
 				$value = $this->convertType($value, $this->columnTypes[$key]);
-			}
 		}
 
 		return $value;
@@ -280,20 +262,18 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 		// If executed w/o needed cols, force exec w/ them.
 		if(!in_array('*', $clone->columns)){
-			if($value !== null){
+			if($value !== null)
 				$clone->columns = array($key, $value);
-			} elseif(!in_array($key, $clone->columns)){
+			elseif(!in_array($key, $clone->columns))
 				$clone->columns[] = $key;
-			}
 		}
 		$k = substr($key, ($pk = strrpos($key, '.')) ? $pk+1 : 0);
 		$v = $value === null ? null : substr($value, ($pv = strrpos($value, '.')) ? $pv+1 : 0);
 
 		$rows = array();
 		while($row = $clone->fetch()){
-			if(!$row){
+			if(!$row)
 				return array();
-			}
 			$rows[$row[$k]] = $value === null ? $row : $row->$v;
 		}
 
@@ -310,9 +290,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	public function seek($offset){
 		$this->performed || $this->run();
 		$seek = $this->connection->getDriver()->seek($this->resultSet, $offset);
-		if($seek){
+		if($seek)
 			return $seek;
-		}
 		throw new NeevoException("Cannot seek to offset $offset.");
 	}
 
@@ -420,9 +399,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return NeevoResult fluent interface
 	 */
 	public function setTypes($types){
-		if(!($types instanceof Traversable || is_array($types))){
+		if(!($types instanceof Traversable || is_array($types)))
 			throw new InvalidArgumentException('Types must be an array or Traversable.');
-		}
 		foreach($types as $column => $type){
 			$this->setType($column, $type);
 		}
@@ -474,9 +452,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 		);
 
 		foreach($patterns as $vendor => $universal){
-			if(preg_match("~$vendor~i", $type)){
+			if(preg_match("~$vendor~i", $type))
 				return $universal;
-			}
 		}
 		return Neevo::TEXT;
 	}
@@ -490,9 +467,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 */
 	protected function convertType($value, $type){
 		$dateFormat = $this->connection['result']['formatDate'];
-		if($value === null){
+		if($value === null)
 			return null;
-		}
 		switch($type){
 			case Neevo::TEXT:
 				return (string) $value;
@@ -510,15 +486,15 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 				return $this->connection->getDriver()->unescape($value, $type);
 
 			case Neevo::DATETIME:
-				if((int) $value === 0){
+				if((int) $value === 0)
 					return null;
-				} elseif(!$dateFormat){
+				elseif(!$dateFormat)
 					return new DateTime(is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value);
-				} elseif($dateFormat == 'U'){
+				elseif($dateFormat == 'U')
 					return is_numeric($value) ? (int) $value : strtotime($value);
-				} elseif(is_numeric($value)){
+				elseif(is_numeric($value))
 					return date($dateFormat, $value);
-				} else{
+				else{
 					$d = new DateTime($value);
 					return $d->format($dateFormat);
 				}
@@ -559,9 +535,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @throws NeevoException
 	 */
 	public function setRowClass($className){
-		if(!class_exists($className)){
+		if(!class_exists($className))
 			throw new NeevoException("Cannot set row class '$className'.");
-		}
 		$this->rowClass = $className;
 		return $this;
 	}
@@ -587,9 +562,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 
 
 	public function getJoins(){
-		if(!empty($this->joins)){
+		if(!empty($this->joins))
 			return $this->joins;
-		}
 		return array();
 	}
 
@@ -599,9 +573,8 @@ class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable 
 	 * @return string|null
 	 */
 	public function getTable(){
-		if($this->source instanceof self){
+		if($this->source instanceof self)
 			return null;
-		}
 		return parent::getTable();
 	}
 
