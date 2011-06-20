@@ -49,12 +49,10 @@ class NeevoDriverMySQLi extends NeevoParser implements INeevoDriver {
 	 * @throws NeevoDriverException
 	 */
 	public function __construct(NeevoStmtBase $statement = null){
-		if(!extension_loaded("mysqli")){
+		if(!extension_loaded("mysqli"))
 			throw new NeevoDriverException("Cannot instantiate Neevo MySQLi driver - PHP extension 'mysqli' not loaded.");
-		}
-		if($statement instanceof NeevoStmtBase){
+		if($statement instanceof NeevoStmtBase)
 			parent::__construct($statement);
-		}
 	}
 
 
@@ -82,22 +80,18 @@ class NeevoDriverMySQLi extends NeevoParser implements INeevoDriver {
 		$config += $defaults;
 
 		// Connect
-		if($config['resource'] instanceof mysqli){
+		if($config['resource'] instanceof mysqli)
 			$this->resource = $config['resource'];
-		} else{
+		else
 			$this->resource = new mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
-		}
 
-		if($this->resource->connect_errno){
+		if($this->resource->connect_errno)
 			throw new NeevoException($this->resource->connect_error, $this->resource->connect_errno);
-		}
 
 		// Set charset
 		if($this->resource instanceof mysqli){
 			$ok = @$this->resource->set_charset($config['charset']);
-			if(!$ok){
-				$this->runQuery("SET NAMES ".$config['charset']);
-			}
+			if(!$ok) $this->runQuery("SET NAMES ".$config['charset']);
 		}
 
 		$this->unbuffered = $config['unbuffered'];
@@ -135,9 +129,8 @@ class NeevoDriverMySQLi extends NeevoParser implements INeevoDriver {
 		$result = $this->resource->query($queryString, $this->unbuffered ? MYSQLI_USE_RESULT : MYSQLI_STORE_RESULT);
 
 		$error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $this->resource->error);
-		if($error && $result === false){
+		if($error && $result === false)
 			throw new NeevoException("Query failed. $error", $this->resource->errno, $queryString);
-		}
 
 		$this->affectedRows = $this->resource->affected_rows;
 		return $result;
@@ -192,9 +185,8 @@ class NeevoDriverMySQLi extends NeevoParser implements INeevoDriver {
 	 * @throws NeevoDriverException
 	 */
 	public function seek($resultSet, $offset){
-		if($this->unbuffered){
+		if($this->unbuffered)
 			throw new NeevoDriverException('Cannot seek on unbuffered result.');
-		}
 		return $resultSet->data_seek($offset);
 	}
 
@@ -225,12 +217,10 @@ class NeevoDriverMySQLi extends NeevoParser implements INeevoDriver {
 	 * @throws NeevoDriverException
 	 */
 	public function getNumRows($resultSet){
-		if($this->unbuffered){
+		if($this->unbuffered)
 			throw new NeevoDriverException('Cannot seek on unbuffered result.');
-		}
-		if($resultSet instanceof mysqli_result){
+		if($resultSet instanceof mysqli_result)
 			return $resultSet->num_rows;
-		}
 		return false;
 	}
 
@@ -283,9 +273,8 @@ class NeevoDriverMySQLi extends NeevoParser implements INeevoDriver {
 	 * @throws InvalidArgumentException
 	 */
 	public function unescape($value, $type){
-		if($type === Neevo::BINARY){
+		if($type === Neevo::BINARY)
 			return $value;
-		}
 		throw new InvalidArgumentException('Unsupported data type.');
 	}
 
@@ -299,9 +288,8 @@ class NeevoDriverMySQLi extends NeevoParser implements INeevoDriver {
 		$key = '';
 		$q = $this->runQuery('SHOW FULL COLUMNS FROM '.$table);
 		while($col = $this->fetch($q)){
-			if(strtolower($col['Key']) === 'pri' && $key === ''){
+			if(strtolower($col['Key']) === 'pri' && $key === '')
 				$key = $col['Field'];
-			}
 		}
 		return $key;
 	}
@@ -318,9 +306,8 @@ class NeevoDriverMySQLi extends NeevoParser implements INeevoDriver {
 		if(empty($colTypes)){
 			$constants = get_defined_constants(true);
 			foreach($constants['mysqli'] as $type => $code){
-				if(strncmp($type, 'MYSQLI_TYPE_', 12) === 0){
+				if(strncmp($type, 'MYSQLI_TYPE_', 12) === 0)
 					$colTypes[$code] = strtolower(substr($type, 12));
-				}
 			}
 			$colTypes[MYSQLI_TYPE_LONG] = $colTypes[MYSQLI_TYPE_SHORT] = $colTypes[MYSQLI_TYPE_TINY] = 'int';
 		}

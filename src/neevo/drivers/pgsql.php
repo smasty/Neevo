@@ -45,12 +45,10 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @throws NeevoDriverException
 	 */
 	public function __construct(NeevoStmtBase $statement = null){
-		if(!extension_loaded("pgsql")){
+		if(!extension_loaded("pgsql"))
 			throw new NeevoDriverException("Cannot instantiate Neevo PgSQL driver - PHP extension 'pgsql' not loaded.");
-		}
-		if($statement instanceof NeevoStmtBase){
+		if($statement instanceof NeevoStmtBase)
 			parent::__construct($statement);
-		}
 	}
 
 
@@ -70,30 +68,27 @@ class NeevoDriverPgSQL implements INeevoDriver {
 
 		$config += $defaults;
 
-		if(isset($config['string'])){
+		if(isset($config['string']))
 			$string = $config['string'];
-		} else{
+		else{
 			// String generation
 			$string = '';
 			foreach(array('host', 'hostaddr', 'port', 'dbname', 'user', 'password', 'connect_timeout', 'options', 'sslmode', 'service') as $cfg){
-				if(isset($config[$cfg])){
+				if(isset($config[$cfg]))
 					$string .= "$cfg=$config[$cfg] ";
-				}
 			}
 		}
 
 		// Connect
-		if(is_resource($config['resource'])){
+		if(is_resource($config['resource']))
 			$connection = $config['resource'];
-		} elseif($config['persistent']){
+		elseif($config['persistent'])
 			$connection = @pg_pconnect($string, PGSQL_CONNECT_FORCE_NEW);
-		} else{
+		else
 			$connection = @pg_connect($string, PGSQL_CONNECT_FORCE_NEW);
-		}
 
-		if(!is_resource($connection)){
+		if(!is_resource($connection))
 			throw new NeevoException("Connection to database failed.");
-		}
 
 		$this->resource = $connection;
 
@@ -101,9 +96,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 		@pg_set_client_encoding($this->resource, $config['charset']);
 
 		// Schema
-		 if(isset($config['schema'])){
+		 if(isset($config['schema']))
 			 $this->runQuery('SET search_path TO "' . $config['schema'] . '"');
-		 }
 
 		 $this->escapeMethod = version_compare(PHP_VERSION , '5.2.0', '>=');
 	}
@@ -138,9 +132,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 		$this->affectedRows = false;
 
 		$result = @pg_query($this->resource, $queryString);
-		if($result === false){
+		if($result === false)
 			throw new NeevoException("Query failed. " . pg_last_error($this->resource), null, $queryString);
-		}
 
 		$this->affectedRows = @pg_affected_rows($result);
 		return $result;
@@ -204,9 +197,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 */
 	public function getInsertId(){
 		$result = $this->runQuery("SELECT LASTVAL()");
-		if(!$result){
+		if(!$result)
 			return false;
-		}
 
 		$r = $this->fetch($result);
 		return is_array($r) ? reset($r) : false;
@@ -255,18 +247,16 @@ class NeevoDriverPgSQL implements INeevoDriver {
 				return $value ? 'TRUE' : 'FALSE';
 
 			case Neevo::TEXT:
-				if($this->escapeMethod){
+				if($this->escapeMethod)
 					return "'" . pg_escape_string($this->resource, $value) . "'";
-				} else{
+				else
 					return "'" . pg_escape_string($value) . "'";
-				}
 
 			case Neevo::BINARY:
-				if($this->escapeMethod){
+				if($this->escapeMethod)
 					return "'" . pg_escape_bytea($this->resource, $value) . "'";
-				} else{
+				else
 					return "'" . pg_escape_bytea($value) . "'";
-				}
 
 			case Neevo::IDENTIFIER:
 				 return '"' . str_replace('.', '"."', str_replace('"', '""', $value)) . '"';
@@ -289,9 +279,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @throws InvalidArgumentException
 	 */
 	public function unescape($value, $type){
-		if($type === Neevo::BINARY){
+		if($type === Neevo::BINARY)
 			return pg_unescape_bytea($value);
-		}
 		throw new InvalidArgumentException('Unsupported data type.');
 	}
 
@@ -308,9 +297,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 			$this->runQuery("SELECT indexdef FROM pg_indexes WHERE indexname = '{$table}_pkey'")
 		);
 		$def = reset($def);
-		if(preg_match("~{$table}_pkey\s+ON\s+{$table}.*\((\w+).*\)~i", $def, $matches)){
+		if(preg_match("~{$table}_pkey\s+ON\s+{$table}.*\((\w+).*\)~i", $def, $matches))
 			return $matches[1];
-		}
 		return false;
 	}
 
@@ -322,9 +310,8 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @return array
 	 */
 	public function getColumnTypes($resultSet, $table){
-		if($table === null){
+		if($table === null)
 			return array();
-		}
 		$cols = pg_meta_data($this->resource, $table);
 		foreach($cols as $key => $value){
 			$cols[$key] = preg_replace('~[^a-z]~i', '', $value['type']);

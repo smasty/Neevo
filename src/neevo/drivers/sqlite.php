@@ -65,12 +65,10 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @throws NeevoDriverException
 	 */
 	public function __construct(NeevoStmtBase $statement = null){
-		if(!extension_loaded("sqlite")){
+		if(!extension_loaded("sqlite"))
 			throw new NeevoDriverException("Cannot instantiate Neevo SQLite driver - PHP extension 'sqlite' not loaded.");
-		}
-		if($statement instanceof NeevoStmtBase){
+		if($statement instanceof NeevoStmtBase)
 			parent::__construct($statement);
-		}
 	}
 
 
@@ -96,17 +94,15 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 		$config += $defaults;
 
 		// Connect
-		if(is_resource($config['resource'])){
+		if(is_resource($config['resource']))
 			$connection = $config['resource'];
-		} elseif($config['persistent']){
+		elseif($config['persistent'])
 			$connection = @sqlite_popen($config['database'], 0666, $error);
-		} else{
+		else
 			$connection = @sqlite_open($config['database'], 0666, $error);
-		}
 
-		if(!is_resource($connection)){
+		if(!is_resource($connection))
 			throw new NeevoException("Opening database file '$config[database]' failed.");
-		}
 
 		$this->resource = $connection;
 		$this->updateLimit = (bool) $config['updateLimit'];
@@ -114,9 +110,8 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 		// Set charset
 		$this->dbCharset = $config['dbcharset'];
 		$this->charset = $config['charset'];
-		if(strcasecmp($this->dbCharset, $this->charset) === 0){
+		if(strcasecmp($this->dbCharset, $this->charset) === 0)
 			$this->dbCharset = $this->charset = null;
-		}
 
 		$this->unbuffered = $config['unbuffered'];
 		$this->persistent = $config['persistent'];
@@ -128,9 +123,8 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @return void
 	 */
 	public function closeConnection(){
-		if(!$this->persistent && $this->resource !== null){
+		if(!$this->persistent && $this->resource !== null)
 			@sqlite_close($this->resource);
-		}
 	}
 
 
@@ -153,19 +147,16 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	public function runQuery($queryString){
 
 		$this->affectedRows = false;
-		if($this->dbCharset !== null){
+		if($this->dbCharset !== null)
 			$queryString = iconv($this->charset, $this->dbCharset . '//IGNORE', $queryString);
-		}
 
-		if($this->unbuffered){
+		if($this->unbuffered)
 			$result = @sqlite_unbuffered_query($this->resource, $queryString, null, $error);
-		} else{
+		else
 			$result = @sqlite_query($this->resource, $queryString, null, $error);
-		}
 
-		if($error && $result === false){
+		if($error && $result === false)
 			throw new NeevoException("Query failed. $error", sqlite_last_error($this->resource), $queryString);
-		}
 
 		$this->affectedRows = @sqlite_changes($this->resource);
 		return $result;
@@ -214,14 +205,12 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 
 			$fields = array();
 			foreach($row as $key => $val){
-				if($charset !== null && is_string($val)){
+				if($charset !== null && is_string($val))
 					$val = iconv($this->dbcharset, $charset, $val);
-				}
 				$key = str_replace(array('[', ']'), '', $key);
 				$pos = strpos($key, '.');
-				if($pos !== false){
+				if($pos !== false)
 					$key = substr($key, $pos + 1);
-				}
 				$fields[$key] = $val;
 			}
 			$row = $fields;
@@ -238,9 +227,8 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @throws NeevoDriverException
 	 */
 	public function seek($resultSet, $offset){
-		if($this->unbuffered){
+		if($this->unbuffered)
 			throw new NeevoDriverException('Cannot seek on unbuffered result.');
-		}
 		return @sqlite_seek($resultSet, $offset);
 	}
 
@@ -271,9 +259,8 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @throws NeevoDriverException
 	 */
 	public function getNumRows($resultSet){
-		if($this->unbuffered){
-			throw new NeevoDriverException('Cannot seek on unbuffered result.');
-		}
+		if($this->unbuffered)
+			throw new NeevoDriverException('Cannot count rows on unbuffered result.');
 		return @sqlite_num_rows($resultSet);
 	}
 
@@ -324,9 +311,8 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @throws InvalidArgumentException
 	 */
 	public function unescape($value, $type){
-		if($type === Neevo::BINARY){
+		if($type === Neevo::BINARY)
 			return $value;
-		}
 		throw new InvalidArgumentException('Unsupported data type.');
 	}
 
@@ -339,26 +325,23 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	public function getPrimaryKey($table){
 		$key = '';
 		$pos = strpos($table, '.');
-		if($pos !== false){
+		if($pos !== false)
 			$table = substr($table, $pos + 1);
-		}
-		if(isset($this->tblData[$table])){
+		if(isset($this->tblData[$table]))
 			$sql = $this->tblData[$table];
-		} else{
+		else{
 			$q = $this->runQuery("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
 			$r = $this->fetch($q);
-			if($r === false){
+			if($r === false)
 				return '';
-			}
 			$this->tblData[$table] = $sql = $r['sql'];
 		}
 
 		$sql = explode("\n", $sql);
 		foreach($sql as $field){
 			$field = trim($field);
-			if(stripos($field, 'PRIMARY KEY') !== false && $key === ''){
+			if(stripos($field, 'PRIMARY KEY') !== false && $key === '')
 				$key = preg_replace('~^"(\w+)".*$~i', '$1', $field);
-			}
 		}
 		return $key;
 	}
@@ -371,28 +354,24 @@ class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
 	 * @return array
 	 */
 	public function getColumnTypes($resultSet, $table){
-		if($table === null){
+		if($table === null)
 			return array();
-		}
-		if(isset($this->tblData[$table])){
+		if(isset($this->tblData[$table]))
 			$sql = $this->tblData[$table];
-		} else{
+		else
 			$q = $this->runQuery("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
 			$r = $this->fetch($q);
-			if($r === false){
+			if($r === false)
 				return array();
-			}
 			$this->tblData[$table] = $sql = $r['sql'];
-		}
 		$sql = explode("\n", $sql);
 
 		$cols = array();
 		foreach($sql as $field){
 			$field = trim($field);
 			preg_match('~^"(\w+)"\s+(integer|real|numeric|text|blob).+$~i', $field, $m);
-			if(isset($m[1], $m[2])){
+			if(isset($m[1], $m[2]))
 				$cols[$m[1]] = $m[2];
-			}
 		}
 		return $cols;
 	}
