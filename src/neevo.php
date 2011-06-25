@@ -22,4 +22,5 @@ if(version_compare(PHP_VERSION, '5.2', '<')){
 
 // Register autoloader responsible for loading Neevo classes and interfaces.
 require_once dirname(__FILE__) . '/neevo/NeevoLoader.php';
-NeevoLoader::getInstance()->register();
+$loader = new NeevoLoader;
+$loader->register();
