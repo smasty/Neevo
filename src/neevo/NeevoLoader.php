@@ -43,6 +43,23 @@ class NeevoLoader {
 		'neevostmtbase' => '/NeevoStmtBase.php',
 	);
 
+	/** @var NeevoLoader */
+	private static $instance;
+
+
+	private function __construct(){}
+
+
+	/**
+	* Get the singleton instance.
+	* @return NeevoLoader
+	*/
+	public static function getInstance(){
+		if(self::$instance === null)
+			self::$instance = new self;
+		return self::$instance;
+	}
+
 
 	/**
 	 * Register the autoloader.
