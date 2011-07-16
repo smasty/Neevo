@@ -76,7 +76,10 @@ class NeevoStmtTest extends PHPUnit_Framework_TestCase {
 	public function testResetState(){
 		$stmt = NeevoStmt::createDelete($this->connection, 'table');
 		$stmt->affectedRows();
-		$stmt->resetState();
+
+		$res = new ReflectionMethod($stmt, 'resetState');
+		$res->setAccessible(true);
+		$res->invoke($stmt);
 
 		$aff = new ReflectionProperty('NeevoStmt', 'affectedRows');
 		$aff->setAccessible(true);

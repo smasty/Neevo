@@ -461,7 +461,7 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 	 * Reset the state of the statement.
 	 * @return void
 	 */
-	public function resetState(){
+	protected function resetState(){
 		$this->performed = false;
 		$this->resultSet = null;
 		$this->time = null;
