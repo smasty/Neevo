@@ -77,4 +77,14 @@ class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testSeekBeforeIteration(){
+		$this->result->seek(1);
+		$ids = array();
+		foreach($this->result as $row){
+			$ids[] = (int) $row['id'];
+		}
+		A::assertEquals(array(2, 3), $ids);
+	}
+
+
 }

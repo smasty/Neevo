@@ -43,7 +43,8 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 	 * @return void
 	 */
 	public function rewind(){
-		$this->result = clone $this->result;
+		if($this->row !== null)
+			$this->result = clone $this->result;
 		$this->pointer = 0;
 	}
 
