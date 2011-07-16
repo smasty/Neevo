@@ -19,7 +19,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 
 	/** @var string Default Neevo driver */
-	public static $defaultDriver = 'mysql';
+	public static $defaultDriver = 'mysqli';
 
 	/** @var string */
 	private $last;
