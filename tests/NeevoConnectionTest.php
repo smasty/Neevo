@@ -1,7 +1,5 @@
  <?php
 
-use PHPUnit_Framework_Assert as A;
-
 
 /**
  * Tests for NeevoConnection.
@@ -30,7 +28,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 	public function testConfigFormatString(){
 		$connection = new NeevoConnection('driver=Dummy');
 
-		A::assertInstanceOf('NeevoDriverDummy', $connection->getDriver());
+		$this->assertInstanceOf('NeevoDriverDummy', $connection->getDriver());
 	}
 
 
@@ -38,7 +36,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 		$config = new ArrayObject(array('driver' => 'Dummy'));
 		$connection = new NeevoConnection($config);
 
-		A::assertInstanceOf('NeevoDriverDummy', $connection->getDriver());
+		$this->assertInstanceOf('NeevoDriverDummy', $connection->getDriver());
 	}
 
 
@@ -49,12 +47,12 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 			$msg = $e->getMessage();
 		}
 
-		A::assertStringStartsWith('Configuration must be', $msg);
+		$this->assertStringStartsWith('Configuration must be', $msg);
 	}
 
 
 	public function testAutoSetDriver(){
-		A::assertInstanceOf('NeevoDriverDummy', $this->instance->getDriver());
+		$this->assertInstanceOf('NeevoDriverDummy', $this->instance->getDriver());
 	}
 
 
@@ -67,7 +65,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 			$msg = $e->getMessage();
 		}
 
-		A::assertStringEndsWith('does not exist.', $msg);
+		$this->assertStringEndsWith('does not exist.', $msg);
 	}
 
 
@@ -80,12 +78,12 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 			$msg = $e->getMessage();
 		}
 
-		A::assertStringStartsWith("Class 'NeevoDriverWrong'", $msg);
+		$this->assertStringStartsWith("Class 'NeevoDriverWrong'", $msg);
 	}
 
 
 	public function testAutoSetParser(){
-		A::assertEquals($this->instance->getParser(), 'NeevoParser');
+		$this->assertEquals($this->instance->getParser(), 'NeevoParser');
 	}
 
 
@@ -94,7 +92,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 				'driver' => 'Parser'
 			));
 
-		A::assertEquals($connection->getParser(), 'NeevoDriverParser');
+		$this->assertEquals($connection->getParser(), 'NeevoDriverParser');
 	}
 
 
@@ -102,18 +100,18 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 		$cache = new NeevoCacheSession;
 		$this->instance->setCache($cache);
 
-		A::assertEquals(spl_object_hash($this->instance->getCache()), spl_object_hash($cache));
+		$this->assertEquals(spl_object_hash($this->instance->getCache()), spl_object_hash($cache));
 	}
 
 
 	public function testAutoSetCache(){
-		A::assertInstanceOf('NeevoCacheMemory', $this->instance->getCache());
+		$this->assertInstanceOf('NeevoCacheMemory', $this->instance->getCache());
 	}
 
 
 	public function testSetConfig(){
-		A::assertTrue($this->instance->getConfig('testConfig'));
-		A::assertInternalType('array', $this->instance->getConfig());
+		$this->assertTrue($this->instance->getConfig('testConfig'));
+		$this->assertInternalType('array', $this->instance->getConfig());
 	}
 
 
@@ -122,7 +120,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 		$this->instance->attachObserver($observer, 1);
 		$this->instance->notifyObservers(1);
 
-		A::assertTrue($observer->isNotified());
+		$this->assertTrue($observer->isNotified());
 	}
 
 
@@ -132,7 +130,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 		$this->instance->detachObserver($observer);
 		$this->instance->notifyObservers(1);
 
-		A::assertFalse($observer->isNotified());
+		$this->assertFalse($observer->isNotified());
 	}
 
 
@@ -142,18 +140,18 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 		);
 		NeevoConnection::alias($config, 'key', 'alias');
 
-		A::assertEquals('value', $config['key']);
+		$this->assertEquals('value', $config['key']);
 	}
 
 
 	public function testGetPrefix(){
-		A::assertEquals('', $this->instance->getPrefix());
+		$this->assertEquals('', $this->instance->getPrefix());
 	}
 
 
 	public function testArrayAccess(){
-		A::assertEquals('Dummy', $this->instance['driver'], 'offsetGet()');
-		A::assertTrue(isset($this->instance['driver']), 'offsetSet()');
+		$this->assertEquals('Dummy', $this->instance['driver'], 'offsetGet()');
+		$this->assertTrue(isset($this->instance['driver']), 'offsetSet()');
 	}
 
 
@@ -161,8 +159,8 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 		$this->instance->attachObserver($o = new DummyObserver, DummyObserver::DISCONNECT);
 		$this->instance->__destruct();
 
-		A::assertTrue($this->instance->getDriver()->isClosed());
-		A::assertTrue($o->isNotified());
+		$this->assertTrue($this->instance->getDriver()->isClosed());
+		$this->assertTrue($o->isNotified());
 	}
 
 

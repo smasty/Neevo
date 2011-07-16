@@ -1,7 +1,5 @@
 <?php
 
-use PHPUnit_Framework_Assert as A;
-
 
 /**
  * Tests for NeevoRow.
@@ -31,30 +29,30 @@ class NeevoRowTest extends PHPUnit_Framework_TestCase {
 		if(isset($this->row['mail'])){
 			$this->row['mail'] = $m = 'john.doe@email.tld';
 		}
-		A::assertEquals($m, $this->row['mail']);
+		$this->assertEquals($m, $this->row['mail']);
 
 		unset($this->row['mail']);
-		A::assertNull($this->row['mail']);
+		$this->assertNull($this->row['mail']);
 	}
 
 
 	public function testCount(){
-		A::assertEquals(3, count($this->row));
+		$this->assertEquals(3, count($this->row));
 	}
 
 
 	public function testGetIterator(){
-		A::assertInstanceOf('ArrayIterator', $this->row->getIterator());
+		$this->assertInstanceOf('ArrayIterator', $this->row->getIterator());
 	}
 
 
 	public function testUpdate(){
 		$this->row['id'] = 5;
-		A::assertEquals(1, $this->row->update());
+		$this->assertEquals(1, $this->row->update());
 	}
 
 	public function testDelete(){
-		A::assertEquals(1, $this->row->delete());
+		$this->assertEquals(1, $this->row->delete());
 	}
 
 

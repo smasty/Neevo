@@ -1,7 +1,5 @@
 <?php
 
-use PHPUnit_Framework_Assert as A;
-
 
 /**
  * Tests for NeevoResult.
@@ -38,8 +36,8 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 
 	public function testInstantiationNullSource(){
 		$r = new NeevoResult($this->connection, $s = 'foo');
-		A::assertEquals($s, $r->getSource());
-		A::assertEquals(array('*'), $r->getColumns());
+		$this->assertEquals($s, $r->getSource());
+		$this->assertEquals(array('*'), $r->getColumns());
 	}
 
 
@@ -61,19 +59,19 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 
 	public function testAlias(){
 		$this->result->as($a = 'foo');
-		A::assertEquals($a, $this->result->getAlias());
+		$this->assertEquals($a, $this->result->getAlias());
 	}
 
 
 	public function testGroup(){
 		$this->result->group($g = 'bar');
-		A::assertEquals(array($g, null), $this->result->getGrouping());
+		$this->assertEquals(array($g, null), $this->result->getGrouping());
 	}
 
 
 	public function testGroupHaving(){
 		$this->result->group($g = 'bar', $h = 'having');
-		A::assertEquals(array($g, $h), $this->result->getGrouping());
+		$this->assertEquals(array($g, $h), $this->result->getGrouping());
 	}
 
 
@@ -81,13 +79,13 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 		$g = $this->result->getGrouping();
 		$this->result->if(false)
 			->group('bar');
-		A::assertEquals($g, $this->result->getGrouping());
+		$this->assertEquals($g, $this->result->getGrouping());
 	}
 
 
 	public function testJoin(){
 		$this->result->join($s = 'foo', $c = 'cond', $t = 'type');
-		A::assertEquals(array(array($s, $c, $t)), $this->result->getJoins());
+		$this->assertEquals(array(array($s, $c, $t)), $this->result->getJoins());
 	}
 
 
@@ -101,62 +99,62 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 
 	public function testLeftJoin(){
 		$this->result->leftJoin($s = 'foo', $c = 'c');
-		A::assertEquals(array(array($s, $c, Neevo::JOIN_LEFT)), $this->result->getJoins());
+		$this->assertEquals(array(array($s, $c, Neevo::JOIN_LEFT)), $this->result->getJoins());
 	}
 
 
 	public function testInnerJoin(){
 		$this->result->innerJoin($s = 'foo', $c = 'c');
-		A::assertEquals(array(array($s, $c, Neevo::JOIN_INNER)), $this->result->getJoins());
+		$this->assertEquals(array(array($s, $c, Neevo::JOIN_INNER)), $this->result->getJoins());
 	}
 
 
 	public function testFetch(){
 		$row = $this->result->fetch()->toArray();
-		A::assertTrue(is_array($row) && count($row) === 3);
+		$this->assertTrue(is_array($row) && count($row) === 3);
 	}
 
 
 	public function testFetchDetectTypes(){
 		$result = new NeevoResult(new NeevoConnection('driver=Dummy&detectTypes=true'), 'foo');
 		$r = $result->fetch()->toArray();
-		A::assertInternalType('int', $r['id']);
-		A::assertInternalType('string', $r['name']);
-		A::assertInternalType('string', $r['mail']);
+		$this->assertInternalType('int', $r['id']);
+		$this->assertInternalType('string', $r['name']);
+		$this->assertInternalType('string', $r['mail']);
 	}
 
 
 	public function testFetchAll(){
 		$rows = array_map('iterator_to_array', $this->result->fetchAll());
-		A::assertTrue(is_array($rows) && count($rows === 3));
+		$this->assertTrue(is_array($rows) && count($rows === 3));
 	}
 
 
 	public function testFetchAllZeroLimit(){
-		A::assertEquals(array(), $this->result->fetchAll(0));
+		$this->assertEquals(array(), $this->result->fetchAll(0));
 	}
 
 
 	public function testFetchAllOffset(){
-		A::assertEquals(
+		$this->assertEquals(
 			array($this->result->getConnection()->getDriver()->getRow(1)), array_map('iterator_to_array', $this->result->fetchAll(1, 1))
 		);
 	}
 
 
 	public function testFetchSingle(){
-		A::assertTrue($this->result->fetchSingle() === '1');
+		$this->assertTrue($this->result->fetchSingle() === '1');
 	}
 
 
 	public function testSingleDetectTypes(){
 		$result = new NeevoResult(new NeevoConnection('driver=Dummy&detectTypes=true'), 'foo');
-		A::assertInternalType('int', $result->fetchSingle());
+		$this->assertInternalType('int', $result->fetchSingle());
 	}
 
 
 	public function testFetchPairs(){
-		A::assertEquals(array(
+		$this->assertEquals(array(
 			'1' => 'Jack York',
 			'2' => 'Nora Frisbie',
 			'3' => 'John Doe'
@@ -166,7 +164,7 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 
 	public function testFetchPairsNotDefined(){
 		$result = new NeevoResult($this->connection, 'col1, col2', 'table');
-		A::assertEquals(array(
+		$this->assertEquals(array(
 			'1' => 'Jack York',
 			'2' => 'Nora Frisbie',
 			'3' => 'John Doe'
@@ -176,7 +174,7 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 
 	public function testSeek(){
 		$this->result->seek(2);
-		A::assertEquals(
+		$this->assertEquals(
 			$this->result->getConnection()->getDriver()->getRow(2), $this->result->fetch()->toArray()
 		);
 	}
@@ -191,43 +189,43 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testGetIterator(){
-		A::assertInstanceOf('NeevoResultIterator', $this->result->getIterator());
+		$this->assertInstanceOf('NeevoResultIterator', $this->result->getIterator());
 	}
 
 
 	public function testGetTable(){
 		$result = new NeevoResult($this->connection, new NeevoResult($this->connection, 'foo'));
-		A::assertNull($result->getTable());
+		$this->assertNull($result->getTable());
 	}
 
 
 	public function testCount(){
-		A::assertTrue(count($this->result) === 3);
+		$this->assertTrue(count($this->result) === 3);
 	}
 
 
 	public function testCountAggregate(){
-		A::assertTrue($this->result->count('foo') === '1');
+		$this->assertTrue($this->result->count('foo') === '1');
 	}
 
 
 	public function testAggregation(){
-		A::assertTrue($this->result->aggregation('foo') === '1');
+		$this->assertTrue($this->result->aggregation('foo') === '1');
 	}
 
 
 	public function testMin(){
-		A::assertTrue($this->result->min('foo') === '1');
+		$this->assertTrue($this->result->min('foo') === '1');
 	}
 
 
 	public function testMax(){
-		A::assertTrue($this->result->max('foo') === '1');
+		$this->assertTrue($this->result->max('foo') === '1');
 	}
 
 
 	public function testSum(){
-		A::assertTrue($this->result->sum('foo') === '1');
+		$this->assertTrue($this->result->sum('foo') === '1');
 	}
 
 
@@ -235,7 +233,7 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 		$r = new ReflectionProperty('NeevoResult', 'columnTypes');
 		$r->setAccessible(true);
 		$this->result->detectTypes();
-		A::assertEquals(array(
+		$this->assertEquals(array(
 			'id' => Neevo::INT,
 			'name' => Neevo::TEXT,
 			'mail' => Neevo::TEXT
@@ -252,63 +250,63 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 			'timestamp' => Neevo::DATETIME
 		));
 
-		A::assertEquals($t, $r->getValue($this->result));
+		$this->assertEquals($t, $r->getValue($this->result));
 	}
 
 
 	public function testConvertTypeString(){
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
-		A::assertTrue($r->invoke($this->result, 5, Neevo::TEXT) === '5');
+		$this->assertTrue($r->invoke($this->result, 5, Neevo::TEXT) === '5');
 	}
 
 
 	public function testConvertTypeInt(){
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
-		A::assertTrue($r->invoke($this->result, '5', Neevo::INT) === 5);
+		$this->assertTrue($r->invoke($this->result, '5', Neevo::INT) === 5);
 	}
 
 
 	public function testConvertTypeFloat(){
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
-		A::assertTrue($r->invoke($this->result, '5', Neevo::FLOAT) === 5.0);
+		$this->assertTrue($r->invoke($this->result, '5', Neevo::FLOAT) === 5.0);
 	}
 
 
 	public function testConvertTypeBool(){
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
-		A::assertTrue($r->invoke($this->result, 'foo', Neevo::BOOL));
+		$this->assertTrue($r->invoke($this->result, 'foo', Neevo::BOOL));
 	}
 
 
 	public function testConvertTypeBinary(){
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
-		A::assertTrue($r->invoke($this->result, 'foo', Neevo::BINARY) === 'bin:foo');
+		$this->assertTrue($r->invoke($this->result, 'foo', Neevo::BINARY) === 'bin:foo');
 	}
 
 
 	public function testConvertTypeNull(){
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
-		A::assertTrue($r->invoke($this->result, null, Neevo::BINARY) === null);
+		$this->assertTrue($r->invoke($this->result, null, Neevo::BINARY) === null);
 	}
 
 
 	public function testConvertTypeNoType(){
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
-		A::assertTrue($r->invoke($this->result, '5', 'auto') === '5');
+		$this->assertTrue($r->invoke($this->result, '5', 'auto') === '5');
 	}
 
 
 	public function testConvertTypeDateTimeZero(){
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
-		A::assertTrue($r->invoke($this->result, 0, Neevo::DATETIME) === null);
+		$this->assertTrue($r->invoke($this->result, 0, Neevo::DATETIME) === null);
 	}
 
 
@@ -316,7 +314,7 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
 		$t = time();
-		A::assertTrue($r->invoke($this->result, $t, Neevo::DATETIME)->getTimestamp() === $t);
+		$this->assertTrue($r->invoke($this->result, $t, Neevo::DATETIME)->getTimestamp() === $t);
 	}
 
 
@@ -325,7 +323,7 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
 
-		A::assertTrue($r->invoke($result, $t = time(), Neevo::DATETIME) === $t);
+		$this->assertTrue($r->invoke($result, $t = time(), Neevo::DATETIME) === $t);
 	}
 
 
@@ -334,7 +332,7 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
 
-		A::assertTrue($r->invoke($result, $t = time(), Neevo::DATETIME) === date('Y-m-d', $t));
+		$this->assertTrue($r->invoke($result, $t = time(), Neevo::DATETIME) === date('Y-m-d', $t));
 	}
 
 
@@ -343,12 +341,12 @@ class NeevoResultTest extends PHPUnit_Framework_TestCase {
 		$r = new ReflectionMethod('NeevoResult', 'convertType');
 		$r->setAccessible(true);
 
-		A::assertTrue($r->invoke($result, date('Y-m-d H:i:s', $t = time()), Neevo::DATETIME) === date('Y-m-d', $t));
+		$this->assertTrue($r->invoke($result, date('Y-m-d H:i:s', $t = time()), Neevo::DATETIME) === date('Y-m-d', $t));
 	}
 
 
 	public function testSetRowClass(){
-		A::assertInstanceOf('stdClass', $this->result->setRowClass('stdClass')->fetch());
+		$this->assertInstanceOf('stdClass', $this->result->setRowClass('stdClass')->fetch());
 	}
 
 

@@ -1,7 +1,5 @@
 <?php
 
-use PHPUnit_Framework_Assert as A;
-
 
 /**
  * Tests for NeevoResultIterator.
@@ -28,12 +26,12 @@ class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
 		foreach($this->result as $key => $row){
 			$rows[$key] = $row->toArray();
 		}
-		A::assertEquals($this->result->getConnection()->getDriver()->getRow(), $rows);
+		$this->assertEquals($this->result->getConnection()->getDriver()->getRow(), $rows);
 	}
 
 
 	public function testCount(){
-		A::assertEquals(3, count($this->result->getIterator()));
+		$this->assertEquals(3, count($this->result->getIterator()));
 	}
 
 
@@ -41,8 +39,8 @@ class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
 		$iterator = $this->result->getIterator();
 		$iterator->rewind();
 		$iterator->seek(1);
-		A::assertTrue($iterator->valid());
-		A::assertEquals('2', $iterator->current()->id);
+		$this->assertTrue($iterator->valid());
+		$this->assertEquals('2', $iterator->current()->id);
 	}
 
 
@@ -69,11 +67,11 @@ class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
 	public function testDoubleRewind(){
 		$iterator = $this->result->getIterator();
 		$iterator->rewind();
-		A::assertTrue($iterator->valid());
+		$this->assertTrue($iterator->valid());
 		$c = $iterator->current();
 		$iterator->rewind();
-		A::assertTrue($iterator->valid());
-		A::assertEquals($c->toArray(), $iterator->current()->toArray());
+		$this->assertTrue($iterator->valid());
+		$this->assertEquals($c->toArray(), $iterator->current()->toArray());
 	}
 
 
@@ -83,7 +81,7 @@ class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
 		foreach($this->result as $row){
 			$ids[] = (int) $row['id'];
 		}
-		A::assertEquals(array(2, 3), $ids);
+		$this->assertEquals(array(2, 3), $ids);
 	}
 
 

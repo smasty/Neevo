@@ -1,7 +1,5 @@
 <?php
 
-use PHPUnit_Framework_Assert as A;
-
 
 /**
  * Tests for NeevoObserverMap.
@@ -24,22 +22,22 @@ class NeevoObserverMapTest extends PHPUnit_Framework_TestCase {
 
 	public function testAttach(){
 		$this->map->attach($o = new DummyObserver, $e = 1024);
-		A::assertEquals($o, $this->map->current());
-		A::assertEquals($e, $this->map->getEvent());
+		$this->assertEquals($o, $this->map->current());
+		$this->assertEquals($e, $this->map->getEvent());
 	}
 
 
 	public function testDetach(){
 		$this->map->attach($o = new DummyObserver, 0);
 		$this->map->detach($o);
-		A::assertFalse($this->map->contains($o));
+		$this->assertFalse($this->map->contains($o));
 	}
 
 
 	public function testCount(){
 		$this->map->attach(new DummyObserver, 0);
 		$this->map->attach(new DummyObserver, 0);
-		A::assertEquals(2, $this->map->count());
+		$this->assertEquals(2, $this->map->count());
 	}
 
 
@@ -47,7 +45,7 @@ class NeevoObserverMapTest extends PHPUnit_Framework_TestCase {
 		$this->map->attach($o1 = new DummyObserver, 0);
 		$this->map->attach($o2 = new DummyObserver, 0);
 		$this->map->rewind();
-		A::assertEquals($o1, $this->map->current());
+		$this->assertEquals($o1, $this->map->current());
 	}
 
 
@@ -56,18 +54,18 @@ class NeevoObserverMapTest extends PHPUnit_Framework_TestCase {
 		$this->map->attach($o2 = new DummyObserver, 0);
 		$this->map->rewind();
 		$this->map->next();
-		A::assertEquals($o2, $this->map->current());
+		$this->assertEquals($o2, $this->map->current());
 	}
 
 
 	public function testValid(){
 		$this->map->attach(new DummyObserver, 0);
-		A::assertTrue($this->map->valid());
+		$this->assertTrue($this->map->valid());
 	}
 
 
 	public function testKey(){
-		A::assertEquals(0, $this->map->key());
+		$this->assertEquals(0, $this->map->key());
 	}
 
 

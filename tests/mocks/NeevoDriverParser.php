@@ -15,9 +15,8 @@ class NeevoDriverParser extends NeevoParser implements INeevoDriver {
 
 
 	function __construct(NeevoStmtBase $statement = null){
-		if($statement !== null){
+		if($statement !== null)
 			return parent::__construct($statement);
-		}
 	}
 
 	function connect(array $config){}

@@ -1,7 +1,5 @@
 <?php
 
-use PHPUnit_Framework_Assert as A;
-
 
 class DummyStmt extends NeevoStmtBase {
 
@@ -32,7 +30,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 
 	public function testWhereDefault(){
 		$this->stmt->where('one');
-		A::assertEquals(array(array(
+		$this->assertEquals(array(array(
 				'simple' => true,
 				'field' => 'one',
 				'value' => true,
@@ -43,7 +41,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 
 	public function testWhereValue(){
 		$this->stmt->where($f = 'two', $v = new DummyStmt(new NeevoConnection('driver=Dummy')));
-		A::assertEquals(array(array(
+		$this->assertEquals(array(array(
 				'simple' => true,
 				'field' => $f,
 				'value' => $v,
@@ -55,7 +53,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 	public function testWhereModifiers(){
 		$this->stmt->where($e = 'one = %s AND two = %i AND three = %sub', $a[] = 'one', $a[] = 2,
 			$a[] = new DummyStmt(new NeevoConnection('driver=Dummy')));
-		A::assertEquals(array(array(
+		$this->assertEquals(array(array(
 				'simple' => false,
 				'expr' => $e,
 				'modifiers' => array('%s', '%i', '%sub'),
@@ -68,7 +66,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 
 	public function testWhereArray(){
 		$this->stmt->where($a = array('one', 'value'));
-		A::assertEquals(array(array(
+		$this->assertEquals(array(array(
 				'simple' => true,
 				'field' => $a[0],
 				'value' => $a[1],
@@ -81,21 +79,21 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 		$w = $this->stmt->getConditions();
 		$this->stmt->if(false);
 		$this->stmt->where('one', 'value');
-		A::assertEquals($w, $this->stmt->getConditions());
+		$this->assertEquals($w, $this->stmt->getConditions());
 	}
 
 
 	public function testWhereAnd(){
 		$this->stmt->where('foo')->and('bar');
 		$w = $this->stmt->getConditions();
-		A::assertEquals('AND', $w[count($w) - 2]['glue']);
+		$this->assertEquals('AND', $w[count($w) - 2]['glue']);
 	}
 
 
 	public function testWhereOr(){
 		$this->stmt->where('foo')->or('bar');
 		$w = $this->stmt->getConditions();
-		A::assertEquals('OR', $w[count($w) - 2]['glue']);
+		$this->assertEquals('OR', $w[count($w) - 2]['glue']);
 	}
 
 
@@ -104,13 +102,13 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 		$w = $this->stmt->getConditions();
 		$this->stmt->if(false);
 		$this->stmt->where('one')->and('two');
-		A::assertEquals($w, $this->stmt->getConditions());
+		$this->assertEquals($w, $this->stmt->getConditions());
 	}
 
 
 	public function testOrderSimple(){
 		$this->stmt->order($r = 'rule', $t = 'type');
-		A::assertEquals(array(array($r, $t)), $this->stmt->getSorting());
+		$this->assertEquals(array(array($r, $t)), $this->stmt->getSorting());
 	}
 
 
@@ -119,7 +117,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 			'one' => '1',
 			'two' => '2'
 		));
-		A::assertEquals(array(
+		$this->assertEquals(array(
 			array('one', '1'),
 			array('two', '2')), $this->stmt->getSorting());
 	}
@@ -129,13 +127,13 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 		$s = $this->stmt->getSorting();
 		$this->stmt->if(false);
 		$this->stmt->order('one');
-		A::assertEquals($s, $this->stmt->getSorting());
+		$this->assertEquals($s, $this->stmt->getSorting());
 	}
 
 
 	public function testLimit(){
 		$this->stmt->limit(5);
-		A::assertEquals(array(5, null), $this->stmt->getLimit());
+		$this->assertEquals(array(5, null), $this->stmt->getLimit());
 	}
 
 
@@ -145,13 +143,13 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 		$r->setValue($this->stmt, Neevo::STMT_SELECT);
 
 		$this->stmt->limit(5, 10);
-		A::assertEquals(array(5, 10), $this->stmt->getLimit());
+		$this->assertEquals(array(5, 10), $this->stmt->getLimit());
 	}
 
 
 	public function testLimitOffsetNoOffset(){
 		$this->stmt->limit(5, 10);
-		A::assertEquals(array(5, null), $this->stmt->getLimit());
+		$this->assertEquals(array(5, null), $this->stmt->getLimit());
 	}
 
 
@@ -159,44 +157,44 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 		$l = $this->stmt->getLimit();
 		$this->stmt->if(false);
 		$this->stmt->limit(5);
-		A::assertEquals($l, $this->stmt->getLimit());
+		$this->assertEquals($l, $this->stmt->getLimit());
 	}
 
 
 	public function testRandom(){
 		$s = $this->stmt->getSorting();
-		A::assertNotEquals($s, $this->stmt->rand());
+		$this->assertNotEquals($s, $this->stmt->rand());
 	}
 
 
 	public function testRandomDoNothing(){
 		$this->stmt->if(false);
-		A::assertEquals($this->stmt, $this->stmt->rand());
+		$this->assertEquals($this->stmt, $this->stmt->rand());
 	}
 
 
 	public function testParse(){
-		A::assertEmpty($this->stmt->parse());
+		$this->assertEmpty($this->stmt->parse());
 	}
 
 
 	public function testDump(){
-		A::assertEquals("\n", $this->stmt->dump(true));
+		$this->assertEquals("\n", $this->stmt->dump(true));
 	}
 
 
 	public function testDumpEcho(){
 		ob_start();
 		$this->stmt->dump();
-		A::assertEquals("\n", ob_get_clean());
+		$this->assertEquals("\n", ob_get_clean());
 	}
 
 
 	public function testRun(){
-		A::assertFalse($this->stmt->run());
-		A::assertTrue($this->stmt->isPerformed());
-		A::assertLessThan(1, $this->stmt->getTime());
-		A::assertFalse($this->stmt->exec());
+		$this->assertFalse($this->stmt->run());
+		$this->assertTrue($this->stmt->isPerformed());
+		$this->assertLessThan(1, $this->stmt->getTime());
+		$this->assertFalse($this->stmt->exec());
 	}
 
 
@@ -205,7 +203,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 		$r->setAccessible(true);
 		$r->setValue($this->stmt, ':foo');
 
-		A::assertEquals('foo', $this->stmt->getTable());
+		$this->assertEquals('foo', $this->stmt->getTable());
 	}
 
 
@@ -214,12 +212,12 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 		$r->setAccessible(true);
 		$r->setValue($this->stmt, 'table');
 
-		A::assertEquals('id', $this->stmt->getPrimaryKey());
+		$this->assertEquals('id', $this->stmt->getPrimaryKey());
 	}
 
 
 	public function testGetPrimaryKeyNull(){
-		A::assertNull($this->stmt->getPrimaryKey());
+		$this->assertNull($this->stmt->getPrimaryKey());
 	}
 
 
@@ -229,12 +227,12 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 		$r->setValue($this->stmt, 'foo');
 
 		$this->stmt->getConnection()->getCache()->store('foo_primaryKey', 'pk');
-		A::assertEquals('pk', $this->stmt->getPrimaryKey());
+		$this->assertEquals('pk', $this->stmt->getPrimaryKey());
 	}
 
 
 	public function testToString(){
-		A::assertEquals((string) $this->stmt, $this->stmt->parse());
+		$this->assertEquals((string) $this->stmt, $this->stmt->parse());
 	}
 
 
@@ -243,7 +241,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 
 		$r = new ReflectionMethod($this->stmt, 'validateConditions');
 		$r->setAccessible(true);
-		A::assertFalse($r->invoke($this->stmt));
+		$this->assertFalse($r->invoke($this->stmt));
 	}
 
 
@@ -252,7 +250,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 
 		$r = new ReflectionMethod($this->stmt, 'validateConditions');
 		$r->setAccessible(true);
-		A::assertTrue($r->invoke($this->stmt));
+		$this->assertTrue($r->invoke($this->stmt));
 	}
 
 
@@ -261,7 +259,7 @@ class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
 
 		$r = new ReflectionMethod($this->stmt, 'validateConditions');
 		$r->setAccessible(true);
-		A::assertFalse($r->invoke($this->stmt));
+		$this->assertFalse($r->invoke($this->stmt));
 	}
 
 

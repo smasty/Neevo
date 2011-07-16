@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <phpunit
-  stopOnError="false"
-  stopOnFailure="false"
-  stopOnIncomplete="false"
-  stopOnSkipped="false"
+	stopOnError="false"
+	stopOnFailure="false"
+	stopOnIncomplete="false"
+	stopOnSkipped="false"
 
-  convertErrorsToExceptions="true"
-  convertNoticesToExceptions="true"
-  convertWarningsToExceptions="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
 
-  bootstrap="bootstrap.php" colors="true"
-  >
-  <testsuites>
-    <testsuite name="Neevo Unit tests">
-      <directory suffix="Test.php">./</directory>
-    </testsuite>
+	bootstrap="bootstrap.php" colors="true"
+	>
+	<testsuites>
+		<testsuite name="Neevo Unit tests">
+			<directory suffix="Test.php">./</directory>
+		</testsuite>
 
-	<testsuite name="Neevo integration tests">
-      <directory suffix=".phpt">./integration</directory>
-    </testsuite>
-  </testsuites>
+		<testsuite name="Neevo integration tests">
+			<directory suffix=".phpt">./integration</directory>
+		</testsuite>
+	</testsuites>
 </phpunit>

@@ -1,7 +1,5 @@
 <?php
 
-use PHPUnit_Framework_Assert as A;
-
 
 /**
  * Tests for NeevoCache.
@@ -26,10 +24,10 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testBaseBehaviour(INeevoCache $cache){
 		$cache->store($k = 'key', $v = 'value');
-		A::assertEquals($v, $cache->fetch($k));
+		$this->assertEquals($v, $cache->fetch($k));
 
 		$cache->flush();
-		A::assertNull($cache->fetch($k));
+		$this->assertNull($cache->fetch($k));
 	}
 
 
