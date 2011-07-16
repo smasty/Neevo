@@ -1,15 +1,15 @@
 <?php
 
 
-class DummyStmt extends NeevoStmtBase {
+class DummyStmt extends NeevoBaseStmt {
 
 }
 
 
 /**
- * Tests for NeevoStmtBase.
+ * Tests for NeevoBaseStmt.
  */
-class NeevoStmtBaseTest extends PHPUnit_Framework_TestCase {
+class NeevoBaseStmtTest extends PHPUnit_Framework_TestCase {
 
 
 	/** @var DummyStmt */

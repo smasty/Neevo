@@ -15,7 +15,7 @@
  * @author Martin Srank
  * @package Neevo
  */
-class NeevoStmt extends NeevoStmtBase {
+class NeevoStmt extends NeevoBaseStmt {
 
 
 	/** @var array */

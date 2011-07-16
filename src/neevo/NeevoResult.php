@@ -18,7 +18,7 @@
  * @author Martin Srank
  * @package Neevo
  */
-class NeevoResult extends NeevoStmtBase implements IteratorAggregate, Countable {
+class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable {
 
 
 	/** @var string */

@@ -55,10 +55,10 @@ class NeevoDriverSQLite3 extends NeevoParser implements INeevoDriver {
 	 * @return void
 	 * @throws NeevoDriverException
 	 */
-	public function __construct(NeevoStmtBase $statement = null){
+	public function __construct(NeevoBaseStmt $statement = null){
 		if(!extension_loaded("sqlite3"))
 			throw new NeevoDriverException("Cannot instantiate Neevo SQLite 3 driver - PHP extension 'sqlite3' not loaded.");
-		if($statement instanceof NeevoStmtBase)
+		if($statement instanceof NeevoBaseStmt)
 			parent::__construct($statement);
 	}
 
@@ -228,10 +228,10 @@ class NeevoDriverSQLite3 extends NeevoParser implements INeevoDriver {
 
 	/**
 	 * Randomize result order.
-	 * @param NeevoStmtBase $tatement
+	 * @param NeevoBaseStmt $tatement
 	 * @return void
 	 */
-	public function randomizeOrder(NeevoStmtBase $statement){
+	public function randomizeOrder(NeevoBaseStmt $statement){
 		$statement->order('RANDOM()');
 	}
 

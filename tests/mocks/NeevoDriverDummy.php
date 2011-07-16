@@ -90,7 +90,7 @@ class NeevoDriverDummy implements INeevoDriver {
 	}
 
 
-	public function randomizeOrder(NeevoStmtBase $statement){
+	public function randomizeOrder(NeevoBaseStmt $statement){
 		$statement->order('RANDOM()');
 	}
 

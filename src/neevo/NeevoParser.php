@@ -18,7 +18,7 @@
 class NeevoParser {
 
 
-	/** @var NeevoStmtBase */
+	/** @var NeevoBaseStmt */
 	protected $stmt;
 
 	/** @var array */
@@ -27,9 +27,9 @@ class NeevoParser {
 
 	/**
 	 * Instantiate the parser for given statement.
-	 * @param NeevoStmtBase $statement
+	 * @param NeevoBaseStmt $statement
 	 */
-	public function __construct(NeevoStmtBase $statement){
+	public function __construct(NeevoBaseStmt $statement){
 		$this->stmt = $statement;
 	}
 

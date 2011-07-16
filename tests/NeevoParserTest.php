@@ -22,7 +22,7 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 
 
 	/** @return NeevoDriverParser */
-	private function parser(NeevoStmtBase $stmt){
+	private function parser(NeevoBaseStmt $stmt){
 		$instance = $this->connection->getParser();
 		return new $instance($stmt);
 	}

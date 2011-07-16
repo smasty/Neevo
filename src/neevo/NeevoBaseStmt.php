@@ -13,16 +13,16 @@
 /**
  * Neevo statement abstract base ancestor.
  *
- * @method NeevoStmtBase and($expr, $value = true)
- * @method NeevoStmtBase or($expr, $value = true)
- * @method NeevoStmtBase if($condition)
- * @method NeevoStmtBase else()
- * @method NeevoStmtBase end()
+ * @method NeevoBaseStmt and($expr, $value = true)
+ * @method NeevoBaseStmt or($expr, $value = true)
+ * @method NeevoBaseStmt if($condition)
+ * @method NeevoBaseStmt else()
+ * @method NeevoBaseStmt end()
  *
  * @author Martin Srank
  * @package Neevo
  */
-abstract class NeevoStmtBase implements INeevoObservable {
+abstract class NeevoBaseStmt implements INeevoObservable {
 
 
 	/** @var string */
@@ -100,7 +100,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 
 
 	/**
-	 * @return NeevoStmtBase fluent interface
+	 * @return NeevoBaseStmt fluent interface
 	 * @internal
 	 * @throws BadMethodCallException
 	 * @throws InvalidArgumentException
@@ -153,7 +153,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * Corresponding operator will be used.
 	 * @param string $expr
 	 * @param mixed $value
-	 * @return NeevoStmtBase fluent interface
+	 * @return NeevoBaseStmt fluent interface
 	 */
 	public function where($expr, $value = true){
 		if(is_array($expr) && $value === true)
@@ -202,7 +202,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * Define order. More calls append rules.
 	 * @param string|array|Traversable $rule
 	 * @param string $order Use constants - Neevo::ASC, Neevo::DESC
-	 * @return NeevoStmtBase fluent interface
+	 * @return NeevoBaseStmt fluent interface
 	 */
 	public function order($rule, $order = null){
 		if($this->validateConditions())
@@ -226,7 +226,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	 * Set LIMIT and OFFSET clauses.
 	 * @param int $limit
 	 * @param int $offset
-	 * @return NeevoStmtBase fluent interface
+	 * @return NeevoBaseStmt fluent interface
 	 */
 	public function limit($limit, $offset = null){
 		if($this->validateConditions())
@@ -241,7 +241,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 
 	/**
 	 * Randomize order. Removes any other order clause.
-	 * @return NeevoStmtBase fluent interface
+	 * @return NeevoBaseStmt fluent interface
 	 */
 	public function rand(){
 		if($this->validateConditions())
@@ -259,7 +259,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 	/**
 	 * Print out syntax highlighted statement.
 	 * @param bool $return
-	 * @return string|NeevoStmtBase fluent interface
+	 * @return string|NeevoBaseStmt fluent interface
 	 */
 	public function dump($return = false){
 		$sql = PHP_SAPI === 'cli' ? $this->parse() . "\n" : Neevo::highlightSql($this->parse());
@@ -485,7 +485,7 @@ abstract class NeevoStmtBase implements INeevoObservable {
 
 	/**
 	 * Check the query tree for circular references.
-	 * @param NeevoStmtBase $parent
+	 * @param NeevoBaseStmt $parent
 	 * @param array $visited
 	 * @return bool True if circular reference found.
 	 */

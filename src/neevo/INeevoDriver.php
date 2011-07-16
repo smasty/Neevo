@@ -121,10 +121,10 @@ interface INeevoDriver {
 
 	/**
 	 * Randomize result order.
-	 * @param NeevoStmtBase $statement
+	 * @param NeevoBaseStmt $statement
 	 * @return void
 	 */
-	public function randomizeOrder(NeevoStmtBase $statement);
+	public function randomizeOrder(NeevoBaseStmt $statement);
 
 
 	/**

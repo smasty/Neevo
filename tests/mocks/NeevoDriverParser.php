@@ -7,14 +7,14 @@
 class NeevoDriverParser extends NeevoParser implements INeevoDriver {
 
 
-	/** @var NeevoStmtBase */
+	/** @var NeevoBaseStmt */
 	protected $stmt;
 
 	/** @var array */
 	protected $clauses = array();
 
 
-	function __construct(NeevoStmtBase $statement = null){
+	function __construct(NeevoBaseStmt $statement = null){
 		if($statement !== null)
 			return parent::__construct($statement);
 	}
@@ -29,7 +29,7 @@ class NeevoDriverParser extends NeevoParser implements INeevoDriver {
 	function fetch($resultSet){}
 	function seek($resultSet, $offset){}
 	function getInsertId(){}
-	function randomizeOrder(NeevoStmtBase $statement){}
+	function randomizeOrder(NeevoBaseStmt $statement){}
 	function getNumRows($resultSet){}
 	function getAffectedRows(){}
 	function getPrimaryKey($table){}

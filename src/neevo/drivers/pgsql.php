@@ -44,10 +44,10 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @return void
 	 * @throws NeevoDriverException
 	 */
-	public function __construct(NeevoStmtBase $statement = null){
+	public function __construct(NeevoBaseStmt $statement = null){
 		if(!extension_loaded("pgsql"))
 			throw new NeevoDriverException("Cannot instantiate Neevo PgSQL driver - PHP extension 'pgsql' not loaded.");
-		if($statement instanceof NeevoStmtBase)
+		if($statement instanceof NeevoBaseStmt)
 			parent::__construct($statement);
 	}
 
@@ -207,10 +207,10 @@ class NeevoDriverPgSQL implements INeevoDriver {
 
 	/**
 	 * Randomize result order.
-	 * @param NeevoStmtBase $statement
+	 * @param NeevoBaseStmt $statement
 	 * @return void
 	 */
-	public function randomizeOrder(NeevoStmtBase $statement){
+	public function randomizeOrder(NeevoBaseStmt $statement){
 		$statement->order('RAND()');
 	}
 

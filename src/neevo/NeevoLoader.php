@@ -25,6 +25,7 @@ class NeevoLoader {
 		'ineevoobservable' => '/INeevoObservable.php',
 		'ineevoobserver' => '/INeevoObserver.php',
 		'neevo' => '/Neevo.php',
+		'neevobasestmt' => '/NeevoBaseStmt.php',
 		'neevocachefile' => '/NeevoCache.php',
 		'neevocachememcache' => '/NeevoCache.php',
 		'neevocachememory' => '/NeevoCache.php',
@@ -40,7 +41,6 @@ class NeevoLoader {
 		'neevoresultiterator' => '/NeevoResultIterator.php',
 		'neevorow' => '/NeevoRow.php',
 		'neevostmt' => '/NeevoStmt.php',
-		'neevostmtbase' => '/NeevoStmtBase.php',
 	);
 
 	/** @var NeevoLoader */
