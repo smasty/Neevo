@@ -54,13 +54,13 @@ class NeevoParser {
 
 		$this->clauses = array($source, $where, $group, $order);
 
-		if($this->stmt->getType() == Neevo::STMT_SELECT)
+		if($this->stmt->getType() === Neevo::STMT_SELECT)
 			$q = $this->parseSelectStmt();
-		elseif($this->stmt->getType() == Neevo::STMT_INSERT)
+		elseif($this->stmt->getType() === Neevo::STMT_INSERT)
 			$q = $this->parseInsertStmt();
-		elseif($this->stmt->getType() == Neevo::STMT_UPDATE)
+		elseif($this->stmt->getType() === Neevo::STMT_UPDATE)
 			$q = $this->parseUpdateStmt();
-		elseif($this->stmt->getType() == Neevo::STMT_DELETE)
+		elseif($this->stmt->getType() === Neevo::STMT_DELETE)
 			$q = $this->parseDeleteStmt();
 
 		return $q;
@@ -259,7 +259,7 @@ class NeevoParser {
 
 		$field = trim($field);
 
-		if($field == '*')
+		if($field === '*')
 			return $field;
 
 		if(strpos($field, ' '))

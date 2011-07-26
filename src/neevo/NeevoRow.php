@@ -93,6 +93,15 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	}
 
 
+	/**
+	 * If row is not able to update it's state.
+	 * @return bool
+	 */
+	public function isFrozen(){
+		return $this->frozen;
+	}
+
+
 	/*  ************  Implementation of Countable  ************  */
 
 
@@ -106,11 +115,6 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 	public function getIterator(){
 		return new ArrayIterator(array_merge($this->data, $this->modified));
-	}
-
-
-	public function isFrozen(){
-		return $this->frozen;
 	}
 
 
