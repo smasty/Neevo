@@ -150,6 +150,8 @@ class NeevoParser {
 					? $join_source->getAlias() : '_j' . ($key+1), Neevo::IDENTIFIER);
 
 				$join_source = "($join_source) $join_alias";
+			} elseif(is_scalar($join_source)){
+				$join_source = $this->parseFieldName($join_source, true);
 			}
 			$type = strtoupper(substr($type, 5));
 			$type .= ($type === '') ? '' : ' ';
@@ -248,9 +250,10 @@ class NeevoParser {
 	/**
 	 * Parse column name.
 	 * @param string|array|NeevoLiteral $field
+	 * @param bool $table Parse table name.
 	 * @return string
 	 */
-	protected function parseFieldName($field){
+	protected function parseFieldName($field, $table = false){
 		// preg_replace callback behaviour
 		if(is_array($field))
 			$field = $field[0];
@@ -267,7 +270,7 @@ class NeevoParser {
 
 		$field = str_replace(':', '', $field);
 
-		if(strpos($field, '.') !== false){
+		if(strpos($field, '.') !== false || $table === true){
 			$prefix = $this->stmt->getConnection()->getPrefix();
 			$field = $prefix . $field;
 		}
