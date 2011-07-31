@@ -141,6 +141,7 @@ class NeevoParser {
 				? $subq->getAlias() : '_t', Neevo::IDENTIFIER);
 			$source = "($subq) $alias";
 		}
+		$source = $this->tryDelimite($source);
 
 		foreach($this->stmt->getJoins() as $key => $join){
 			list($join_source, $cond, $type) = $join;
@@ -150,17 +151,21 @@ class NeevoParser {
 					? $join_source->getAlias() : '_j' . ($key+1), Neevo::IDENTIFIER);
 
 				$join_source = "($join_source) $join_alias";
+			} elseif($join_source instanceof NeevoLiteral){
+				$join_source = $join_source->value;
 			}
 
-			# @todo Dirty quick fix
+			// @todo Dirty quick fix
 			elseif(is_scalar($join_source)){
 				$join_source = $this->parseFieldName($join_source, true);
 			}
 			$type = strtoupper(substr($type, 5));
 			$type .= ($type === '') ? '' : ' ';
-			$source .= " {$type}JOIN $join_source ON $cond";
+				$source .= $cond instanceof NeevoLiteral
+					? " {$type}JOIN $join_source ON $cond->value"
+					: $this->tryDelimite(" {$type}JOIN $join_source ON $cond");
 		}
-		return $this->tryDelimite($source);
+		return $source;
 	}
 
 

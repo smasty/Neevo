@@ -127,16 +127,18 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 
 	/**
 	 * Perform JOIN on tables.
-	 * @param string|NeevoResult $source Table name or subquery
-	 * @param string $condition
+	 * @param string|NeevoResult|NeevoLiteral $source Table name or subquery
+	 * @param string|NeevoLiteral $condition
 	 * @return NeevoResult fluent interface
 	 */
 	public function join($source, $condition){
 		if($this->validateConditions())
 			return $this;
 
-		if(!(is_string($source) || $source instanceof self))
-			throw new InvalidArgumentException('Source must be a string or NeevoResult.');
+		if(!(is_string($source) || $source instanceof self || $source instanceof NeevoLiteral))
+			throw new InvalidArgumentException('Source must be a string, NeevoLiteral or NeevoResult.');
+		if(!(is_string($condition) || $condition instanceof NeevoLiteral))
+			throw new InvalidArgumentException('Condition must be a string or NeevoLiteral.');
 
 		if($source instanceof self)
 			$this->subqueries[] = $source;
@@ -152,8 +154,8 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 
 	/**
 	 * Perform LEFT JOIN on tables.
-	 * @param string|NeevoResult $source Table name or subquery
-	 * @param string $condition
+	 * @param string|NeevoResult|NeevoLiteral $source Table name or subquery
+	 * @param string|NeevoLiteral $condition
 	 * @return NeevoResult fluent interface
 	 */
 	public function leftJoin($source, $condition){
@@ -163,8 +165,8 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 
 	/**
 	 * Perform INNER JOIN on tables.
-	 * @param string|NeevoResult $source Table name or subquery
-	 * @param string $condition
+	 * @param string|NeevoResult|NeevoLiteral $source Table name or subquery
+	 * @param string|NeevoLiteral $condition
 	 * @return NeevoResult fluent interface
 	 */
 	public function innerJoin($source, $condition){
