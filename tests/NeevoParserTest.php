@@ -115,6 +115,15 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testParseSourceJoinLiteral(){
+		$this->assertEquals(
+			":foo LEFT JOIN GETTABLE(bar) ON bar.id = foo.bar_id",
+			$this->parser($this->createSelect()->leftJoin(new NeevoLiteral('GETTABLE(bar)'), new NeevoLiteral('bar.id = foo.bar_id')))
+			->parseSource()
+		);
+	}
+
+
 	public function testApplyLimit(){
 		$this->assertEquals(
 			"foo LIMIT 15 OFFSET 5", $this->parser($this->createSelect()->limit(15, 5))->applyLimit('foo')
