@@ -284,7 +284,8 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 		$this->performed = true;
 		$this->resultSet = $query;
 
-		$this->notifyObservers(self::$eventTable[$this->type]);
+		$this->notifyObservers(isset($this->type)
+			? self::$eventTable[$this->type] : INeevoObserver::QUERY);
 
 		return $query;
 	}

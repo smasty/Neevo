@@ -24,7 +24,7 @@ class NeevoDriverDummy implements INeevoDriver {
 
 
 	public function connect(array $config){
-		$this->unbuffered = $config['unbuffered'];
+		$this->unbuffered = isset($config['unbuffered']) ? $config['unbuffered'] : false;
 		$this->connected = true;
 	}
 
