@@ -8,13 +8,9 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 
 
 	public function getImplementations(){
-		$memcache = new Memcache;
-		$memcache->connect('localhost');
-
 		return array(
 			array(new NeevoCacheMemory),
-			array(new NeevoCacheSession),
-			array(new NeevoCacheMemcache($memcache))
+			array(new NeevoCacheSession)
 		);
 	}
 
@@ -35,6 +31,14 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 		$filename = 'neevo.cache';
 		$this->testBaseBehaviour(new NeevoCacheFile($filename));
 		unlink($filename);
+	}
+
+
+	public function testNeevoCacheMemcache(){
+		$memcache = new Memcache;
+		$memcache->connect('localhost');
+		$this->testBaseBehaviour(new NeevoCacheMemcache($memcache));
+
 	}
 
 
