@@ -51,8 +51,16 @@ class NeevoRowTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, $this->row->update());
 	}
 
+	public function testUpdateNotModified(){
+		$this->assertEquals(0, $this->row->update());
+	}
+
 	public function testDelete(){
 		$this->assertEquals(1, $this->row->delete());
+	}
+
+	public function testIsFrozen(){
+		$this->assertFalse($this->row->isFrozen());
 	}
 
 

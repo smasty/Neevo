@@ -67,6 +67,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 			return NeevoStmt::createUpdate($this->connection, $this->table,	$this->modified)
 					->where($this->primary, $this->data[$this->primary])->limit(1)->affectedRows();
 		}
+		return 0;
 	}
 
 
@@ -98,7 +99,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	 * @return bool
 	 */
 	public function isFrozen(){
-		return $this->frozen;
+		return (bool) $this->frozen;
 	}
 
 
