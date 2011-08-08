@@ -19,5 +19,9 @@ class DummyObserver implements INeevoObserver {
 		return (bool) $event = $this->notified;
 	}
 
+	public function reset(){
+		$this->notified = false;
+	}
+
 
 }
