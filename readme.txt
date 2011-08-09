@@ -25,8 +25,8 @@ Features
 Documentation
 -------------
 
-Documentation for Neevo is available online: http://neevo.smasty.net/documentation
-For examples of using Neevo, refer to the 'examples' directory.
+Documentation for Neevo is available online: http://neevo.smasty.net/documentation.
+Public API reference can be found on http://neevo.smasty.net/api/.
 
 
 Minified version
