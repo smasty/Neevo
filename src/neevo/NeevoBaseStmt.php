@@ -274,12 +274,14 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 	 * @return resource|bool
 	 */
 	public function run(){
-		$start = -microtime(true);
+		if(!$this->performed)
+			$start = microtime(true);
 
 		$query = $this->performed ?
 			$this->resultSet : $this->connection->getDriver()->runQuery($this->parse());
 
-		$this->time = $start + microtime(true);
+		if(!$this->performed)
+			$this->time = microtime(true) - $start;
 
 		$this->performed = true;
 		$this->resultSet = $query;
