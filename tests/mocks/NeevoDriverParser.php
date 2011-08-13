@@ -82,8 +82,8 @@ class NeevoDriverParser extends NeevoParser implements INeevoDriver {
 		return parent::parseDeleteStmt();
 	}
 
-	public function parseFieldName($field){
-		return parent::parseFieldName($field);
+	public function parseFieldName($field, $table = false){
+		return parent::parseFieldName($field, $table);
 	}
 
 	public function parseGrouping(){
