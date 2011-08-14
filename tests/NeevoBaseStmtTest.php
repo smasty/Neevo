@@ -106,6 +106,19 @@ class NeevoBaseStmtTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testWhereOrFirstCondition(){
+		$this->stmt->or($f = 'test', $v = false);
+		$this->assertEquals(array(
+			array(
+				'simple' => true,
+				'field' => $f,
+				'value' => $v,
+				'glue' => 'AND'
+			)
+		), $this->stmt->getConditions());
+	}
+
+
 	public function testOrderSimple(){
 		$this->stmt->order($r = 'rule', $t = 'type');
 		$this->assertEquals(array(array($r, $t)), $this->stmt->getSorting());
