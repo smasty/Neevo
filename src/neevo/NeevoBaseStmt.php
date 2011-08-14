@@ -114,8 +114,8 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 				return $this;
 
 			$this->resetState();
-			if($this->conditions !== array())
-				$this->conditions[count($this->conditions)-1]['glue'] = strtoupper($name);
+			if(($count = count($this->conditions)) !== 0)
+				$this->conditions[$count-1]['glue'] = strtoupper($name);
 			if(count($args) >= 1)
 				call_user_func_array(array($this, 'where'), $args);
 			return $this;
