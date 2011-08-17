@@ -22,8 +22,10 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 		$cache->store($k = 'key', $v = 'value');
 		$this->assertEquals($v, $cache->fetch($k));
 
-		$cache->flush();
-		$this->assertNull($cache->fetch($k));
+		if(method_exists($cache, 'flush')){
+			$cache->flush();
+			$this->assertNull($cache->fetch($k));
+		}
 	}
 
 

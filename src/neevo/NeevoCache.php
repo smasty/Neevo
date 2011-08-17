@@ -35,13 +35,6 @@ interface INeevoCache {
 	public function store($key, $value);
 
 
-	/**
-	 * Flush entire cache.
-	 * @return bool
-	 */
-	public function flush();
-
-
 }
 
 
@@ -70,8 +63,7 @@ class NeevoCacheMemory implements INeevoCache {
 
 
 	public function flush(){
-		$this->data = array();
-		return empty($this->data);
+		return !$this->data = array();
 	}
 
 
@@ -98,8 +90,7 @@ class NeevoCacheSession implements INeevoCache {
 
 
 	public function flush(){
-		$_SESSION['NeevoCache'] = array();
-		return empty($_SESSION['NeevoCache']);
+		return !$_SESSION['NeevoCache'] = array();
 	}
 
 
