@@ -19,6 +19,7 @@
  *
  * Driver configuration:
  *  - database (or file)
+ *  - memory (bool) => use an in-memory database (overrides 'database')
  *  - charset => Character encoding to set (defaults to utf-8)
  *  - dbcharset => Database character encoding (will be converted to 'charset')
  *  - persistent (bool) => Try to find a persistent link
@@ -83,6 +84,7 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 		NeevoConnection::alias($config, 'updateLimit', 'update_limit');
 
 		$defaults = array(
+			'memory' => false,
 			'resource' => null,
 			'updateLimit' => false,
 			'charset' => 'UTF-8',
@@ -92,6 +94,9 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 		);
 
 		$config += $defaults;
+
+		if($config['memory'])
+			$config['database'] = ':memory:';
 
 		// Connect
 		if(is_resource($config['resource']))

@@ -104,6 +104,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 
 		$this->setDriver($config['driver']);
 
+		$config['lazy'] = (bool) $config['lazy'] && strtolower($config['lazy']) !== 'false';
 		$this->config = $config;
 
 		if($config['lazy'] === false)
