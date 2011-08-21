@@ -15,7 +15,7 @@
 
 
 /**
- * Neevo SQLite driver (PHP extension 'sqlite')
+ * Neevo SQLite 2 driver (PHP extension 'sqlite')
  *
  * Driver configuration:
  *  - database (or file)
@@ -25,13 +25,13 @@
  *  - unbuffered (bool) => Sends query without fetching and buffering the result
  *
  *  - updateLimit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
- *  - resource (type resource) => Existing SQLite link
+ *  - resource (type resource) => Existing SQLite 2 link
  *  - lazy, table_prefix... => see NeevoConnection
  *
  * @author Martin Srank
  * @package Neevo\Drivers
  */
-class NeevoDriverSQLite extends NeevoParser implements INeevoDriver {
+class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 
 
 	/** @var string */

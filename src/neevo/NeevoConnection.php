@@ -293,19 +293,21 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @throws NeevoDriverException
 	 */
 	protected function setDriver($driver){
+		if(strcasecmp($driver, 'sqlite') === 0) // Backward compatibility
+			$driver = 'SQLite2';
+
 		$class = "NeevoDriver$driver";
 
 		if(!class_exists($class)){
 			$file = dirname(__FILE__) . '/drivers/' . strtolower($driver) . '.php';
 
-			if(!file_exists($file)){
+			if(!file_exists($file))
 				throw new NeevoDriverException("$driver driver file ($file) does not exist.");
-			}
-			if(is_readable($file)){
+			if(is_readable($file))
 				include_once $file;
-			} else{
+			else
 				throw new NeevoDriverException("$driver driver file ($file) is not readable.");
-			}
+
 		}
 		if(!$this->isDriver($class))
 			throw new NeevoDriverException("Class '$class' is not a valid Neevo driver class.");
