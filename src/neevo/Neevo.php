@@ -142,6 +142,45 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	}
 
 
+	/**
+	 * Import a SQL dump from given file.
+	 *
+	 * Based on implementation in Nette\Database,
+	 * Copyright (c) 2004, 2011 David Grudl (http://davidgrudl.com), new BSD license.
+	 * @copyright 2004, 2011 David Grudl
+	 * @param string $filename
+	 * @return int Number of executed commands
+	 */
+	public function loadFile($filename){
+		$this->connection->connect();
+		$abort = ignore_user_abort();
+		@set_time_limit(0);
+		ignore_user_abort(true);
+
+		$handle = @fopen($filename, 'r');
+		if($handle === false){
+			ignore_user_abort($abort);
+			throw new NeevoException("Cannot open file '$filename' for SQL import.");
+		}
+
+		$sql = '';
+		$count = 0;
+		while(!feof($handle)){
+			$content = fgets($handle);
+			$sql .= $content;
+			if(substr(rtrim($content), -1) === ';'){
+				// Passed directly to driver without logging.
+				$this->connection->getDriver()->runQuery($sql);
+				$sql = '';
+				$count++;
+			}
+		}
+		fclose($handle);
+		ignore_user_abort($abort);
+		return $count;
+	}
+
+
 	/*  ************  Transactions  ************  */
 
 
