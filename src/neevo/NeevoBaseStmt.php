@@ -152,13 +152,18 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 	 * More calls append conditions with 'AND' operator. Conditions can also be specified
 	 * by calling and() / or() methods the same way as where().
 	 * Corresponding operator will be used.
-	 * @param string $expr
+	 *
+	 * Accepts associative array in field => value form.
+	 * @param string|array|Traversable $expr
 	 * @param mixed $value
 	 * @return NeevoBaseStmt fluent interface
 	 */
 	public function where($expr, $value = true){
-		if(is_array($expr) && $value === true)
-			return call_user_func_array(array($this, 'where'), $expr);
+		if((is_array($expr) || $expr instanceof Traversable) && $value === true){
+			foreach($expr as $key => $val)
+				$this->where($key, $val);
+			return $this;
+		}
 
 		if($this->validateConditions())
 			return $this;
