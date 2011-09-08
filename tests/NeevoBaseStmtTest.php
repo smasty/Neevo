@@ -64,12 +64,12 @@ class NeevoBaseStmtTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testWhereArray(){
-		$this->stmt->where($a = array('one', 'value'));
+	public function testWhereAssocArray(){
+		$this->stmt->where(array($k = 'key' => $v = 'val'));
 		$this->assertEquals(array(array(
 				'simple' => true,
-				'field' => $a[0],
-				'value' => $a[1],
+				'field' => $k,
+				'value' => $v,
 				'glue' => 'AND'
 			)), $this->stmt->getConditions());
 	}
