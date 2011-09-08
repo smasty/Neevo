@@ -155,7 +155,6 @@ class NeevoParser {
 				$join_source = $join_source->value;
 			}
 
-			// @todo Dirty quick fix
 			elseif(is_scalar($join_source)){
 				$join_source = $this->parseFieldName($join_source, true);
 			}
@@ -259,7 +258,6 @@ class NeevoParser {
 	 * Parse column name.
 	 * @param string|array|NeevoLiteral $field
 	 * @param bool $table Parse table name.
-	 * @todo Prefix table name (dirty fix)
 	 * @return string
 	 */
 	protected function parseFieldName($field, $table = false){
