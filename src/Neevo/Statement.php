@@ -101,7 +101,7 @@ class Statement extends BaseStatement {
 	 */
 	public function insertId(){
 		if($this->type !== Manager::STMT_INSERT)
-			throw new NeevoException(__METHOD__.' can be called only on INSERT statements.');
+			throw new NeevoException(__METHOD__ . ' can be called only on INSERT statements.');
 
 		$this->performed || $this->run();
 		try{
