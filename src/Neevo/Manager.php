@@ -336,3 +336,29 @@ class Manager implements IObservable, IObserver {
 
 
 }
+
+
+
+/**
+ * Representation of SQL literal.
+ * @author Martin Srank
+ * @package Neevo
+ */
+class Literal {
+
+
+	/** @var string */
+	public $value;
+
+
+	/**
+	 * Create instance of SQL literal.
+	 * @param string $value
+	 * @return void
+	 */
+	public function __construct($value){
+		$this->value = $value;
+	}
+
+
+}

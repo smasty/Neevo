@@ -35,7 +35,7 @@ class Loader {
 		'neevo\\driverexception' => '/Exception.php',
 		'neevo\\neevoexception' => '/Exception.php',
 		'neevo\\implementationexception' => '/Exception.php',
-		'neevo\\literal' => '/Literal.php',
+		'neevo\\literal' => '/Manager.php',
 		'neevo\\observermap' => '/ObserverMap.php',
 		'neevo\\parser' => '/Parser.php',
 		'neevo\\result' => '/Result.php',
