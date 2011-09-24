@@ -11,9 +11,12 @@
 
 
 // PHP compatibility
-if(version_compare(PHP_VERSION, '5.2', '<')){
-	trigger_error('Neevo requires PHP version 5.2 or newer', E_USER_ERROR);
+if(version_compare(PHP_VERSION, '5.3', '<')){
+	trigger_error('Neevo requires PHP version 5.3 or newer', E_USER_ERROR);
 }
+
+
+define('NEEVO_DIR', __DIR__);
 
 
 // Try to turn magic quotes off - Neevo handles SQL quoting.
@@ -21,5 +24,5 @@ if(version_compare(PHP_VERSION, '5.2', '<')){
 
 
 // Register autoloader responsible for loading Neevo classes and interfaces.
-require_once dirname(__FILE__) . '/neevo/NeevoLoader.php';
-NeevoLoader::getInstance()->register();
+require_once NEEVO_DIR . '/Neevo/Loader.php';
+Neevo\Loader::getInstance()->register();
