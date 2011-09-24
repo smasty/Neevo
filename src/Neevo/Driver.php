@@ -30,7 +30,7 @@ namespace Neevo;
  *
  * @author Martin Srank
  */
-interface IDriver {
+interface Driver {
 
 
 	/**

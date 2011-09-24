@@ -32,7 +32,7 @@ use Neevo;
  *
  * @author Martin Srank
  */
-class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
+class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 
 
 	/** @var string */

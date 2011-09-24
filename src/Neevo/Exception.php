@@ -16,13 +16,13 @@ namespace Neevo;
  * Main Neevo exception.
  * @author Martin Srank
  */
-class NeevoException extends \Exception implements IObservable {
+class NeevoException extends \Exception implements Observer\Subject {
 
 
 	/** @var string */
 	protected $sql;
 
-	/** @var ObserverMap */
+	/** @var Observer\ObjectMap */
 	protected static $observers;
 
 
@@ -38,8 +38,8 @@ class NeevoException extends \Exception implements IObservable {
 
 		parent::__construct($message, (int) $code, $previous);
 		$this->sql = $sql;
-		self::$observers = new ObserverMap;
-		$this->notifyObservers(IObserver::EXCEPTION);
+		self::$observers = new Observer\ObjectMap;
+		$this->notifyObservers(Observer\Observer::EXCEPTION);
 	}
 
 
@@ -61,26 +61,26 @@ class NeevoException extends \Exception implements IObservable {
 	}
 
 
-	/*  ************  Implementation of IObservable  ************  */
+	/*  ************  Implementation of Observer\Subject  ************  */
 
 
 	/**
 	 * Attach given observer to given event.
-	 * @param IObserver $observer
+	 * @param Observer\Observer $observer
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(IObserver $observer, $event){
+	public function attachObserver(Observer\Observer $observer, $event){
 		self::$observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detach given observer.
-	 * @param IObserver $observer
+	 * @param Observer\Observer $observer
 	 * @return void
 	 */
-	public function detachObserver(IObserver $observer){
+	public function detachObserver(Observer\Observer $observer){
 		self::$observers->detach($observer);
 	}
 

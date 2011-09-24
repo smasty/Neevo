@@ -11,14 +11,14 @@
 
 namespace Neevo\Cache;
 
-use Neevo\ICache;
+use Neevo\Cache;
 
 
 /**
  * Session cache storage.
  * @author Martin Srank
  */
-class SessionStorage implements ICache {
+class SessionStorage implements Cache {
 
 
 	public function fetch($key){

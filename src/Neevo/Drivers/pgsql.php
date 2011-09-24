@@ -29,7 +29,7 @@ use Neevo;
  *
  * @author Martin Srank
  */
-class PgSQLDriver implements Neevo\IDriver {
+class PgSQLDriver implements Neevo\Driver {
 
 
 	/** @var resource */

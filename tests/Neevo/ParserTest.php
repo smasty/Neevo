@@ -12,7 +12,7 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 
 
 	protected function setUp(){
-		$this->connection = new Neevo\Connection('driver=Parser');
+		$this->connection = new Neevo\Connection('driver=DummyParser');
 	}
 
 

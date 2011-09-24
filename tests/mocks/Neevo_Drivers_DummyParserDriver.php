@@ -7,7 +7,7 @@ use Neevo;
 /**
  * Dummy Neevo driver/parser.
  */
-class ParserDriver extends Neevo\Parser implements Neevo\IDriver {
+class DummyParserDriver extends Neevo\Parser implements Neevo\Driver {
 
 
 	/** @var Neevo\BaseStatement */

@@ -33,7 +33,7 @@ use Neevo;
  *
  * @author Martin Srank
  */
-class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
+class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 
 
 	/** @var mysqli_result */

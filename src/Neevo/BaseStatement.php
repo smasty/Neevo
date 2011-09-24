@@ -22,7 +22,7 @@ namespace Neevo;
  *
  * @author Martin Srank
  */
-abstract class BaseStatement implements IObservable {
+abstract class BaseStatement implements Observer\Subject {
 
 
 	/** @var string */
@@ -54,16 +54,16 @@ abstract class BaseStatement implements IObservable {
 
 	/** @var array Event type conversion table */
 	protected static $eventTable = array(
-		Manager::STMT_SELECT => IObserver::SELECT,
-		Manager::STMT_INSERT => IObserver::INSERT,
-		Manager::STMT_UPDATE => IObserver::UPDATE,
-		Manager::STMT_DELETE => IObserver::DELETE
+		Manager::STMT_SELECT => Observer\Observer::SELECT,
+		Manager::STMT_INSERT => Observer\Observer::INSERT,
+		Manager::STMT_UPDATE => Observer\Observer::UPDATE,
+		Manager::STMT_DELETE => Observer\Observer::DELETE
 	);
 
 	/** @var array */
 	protected $subqueries = array();
 
-	/** @var Neevo\ObserverMap */
+	/** @var Neevo\Observer\ObjectMap */
 	protected $observers;
 
 	/** @var array */
@@ -77,7 +77,7 @@ abstract class BaseStatement implements IObservable {
 	 */
 	public function __construct(Connection $connection){
 		$this->connection = $connection;
-		$this->observers = new ObserverMap;
+		$this->observers = new Observer\ObjectMap;
 	}
 
 
@@ -293,7 +293,7 @@ abstract class BaseStatement implements IObservable {
 		$this->resultSet = $query;
 
 		$this->notifyObservers(isset($this->type)
-			? self::$eventTable[$this->type] : IObserver::QUERY);
+			? self::$eventTable[$this->type] : Observer\Observer::QUERY);
 
 		return $query;
 	}
@@ -325,26 +325,26 @@ abstract class BaseStatement implements IObservable {
 	}
 
 
-	/*  ************  IObservable implementation  ************  */
+	/*  ************  Observer\Subject implementation  ************  */
 
 
 	/**
 	 * Attach given observer to given event.
-	 * @param IObserver $observer
+	 * @param Observer\Observer $observer
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(IObserver $observer, $event){
+	public function attachObserver(Observer\Observer $observer, $event){
 		$this->observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detach given observer.
-	 * @param IObserver $observer
+	 * @param Observer\Observer $observer
 	 * @return void
 	 */
-	public function detachObserver(IObserver $observer){
+	public function detachObserver(Observer\Observer $observer){
 		$this->observers->detach($observer);
 	}
 

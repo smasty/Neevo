@@ -16,7 +16,7 @@ namespace Neevo;
  * Core Neevo class.
  * @author Martin Srank
  */
-class Manager implements IObservable, IObserver {
+class Manager implements Observer\Subject, Observer\Observer {
 
 
 	/** @var string Default Neevo driver */
@@ -31,7 +31,7 @@ class Manager implements IObservable, IObserver {
 	/** @var Connection */
 	private $connection;
 
-	/** @var ObserverMap */
+	/** @var Observer\ObjectMap */
 	private $observers;
 
 
@@ -70,13 +70,13 @@ class Manager implements IObservable, IObserver {
 	 * Configure Neevo and establish a connection.
 	 * Configuration can be different - see the API for your driver.
 	 * @param mixed $config Connection configuration.
-	 * @param ICache $cache Cache to use.
+	 * @param Cache $cache Cache to use.
 	 * @return void
 	 * @throws NeevoException
 	 */
-	public function __construct($config, ICache $cache = null){
+	public function __construct($config, Cache $cache = null){
 		$this->connection = new Connection($config, $cache);
-		$this->observers = new ObserverMap;
+		$this->observers = new Observer\ObjectMap;
 		$this->attachObserver($this, self::QUERY);
 	}
 
@@ -192,7 +192,7 @@ class Manager implements IObservable, IObserver {
 	 */
 	public function begin($savepoint = null){
 		$this->connection->getDriver()->beginTransaction($savepoint);
-		$this->notifyObservers(IObserver::BEGIN);
+		$this->notifyObservers(Observer\Observer::BEGIN);
 		return $this;
 	}
 
@@ -204,7 +204,7 @@ class Manager implements IObservable, IObserver {
 	 */
 	public function commit($savepoint = null){
 		$this->connection->getDriver()->commit($savepoint);
-		$this->notifyObservers(IObserver::COMMIT);
+		$this->notifyObservers(Observer\Observer::COMMIT);
 		return $this;
 	}
 
@@ -216,21 +216,21 @@ class Manager implements IObservable, IObserver {
 	 */
 	public function rollback($savepoint = null){
 		$this->connection->getDriver()->rollback($savepoint);
-		$this->notifyObservers(IObserver::ROLLBACK);
+		$this->notifyObservers(Observer\Observer::ROLLBACK);
 		return $this;
 	}
 
 
-	/*  ************  Implementation of IObservable & IObserver  ************  */
+	/*  ************  Implementation of Observer\Subject & Observer\Observer  ************  */
 
 
 	/**
 	 * Attach an observer for debugging.
-	 * @param IObserver $observer
+	 * @param Observer\Observer $observer
 	 * @param int $event Event to attach the observer to.
 	 * @return void
 	 */
-	public function attachObserver(IObserver $observer, $event){
+	public function attachObserver(Observer\Observer $observer, $event){
 		$this->observers->attach($observer, $event);
 		$this->connection->attachObserver($observer, $event);
 		$e = new NeevoException;
@@ -240,10 +240,10 @@ class Manager implements IObservable, IObserver {
 
 	/**
 	 * Detach given observer.
-	 * @param IObserver $observer
+	 * @param Observer\Observer $observer
 	 * @return void
 	 */
-	public function detachObserver(IObserver $observer){
+	public function detachObserver(Observer\Observer $observer){
 		$this->connection->detachObserver($observer);
 		$this->observers->detach($observer);
 		$e = new NeevoException;
@@ -266,11 +266,11 @@ class Manager implements IObservable, IObserver {
 
 	/**
 	 * Receive update from observable.
-	 * @param IObservable $observable
+	 * @param Observer\Subject $observable
 	 * @param int $event Event type
 	 * @return void
 	 */
-	public function updateStatus(IObservable $observable, $event){
+	public function updateStatus(Observer\Subject $observable, $event){
 		$this->last = $observable->__toString();
 		++$this->queries;
 	}

@@ -11,14 +11,14 @@
 
 namespace Neevo\Cache;
 
-use Neevo\ICache;
+use Neevo\Cache;
 
 
 /**
  * Memcache cache storage.
  * @author Martin Srank
  */
-class MemcacheStorage implements ICache {
+class MemcacheStorage implements Cache {
 
 
 	/** @var \Memcache */

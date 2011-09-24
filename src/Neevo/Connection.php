@@ -25,7 +25,7 @@ namespace Neevo;
  *
  * @author Martin Srank
  */
-class Connection implements IObservable, \ArrayAccess {
+class Connection implements Observer\Subject, \ArrayAccess {
 
 
 	/** @var array */
@@ -34,28 +34,28 @@ class Connection implements IObservable, \ArrayAccess {
 	/** @var bool */
 	private $connected = false;
 
-	/** @var IDriver */
+	/** @var Driver */
 	private $driver;
 
 	/** @var string */
 	private $parser = 'Neevo\\Parser';
 
-	/** @var ObserverMap */
+	/** @var Observer\ObjectMap */
 	private $observers;
 
-	/** @var ICache */
+	/** @var Cache */
 	private $cache;
 
 
 	/**
 	 * Establish a connection.
 	 * @param array|string|\Traversable $config
-	 * @param ICache $cache
+	 * @param Cache $cache
 	 * @return void
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct($config, ICache $cache = null){
-		$this->observers = new ObserverMap;
+	public function __construct($config, Cache $cache = null){
+		$this->observers = new Observer\ObjectMap;
 
 		$this->cache = $cache !== null ? $cache : new Cache\MemoryStorage;
 
@@ -124,7 +124,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 		}
 
-		$this->notifyObservers(IObserver::DISCONNECT);
+		$this->notifyObservers(Observer\Observer::DISCONNECT);
 	}
 
 
@@ -138,7 +138,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 		$this->driver->connect($this->config);
 		$this->connected = true;
-		$this->notifyObservers(IObserver::CONNECT);
+		$this->notifyObservers(Observer\Observer::CONNECT);
 	}
 
 
@@ -165,7 +165,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 	/**
 	 * Get the current driver instance.
-	 * @return IDriver
+	 * @return Driver
 	 */
 	public function getDriver(){
 		return $this->driver;
@@ -183,7 +183,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 	/**
 	 * Get the current cache storage instance.
-	 * @return ICache
+	 * @return Cache
 	 */
 	public function getCache(){
 		return $this->cache;
@@ -192,33 +192,33 @@ class Connection implements IObservable, \ArrayAccess {
 
 	/**
 	 * Set the cache storage.
-	 * @param ICache $cache
+	 * @param Cache $cache
 	 */
-	public function setCache(ICache $cache){
+	public function setCache(Cache $cache){
 		$this->cache = $cache;
 	}
 
 
-	/*  ************  Implementation of IObservable  ************  */
+	/*  ************  Implementation of Observer\Subject  ************  */
 
 
 	/**
 	 * Attach given observer to given $event.
-	 * @param IObserver $observer
+	 * @param Observer\Observer $observer
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(IObserver $observer, $event){
+	public function attachObserver(Observer\Observer $observer, $event){
 		$this->observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detach given observer.
-	 * @param IObserver $observer
+	 * @param Observer\Observer $observer
 	 * @return void
 	 */
-	public function detachObserver(IObserver $observer){
+	public function detachObserver(Observer\Observer $observer){
 		$this->observers->detach($observer);
 	}
 
@@ -329,7 +329,7 @@ class Connection implements IObservable, \ArrayAccess {
 	protected function isDriver($class){
 		//try{
 			$reflection = new \ReflectionClass($class);
-			return $reflection->implementsInterface('Neevo\IDriver');
+			return $reflection->implementsInterface('Neevo\Driver');
 		//} catch(\ReflectionException $e){
 		//	return false;
 		//}

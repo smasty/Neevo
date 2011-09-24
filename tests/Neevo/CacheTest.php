@@ -4,7 +4,7 @@
 /**
  * Tests for NeevoCache.
  */
-class NeevoCacheTest extends PHPUnit_Framework_TestCase {
+class CacheTest extends PHPUnit_Framework_TestCase {
 
 
 	private $filename = 'neevo.cache';
@@ -22,7 +22,7 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @dataProvider getImplementations
 	 */
-	public function testBehaviour(Neevo\ICache $cache){
+	public function testBehaviour(Neevo\Cache $cache){
 		$cache->store($k = 'key', $v = 'value');
 		$this->assertEquals($v, $cache->fetch($k));
 

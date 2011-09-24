@@ -4,7 +4,7 @@
 /**
  * Tests for Neevo.
  */
-class NeevoTest extends PHPUnit_Framework_TestCase {
+class ManagerTest extends PHPUnit_Framework_TestCase {
 
 	/** @var Neevo */
 	private $neevo;

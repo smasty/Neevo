@@ -4,7 +4,7 @@
 /**
  * Tests for Neevo\NeevoException additional features.
  */
-class NeevoExceptionTest extends PHPUnit_Framework_TestCase {
+class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testConstructor(){

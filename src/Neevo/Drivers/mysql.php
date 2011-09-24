@@ -32,7 +32,7 @@ use Neevo;
  *
  * @author Martin Srank
  */
-class MySQLDriver extends Neevo\Parser implements Neevo\IDriver {
+class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 
 
 	/** @var resource */

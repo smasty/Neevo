@@ -89,10 +89,10 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 	public function testSetCustomParser(){
 		$connection = new Neevo\Connection(array(
-				'driver' => 'Parser'
+				'driver' => 'DummyParser'
 			));
 
-		$this->assertEquals($connection->getParser(), 'Neevo\\Drivers\\ParserDriver');
+		$this->assertEquals($connection->getParser(), 'Neevo\\Drivers\\DummyParserDriver');
 	}
 
 

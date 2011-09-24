@@ -9,14 +9,14 @@
  *
  */
 
-namespace Neevo;
+namespace Neevo\Observer;
 
 
 /**
- * The map of observers - instances of Neevo\IObserver.
+ * The map of observers - instances of Neevo\Observer\Observer.
  * @author Martin Srank
  */
-class ObserverMap implements \Iterator, \Countable {
+class ObjectMap implements \Iterator, \Countable {
 
 
 	/** @var array */
@@ -28,11 +28,11 @@ class ObserverMap implements \Iterator, \Countable {
 
 	/**
 	 * Add given observer to map for given event.
-	 * @param IObserver $observer
+	 * @param Observer $observer
 	 * @param int $event Event bitmap
 	 * @return void
 	 */
-	public function attach(IObserver $observer, $event){
+	public function attach(Observer $observer, $event){
 		$this->storage[spl_object_hash($observer)] = array(
 			'observer' => $observer,
 			'event' => $event
@@ -42,20 +42,20 @@ class ObserverMap implements \Iterator, \Countable {
 
 	/**
 	 * Remove given observer from map.
-	 * @param IObserver $observer
+	 * @param Observer $observer
 	 * @return void
 	 */
-	public function detach(IObserver $observer){
+	public function detach(Observer $observer){
 		unset($this->storage[spl_object_hash($observer)]);
 	}
 
 
 	/**
 	 * Check if given observer is in the map.
-	 * @param IObserver $observer
+	 * @param Observer $observer
 	 * @return bool
 	 */
-	public function contains(IObserver $observer){
+	public function contains(Observer $observer){
 		return isset($this->storage[spl_object_hash($observer)]);
 	}
 
@@ -110,7 +110,7 @@ class ObserverMap implements \Iterator, \Countable {
 
 	/**
 	 * Return the current observer.
-	 * @return IObserver
+	 * @return Observer
 	 */
 	public function current(){
 		$current = current($this->storage);

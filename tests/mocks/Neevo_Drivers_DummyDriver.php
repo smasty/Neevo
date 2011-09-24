@@ -7,7 +7,7 @@ use Neevo;
 /**
  * Dummy Neevo driver.
  */
-class DummyDriver implements Neevo\IDriver {
+class DummyDriver implements Neevo\Driver {
 
 	private $unbuffered = false,
 			$connected = false,
