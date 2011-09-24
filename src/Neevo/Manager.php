@@ -36,7 +36,7 @@ class Manager implements Observer\Subject, Observer\Observer {
 
 
 	// Neevo version
-	const VERSION = '2.0',
+	const VERSION = '2.0-beta',
 	REVISION = '@VCREV@ released on @VCDATE@';
 
 	// Data types
