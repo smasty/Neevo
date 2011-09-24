@@ -2,7 +2,7 @@
 
 require __DIR__ . '/../../src/neevo.php';
 
-$db = new Neevo(array(
+$db = new Neevo\Manager(array(
 	'driver' => 'sqlite3',
 	'memory' => true
 ));

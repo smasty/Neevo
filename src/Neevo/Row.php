@@ -9,13 +9,14 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
  * Representation of a row in a result.
  * @author Martin Srank
- * @package Neevo
  */
-class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
+class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 
 
 	/** @var bool */
@@ -33,17 +34,17 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 	/** @var string */
 	protected $table;
 
-	/** @var NeevoConnection */
+	/** @var Connection */
 	protected $connection;
 
 
 	/**
 	 * Create a row instance.
 	 * @param array $data
-	 * @param NeevoResult $result
+	 * @param Result $result
 	 * @return void
 	 */
-	public function __construct(array $data, NeevoResult $result){
+	public function __construct(array $data, Result $result){
 		$this->data = $data;
 		$this->connection = $result->getConnection();
 		$this->table = $result->getTable();
@@ -64,7 +65,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 			throw new NeevoException('Update disabled - cannot get primary key or table.');
 
 		if(!empty($this->modified)){
-			return NeevoStmt::createUpdate($this->connection, $this->table,	$this->modified)
+			return Statement::createUpdate($this->connection, $this->table,	$this->modified)
 					->where($this->primary, $this->data[$this->primary])->limit(1)->affectedRows();
 		}
 		return 0;
@@ -80,7 +81,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 		if($this->frozen)
 			throw new NeevoException('Delete disabled - cannot get primary key or table.');
 
-		return NeevoStmt::createDelete($this->connection, $this->table)
+		return Statement::createDelete($this->connection, $this->table)
 				->where($this->primary, $this->data[$this->primary])->limit(1)->affectedRows();
 	}
 
@@ -115,7 +116,7 @@ class NeevoRow implements ArrayAccess, Countable, IteratorAggregate {
 
 
 	public function getIterator(){
-		return new ArrayIterator(array_merge($this->data, $this->modified));
+		return new \ArrayIterator(array_merge($this->data, $this->modified));
 	}
 
 

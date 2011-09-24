@@ -1,5 +1,5 @@
 --TEST--
-NeevoRow Update/delete functionality
+Neevo\Row Update/delete functionality
 --FILE--
 <?php
 require_once __DIR__ . '/config.php';
@@ -12,7 +12,7 @@ $db->insert('software', array(
 
 $row = $db->select('software')->where('title', 'Debian Linux')->fetch();
 
-if($row instanceof NeevoRow){
+if($row instanceof Neevo\Row){
 
 	$row->url = 'http://debian.org';
 

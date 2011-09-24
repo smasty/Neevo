@@ -1,57 +1,51 @@
 <?php
 /**
- * Neevo - Tiny open-source database abstraction layer for PHP
- *
- * Copyright 2010-2011 Martin Srank (http://smasty.net)
+ * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
  *
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * @author	 Martin Srank (http://smasty.net)
- * @license	http://neevo.smasty.net/license MIT license
- * @link    	 http://neevo.smasty.net/
+ * Copyright (c) 2011 Martin Srank (http://smasty.net)
  *
  */
 
+namespace Neevo\Drivers;
+
+use Neevo;
+
 
 /**
- * Neevo SQLite 2 driver (PHP extension 'sqlite')
+ * Neevo SQLite 3 driver (PHP extension 'sqlite3')
  *
  * Driver configuration:
  *  - database (or file)
  *  - memory (bool) => use an in-memory database (overrides 'database')
  *  - charset => Character encoding to set (defaults to utf-8)
  *  - dbcharset => Database character encoding (will be converted to 'charset')
- *  - persistent (bool) => Try to find a persistent link
- *  - unbuffered (bool) => Sends query without fetching and buffering the result
  *
  *  - updateLimit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
- *  - resource (type resource) => Existing SQLite 2 link
- *  - lazy, table_prefix... => see NeevoConnection
+ *  - resource (instance of SQLite3) => Existing SQLite 3 link
+ *  - lazy, table_prefix => see Neevo\Connection
+ *
+ * Since SQLite 3 only allows unbuffered queries, number of result rows and seeking
+ * is not supported for this driver.
  *
  * @author Martin Srank
- * @package Neevo\Drivers
  */
-class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
+class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 
-
-	/** @var string */
-	private $charset;
 
 	/** @var string */
 	private $dbCharset;
 
+	/** @var string */
+	private $charset;
+
 	/** @var bool */
 	private $updateLimit;
 
-	/** @var resource */
+	/** @var SQLite3Result */
 	private $resource;
-
-	/** @var bool */
-	private $unbuffered;
-
-	/** @var bool */
-	private $persistent;
 
 	/** @var int */
 	private $affectedRows;
@@ -63,12 +57,12 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws NeevoDriverException
+	 * @throws Neevo\DriverException
 	 */
-	public function __construct(NeevoBaseStmt $statement = null){
-		if(!extension_loaded("sqlite"))
-			throw new NeevoDriverException("Cannot instantiate Neevo SQLite driver - PHP extension 'sqlite' not loaded.");
-		if($statement instanceof NeevoBaseStmt)
+	public function __construct(Neevo\BaseStatement $statement = null){
+		if(!extension_loaded("sqlite3"))
+			throw new Neevo\DriverException("Cannot instantiate Neevo SQLite 3 driver - PHP extension 'sqlite3' not loaded.");
+		if($statement instanceof Neevo\BaseStatement)
 			parent::__construct($statement);
 	}
 
@@ -77,20 +71,18 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	 * Create connection to database.
 	 * @param array $config Configuration options
 	 * @return void
-	 * @throws NeevoException
+	 * @throws Neevo\NeevoException
 	 */
 	public function connect(array $config){
-		NeevoConnection::alias($config, 'database', 'file');
-		NeevoConnection::alias($config, 'updateLimit', 'update_limit');
+		//Neevo\Connection::alias($config, 'database', 'file');
+		Neevo\Connection::alias($config, 'updateLimit', 'update_limit');
 
 		$defaults = array(
 			'memory' => false,
 			'resource' => null,
 			'updateLimit' => false,
 			'charset' => 'UTF-8',
-			'dbcharset' => 'UTF-8',
-			'persistent' => false,
-			'unbuffered' => false
+			'dbcharset' => 'UTF-8'
 		);
 
 		$config += $defaults;
@@ -99,15 +91,18 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 			$config['database'] = ':memory:';
 
 		// Connect
-		if(is_resource($config['resource']))
+		if($config['resource'] instanceof \SQLite3)
 			$connection = $config['resource'];
-		elseif($config['persistent'])
-			$connection = @sqlite_popen($config['database'], 0666, $error);
-		else
-			$connection = @sqlite_open($config['database'], 0666, $error);
+		else{
+			try{
+				$connection = new \SQLite3($config['database']);
+			} catch(Exception $e){
+					throw new Neevo\NeevoException($e->getMessage(), $e->getCode());
+			}
+		}
 
-		if(!is_resource($connection))
-			throw new NeevoException("Opening database file '$config[database]' failed.");
+		if(!($connection instanceof \SQLite3))
+			throw new Neevo\NeevoException("Opening database file '$config[database]' failed.");
 
 		$this->resource = $connection;
 		$this->updateLimit = (bool) $config['updateLimit'];
@@ -117,9 +112,6 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 		$this->charset = $config['charset'];
 		if(strcasecmp($this->dbCharset, $this->charset) === 0)
 			$this->dbCharset = $this->charset = null;
-
-		$this->unbuffered = $config['unbuffered'];
-		$this->persistent = $config['persistent'];
 	}
 
 
@@ -128,14 +120,16 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	 * @return void
 	 */
 	public function closeConnection(){
-		if(!$this->persistent && $this->resource !== null)
-			@sqlite_close($this->resource);
+		$this->resource->close();
 	}
 
 
+
 	/**
-	 * Free memory used by given result set.
-	 * @param resource $resultSet
+	 * Free memory used by given result.
+	 *
+	 * Neevo\Result automatically NULLs the resource, so this is not necessary.
+	 * @param SQLite3Result $resultSet
 	 * @return bool
 	 */
 	public function freeResultSet($resultSet){
@@ -146,8 +140,8 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	/**
 	 * Execute given SQL statement.
 	 * @param string $queryString
-	 * @return resource|bool
-	 * @throws NeevoException
+	 * @return SQLite3Result|bool
+	 * @throws Neevo\NeevoException
 	 */
 	public function runQuery($queryString){
 
@@ -155,15 +149,12 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 		if($this->dbCharset !== null)
 			$queryString = iconv($this->charset, $this->dbCharset . '//IGNORE', $queryString);
 
-		if($this->unbuffered)
-			$result = @sqlite_unbuffered_query($this->resource, $queryString, null, $error);
-		else
-			$result = @sqlite_query($this->resource, $queryString, null, $error);
+		$result = $this->resource->query($queryString);
 
-		if($error && $result === false)
-			throw new NeevoException("Query failed. $error", sqlite_last_error($this->resource), $queryString);
+		if($result === false)
+			throw new Neevo\NeevoException($this->resource->lastErrorMsg(), $this->resource->lastErrorCode(), $queryString);
 
-		$this->affectedRows = @sqlite_changes($this->resource);
+		$this->affectedRows = $this->resource->changes();
 		return $result;
 	}
 
@@ -174,7 +165,7 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	 * @return void
 	 */
 	public function beginTransaction($savepoint = null){
-		$this->runQuery('BEGIN');
+		$this->runQuery($savepoint ? "SAVEPOINT $savepoint" : 'BEGIN');
 	}
 
 
@@ -184,7 +175,7 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	 * @return void
 	 */
 	public function commit($savepoint = null){
-		$this->runQuery('COMMIT');
+		$this->runQuery($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
 	}
 
 
@@ -194,31 +185,27 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	 * @return void
 	 */
 	public function rollback($savepoint = null){
-		$this->runQuery('ROLLBACK');
+		$this->runQuery($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
 	}
 
 
 	/**
 	 * Fetch row from given result set as an associative array.
-	 * @param resource $resultSet
+	 * @param SQLite3Result $resultSet
 	 * @return array
 	 */
 	public function fetch($resultSet){
-		$row = @sqlite_fetch_array($resultSet, SQLITE_ASSOC);
-		if($row){
-			$charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
+		$row = $resultSet->fetchArray(SQLITE3_ASSOC);
+		$charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
 
+		if($row){
 			$fields = array();
-			foreach($row as $key => $val){
+			foreach($row as $key=>$val){
 				if($charset !== null && is_string($val))
 					$val = iconv($this->dbcharset, $charset, $val);
-				$key = str_replace(array('[', ']'), '', $key);
-				$pos = strpos($key, '.');
-				if($pos !== false)
-					$key = substr($key, $pos + 1);
-				$fields[$key] = $val;
+				$fields[str_replace(array('[', ']'), '', $key)] = $val;
 			}
-			$row = $fields;
+			return $fields;
 		}
 		return $row;
 	}
@@ -226,15 +213,15 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 
 	/**
 	 * Move internal result pointer.
-	 * @param resource $resultSet
+	 *
+	 * Not supported because of unbuffered queries.
+	 * @param SQLite3Result $resultSet
 	 * @param int $offset
 	 * @return bool
-	 * @throws NeevoDriverException
+	 * @throws Neevo\DriverException
 	 */
 	public function seek($resultSet, $offset){
-		if($this->unbuffered)
-			throw new NeevoDriverException('Cannot seek on unbuffered result.');
-		return @sqlite_seek($resultSet, $offset);
+		throw new Neevo\DriverException('Cannot seek on unbuffered result.');
 	}
 
 
@@ -243,35 +230,35 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	 * @return int
 	 */
 	public function getInsertId(){
-		return @sqlite_last_insert_rowid($this->resource);
+		return $this->resource->lastInsertRowID();
 	}
 
 
 	/**
 	 * Randomize result order.
-	 * @param NeevoBaseStmt $statement
+	 * @param Neevo\BaseStatement $tatement
 	 * @return void
 	 */
-	public function randomizeOrder(NeevoBaseStmt $statement){
+	public function randomizeOrder(Neevo\BaseStatement $statement){
 		$statement->order('RANDOM()');
 	}
 
 
 	/**
 	 * Get the number of rows in the given result set.
-	 * @param resource $resultSet
+	 *
+	 * Not supported because of unbuffered queries.
+	 * @param SQLite3Result $resultSet
 	 * @return int|FALSE
-	 * @throws NeevoDriverException
+	 * @throws Neevo\DriverException
 	 */
 	public function getNumRows($resultSet){
-		if($this->unbuffered)
-			throw new NeevoDriverException('Cannot count rows on unbuffered result.');
-		return @sqlite_num_rows($resultSet);
+		throw new Neevo\DriverException('Cannot count rows on unbuffered result.');
 	}
 
 
 	/**
-	 * Get the number of affected rows in previous operation.
+	 * Get the umber of affected rows in previous operation.
 	 * @return int
 	 */
 	public function getAffectedRows(){
@@ -283,26 +270,28 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	 * Escape given value.
 	 * @param mixed $value
 	 * @param string $type
+	 * @throws \InvalidArgumentException
 	 * @return mixed
-	 * @throws InvalidArgumentException
 	 */
 	public function escape($value, $type){
 		switch($type){
-			case Neevo::BOOL:
+			case Neevo\Manager::BOOL:
 				return $value ? 1 :0;
 
-			case Neevo::TEXT:
-			case Neevo::BINARY:
-				return "'". sqlite_escape_string($value) ."'";
+			case Neevo\Manager::TEXT:
+				return "'". $this->resource->escapeString($value) ."'";
 
-			case Neevo::IDENTIFIER:
+			case Neevo\Manager::IDENTIFIER:
 				return str_replace('[*]', '*', '[' . str_replace('.', '].[', $value) . ']');
 
-			case Neevo::DATETIME:
-				return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
+			case Neevo\Manager::BINARY:
+				return "X'" . bin2hex((string) $value) . "'";
+
+			case Neevo\Manager::DATETIME:
+				return ($value instanceof \DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
 
 			default:
-				throw new InvalidArgumentException('Unsupported data type.');
+				throw new \InvalidArgumentException('Unsupported data type');
 				break;
 		}
 	}
@@ -313,12 +302,12 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
 	public function unescape($value, $type){
-		if($type === Neevo::BINARY)
+		if($type === Neevo\Manager::BINARY)
 			return $value;
-		throw new InvalidArgumentException('Unsupported data type.');
+		throw new \InvalidArgumentException('Unsupported data type.');
 	}
 
 
@@ -354,7 +343,7 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 
 	/**
 	 * Get types of columns in given result set.
-	 * @param resource $resultSet
+	 * @param SQLite3Result $resultSet
 	 * @param string $table
 	 * @return array
 	 */
@@ -363,12 +352,14 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 			return array();
 		if(isset($this->tblData[$table]))
 			$sql = $this->tblData[$table];
-		else
+		else{
 			$q = $this->runQuery("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
 			$r = $this->fetch($q);
-			if($r === false)
+			if($r === false){
 				return array();
+			}
 			$this->tblData[$table] = $sql = $r['sql'];
+		}
 		$sql = explode("\n", $sql);
 
 		$cols = array();
@@ -382,7 +373,7 @@ class NeevoDriverSQLite2 extends NeevoParser implements INeevoDriver {
 	}
 
 
-	/*  ************  NeevoParser overrides  ************  */
+	/*  ************  Neevo\Parser overrides  ************  */
 
 
 	/**

@@ -9,6 +9,8 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
  * Interface implemented by all Neevo drivers.
@@ -16,26 +18,25 @@
  * All Neevo drivers **must** implement this interface, not only reproduce all it's
  * methods, or they won't be recognised as valid drivers.
  *
- * If something is not implemented, the method **must** throw NeevoImplementationException.
+ * If something is not implemented, the method **must** throw Neevo\ImplementationException.
  * The exception will be catched and Neevo will decide, what to do next.
  *
  * If something is not supported by the driver (e.g. number of result rows on unbuffered queries)
- * the driver should throw NeevoDriverException.
+ * the driver should throw Neevo\DriverException.
  *
  * When the driver needs to rewrite default output of SQL commands, it **must**
- * extend **NeevoParser** class. For proper use, see
- * "source of **NeevoParser** class":./source-neevo.NeevoParser.php.html.
+ * extend **Neevo\Parser** class. For proper use, see
+ * "source of **Neevo\Parser** class":./source-neevo.Neevo.Parser.php.html.
  *
  * @author Martin Srank
- * @package Neevo\Drivers
  */
-interface INeevoDriver {
+interface IDriver {
 
 
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws NeevoDriverException
+	 * @throws DriverException
 	 */
 	public function __construct();
 
@@ -121,10 +122,10 @@ interface INeevoDriver {
 
 	/**
 	 * Randomize result order.
-	 * @param NeevoBaseStmt $statement
+	 * @param BaseStatement $statement
 	 * @return void
 	 */
-	public function randomizeOrder(NeevoBaseStmt $statement);
+	public function randomizeOrder(BaseStatement $statement);
 
 
 	/**

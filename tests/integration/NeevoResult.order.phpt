@@ -6,8 +6,8 @@ require_once __DIR__ . '/config.php';
 
 foreach(array(
 
-	array(':id', Neevo::ASC),
-	array(':id', Neevo::DESC),
+	array(':id', Neevo\Manager::ASC),
+	array(':id', Neevo\Manager::DESC),
 	array(array(
 		':author_id' => 'DESC',
 		':url' => null), null),

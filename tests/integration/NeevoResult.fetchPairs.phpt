@@ -1,5 +1,5 @@
 --TEST--
-NeevoResult->fetchPairs() key=>value test, key=>row test.
+Neevo\Result->fetchPairs() key=>value test, key=>row test.
 --FILE--
 <?php
 require_once __DIR__ . '/config.php';

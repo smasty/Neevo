@@ -2,16 +2,16 @@
 
 
 /**
- * Tests for NeevoObserverMap.
+ * Tests for Neevo\ObserverMap.
  */
-class NeevoObserverMapTest extends PHPUnit_Framework_TestCase {
+class ObserverMapTest extends PHPUnit_Framework_TestCase {
 
-	/** @var NeevoObserverMap */
+	/** @var Neevo\ObserverMap */
 	private $map;
 
 
 	protected function setUp(){
-		$this->map = new NeevoObserverMap;
+		$this->map = new Neevo\ObserverMap;
 	}
 
 

@@ -9,20 +9,20 @@
  *
  */
 
+namespace Neevo;
 
 /**
  * Neevo statement abstract base ancestor.
  *
- * @method NeevoBaseStmt and($expr, $value = true)
- * @method NeevoBaseStmt or($expr, $value = true)
- * @method NeevoBaseStmt if($condition)
- * @method NeevoBaseStmt else()
- * @method NeevoBaseStmt end()
+ * @method BaseStatement and($expr, $value = true)
+ * @method BaseStatement or($expr, $value = true)
+ * @method BaseStatement if($condition)
+ * @method BaseStatement else()
+ * @method BaseStatement end()
  *
  * @author Martin Srank
- * @package Neevo
  */
-abstract class NeevoBaseStmt implements INeevoObservable {
+abstract class BaseStatement implements IObservable {
 
 
 	/** @var string */
@@ -49,21 +49,21 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 	/** @var bool */
 	protected $performed;
 
-	/** @var NeevoConnection */
+	/** @var Connection */
 	protected $connection;
 
 	/** @var array Event type conversion table */
 	protected static $eventTable = array(
-		Neevo::STMT_SELECT => INeevoObserver::SELECT,
-		Neevo::STMT_INSERT => INeevoObserver::INSERT,
-		Neevo::STMT_UPDATE => INeevoObserver::UPDATE,
-		Neevo::STMT_DELETE => INeevoObserver::DELETE
+		Manager::STMT_SELECT => IObserver::SELECT,
+		Manager::STMT_INSERT => IObserver::INSERT,
+		Manager::STMT_UPDATE => IObserver::UPDATE,
+		Manager::STMT_DELETE => IObserver::DELETE
 	);
 
 	/** @var array */
 	protected $subqueries = array();
 
-	/** @var NeevoObserverMap */
+	/** @var Neevo\ObserverMap */
 	protected $observers;
 
 	/** @var array */
@@ -72,12 +72,12 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 
 	/**
 	 * Create statement.
-	 * @param NeevoConnection $connection
+	 * @param Connection $connection
 	 * @return void
 	 */
-	public function __construct(NeevoConnection $connection){
+	public function __construct(Connection $connection){
 		$this->connection = $connection;
-		$this->observers = new NeevoObserverMap;
+		$this->observers = new ObserverMap;
 	}
 
 
@@ -100,10 +100,10 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 
 
 	/**
-	 * @return NeevoBaseStmt fluent interface
+	 * @return BaseStatement fluent interface
 	 * @internal
-	 * @throws BadMethodCallException
-	 * @throws InvalidArgumentException
+	 * @throws \BadMethodCallException
+	 * @throws \InvalidArgumentException
 	 */
 	public function __call($name, $args){
 		$name = strtolower($name);
@@ -126,7 +126,7 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 
 			// Parameter counts
 			if(count($args) < 1 && $name == 'if')
-				throw new InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
+				throw new \InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
 
 			$conds = & $this->stmtConditions;
 			if($name == 'if')
@@ -139,7 +139,7 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 			return $this;
 
 		}
-		throw new BadMethodCallException('Call to undefined method '.__CLASS__."::$name()");
+		throw new \BadMethodCallException('Call to undefined method '.__CLASS__."::$name()");
 	}
 
 
@@ -154,12 +154,12 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 	 * Corresponding operator will be used.
 	 *
 	 * Accepts associative array in field => value form.
-	 * @param string|array|Traversable $expr
+	 * @param string|array|\Traversable $expr
 	 * @param mixed $value
-	 * @return NeevoBaseStmt fluent interface
+	 * @return BaseStatement fluent interface
 	 */
 	public function where($expr, $value = true){
-		if((is_array($expr) || $expr instanceof Traversable) && $value === true){
+		if((is_array($expr) || $expr instanceof \Traversable) && $value === true){
 			foreach($expr as $key => $val)
 				$this->where($key, $val);
 			return $this;
@@ -206,9 +206,9 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 
 	/**
 	 * Define order. More calls append rules.
-	 * @param string|array|Traversable $rule
-	 * @param string $order Use constants - Neevo::ASC, Neevo::DESC
-	 * @return NeevoBaseStmt fluent interface
+	 * @param string|array|\Traversable $rule
+	 * @param string $order Use constants - Manager::ASC, Manager::DESC
+	 * @return BaseStatement fluent interface
 	 */
 	public function order($rule, $order = null){
 		if($this->validateConditions())
@@ -216,7 +216,7 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 
 		$this->resetState();
 
-		if(is_array($rule) || $rule instanceof Traversable){
+		if(is_array($rule) || $rule instanceof \Traversable){
 			foreach($rule as $key => $val){
 				$this->order($key, $val);
 			}
@@ -232,7 +232,7 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 	 * Set LIMIT and OFFSET clauses.
 	 * @param int $limit
 	 * @param int $offset
-	 * @return NeevoBaseStmt fluent interface
+	 * @return BaseStatement fluent interface
 	 */
 	public function limit($limit, $offset = null){
 		if($this->validateConditions())
@@ -240,14 +240,14 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 
 		$this->resetState();
 		$this->limit = array($limit,
-			($offset !== null && $this->type === Neevo::STMT_SELECT) ? $offset : null);
+			($offset !== null && $this->type === Manager::STMT_SELECT) ? $offset : null);
 		return $this;
 	}
 
 
 	/**
 	 * Randomize order. Removes any other order clause.
-	 * @return NeevoBaseStmt fluent interface
+	 * @return BaseStatement fluent interface
 	 */
 	public function rand(){
 		if($this->validateConditions())
@@ -265,10 +265,10 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 	/**
 	 * Print out syntax highlighted statement.
 	 * @param bool $return
-	 * @return string|NeevoBaseStmt fluent interface
+	 * @return string|Neevo\BaseStatement fluent interface
 	 */
 	public function dump($return = false){
-		$sql = PHP_SAPI === 'cli' ? $this->parse() . "\n" : Neevo::highlightSql($this->parse());
+		$sql = PHP_SAPI === 'cli' ? $this->parse() . "\n" : Manager::highlightSql($this->parse());
 		if(!$return)
 			echo $sql;
 		return $return ? $sql : $this;
@@ -293,7 +293,7 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 		$this->resultSet = $query;
 
 		$this->notifyObservers(isset($this->type)
-			? self::$eventTable[$this->type] : INeevoObserver::QUERY);
+			? self::$eventTable[$this->type] : IObserver::QUERY);
 
 		return $query;
 	}
@@ -315,7 +315,7 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 	 */
 	public function parse(){
 		if($this->hasCircularReferences($this))
-			throw new RuntimeException('Circular reference found, aborting.');
+			throw new \RuntimeException('Circular reference found, aborting.');
 
 		$this->connection->connect();
 
@@ -325,26 +325,26 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 	}
 
 
-	/*	 * ***********  INeevoObservable implementation  ************  */
+	/*	 * ***********  IObservable implementation  ************  */
 
 
 	/**
 	 * Attach given observer to given event.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(INeevoObserver $observer, $event){
+	public function attachObserver(IObserver $observer, $event){
 		$this->observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detach given observer.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @return void
 	 */
-	public function detachObserver(INeevoObserver $observer){
+	public function detachObserver(IObserver $observer){
 		$this->observers->detach($observer);
 	}
 
@@ -459,7 +459,7 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 
 	/**
 	 * Get the connection instance.
-	 * @return NeevoConnection
+	 * @return Connection
 	 */
 	public function getConnection(){
 		return $this->connection;
@@ -494,7 +494,7 @@ abstract class NeevoBaseStmt implements INeevoObservable {
 
 	/**
 	 * Check the query tree for circular references.
-	 * @param NeevoBaseStmt $parent
+	 * @param BaseStatement $parent
 	 * @param array $visited
 	 * @return bool True if circular reference found.
 	 */

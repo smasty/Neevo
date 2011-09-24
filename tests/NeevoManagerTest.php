@@ -11,7 +11,7 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 
 
 	protected function setUp(){
-		$this->neevo = new Neevo('driver=Dummy&lazy=1');
+		$this->neevo = new Neevo\Manager('driver=Dummy&lazy=1');
 	}
 
 
@@ -21,11 +21,11 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testConnect(){
-		$neevo = new Neevo('driver=Dummy', new NeevoCacheSession);
-		$this->assertInstanceOf('NeevoDriverDummy', $neevo->getConnection()->getDriver());
-		$this->assertInstanceOf('NeevoCacheSession', $neevo->getConnection()->getCache());
+		$neevo = new Neevo\Manager('driver=Dummy', new Neevo\Cache\SessionStorage);
+		$this->assertInstanceOf('Neevo\\Drivers\\DummyDriver', $neevo->getConnection()->getDriver());
+		$this->assertInstanceOf('Neevo\\Cache\\SessionStorage', $neevo->getConnection()->getCache());
 
-		$r = new ReflectionProperty('NeevoConnection', 'observers');
+		$r = new ReflectionProperty('Neevo\Connection', 'observers');
 		$r->setAccessible(true);
 		$this->assertTrue($r->getValue($neevo->getConnection())->contains($neevo));
 	}
@@ -33,28 +33,37 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 
 	public function testBeginTransaction(){
 		$this->neevo->begin();
-		$this->assertEquals(NeevoDriverDummy::TRANSACTION_OPEN, $this->neevo->getConnection()->getDriver()->transactionState());
+		$this->assertEquals(
+			Neevo\Drivers\DummyDriver::TRANSACTION_OPEN,
+			$this->neevo->getConnection()->getDriver()->transactionState()
+		);
 	}
 
 
 	public function testCommitTransaction(){
 		$this->neevo->begin();
 		$this->neevo->commit();
-		$this->assertEquals(NeevoDriverDummy::TRANSACTION_COMMIT, $this->neevo->getConnection()->getDriver()->transactionState());
+		$this->assertEquals(
+			Neevo\Drivers\DummyDriver::TRANSACTION_COMMIT,
+			$this->neevo->getConnection()->getDriver()->transactionState()
+		);
 	}
 
 
 	public function testRollbackTransaction(){
 		$this->neevo->begin();
 		$this->neevo->rollback();
-		$this->assertEquals(NeevoDriverDummy::TRANSACTION_ROLLBACK, $this->neevo->getConnection()->getDriver()->transactionState());
+		$this->assertEquals(
+			Neevo\Drivers\DummyDriver::TRANSACTION_ROLLBACK,
+			$this->neevo->getConnection()->getDriver()->transactionState()
+		);
 	}
 
 
 	public function testSelect(){
 		$res = $this->neevo->select($c = 'col', $t = 'table');
-		$this->assertInstanceOf('NeevoResult', $res);
-		$this->assertEquals(Neevo::STMT_SELECT, $res->getType());
+		$this->assertInstanceOf('Neevo\Result', $res);
+		$this->assertEquals(Neevo\Manager::STMT_SELECT, $res->getType());
 		$this->assertEquals(array($c), $res->getColumns());
 		$this->assertEquals($t, $res->getSource());
 		$this->assertTrue($res->getConnection() === $this->neevo->getConnection());
@@ -63,8 +72,8 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 
 	public function testInsert(){
 		$ins = $this->neevo->insert($t = 'table', $v = array('val1', 'val2'));
-		$this->assertInstanceOf('NeevoStmt', $ins);
-		$this->assertEquals(Neevo::STMT_INSERT, $ins->getType());
+		$this->assertInstanceOf('Neevo\Statement', $ins);
+		$this->assertEquals(Neevo\Manager::STMT_INSERT, $ins->getType());
 		$this->assertEquals($t, $ins->getTable());
 		$this->assertEquals($v, $ins->getValues());
 	}
@@ -72,8 +81,8 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 
 	public function testUpdate(){
 		$upd = $this->neevo->update($t = 'table', $d = array('val1', 'val2'));
-		$this->assertInstanceOf('NeevoStmt', $upd);
-		$this->assertEquals(Neevo::STMT_UPDATE, $upd->getType());
+		$this->assertInstanceOf('Neevo\Statement', $upd);
+		$this->assertEquals(Neevo\Manager::STMT_UPDATE, $upd->getType());
 		$this->assertEquals($t, $upd->getTable());
 		$this->assertEquals($d, $upd->getValues());
 	}
@@ -81,8 +90,8 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 
 	public function testDelete(){
 		$del = $this->neevo->delete($t = 'table');
-		$this->assertEquals(Neevo::STMT_DELETE, $del->getType());
-		$this->assertInstanceOf('NeevoStmt', $del);
+		$this->assertEquals(Neevo\Manager::STMT_DELETE, $del->getType());
+		$this->assertInstanceOf('Neevo\Statement', $del);
 		$this->assertEquals($t, $del->getTable());
 	}
 
@@ -109,7 +118,7 @@ class NeevoTest extends PHPUnit_Framework_TestCase {
 	public function testHighlightSql(){
 		$this->assertEquals(
 			"<pre style=\"color:#555\" class=\"sql-dump\"><strong style=\"color:#e71818\">SELECT</strong> * \n<strong style=\"color:#e71818\">FROM</strong> `table` \n<strong style=\"color:#e71818\">WHERE</strong> <strong style=\"color:#d59401\">RAND</strong>() = <em style=\"color:#008000\">'John Doe'</em>; <em style=\"color:#999\">/* comment */</em></pre>\n",
-			$v=Neevo::highlightSql("SELECT * FROM `table` WHERE RAND() = 'John Doe'; /* comment */")
+			$v=Neevo\Manager::highlightSql("SELECT * FROM `table` WHERE RAND() = 'John Doe'; /* comment */")
 		);
 	}
 

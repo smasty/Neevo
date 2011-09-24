@@ -6,7 +6,7 @@ require_once __DIR__ . '/config.php';
 
 foreach($db->select('author')
 			->leftJoin(':software', ':author.id = :software.author_id')
-			->order(':software.id', Neevo::ASC)
+			->order(':software.id', Neevo\Manager::ASC)
 		as $r){
 	echo "$r->name - $r->title\n";
 }

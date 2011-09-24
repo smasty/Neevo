@@ -2,21 +2,21 @@
 
 
 /**
- * Tests for NeevoRow.
+ * Tests for Neevo\Row.
  */
-class NeevoRowTest extends PHPUnit_Framework_TestCase {
+class RowTest extends PHPUnit_Framework_TestCase {
 
 
-	/** @var NeevoResult */
+	/** @var Neevo\Result */
 	private $result;
 
-	/** @var NeevoRow */
+	/** @var Neevo\Row */
 	private $row;
 
 
 	protected function setUp(){
-		$this->result = new NeevoResult(new NeevoConnection('driver=Dummy'), 'author');
-		$this->row = new NeevoRow($this->result->getConnection()->getDriver()->getRow(0), $this->result);
+		$this->result = new Neevo\Result(new Neevo\Connection('driver=Dummy'), 'author');
+		$this->row = new Neevo\Row($this->result->getConnection()->getDriver()->getRow(0), $this->result);
 	}
 
 

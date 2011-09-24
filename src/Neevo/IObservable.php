@@ -9,30 +9,31 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
  * Neevo observable interface.
  * @author Martin Srank
- * @package Neevo
  */
-interface INeevoObservable {
+interface IObservable {
 
 
 	/**
 	 * Attach given observer to given event.
-	 * @param INeevoObserver $observer
+	 * @param Neevo\IObserver $observer
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(INeevoObserver $observer, $event);
+	public function attachObserver(IObserver $observer, $event);
 
 
 	/**
 	 * Detach given observer.
-	 * @param INeevoObserver $observer
+	 * @param Neevo\IObserver $observer
 	 * @return void
 	 */
-	public function detachObserver(INeevoObserver $observer);
+	public function detachObserver(IObserver $observer);
 
 
 	/**

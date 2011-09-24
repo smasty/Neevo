@@ -9,19 +9,20 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
  * Main Neevo exception.
  * @author Martin Srank
- * @package Neevo
  */
-class NeevoException extends Exception implements INeevoObservable {
+class NeevoException extends \Exception implements IObservable {
 
 
 	/** @var string */
 	protected $sql;
 
-	/** @var NeevoObserverMap */
+	/** @var ObserverMap */
 	protected static $observers;
 
 
@@ -33,12 +34,12 @@ class NeevoException extends Exception implements INeevoObservable {
 	 * @param Exception $previous
 	 * @return void
 	 */
-	public function __construct($message = '', $code = 0, $sql = null, Exception $previous = null){
+	public function __construct($message = '', $code = 0, $sql = null, \Exception $previous = null){
 
 		parent::__construct($message, (int) $code, $previous);
 		$this->sql = $sql;
-		self::$observers = new NeevoObserverMap;
-		$this->notifyObservers(INeevoObserver::EXCEPTION);
+		self::$observers = new ObserverMap;
+		$this->notifyObservers(IObserver::EXCEPTION);
 	}
 
 
@@ -59,27 +60,26 @@ class NeevoException extends Exception implements INeevoObservable {
 		return $this->sql;
 	}
 
-
-	/*  ============  Implementation of INeevoObservable  ============  */
+	/*  ============  Implementation of IObservable  ============  */
 
 
 	/**
 	 * Attach given observer to given event.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(INeevoObserver $observer, $event){
+	public function attachObserver(IObserver $observer, $event){
 		self::$observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detach given observer.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @return void
 	 */
-	public function detachObserver(INeevoObserver $observer){
+	public function detachObserver(IObserver $observer){
 		self::$observers->detach($observer);
 	}
 
@@ -98,21 +98,3 @@ class NeevoException extends Exception implements INeevoObservable {
 
 
 }
-
-
-
-/**
- * Exception for features not implemented by the driver.
- * @author Martin Srank
- * @package Neevo\Drivers
- */
-class NeevoImplementationException extends NeevoException {}
-
-
-
-/**
- * Neevo driver exception.
- * @author Martin Srank
- * @package Neevo\Drivers
- */
-class NeevoDriverException extends NeevoException {}

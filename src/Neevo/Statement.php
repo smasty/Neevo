@@ -9,13 +9,14 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
  * Class for data manipulation statements (INSERT, UPDATE, DELETE)
  * @author Martin Srank
- * @package Neevo
  */
-class NeevoStmt extends NeevoBaseStmt {
+class Statement extends BaseStatement {
 
 
 	/** @var array */
@@ -30,17 +31,17 @@ class NeevoStmt extends NeevoBaseStmt {
 
 	/**
 	 * Create UPDATE statement.
-	 * @param NeevoConnection $connection
+	 * @param Connection $connection
 	 * @param string $table
-	 * @param array|Traversable $data
-	 * @return NeevoStmt fluent interface
+	 * @param array|\Traversable $data
+	 * @return Statement fluent interface
 	 */
-	public static function createUpdate(NeevoConnection $connection, $table, $data){
-		if(!($data instanceof Traversable || (is_array($data) && !empty($data))))
-			throw new InvalidArgumentException('Data must be a non-empty array or Traversable.');
+	public static function createUpdate(Connection $connection, $table, $data){
+		if(!($data instanceof \Traversable || (is_array($data) && !empty($data))))
+			throw new \InvalidArgumentException('Data must be a non-empty array or Traversable.');
 
 		$obj = new self($connection);
-		$obj->type = Neevo::STMT_UPDATE;
+		$obj->type = Manager::STMT_UPDATE;
 		$obj->source = $table;
 		$obj->values = $data instanceof Traversable ? iterator_to_array($data) : $data;
 		return $obj;
@@ -49,32 +50,32 @@ class NeevoStmt extends NeevoBaseStmt {
 
 	/**
 	 * Create INSERT statement.
-	 * @param NeevoConnection $connection
+	 * @param Connection $connection
 	 * @param string $table
-	 * @param array $values
-	 * @return NeevoStmt fluent interface
+	 * @param array|\Traversable $values
+	 * @return Statement fluent interface
 	 */
-	public static function createInsert(NeevoConnection $connection, $table, array $values){
-		if(!($values instanceof Traversable || (is_array($values) && !empty($values))))
-			throw new InvalidArgumentException('Values must be a non-empty array or Traversable.');
+	public static function createInsert(Connection $connection, $table, array $values){
+		if(!($values instanceof \Traversable || (is_array($values) && !empty($values))))
+			throw new \InvalidArgumentException('Values must be a non-empty array or Traversable.');
 
 		$obj = new self($connection);
-		$obj->type = Neevo::STMT_INSERT;
+		$obj->type = Manager::STMT_INSERT;
 		$obj->source = $table;
-		$obj->values = $values instanceof Traversable ? iterator_to_array($values) : $values;
+		$obj->values = $values instanceof \Traversable ? iterator_to_array($values) : $values;
 		return $obj;
 	}
 
 
 	/**
 	 * Create DELETE statement.
-	 * @param NeevoConnection $connection
+	 * @param Connection $connection
 	 * @param string $table
-	 * @return NeevoStmt fluent interface
+	 * @return Statement fluent interface
 	 */
-	public static function createDelete(NeevoConnection $connection, $table){
+	public static function createDelete(Connection $connection, $table){
 		$obj = new self($connection);
-		$obj->type = Neevo::STMT_DELETE;
+		$obj->type = Manager::STMT_DELETE;
 		$obj->source = $table;
 		return $obj;
 	}
@@ -85,7 +86,7 @@ class NeevoStmt extends NeevoBaseStmt {
 
 		try{
 			$this->affectedRows = $this->connection->getDriver()->getAffectedRows();
-		} catch(NeevoDriverException $e){
+		} catch(DriverException $e){
 			$this->affectedRows = false;
 		}
 
@@ -99,13 +100,13 @@ class NeevoStmt extends NeevoBaseStmt {
 	 * @throws NeevoException on non-INSERT statements.
 	 */
 	public function insertId(){
-		if($this->type !== Neevo::STMT_INSERT)
+		if($this->type !== Manager::STMT_INSERT)
 			throw new NeevoException(__METHOD__.' can be called only on INSERT statements.');
 
 		$this->performed || $this->run();
 		try{
 			return $this->connection->getDriver()->getInsertId();
-		} catch(NeevoImplemenationException $e){
+		} catch(ImplementationException $e){
 			return false;
 		}
 	}
@@ -118,7 +119,7 @@ class NeevoStmt extends NeevoBaseStmt {
 	public function affectedRows(){
 		$this->performed || $this->run();
 		if($this->affectedRows === false)
-			throw new NeevoDriverException('Affected rows are not supported by this driver.');
+			throw new DriverException('Affected rows are not supported by this driver.');
 		return $this->affectedRows;
 	}
 

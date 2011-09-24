@@ -2,47 +2,47 @@
 
 
 /**
- * Tests for NeevoLoader.
+ * Tests for Neevo\Loader.
  */
-class NeevoLoaderTest extends PHPUnit_Framework_TestCase {
+class LoaderTest extends PHPUnit_Framework_TestCase {
 
 
 	protected function setUp(){
-		NeevoLoader::getInstance()->unregister();
+		Neevo\Loader::getInstance()->unregister();
 	}
 
 
 	protected function tearDown(){
-		NeevoLoader::getInstance()->register();
+		Neevo\Loader::getInstance()->register();
 	}
 
 
 	public function testRegister(){
-		$cb = array(NeevoLoader::getInstance(), 'tryLoad');
+		$cb = array(Neevo\Loader::getInstance(), 'tryLoad');
 		$this->assertFalse(in_array($cb, spl_autoload_functions()));
-		NeevoLoader::getInstance()->register();
+		Neevo\Loader::getInstance()->register();
 		$this->assertTrue(in_array($cb, spl_autoload_functions()));
 	}
 
 
 	public function testUnregister(){
-		$cb = array(NeevoLoader::getInstance(), 'tryLoad');
+		$cb = array(Neevo\Loader::getInstance(), 'tryLoad');
 		$this->assertFalse(in_array($cb, spl_autoload_functions()));
-		NeevoLoader::getInstance()->register();
+		Neevo\Loader::getInstance()->register();
 		$this->assertTrue(in_array($cb, spl_autoload_functions()));
-		NeevoLoader::getInstance()->unregister();
+		Neevo\Loader::getInstance()->unregister();
 		$this->assertFalse(in_array($cb, spl_autoload_functions()));
 	}
 
 
 	public function testTryLoad(){
-		$this->assertTrue(NeevoLoader::getInstance()->tryLoad('Neevo'));
+		$this->assertTrue(Neevo\Loader::getInstance()->tryLoad('Neevo\\Manager'));
 	}
 
 
 	public function testTryLoadFailed(){
 		$this->assertFalse(class_exists($class = '__DummyClass', false));
-		$this->assertFalse(NeevoLoader::getInstance()->tryLoad($class));
+		$this->assertFalse(Neevo\Loader::getInstance()->tryLoad($class));
 	}
 
 

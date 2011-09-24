@@ -9,6 +9,8 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
  * Representation of database connection.
@@ -22,9 +24,8 @@
  * - rowClass => Name of class to use as a row class.
  *
  * @author Martin Srank
- * @package Neevo
  */
-class NeevoConnection implements INeevoObservable, ArrayAccess {
+class Connection implements IObservable, \ArrayAccess {
 
 
 	/** @var array */
@@ -33,51 +34,51 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	/** @var bool */
 	private $connected = false;
 
-	/** @var INeevoDriver */
+	/** @var IDriver */
 	private $driver;
 
 	/** @var string */
-	private $parser = 'NeevoParser';
+	private $parser = 'Neevo\\Parser';
 
-	/** @var NeevoObserverMap */
+	/** @var ObserverMap */
 	private $observers;
 
-	/** @var INeevoCache */
+	/** @var ICache */
 	private $cache;
 
 
 	/**
 	 * Establish a connection.
-	 * @param array|string|Traversable $config
-	 * @param INeevoCache $cache
+	 * @param array|string|\Traversable $config
+	 * @param ICache $cache
 	 * @return void
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
-	public function __construct($config, INeevoCache $cache = null){
-		$this->observers = new NeevoObserverMap;
+	public function __construct($config, ICache $cache = null){
+		$this->observers = new ObserverMap;
 
-		$this->cache = $cache !== null ? $cache : new NeevoCacheMemory;
+		$this->cache = $cache !== null ? $cache : new Cache\MemoryStorage;
 
 		// Parse config
 		if(is_string($config)){
 			parse_str($config, $config);
 
-		} elseif($config instanceof Traversable){
+		} elseif($config instanceof \Traversable){
 			$tmp = array();
 			foreach($config as $key => $val){
-				$tmp[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
+				$tmp[$key] = $val instanceof \Traversable ? iterator_to_array($val) : $val;
 			}
 			$config = $tmp;
 
 		} elseif(!is_array($config)){
-			throw new InvalidArgumentException('Configuration must be an array, string or Traversable.');
+			throw new \InvalidArgumentException('Configuration must be an array, string or Traversable.');
 		}
 
 		// Default values
 		$defaults = array(
-			'driver' => Neevo::$defaultDriver,
+			'driver' => Manager::$defaultDriver,
 			'lazy' => false,
-			'rowClass' => 'NeevoRow',
+			'rowClass' => 'Neevo\\Row',
 			'tablePrefix' => '',
 			'result' => array(
 				'detectTypes' => false,
@@ -119,11 +120,11 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	public function __destruct(){
 		try{
 			$this->driver->closeConnection();
-		} catch(NeevoImplementationException $e){
+		} catch(ImplementationException $e){
 
 		}
 
-		$this->notifyObservers(INeevoObserver::DISCONNECT);
+		$this->notifyObservers(IObserver::DISCONNECT);
 	}
 
 
@@ -137,7 +138,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 
 		$this->driver->connect($this->config);
 		$this->connected = true;
-		$this->notifyObservers(INeevoObserver::CONNECT);
+		$this->notifyObservers(IObserver::CONNECT);
 	}
 
 
@@ -164,7 +165,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 
 	/**
 	 * Get the current driver instance.
-	 * @return INeevoDriver
+	 * @return IDriver
 	 */
 	public function getDriver(){
 		return $this->driver;
@@ -182,7 +183,7 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 
 	/**
 	 * Get the current cache storage instance.
-	 * @return INeevoCache
+	 * @return ICache
 	 */
 	public function getCache(){
 		return $this->cache;
@@ -191,33 +192,33 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 
 	/**
 	 * Set the cache storage.
-	 * @param INeevoCache $cache
+	 * @param ICache $cache
 	 */
-	public function setCache(INeevoCache $cache){
+	public function setCache(ICache $cache){
 		$this->cache = $cache;
 	}
 
 
-	/*  ************  Implementation of INeevoObservable  ************  */
+	/*  ************  Implementation of IObservable  ************  */
 
 
 	/**
 	 * Attach given observer to given $event.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(INeevoObserver $observer, $event){
+	public function attachObserver(IObserver $observer, $event){
 		$this->observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detach given observer.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @return void
 	 */
-	public function detachObserver(INeevoObserver $observer){
+	public function detachObserver(IObserver $observer){
 		$this->observers->detach($observer);
 	}
 
@@ -291,27 +292,26 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * Set the driver and statement parser.
 	 * @param string $driver
 	 * @return void
-	 * @throws NeevoDriverException
+	 * @throws DriverException
 	 */
 	protected function setDriver($driver){
 		if(strcasecmp($driver, 'sqlite') === 0) // Backward compatibility
 			$driver = 'SQLite2';
 
-		$class = "NeevoDriver$driver";
+		$class = "Neevo\\Drivers\\{$driver}Driver";
 
 		if(!class_exists($class)){
-			$file = dirname(__FILE__) . '/drivers/' . strtolower($driver) . '.php';
-
+			$file = __DIR__ . '/Drivers/' . strtolower($driver) . '.php';
 			if(!file_exists($file))
-				throw new NeevoDriverException("$driver driver file ($file) does not exist.");
+				throw new DriverException("$driver driver file ($file) does not exist.");
 			if(is_readable($file))
 				include_once $file;
 			else
-				throw new NeevoDriverException("$driver driver file ($file) is not readable.");
+				throw new DriverException("$driver driver file ($file) is not readable.");
 
 		}
 		if(!$this->isDriver($class))
-			throw new NeevoDriverException("Class '$class' is not a valid Neevo driver class.");
+			throw new DriverException("Class '$class' is not a valid Neevo driver class.");
 
 		$this->driver = new $class;
 
@@ -327,12 +327,12 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 * @return bool
 	 */
 	protected function isDriver($class){
-		try{
-			$reflection = new ReflectionClass($class);
-			return $reflection->implementsInterface('INeevoDriver');
-		} catch(ReflectionException $e){
-			return false;
-		}
+		//try{
+			$reflection = new \ReflectionClass($class);
+			return $reflection->implementsInterface('Neevo\IDriver');
+		//} catch(\ReflectionException $e){
+		//	return false;
+		//}
 	}
 
 
@@ -343,9 +343,9 @@ class NeevoConnection implements INeevoObservable, ArrayAccess {
 	 */
 	protected function isParser($class){
 		try{
-			$reflection = new ReflectionClass($class);
-			return $reflection->isSubclassOf('NeevoParser');
-		} catch(ReflectionException $e){
+			$reflection = new \ReflectionClass($class);
+			return $reflection->isSubclassOf('Neevo\Parser');
+		} catch(\ReflectionException $e){
 			return false;
 		}
 	}

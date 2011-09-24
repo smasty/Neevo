@@ -9,13 +9,14 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
  * Neevo observer interface.
  * @author Martin Srank
- * @package Neevo
  */
-interface INeevoObserver {
+interface IObserver {
 
 	// Event types
 	const CONNECT = 2,
@@ -38,11 +39,11 @@ interface INeevoObserver {
 
 	/**
 	 * Receive update from observable.
-	 * @param INeevoObservable $observable
+	 * @param Neevo\IObservable $observable
 	 * @param int $event Event type
 	 * @return void
 	 */
-	public function updateStatus(INeevoObservable $observable, $event);
+	public function updateStatus(IObservable $observable, $event);
 
 
 }

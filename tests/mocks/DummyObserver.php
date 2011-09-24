@@ -4,13 +4,13 @@
 /**
  * Dummy Neevo observer.
  */
-class DummyObserver implements INeevoObserver {
+class DummyObserver implements Neevo\IObserver {
 
 
 	private $notified = false;
 
 
-	public function updateStatus(INeevoObservable $observable, $event){
+	public function updateStatus(Neevo\IObservable $observable, $event){
 		$this->notified = $event;
 	}
 

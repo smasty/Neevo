@@ -2,13 +2,13 @@
 
 
 /**
- * Tests for NeevoException additional features.
+ * Tests for Neevo\NeevoException additional features.
  */
 class NeevoExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testConstructor(){
-		$e = new NeevoException($m = 'error', $c = 0, $s = 'SELECT * FROM error', $p = new Exception);
+		$e = new Neevo\NeevoException($m = 'error', $c = 0, $s = 'SELECT * FROM error', $p = new Exception);
 		$this->assertEquals($m, $e->getMessage());
 		$this->assertEquals($c, $e->getCode());
 		$this->assertEquals($p, $e->getPrevious());
@@ -17,13 +17,13 @@ class NeevoExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testToString(){
-		$e = new NeevoException(null, 0, $sql = 'SELECT * FROM error');
+		$e = new Neevo\NeevoException(null, 0, $sql = 'SELECT * FROM error');
 		$this->assertContains("\nSQL: $sql", (string) $e);
 	}
 
 
 	public function testObservable(){
-		$e = new NeevoException;
+		$e = new Neevo\NeevoException;
 		$observer = new DummyObserver;
 
 		$e->attachObserver($observer, $event = DummyObserver::EXCEPTION);

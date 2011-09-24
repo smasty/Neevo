@@ -1,5 +1,5 @@
 --TEST--
-NeevoResult->fetchSingle()
+Neevo\Result->fetchSingle()
 --FILE--
 <?php
 require_once __DIR__ . '/config.php';

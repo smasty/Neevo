@@ -1,38 +1,35 @@
 <?php
 /**
- * Neevo - Tiny open-source database abstraction layer for PHP
- *
- * Copyright 2010-2011 Martin Srank (http://smasty.net)
+ * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
  *
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * @author   Martin Srank (http://smasty.net)
- * @license  http://neevo.smasty.net/license MIT license
- * @link      http://neevo.smasty.net/
+ * Copyright (c) 2011 Martin Srank (http://smasty.net)
  *
  */
+
+namespace Neevo;
 
 
 /**
  * Result set iterator.
  * @author Martin Srank
- * @package Neevo
  */
-class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
+class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 
 
 	/** @var int */
 	private $pointer;
 
-	/** @var NeevoResult */
+	/** @var Result */
 	private $result;
 
-	/** @var NeevoRow */
+	/** @var Row */
 	private $row;
 
 
-	public function __construct(NeevoResult $result){
+	public function __construct(Result $result){
 		$this->result = $result;
 	}
 
@@ -69,7 +66,7 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 
 	/**
 	 * Return the current row.
-	 * @return NeevoRow
+	 * @return Row
 	 */
 	public function current(){
 		return $this->row;
@@ -88,7 +85,7 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 	/**
 	 * Implementation of Countable.
 	 * @return int
-	 * @throws NeevoDriverException on unbuffered result.
+	 * @throws DriverException on unbuffered result.
 	 */
 	public function count(){
 		return $this->result->count();
@@ -98,15 +95,15 @@ class NeevoResultIterator implements Iterator, Countable, SeekableIterator {
 	/**
 	 * Implementation of SeekableIterator.
 	 * @param int $offset
-	 * @throws OutOfRangeException|NeevoDriverException
+	 * @throws \OutOfRangeException|DriverException
 	 */
 	public function seek($offset){
 		try{
 			$this->result->seek($offset);
-		} catch(NeevoDriverException $e){
+		} catch(DriverException $e){
 			throw $e;
 		} catch(NeevoException $e){
-			throw new OutOfRangeException("Cannot seek to offset $offset.", null, $e);
+			throw new \OutOfRangeException("Cannot seek to offset $offset.", null, $e);
 		}
 		$this->pointer = $offset;
 	}

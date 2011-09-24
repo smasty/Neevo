@@ -9,30 +9,34 @@
  *
  */
 
+namespace Neevo\Drivers;
+
+use Neevo;
+
 
 /**
- * Neevo MySQL driver (PHP extension 'mysql')
+ * Neevo MySQLi driver (PHP extension 'mysqli')
  *
  * Driver configuration:
  *  - host => MySQL server name or address
  *  - port (int) => MySQL server port
+ *  - socket
  *  - username
  *  - password
  *  - database => database to select
  *  - charset => Character encoding to set (defaults to utf8)
- *  - persistent (bool) => Try to find a persistent link
+ *  - peristent (bool) => Try to find a persistent link
  *  - unbuffered (bool) => Sends query without fetching and buffering the result
  *
- *  - resource (type resource) => Existing MySQL link
- *  - lazy, table_prefix... => see NeevoConnection
+ *  - resource (instance of mysqli) => Existing MySQLi link
+ *  - lazy, table_prefix... => see Neevo\Connection
  *
  * @author Martin Srank
- * @package Neevo\Drivers
  */
-class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
+class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
-	/** @var resource */
+	/** @var mysqli_result */
 	private $resource;
 
 	/** @var bool */
@@ -45,12 +49,12 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws NeevoDriverException
+	 * @throws Neevo\DriverException
 	 */
-	public function __construct(NeevoBaseStmt $statement = null){
-		if(!extension_loaded("mysql"))
-			throw new NeevoDriverException("Cannot instantiate Neevo MySQL driver - PHP extension 'mysql' not loaded.");
-		if($statement instanceof NeevoBaseStmt)
+	public function __construct(Neevo\BaseStatement $statement = null){
+		if(!extension_loaded("mysqli"))
+			throw new Neevo\DriverException("Cannot instantiate Neevo MySQLi driver - PHP extension 'mysqli' not loaded.");
+		if($statement instanceof Neevo\BaseStatement)
 			parent::__construct($statement);
 	}
 
@@ -59,7 +63,7 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * Create connection to database.
 	 * @param array $config Configuration options
 	 * @return void
-	 * @throws NeevoException
+	 * @throws Neevo\NeevoException
 	 */
 	public function connect(array $config){
 
@@ -67,45 +71,30 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 		$defaults = array(
 			'resource' => null,
 			'charset' => 'utf8',
-			'username' => ini_get('mysql.default_user'),
-			'password' => ini_get('mysql.default_password'),
-			'host' => ini_get('mysql.default_host'),
-			'port' => ini_get('mysql.default_port'),
+			'username' => ini_get('mysqli.default_user'),
+			'password' => ini_get('mysqli.default_pw'),
+			'socket' => ini_get('mysqli.default_socket'),
+			'port' => ini_get('mysqli.default_port'),
+			'host' => ini_get('mysqli.default_host'),
 			'persistent' => false,
 			'unbuffered' => false
 		);
 
 		$config += $defaults;
-		if(isset($config['port']))
-			$host = $config['host'] .':'. $config['port'];
-		else
-			$host = $config['host'];
 
 		// Connect
-		if(is_resource($config['resource']))
-			$connection = $config['resource'];
-		elseif($config['persistent'])
-			$connection = @mysql_pconnect($host, $config['username'], $config['password']);
+		if($config['resource'] instanceof \mysqli)
+			$this->resource = $config['resource'];
 		else
-			$connection = @mysql_connect($host, $config['username'], $config['password']);
+			$this->resource = new \mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
 
-		if(!is_resource($connection))
-			throw new NeevoException("Connection to host '$host' failed.");
+		if($this->resource->connect_errno)
+			throw new Neevo\NeevoException($this->resource->connect_error, $this->resource->connect_errno);
 
-		// Select DB
-		if($config['database']){
-			$db = mysql_select_db($config['database']);
-			if(!$db) throw new NeevoException("Could not select database '$config[database]'.");
-		}
-
-		$this->resource = $connection;
-
-		//Set charset
-		if(is_resource($connection)){
-			if(function_exists('mysql_set_charset'))
-				@mysql_set_charset($config['charset'], $connection);
-			else
-				$this->runQuery("SET NAMES ".$config['charset']);
+		// Set charset
+		if($this->resource instanceof \mysqli){
+			$ok = @$this->resource->set_charset($config['charset']);
+			if(!$ok) $this->runQuery("SET NAMES ".$config['charset']);
 		}
 
 		$this->unbuffered = $config['unbuffered'];
@@ -117,39 +106,36 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @return void
 	 */
 	public function closeConnection(){
-		@mysql_close($this->resource);
+		@$this->resource->close();
 	}
 
 
 	/**
 	 * Free memory used by given result set.
-	 * @param resource $resultSet
+	 * @param mysqli_result $resultSet
 	 * @return bool
 	 */
 	public function freeResultSet($resultSet){
-		return @mysql_free_result($resultSet);
+		return true;
 	}
 
 
 	/**
 	 * Execute given SQL statement.
 	 * @param string $queryString
-	 * @return resource|bool
-	 * @throws NeevoException
+	 * @return mysqli_result|bool
+	 * @throws Neevo\NeevoException
 	 */
 	public function runQuery($queryString){
 
 		$this->affectedRows = false;
-		if($this->unbuffered)
-			$result = @mysql_unbuffered_query($queryString, $this->resource);
-		else
-			$result = @mysql_query($queryString, $this->resource);
+		$result = $this->resource->query($queryString, $this->unbuffered ? MYSQLI_USE_RESULT : MYSQLI_STORE_RESULT);
 
-		$error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', @mysql_error($this->resource));
+		$error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $this->resource->error);
 		if($error && $result === false)
-			throw new NeevoException("Query failed. $error", @mysql_errno($this->resource), $queryString);
+			throw new Neevo\NeevoException("Query failed. $error", $this->resource->errno, $queryString);
 
-		$this->affectedRows = @mysql_affected_rows($this->resource);
+		$this->affectedRows = $this->resource->affected_rows;
 		return $result;
 	}
 
@@ -186,26 +172,25 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 
 	/**
 	 * Fetch row from given result set as an associative array.
-	 * @param resource $resultSet
+	 * @param mysqli_result $resultSet
 	 * @return array
 	 */
 	public function fetch($resultSet){
-		return @mysql_fetch_assoc($resultSet);
+		return $resultSet->fetch_assoc();
 	}
 
 
 	/**
 	 * Move internal result pointer.
-	 * @param resource $resultSet
-	 * @param int $offset
+	 * @param mysqli_result $resultSet
+	 * @param int
 	 * @return bool
-	 * @throws NeevoDriverException
+	 * @throws Neevo\DriverException
 	 */
 	public function seek($resultSet, $offset){
-		if($this->unbuffered){
-			throw new NeevoDriverException('Cannot seek on unbuffered result.');
-		}
-		return @mysql_data_seek($resultSet, $offset);
+		if($this->unbuffered)
+			throw new Neevo\DriverException('Cannot seek on unbuffered result.');
+		return $resultSet->data_seek($offset);
 	}
 
 
@@ -214,30 +199,32 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @return int
 	 */
 	public function getInsertId(){
-		return @mysql_insert_id($this->resource);
+		return $this->resource->insert_id;
 	}
 
 
 	/**
 	 * Randomize result order.
-	 * @param NeevoBaseStmt $statement
+	 * @param Neevo\BaseStatement $statement
 	 * @return void
 	 */
-	public function randomizeOrder(NeevoBaseStmt $statement){
+	public function randomizeOrder(Neevo\BaseStatement $statement){
 		$statement->order('RAND()');
 	}
 
 
 	/**
 	 * Get the number of rows in the given result set.
-	 * @param resource $resultSet
+	 * @param \mysqli_result $resultSet
 	 * @return int|FALSE
-	 * @throws NeevoDriverException
+	 * @throws Neevo\DriverException
 	 */
 	public function getNumRows($resultSet){
 		if($this->unbuffered)
-			throw new NeevoDriverException('Cannot count rows on unbuffered result.');
-		return @mysql_num_rows($resultSet);
+			throw new Neevo\DriverException('Cannot seek on unbuffered result.');
+		if($resultSet instanceof \mysqli_result)
+			return $resultSet->num_rows;
+		return false;
 	}
 
 
@@ -255,27 +242,27 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
 	public function escape($value, $type){
 		switch($type){
-			case Neevo::BOOL:
-				return $value ? 1 : 0;
+			case Neevo\Manager::BOOL:
+				return $value ? 1 :0;
 
-			case Neevo::TEXT:
-				return "'". mysql_real_escape_string($value, $this->resource) ."'";
+			case Neevo\Manager::TEXT:
+				return "'". $this->resource->real_escape_string($value) ."'";
 
-			case Neevo::IDENTIFIER:
+			case Neevo\Manager::IDENTIFIER:
 				return str_replace('`*`', '*', '`' . str_replace('.', '`.`', str_replace('`', '``', $value)) . '`');
 
-			case Neevo::BINARY:
-				return "_binary'" . mysql_real_escape_string($value, $this->resource) . "'";
+			case Neevo\Manager::BINARY:
+				return "_binary'" . mysqli_real_escape_string($this->resource, $value) . "'";
 
-			case Neevo::DATETIME:
-				return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
+			case Neevo\Manager::DATETIME:
+				return ($value instanceof \DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
 
 			default:
-				throw new InvalidArgumentException('Unsupported data type.');
+				throw new \InvalidArgumentException('Unsupported data type.');
 				break;
 		}
 	}
@@ -286,12 +273,12 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
 	public function unescape($value, $type){
-		if($type === Neevo::BINARY)
+		if($type === Neevo\Manager::BINARY)
 			return $value;
-		throw new InvalidArgumentException('Unsupported data type.');
+		throw new \InvalidArgumentException('Unsupported data type.');
 	}
 
 
@@ -313,22 +300,30 @@ class NeevoDriverMySQL extends NeevoParser implements INeevoDriver {
 
 	/**
 	 * Get types of columns in given result set.
-	 * @param resource $resultSet
+	 * @param mysqli_result $resultset
 	 * @param string $table
 	 * @return array
 	 */
 	public function getColumnTypes($resultSet, $table){
+		static $colTypes;
+		if(empty($colTypes)){
+			$constants = get_defined_constants(true);
+			foreach($constants['mysqli'] as $type => $code){
+				if(strncmp($type, 'MYSQLI_TYPE_', 12) === 0)
+					$colTypes[$code] = strtolower(substr($type, 12));
+			}
+			$colTypes[MYSQLI_TYPE_LONG] = $colTypes[MYSQLI_TYPE_SHORT] = $colTypes[MYSQLI_TYPE_TINY] = 'int';
+		}
+
 		$cols = array();
-		$count = mysql_num_fields($resultSet);
-		for($i = 0; $i < $count; $i++){
-			$field = mysql_fetch_field($resultSet, $i);
-			$cols[$field->name] = $field->type;
+		while($field = $resultSet->fetch_field()){
+			$cols[$field->name] = $colTypes[$field->type];
 		}
 		return $cols;
 	}
 
 
-	/*  ************  NeevoParser overrides  ************  */
+	/*  ************  Neevo\Parser overrides  ************  */
 
 
 	/**

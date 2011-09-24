@@ -9,13 +9,14 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
  * Core Neevo class.
  * @author Martin Srank
- * @package Neevo
  */
-class Neevo implements INeevoObservable, INeevoObserver {
+class Manager implements IObservable, IObserver {
 
 
 	/** @var string Default Neevo driver */
@@ -27,70 +28,69 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	/** @var int */
 	private $queries = 0;
 
-	/** @var NeevoConnection */
+	/** @var Connection */
 	private $connection;
 
-	/** @var NeevoObserverMap */
+	/** @var ObserverMap */
 	private $observers;
 
 
 	// Neevo version
-	const VERSION = '1.3',
-		REVISION = '@VCREV@ released on @VCDATE@';
+	const VERSION = '2.0',
+	REVISION = '@VCREV@ released on @VCDATE@';
 
 	// Data types
 	const BOOL = 'b',
-		INT = 'i',
-		FLOAT = 'f',
-		TEXT = 's',
-		BINARY = 'bin',
-		DATETIME = 'd',
-		ARR = 'a',
-		LITERAL = 'l',
-		IDENTIFIER = 'id',
-		SUBQUERY = 'sub';
+	INT = 'i',
+	FLOAT = 'f',
+	TEXT = 's',
+	BINARY = 'bin',
+	DATETIME = 'd',
+	ARR = 'a',
+	LITERAL = 'l',
+	IDENTIFIER = 'id',
+	SUBQUERY = 'sub';
 
 	// Statement types
 	const STMT_SELECT = 'stmt_select',
-		STMT_INSERT = 'stmt_insert',
-		STMT_UPDATE = 'stmt_update',
-		STMT_DELETE = 'stmt_delete';
+	STMT_INSERT = 'stmt_insert',
+	STMT_UPDATE = 'stmt_update',
+	STMT_DELETE = 'stmt_delete';
 
 	// JOIN types
 	const JOIN_LEFT = 'join_left',
-		JOIN_INNER = 'join_inner';
+	JOIN_INNER = 'join_inner';
 
 	// Order types
 	const ASC = 'ASC',
-		DESC = 'DESC';
+	DESC = 'DESC';
 
 
 	/**
 	 * Configure Neevo and establish a connection.
 	 * Configuration can be different - see the API for your driver.
 	 * @param mixed $config Connection configuration.
-	 * @param INeevoCache $cache Cache to use.
+	 * @param ICache $cache Cache to use.
 	 * @return void
 	 * @throws NeevoException
 	 */
-	public function __construct($config, INeevoCache $cache = null){
-		$this->connection = new NeevoConnection($config, $cache);
-		$this->observers = new NeevoObserverMap;
+	public function __construct($config, ICache $cache = null){
+		$this->connection = new Connection($config, $cache);
+		$this->observers = new ObserverMap;
 		$this->attachObserver($this, self::QUERY);
 	}
 
-
-	/*  ************  Statement factories  ************  */
+	/*	 * ***********  Statement factories  ************  */
 
 
 	/**
 	 * SELECT statement factory.
 	 * @param string|array $columns Array or comma-separated list (optional)
 	 * @param string $table
-	 * @return NeevoResult fluent interface
+	 * @return Result fluent interface
 	 */
 	public function select($columns = null, $table = null){
-		$result = new NeevoResult($this->connection, $columns, $table);
+		$result = new Result($this->connection, $columns, $table);
 		foreach($this->observers as $observer){
 			$result->attachObserver($observer, $this->observers->getEvent());
 		}
@@ -102,10 +102,10 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * INSERT statement factory.
 	 * @param string $table
 	 * @param array $values
-	 * @return NeevoStmt fluent interface
+	 * @return Statement fluent interface
 	 */
 	public function insert($table, array $values){
-		$statement = NeevoStmt::createInsert($this->connection, $table, $values);
+		$statement = Statement::createInsert($this->connection, $table, $values);
 		foreach($this->observers as $observer){
 			$statement->attachObserver($observer, $this->observers->getEvent());
 		}
@@ -117,10 +117,10 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 * UPDATE statement factory.
 	 * @param string $table
 	 * @param array $data
-	 * @return NeevoStmt fluent interface
+	 * @return Statement fluent interface
 	 */
 	public function update($table, array $data){
-		$statement = NeevoStmt::createUpdate($this->connection, $table, $data);
+		$statement = Statement::createUpdate($this->connection, $table, $data);
 		foreach($this->observers as $observer){
 			$statement->attachObserver($observer, $this->observers->getEvent());
 		}
@@ -131,10 +131,10 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	/**
 	 * DELETE statement factory.
 	 * @param string $table
-	 * @return NeevoStmt fluent interface
+	 * @return Statement fluent interface
 	 */
 	public function delete($table){
-		$statement = NeevoStmt::createDelete($this->connection, $table);
+		$statement = Statement::createDelete($this->connection, $table);
 		foreach($this->observers as $observer){
 			$statement->attachObserver($observer, $this->observers->getEvent());
 		}
@@ -160,7 +160,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 		$handle = @fopen($filename, 'r');
 		if($handle === false){
 			ignore_user_abort($abort);
-			throw new NeevoException("Cannot open file '$filename' for SQL import.");
+			throw new Exception("Cannot open file '$filename' for SQL import.");
 		}
 
 		$sql = '';
@@ -180,8 +180,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 		return $count;
 	}
 
-
-	/*  ************  Transactions  ************  */
+	/*	 * ***********  Transactions  ************  */
 
 
 	/**
@@ -191,7 +190,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 */
 	public function begin($savepoint = null){
 		$this->connection->getDriver()->beginTransaction($savepoint);
-		$this->notifyObservers(INeevoObserver::BEGIN);
+		$this->notifyObservers(IObserver::BEGIN);
 		return $this;
 	}
 
@@ -203,7 +202,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 */
 	public function commit($savepoint = null){
 		$this->connection->getDriver()->commit($savepoint);
-		$this->notifyObservers(INeevoObserver::COMMIT);
+		$this->notifyObservers(IObserver::COMMIT);
 		return $this;
 	}
 
@@ -215,21 +214,20 @@ class Neevo implements INeevoObservable, INeevoObserver {
 	 */
 	public function rollback($savepoint = null){
 		$this->connection->getDriver()->rollback($savepoint);
-		$this->notifyObservers(INeevoObserver::ROLLBACK);
+		$this->notifyObservers(IObserver::ROLLBACK);
 		return $this;
 	}
 
-
-	/*  ************  Implementation of INeevoObservable & INeevoObserver  ************  */
+	/*	 * ***********  Implementation of IObservable & IObserver  ************  */
 
 
 	/**
 	 * Attach an observer for debugging.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @param int $event Event to attach the observer to.
 	 * @return void
 	 */
-	public function attachObserver(INeevoObserver $observer, $event){
+	public function attachObserver(IObserver $observer, $event){
 		$this->observers->attach($observer, $event);
 		$this->connection->attachObserver($observer, $event);
 		$e = new NeevoException;
@@ -239,10 +237,10 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 	/**
 	 * Detach given observer.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @return void
 	 */
-	public function detachObserver(INeevoObserver $observer){
+	public function detachObserver(IObserver $observer){
 		$this->connection->detachObserver($observer);
 		$this->observers->detach($observer);
 		$e = new NeevoException;
@@ -265,19 +263,19 @@ class Neevo implements INeevoObservable, INeevoObserver {
 
 	/**
 	 * Receive update from observable.
-	 * @param INeevoObservable $observable
+	 * @param IObservable $observable
 	 * @param int $event Event type
 	 * @return void
 	 */
-	public function updateStatus(INeevoObservable $observable, $event){
+	public function updateStatus(IObservable $observable, $event){
 		$this->last = $observable->__toString();
 		++$this->queries;
 	}
 
 
 	/**
-	 * Current NeevoConnection instance.
-	 * @return NeevoConnection
+	 * Current Connection instance.
+	 * @return Connection
 	 */
 	public function getConnection(){
 		return $this->connection;
@@ -312,7 +310,7 @@ class Neevo implements INeevoObservable, INeevoObserver {
 		$keywords2 = 'RANDOM|RAND|ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
 
 		$sql = str_replace("\\'", '\\&#39;', $sql);
-		$sql = preg_replace_callback("~(/\\*.*\\*/)|($keywords1)|($keywords2)|('[^']+'|[0-9]+)~", array('Neevo', '_highlightCallback'), $sql);
+		$sql = preg_replace_callback("~(/\\*.*\\*/)|($keywords1)|($keywords2)|('[^']+'|[0-9]+)~", 'self::_highlightCallback', $sql);
 		$sql = str_replace('\\&#39;', "\\'", $sql);
 		return '<pre style="color:#555" class="sql-dump">' . trim($sql) . "</pre>\n";
 	}
@@ -331,32 +329,6 @@ class Neevo implements INeevoObservable, INeevoObserver {
 		// Values
 		if(!empty($match[4]) || $match[4] === '0')
 			return '<em style="color:#008000">' . $match[4] . '</em>';
-	}
-
-
-}
-
-
-
-/**
- * Representation of SQL literal.
- * @author Martin Srank
- * @package Neevo
- */
-class NeevoLiteral {
-
-
-	/** @var string */
-	public $value;
-
-
-	/**
-	 * Create instance of SQL literal.
-	 * @param string $value
-	 * @return void
-	 */
-	public function __construct($value) {
-		$this->value = $value;
 	}
 
 

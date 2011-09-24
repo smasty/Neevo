@@ -9,13 +9,14 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
- * The map of observers - instances of INeevoObserver.
+ * The map of observers - instances of Neevo\IObserver.
  * @author Martin Srank
- * @package Neevo
  */
-class NeevoObserverMap implements Iterator, Countable {
+class ObserverMap implements \Iterator, \Countable {
 
 
 	/** @var array */
@@ -27,11 +28,11 @@ class NeevoObserverMap implements Iterator, Countable {
 
 	/**
 	 * Add given observer to map for given event.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @param int $event Event bitmap
 	 * @return void
 	 */
-	public function attach(INeevoObserver $observer, $event){
+	public function attach(IObserver $observer, $event){
 		$this->storage[spl_object_hash($observer)] = array(
 			'observer' => $observer,
 			'event' => $event
@@ -41,20 +42,20 @@ class NeevoObserverMap implements Iterator, Countable {
 
 	/**
 	 * Remove given observer from map.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @return void
 	 */
-	public function detach(INeevoObserver $observer){
+	public function detach(IObserver $observer){
 		unset($this->storage[spl_object_hash($observer)]);
 	}
 
 
 	/**
 	 * Check if given observer is in the map.
-	 * @param INeevoObserver $observer
+	 * @param IObserver $observer
 	 * @return bool
 	 */
-	public function contains(INeevoObserver $observer){
+	public function contains(IObserver $observer){
 		return isset($this->storage[spl_object_hash($observer)]);
 	}
 
@@ -109,7 +110,7 @@ class NeevoObserverMap implements Iterator, Countable {
 
 	/**
 	 * Return the current observer.
-	 * @return INeevoObserver
+	 * @return Neevo\IObserver
 	 */
 	public function current(){
 		$current = current($this->storage);

@@ -2,17 +2,17 @@
 
 
 /**
- * Tests for NeevoParser.
+ * Tests for Neevo\Parser.
  */
-class NeevoParserTest extends PHPUnit_Framework_TestCase {
+class ParserTest extends PHPUnit_Framework_TestCase {
 
 
-	/** @var NeevoConnection */
+	/** @var Neevo\Connection */
 	private $connection;
 
 
 	protected function setUp(){
-		$this->connection = new NeevoConnection('driver=Parser');
+		$this->connection = new Neevo\Connection('driver=Parser');
 	}
 
 
@@ -22,29 +22,29 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 
 
 	/** @return NeevoDriverParser */
-	private function parser(NeevoBaseStmt $stmt){
+	private function parser(Neevo\BaseStatement $stmt){
 		$instance = $this->connection->getParser();
 		return new $instance($stmt);
 	}
 
 
 	private function createSelect(){
-		return new NeevoResult($this->connection, 'foo');
+		return new Neevo\Result($this->connection, 'foo');
 	}
 
 
 	private function createInsert($table, array $values){
-		return NeevoStmt::createInsert($this->connection, $table, $values);
+		return Neevo\Statement::createInsert($this->connection, $table, $values);
 	}
 
 
 	private function createUpdate($table, array $data){
-		return NeevoStmt::createUpdate($this->connection, $table, $data);
+		return Neevo\Statement::createUpdate($this->connection, $table, $data);
 	}
 
 
 	private function createDelete($table){
-		return NeevoStmt::createDelete($this->connection, $table);
+		return Neevo\Statement::createDelete($this->connection, $table);
 	}
 
 
@@ -55,7 +55,7 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 			array(array('bar', true), " WHERE (:bar)"),
 			array(array('bar', false), " WHERE (NOT :bar)"),
 			array(array('bar', array(1, 2)), " WHERE (:bar IN (1, 2))"),
-			array(array('bar', new NeevoLiteral('NOW()')), " WHERE (:bar = NOW())"),
+			array(array('bar', new Neevo\Literal('NOW()')), " WHERE (:bar = NOW())"),
 			array(array('bar', $date), " WHERE (:bar = '{$date->format('Y-m-d H:i:s')}')"),
 			array(array('bar', 'baz'), " WHERE (:bar = 'baz')"),
 			array(array(':bar = %i AND :baz = %s', 1, 2), " WHERE (:bar = 1 AND :baz = '2')")
@@ -88,7 +88,7 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 
 	public function testParseSorting(){
 		$this->assertEquals(
-			" ORDER BY :bar, :baz DESC", $this->parser($this->createSelect()->order(':bar')->order(':baz', Neevo::DESC))
+			" ORDER BY :bar, :baz DESC", $this->parser($this->createSelect()->order(':bar')->order(':baz', Neevo\Manager::DESC))
 				->parseSorting()
 		);
 	}
@@ -118,7 +118,7 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 	public function testParseSourceJoinLiteral(){
 		$this->assertEquals(
 			":foo LEFT JOIN GETTABLE(bar) ON bar.id = foo.bar_id",
-			$this->parser($this->createSelect()->leftJoin(new NeevoLiteral('GETTABLE(bar)'), new NeevoLiteral('bar.id = foo.bar_id')))
+			$this->parser($this->createSelect()->leftJoin(new Neevo\Literal('GETTABLE(bar)'), new Neevo\Literal('bar.id = foo.bar_id')))
 			->parseSource()
 		);
 	}
@@ -134,7 +134,7 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 	public function parseFieldName(){
 		return array(
 			array(':foo', ':foo'),
-			array(new NeevoLiteral('NOW()'), 'NOW()'),
+			array(new Neevo\Literal('NOW()'), 'NOW()'),
 			array('*', '*'),
 			array('foo bar', 'foo bar'),
 			array(':foo.bar', ':foo.bar'),
@@ -157,7 +157,7 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 			array(array('1', 'foo'), array(1, "'foo'")),
 			array('1', 1),
 			array('foo', "'foo'"),
-			array(new NeevoLiteral(1), 1),
+			array(new Neevo\Literal(1), 1),
 			array($date, $date->format("'Y-m-d H:i:s'"))
 		);
 	}
@@ -174,12 +174,12 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 
 	public function escapeValueType(){
 		return array(
-			array(array('1', 'foo'), array(Neevo::FLOAT, Neevo::TEXT), array(1.0, "'foo'")),
-			array('1', Neevo::INT, 1),
-			array('1', Neevo::FLOAT, 1.0),
-			array(array(1, 'foo'), Neevo::ARR, "(1, 'foo')"),
-			array('1', Neevo::LITERAL, '1'),
-			array('foo', Neevo::BINARY, "bin:'foo'")
+			array(array('1', 'foo'), array(Neevo\Manager::FLOAT, Neevo\Manager::TEXT), array(1.0, "'foo'")),
+			array('1', Neevo\Manager::INT, 1),
+			array('1', Neevo\Manager::FLOAT, 1.0),
+			array(array(1, 'foo'), Neevo\Manager::ARR, "(1, 'foo')"),
+			array('1', Neevo\Manager::LITERAL, '1'),
+			array('foo', Neevo\Manager::BINARY, "bin:'foo'")
 		);
 	}
 
@@ -203,7 +203,7 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 
 	public function testTryDelimiteLiteral(){
 		$this->assertEquals('NOW()', $this->parser($this->createSelect())
-				->tryDelimite(new NeevoLiteral('NOW()')));
+				->tryDelimite(new Neevo\Literal('NOW()')));
 	}
 
 
@@ -243,15 +243,15 @@ class NeevoParserTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testParseSourceSubquery(){
-		$subquery = new NeevoResult($this->connection, 'foo');
-		$result = new NeevoResult($this->connection, $subquery->as('alias'));
+		$subquery = new Neevo\Result($this->connection, 'foo');
+		$result = new Neevo\Result($this->connection, $subquery->as('alias'));
 		$this->assertEquals('(SELECT * FROM :foo) :alias', $this->parser($result)->parseSource());
 	}
 
 
 	public function testParseSourceJoinSubquery(){
-		$subquery = new NeevoResult($this->connection, 'tab2');
-		$result = new NeevoResult($this->connection, 'tab1');
+		$subquery = new Neevo\Result($this->connection, 'tab2');
+		$result = new Neevo\Result($this->connection, 'tab1');
 		$this->assertEquals(
 			':tab1 LEFT JOIN (SELECT * FROM :tab2) :tab2 ON :tab1.id = :tab2.tab1_id', $this->parser($result->leftJoin($subquery->as('tab2'), ':tab1.id = :tab2.tab1_id'))->parseSource()
 		);

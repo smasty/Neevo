@@ -12,9 +12,9 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 
 	public function getImplementations(){
 		return array(
-			array(new NeevoCacheMemory),
-			array(new NeevoCacheSession),
-			array(new NeevoCacheFile($this->filename))
+			array(new Neevo\Cache\MemoryStorage),
+			array(new Neevo\Cache\SessionStorage),
+			array(new Neevo\Cache\FileStorage($this->filename))
 		);
 	}
 
@@ -22,7 +22,7 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @dataProvider getImplementations
 	 */
-	public function testBehaviour(INeevoCache $cache){
+	public function testBehaviour(Neevo\ICache $cache){
 		$cache->store($k = 'key', $v = 'value');
 		$this->assertEquals($v, $cache->fetch($k));
 
@@ -31,7 +31,7 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 			$this->assertNull($cache->fetch($k));
 		}
 
-		if($cache instanceof NeevoCacheFile)
+		if($cache instanceof Neevo\Cache\FileStorage)
 			unlink($this->filename);
 	}
 
@@ -39,7 +39,7 @@ class NeevoCacheTest extends PHPUnit_Framework_TestCase {
 	public function testMemcache(){
 		$memcache = new Memcache();
 		$memcache->connect('localhost');
-		$cache = new NeevoCacheMemcache($memcache);
+		$cache = new Neevo\Cache\MemcacheStorage($memcache);
 
 		$cache->store($k = 'key', $v = 'value');
 		$this->assertEquals($v, $cache->fetch($k));

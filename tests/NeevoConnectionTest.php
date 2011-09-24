@@ -2,12 +2,12 @@
 
 
 /**
- * Tests for NeevoConnection.
+ * Tests for Neevo\Connection.
  */
-class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
+class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 
-	/** @var NeevoConnection */
+	/** @var Neevo\Connection */
 	protected $instance;
 
 
@@ -16,7 +16,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 			'testConfig' => true,
 			'driver' => 'Dummy'
 		);
-		$this->instance = new NeevoConnection($config);
+		$this->instance = new Neevo\Connection($config);
 	}
 
 
@@ -26,23 +26,23 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testConfigFormatString(){
-		$connection = new NeevoConnection('driver=Dummy');
+		$connection = new Neevo\Connection('driver=Dummy');
 
-		$this->assertInstanceOf('NeevoDriverDummy', $connection->getDriver());
+		$this->assertInstanceOf('Neevo\\Drivers\\DummyDriver', $connection->getDriver());
 	}
 
 
 	public function testConfigFormatTraversable(){
 		$config = new ArrayObject(array('driver' => 'Dummy'));
-		$connection = new NeevoConnection($config);
+		$connection = new Neevo\Connection($config);
 
-		$this->assertInstanceOf('NeevoDriverDummy', $connection->getDriver());
+		$this->assertInstanceOf('Neevo\\Drivers\\DummyDriver', $connection->getDriver());
 	}
 
 
 	public function testConfigFormatElse(){
 		try{
-			$msg = new NeevoConnection(false);
+			$msg = new Neevo\Connection(false);
 		} catch(InvalidArgumentException $e){
 			$msg = $e->getMessage();
 		}
@@ -52,16 +52,16 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testAutoSetDriver(){
-		$this->assertInstanceOf('NeevoDriverDummy', $this->instance->getDriver());
+		$this->assertInstanceOf('Neevo\\Drivers\\DummyDriver', $this->instance->getDriver());
 	}
 
 
 	public function testSetDriverNoFile(){
 		try{
-			$msg = new NeevoConnection(array(
+			$msg = new Neevo\Connection(array(
 					'driver' => 'Foo'
 				));
-		} catch(NeevoDriverException $e){
+		} catch(Neevo\DriverException $e){
 			$msg = $e->getMessage();
 		}
 
@@ -71,33 +71,33 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 
 	public function testSetDriverNoDriver(){
 		try{
-			$msg = new NeevoConnection(array(
+			$msg = new Neevo\Connection(array(
 					'driver' => 'Wrong'
 				));
-		} catch(NeevoDriverException $e){
+		} catch(Neevo\DriverException $e){
 			$msg = $e->getMessage();
 		}
 
-		$this->assertStringStartsWith("Class 'NeevoDriverWrong'", $msg);
+		$this->assertStringStartsWith("Wrong driver file", $msg);
 	}
 
 
 	public function testAutoSetParser(){
-		$this->assertEquals($this->instance->getParser(), 'NeevoParser');
+		$this->assertEquals($this->instance->getParser(), 'Neevo\\Parser');
 	}
 
 
 	public function testSetCustomParser(){
-		$connection = new NeevoConnection(array(
+		$connection = new Neevo\Connection(array(
 				'driver' => 'Parser'
 			));
 
-		$this->assertEquals($connection->getParser(), 'NeevoDriverParser');
+		$this->assertEquals($connection->getParser(), 'Neevo\\Drivers\\ParserDriver');
 	}
 
 
 	public function testSetCache(){
-		$cache = new NeevoCacheSession;
+		$cache = new Neevo\Cache\SessionStorage;
 		$this->instance->setCache($cache);
 
 		$this->assertEquals(spl_object_hash($this->instance->getCache()), spl_object_hash($cache));
@@ -105,7 +105,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testAutoSetCache(){
-		$this->assertInstanceOf('NeevoCacheMemory', $this->instance->getCache());
+		$this->assertInstanceOf('Neevo\\Cache\\MemoryStorage', $this->instance->getCache());
 	}
 
 
@@ -138,7 +138,7 @@ class NeevoConnectionTest extends PHPUnit_Framework_TestCase {
 		$config = array(
 			'alias' => 'value',
 		);
-		NeevoConnection::alias($config, 'key', 'alias');
+		Neevo\Connection::alias($config, 'key', 'alias');
 
 		$this->assertEquals('value', $config['key']);
 	}

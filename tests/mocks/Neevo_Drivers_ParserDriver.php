@@ -1,20 +1,23 @@
 <?php
 
+namespace Neevo\Drivers;
+
+use Neevo;
 
 /**
  * Dummy Neevo driver/parser.
  */
-class NeevoDriverParser extends NeevoParser implements INeevoDriver {
+class ParserDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
-	/** @var NeevoBaseStmt */
+	/** @var Neevo\BaseStatement */
 	protected $stmt;
 
 	/** @var array */
 	protected $clauses = array();
 
 
-	function __construct(NeevoBaseStmt $statement = null){
+	function __construct(Neevo\BaseStatement $statement = null){
 		if($statement !== null)
 			return parent::__construct($statement);
 	}
@@ -29,7 +32,7 @@ class NeevoDriverParser extends NeevoParser implements INeevoDriver {
 	function fetch($resultSet){}
 	function seek($resultSet, $offset){}
 	function getInsertId(){}
-	function randomizeOrder(NeevoBaseStmt $statement){}
+	function randomizeOrder(Neevo\BaseStatement $statement){}
 	function getNumRows($resultSet){}
 	function getAffectedRows(){}
 	function getPrimaryKey($table){}
@@ -37,23 +40,23 @@ class NeevoDriverParser extends NeevoParser implements INeevoDriver {
 
 	function escape($value, $type){
 		switch($type){
-			case Neevo::BOOL:
+			case Neevo\Manager::BOOL:
 				return $value ? 'true' : 'false';
 
-			case Neevo::TEXT:
+			case Neevo\Manager::TEXT:
 				return "'$value'";
 
-			case Neevo::IDENTIFIER:
+			case Neevo\Manager::IDENTIFIER:
 				return ":$value";
 
-			case Neevo::BINARY:
+			case Neevo\Manager::BINARY:
 				return "bin:'$value'";
 
-			case Neevo::DATETIME:
-				return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
+			case Neevo\Manager::DATETIME:
+				return ($value instanceof \DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
 
 			default:
-				throw new InvalidArgumentException('Unsupported data type.');
+				throw new \InvalidArgumentException('Unsupported data type.');
 				break;
 		}
 	}

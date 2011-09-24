@@ -1,10 +1,13 @@
 <?php
 
+namespace Neevo\Drivers;
+
+use Neevo;
 
 /**
  * Dummy Neevo driver.
  */
-class NeevoDriverDummy implements INeevoDriver {
+class DummyDriver implements Neevo\IDriver {
 
 	private $unbuffered = false,
 			$connected = false,
@@ -43,7 +46,7 @@ class NeevoDriverDummy implements INeevoDriver {
 
 	public function runQuery($queryString){
 		if($queryString)
-			return new DummyResult($queryString, $this);
+			return new \DummyResult($queryString, $this);
 		return false;
 	}
 
@@ -59,7 +62,7 @@ class NeevoDriverDummy implements INeevoDriver {
 		elseif($savepoint === null)
 			$this->transactions[count($this->transactions)-1] = self::TRANSACTION_COMMIT;
 		else
-			throw new NeevoDriverException("Invalid savepoint '$savepoint'.");
+			throw new Neevo\DriverException("Invalid savepoint '$savepoint'.");
 	}
 
 
@@ -69,7 +72,7 @@ class NeevoDriverDummy implements INeevoDriver {
 		elseif($savepoint === null)
 			$this->transactions[count($this->transactions)-1] = self::TRANSACTION_ROLLBACK;
 		else
-			throw new NeevoDriverException("Invalid savepoint '$savepoint'.");
+			throw new Neevo\DriverException("Invalid savepoint '$savepoint'.");
 	}
 
 
@@ -80,7 +83,7 @@ class NeevoDriverDummy implements INeevoDriver {
 
 	public function seek($resultSet, $offset){
 		if($this->unbuffered)
-			throw new NeevoDriverException('Cannot seek on unbuffered result.');
+			throw new Neevo\DriverException('Cannot seek on unbuffered result.');
 		return $resultSet->seek($offset);
 	}
 
@@ -90,14 +93,14 @@ class NeevoDriverDummy implements INeevoDriver {
 	}
 
 
-	public function randomizeOrder(NeevoBaseStmt $statement){
+	public function randomizeOrder(Neevo\BaseStatement $statement){
 		$statement->order('RANDOM()');
 	}
 
 
 	public function getNumRows($resultSet){
 		if($this->unbuffered)
-			throw new NeevoDriverException('Cannot count rows on unbuffered result.');
+			throw new Neevo\DriverException('Cannot count rows on unbuffered result.');
 		return $resultSet ? 3 : false;
 	}
 
@@ -113,7 +116,7 @@ class NeevoDriverDummy implements INeevoDriver {
 
 
 	public function unescape($value, $type){
-		if($type === Neevo::BINARY)
+		if($type === Neevo\Manager::BINARY)
 			return "bin:$value";
 	}
 
@@ -134,9 +137,9 @@ class NeevoDriverDummy implements INeevoDriver {
 
 	public function getRow($i = null){
 		if($i === null)
-			return DummyResult::$data;
-		if(isset(DummyResult::$data[$i]))
-			return DummyResult::$data[$i];
+			return \DummyResult::$data;
+		if(isset(\DummyResult::$data[$i]))
+			return \DummyResult::$data[$i];
 		return false;
 	}
 
@@ -155,57 +158,5 @@ class NeevoDriverDummy implements INeevoDriver {
 		return end($this->transactions);
 	}
 
-
-}
-
-
-class DummyResult {
-
-
-	private $queryString, $driver, $cursor = 0;
-
-	public static $data = array(
-		array(
-			'id' => '1',
-			'name' => 'Jack York',
-			'mail' => 'jack.york@mail.tld'
-		),
-		array(
-			'id' => '2',
-			'name' => 'Nora Frisbie',
-			'mail' => 'nora.friesbie@mail.tld'
-		),
-		array(
-			'id' => '3',
-			'name' => 'John Doe',
-			'mail' => 'john.doe@mail.tld'
-		)
-	);
-
-
-	public function __construct($queryString, NeevoDriverDummy $driver){
-		$this->queryString = $queryString;
-		$this->driver= $driver;
-	}
-
-
-	public function __destruct(){
-		$this->driver->freeResultSet($this);
-	}
-
-
-	public function fetch(){
-		if($this->cursor >= count(self::$data))
-			return false;
-		return self::$data[$this->cursor++];
-	}
-
-
-	public function seek($offset){
-		if($offset >= count(self::$data))
-			return false;
-		$this->cursor = $offset;
-		return true;
-	}
 
 }

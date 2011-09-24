@@ -1,15 +1,15 @@
 <?php
 
 
-class DummyStmt extends NeevoBaseStmt {
+class DummyStmt extends Neevo\BaseStatement {
 
 }
 
 
 /**
- * Tests for NeevoBaseStmt.
+ * Tests for Neevo\BaseStatement.
  */
-class NeevoBaseStmtTest extends PHPUnit_Framework_TestCase {
+class BaseStatementTest extends PHPUnit_Framework_TestCase {
 
 
 	/** @var DummyStmt */
@@ -17,7 +17,7 @@ class NeevoBaseStmtTest extends PHPUnit_Framework_TestCase {
 
 
 	protected function setUp(){
-		$this->stmt = new DummyStmt(new NeevoConnection(array(
+		$this->stmt = new DummyStmt(new Neevo\Connection(array(
 					'driver' => 'Dummy'
 				)));
 	}
@@ -40,7 +40,7 @@ class NeevoBaseStmtTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testWhereValue(){
-		$this->stmt->where($f = 'two', $v = new DummyStmt(new NeevoConnection('driver=Dummy')));
+		$this->stmt->where($f = 'two', $v = new DummyStmt(new Neevo\Connection('driver=Dummy')));
 		$this->assertEquals(array(array(
 				'simple' => true,
 				'field' => $f,
@@ -52,12 +52,12 @@ class NeevoBaseStmtTest extends PHPUnit_Framework_TestCase {
 
 	public function testWhereModifiers(){
 		$this->stmt->where($e = 'one = %s AND two = %i AND three = %sub', $a[] = 'one', $a[] = 2,
-			$a[] = new DummyStmt(new NeevoConnection('driver=Dummy')));
+			$a[] = new DummyStmt(new Neevo\Connection('driver=Dummy')));
 		$this->assertEquals(array(array(
 				'simple' => false,
 				'expr' => $e,
 				'modifiers' => array('%s', '%i', '%sub'),
-				'types' => array(Neevo::TEXT, Neevo::INT, Neevo::SUBQUERY),
+				'types' => array(Neevo\Manager::TEXT, Neevo\Manager::INT, Neevo\Manager::SUBQUERY),
 				'values' => $a,
 				'glue' => 'AND'
 			)), $this->stmt->getConditions());
@@ -153,7 +153,7 @@ class NeevoBaseStmtTest extends PHPUnit_Framework_TestCase {
 	public function testLimitOffset(){
 		$r = new ReflectionProperty('DummyStmt', 'type');
 		$r->setAccessible(true);
-		$r->setValue($this->stmt, Neevo::STMT_SELECT);
+		$r->setValue($this->stmt, Neevo\Manager::STMT_SELECT);
 
 		$this->stmt->limit(5, 10);
 		$this->assertEquals(array(5, 10), $this->stmt->getLimit());

@@ -9,16 +9,17 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
- * NeevoStmt to SQL command parser.
+ * Neevo\Statement to SQL command parser.
  * @author Martin Srank
- * @package Neevo
  */
-class NeevoParser {
+class Parser {
 
 
-	/** @var NeevoBaseStmt */
+	/** @var BaseStatement */
 	protected $stmt;
 
 	/** @var array */
@@ -27,9 +28,9 @@ class NeevoParser {
 
 	/**
 	 * Instantiate the parser for given statement.
-	 * @param NeevoBaseStmt $statement
+	 * @param BaseStatement $statement
 	 */
-	public function __construct(NeevoBaseStmt $statement){
+	public function __construct(BaseStatement $statement){
 		$this->stmt = $statement;
 	}
 
@@ -47,20 +48,20 @@ class NeevoParser {
 
 		if($this->stmt->getConditions())
 			$where = $this->parseWhere();
-		if($this->stmt instanceof NeevoResult && $this->stmt->getGrouping())
+		if($this->stmt instanceof Result && $this->stmt->getGrouping())
 			$group = $this->parseGrouping();
 		if($this->stmt->getSorting())
 			$order = $this->parseSorting();
 
 		$this->clauses = array($source, $where, $group, $order);
 
-		if($this->stmt->getType() === Neevo::STMT_SELECT)
+		if($this->stmt->getType() === Manager::STMT_SELECT)
 			$q = $this->parseSelectStmt();
-		elseif($this->stmt->getType() === Neevo::STMT_INSERT)
+		elseif($this->stmt->getType() === Manager::STMT_INSERT)
 			$q = $this->parseInsertStmt();
-		elseif($this->stmt->getType() === Neevo::STMT_UPDATE)
+		elseif($this->stmt->getType() === Manager::STMT_UPDATE)
 			$q = $this->parseUpdateStmt();
-		elseif($this->stmt->getType() === Neevo::STMT_DELETE)
+		elseif($this->stmt->getType() === Manager::STMT_DELETE)
 			$q = $this->parseDeleteStmt();
 
 		return $q;
@@ -130,15 +131,15 @@ class NeevoParser {
 	 * @return string
 	 */
 	protected function parseSource(){
-		if(!($this->stmt instanceof NeevoResult))
-			return $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
+		if(!($this->stmt instanceof Result))
+			return $this->escapeValue($this->stmt->getTable(), Manager::IDENTIFIER);
 
 		if($this->stmt->getTable() !== null){
-			$source = $this->escapeValue($this->stmt->getTable(), Neevo::IDENTIFIER);
+			$source = $this->escapeValue($this->stmt->getTable(), Manager::IDENTIFIER);
 		} else{
 			$subq = $this->stmt->getSource();
 			$alias = $this->escapeValue($subq->getAlias()
-				? $subq->getAlias() : '_t', Neevo::IDENTIFIER);
+				? $subq->getAlias() : '_t', Manager::IDENTIFIER);
 			$source = "($subq) $alias";
 		}
 		$source = $this->tryDelimite($source);
@@ -146,12 +147,12 @@ class NeevoParser {
 		foreach($this->stmt->getJoins() as $key => $join){
 			list($join_source, $cond, $type) = $join;
 
-			if($join_source instanceof NeevoResult){
+			if($join_source instanceof Result){
 				$join_alias = $this->escapeValue($join_source->getAlias()
-					? $join_source->getAlias() : '_j' . ($key+1), Neevo::IDENTIFIER);
+					? $join_source->getAlias() : '_j' . ($key+1), Manager::IDENTIFIER);
 
 				$join_source = "($join_source) $join_alias";
-			} elseif($join_source instanceof NeevoLiteral){
+			} elseif($join_source instanceof Literal){
 				$join_source = $join_source->value;
 			}
 
@@ -160,7 +161,7 @@ class NeevoParser {
 			}
 			$type = strtoupper(substr($type, 5));
 			$type .= ($type === '') ? '' : ' ';
-				$source .= $cond instanceof NeevoLiteral
+				$source .= $cond instanceof Literal
 					? " {$type}JOIN $join_source ON $cond->value"
 					: $this->tryDelimite(" {$type}JOIN $join_source ON $cond");
 		}
@@ -203,17 +204,17 @@ class NeevoParser {
 			} elseif($value === false){ // NOT field
 				$value = $field;
 				$field = 'NOT ';
-			} elseif($value instanceof NeevoResult){
+			} elseif($value instanceof Result){
 				$operator = ' IN ';
-				$value = $this->escapeValue($value, Neevo::SUBQUERY);
-			} elseif(is_array($value) || $value instanceof Traversable){ // field IN (array)
-				$value = ' IN ' . $this->escapeValue($value, Neevo::ARR);
-			} elseif($value instanceof NeevoLiteral){ // field = SQL literal
+				$value = $this->escapeValue($value, Manager::SUBQUERY);
+			} elseif(is_array($value) || $value instanceof \Traversable){ // field IN (array)
+				$value = ' IN ' . $this->escapeValue($value, Manager::ARR);
+			} elseif($value instanceof Literal){ // field = SQL literal
 				$operator = ' = ';
-				$value = $this->escapeValue($value, Neevo::LITERAL);
-			} elseif($value instanceof DateTime){ // field = DateTime
+				$value = $this->escapeValue($value, Manager::LITERAL);
+			} elseif($value instanceof \DateTime){ // field = DateTime
 				$operator = ' = ';
-				$value = $this->escapeValue($value, Neevo::DATETIME);
+				$value = $this->escapeValue($value, Manager::DATETIME);
 			} else{ // field = value
 				$operator = ' = ';
 				$value = $this->escapeValue($value);
@@ -256,7 +257,7 @@ class NeevoParser {
 
 	/**
 	 * Parse column name.
-	 * @param string|array|NeevoLiteral $field
+	 * @param string|array|Literal $field
 	 * @param bool $table Parse table name.
 	 * @return string
 	 */
@@ -264,7 +265,7 @@ class NeevoParser {
 		// preg_replace callback behaviour
 		if(is_array($field))
 			$field = $field[0];
-		if($field instanceof NeevoLiteral)
+		if($field instanceof Literal)
 			return $field->value;
 
 		$field = trim($field);
@@ -282,7 +283,7 @@ class NeevoParser {
 			$field = $prefix . $field;
 		}
 
-		return $this->stmt->getConnection()->getDriver()->escape($field, Neevo::IDENTIFIER);
+		return $this->stmt->getConnection()->getDriver()->escape($field, Manager::IDENTIFIER);
 	}
 
 
@@ -308,7 +309,7 @@ class NeevoParser {
 
 	/**
 	 * Escape given value.
-	 * @param mixed|array|Traversable $value
+	 * @param mixed|array|\Traversable $value
 	 * @param string|array|null $type
 	 * @return mixed|array
 	 */
@@ -319,7 +320,7 @@ class NeevoParser {
 				return 'NULL';
 
 			// Multiple values w/o types
-			elseif(is_array($value) || $value instanceof Traversable){
+			elseif(is_array($value) || $value instanceof \Traversable){
 				foreach($value as $k => $v)
 					$value[$k] = $this->escapeValue($v);
 				return $value;
@@ -327,14 +328,14 @@ class NeevoParser {
 
 			// Value w/o type
 			else{
-				if($value instanceof DateTime){
-					return $this->escapeValue($value, Neevo::DATETIME);
-				} elseif($value instanceof NeevoLiteral){
+				if($value instanceof \DateTime){
+					return $this->escapeValue($value, Manager::DATETIME);
+				} elseif($value instanceof Literal){
 					return $value->value;
 				} else{
 					return is_numeric($value)
 						? 1 * $value
-						: $this->stmt->getConnection()->getDriver()->escape($value, Neevo::TEXT);
+						: $this->stmt->getConnection()->getDriver()->escape($value, Manager::TEXT);
 				}
 			}
 		}
@@ -348,17 +349,17 @@ class NeevoParser {
 
 		// Single value w/ type
 		elseif($type !== null){
-			if($type === Neevo::INT){
+			if($type === Manager::INT){
 				return (int) $value;
-			} elseif($type === Neevo::FLOAT){
+			} elseif($type === Manager::FLOAT){
 				return (float) $value;
-			} elseif($type === Neevo::SUBQUERY && $value instanceof NeevoResult){
+			} elseif($type === Manager::SUBQUERY && $value instanceof Result){
 				return "($value)";
-			} elseif($type === Neevo::ARR){
-				$arr = $value instanceof Traversable ? iterator_to_array($value) : (array) $value;
+			} elseif($type === Manager::ARR){
+				$arr = $value instanceof \Traversable ? iterator_to_array($value) : (array) $value;
 				return '(' . implode(', ', $this->escapeValue($arr)) . ')';
-			} elseif($type === Neevo::LITERAL){
-				return $value instanceof NeevoLiteral ? $value->value : $value;
+			} elseif($type === Manager::LITERAL){
+				return $value instanceof Literal ? $value->value : $value;
 			} else{
 				return $this->stmt->getConnection()->getDriver()->escape($value, $type);
 			}
@@ -384,11 +385,11 @@ class NeevoParser {
 
 	/**
 	 * Try delimite fields in given expression.
-	 * @param NeevoLiteral $expr
+	 * @param string|Literal $expr
 	 * @return string
 	 */
 	protected function tryDelimite($expr){
-		if($expr instanceof NeevoLiteral)
+		if($expr instanceof Literal)
 			return $expr->value;
 		return preg_replace_callback('~:([a-z_\*][a-z0-9._\*]*)~', array($this, 'parseFieldName'), $expr);
 	}

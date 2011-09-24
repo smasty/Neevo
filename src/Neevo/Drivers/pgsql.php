@@ -9,6 +9,10 @@
  *
  */
 
+namespace Neevo\Drivers;
+
+use Neevo;
+
 
 /**
  * Neevo PostgreSQL driver (PHP extension 'pgsql')
@@ -21,12 +25,11 @@
  *  - persistent (bool) => Try to find a persistent link
  *
  *  - resource (type resource) => Existing SQLite link
- *  - lazy, table_prefix... => see NeevoConnection
+ *  - lazy, table_prefix... => see Neevo\Connection
  *
  * @author Martin Srank
- * @package Neevo\Drivers
  */
-class NeevoDriverPgSQL implements INeevoDriver {
+class PgSQLDriver implements Neevo\IDriver {
 
 
 	/** @var resource */
@@ -35,19 +38,16 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	/** @var int */
 	private $affectedRows;
 
-	/** @var bool */
-	private $escapeMethod = false;
-
 
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws NeevoDriverException
+	 * @throws Neevo\DriverException
 	 */
-	public function __construct(NeevoBaseStmt $statement = null){
+	public function __construct(Neevo\BaseStatement $statement = null){
 		if(!extension_loaded("pgsql"))
-			throw new NeevoDriverException("Cannot instantiate Neevo PgSQL driver - PHP extension 'pgsql' not loaded.");
-		if($statement instanceof NeevoBaseStmt)
+			throw new Neevo\DriverException("Cannot instantiate Neevo PgSQL driver - PHP extension 'pgsql' not loaded.");
+		if($statement instanceof Neevo\BaseStatement)
 			parent::__construct($statement);
 	}
 
@@ -56,7 +56,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * Create connection to database.
 	 * @param array $config Configuration options
 	 * @return void
-	 * @throws NeevoException
+	 * @throws Neevo\NeevoException
 	 */
 	public function connect(array $config){
 
@@ -88,7 +88,7 @@ class NeevoDriverPgSQL implements INeevoDriver {
 			$connection = @pg_connect($string, PGSQL_CONNECT_FORCE_NEW);
 
 		if(!is_resource($connection))
-			throw new NeevoException("Connection to database failed.");
+			throw new Neevo\NeevoException("Connection to database failed.");
 
 		$this->resource = $connection;
 
@@ -98,8 +98,6 @@ class NeevoDriverPgSQL implements INeevoDriver {
 		// Schema
 		 if(isset($config['schema']))
 			 $this->runQuery('SET search_path TO "' . $config['schema'] . '"');
-
-		 $this->escapeMethod = version_compare(PHP_VERSION , '5.2.0', '>=');
 	}
 
 
@@ -126,14 +124,14 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * Execute given SQL statement.
 	 * @param string $queryString
 	 * @return resource|bool
-	 * @throws NeevoException
+	 * @throws Neevo\NeevoException
 	 */
 	public function runQuery($queryString){
 		$this->affectedRows = false;
 
 		$result = @pg_query($this->resource, $queryString);
 		if($result === false)
-			throw new NeevoException("Query failed. " . pg_last_error($this->resource), null, $queryString);
+			throw new Neevo\NeevoException("Query failed. " . pg_last_error($this->resource), null, $queryString);
 
 		$this->affectedRows = @pg_affected_rows($result);
 		return $result;
@@ -207,10 +205,10 @@ class NeevoDriverPgSQL implements INeevoDriver {
 
 	/**
 	 * Randomize result order.
-	 * @param NeevoBaseStmt $statement
+	 * @param Neevo\BaseStatement $statement
 	 * @return void
 	 */
-	public function randomizeOrder(NeevoBaseStmt $statement){
+	public function randomizeOrder(Neevo\BaseStatement $statement){
 		$statement->order('RAND()');
 	}
 
@@ -239,33 +237,27 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
 	public function escape($value, $type){
 		switch($type){
-			case Neevo::BOOL:
+			case Neevo\Manager::BOOL:
 				return $value ? 'TRUE' : 'FALSE';
 
-			case Neevo::TEXT:
-				if($this->escapeMethod)
-					return "'" . pg_escape_string($this->resource, $value) . "'";
-				else
-					return "'" . pg_escape_string($value) . "'";
+			case Neevo\Manager::TEXT:
+				return "'" . pg_escape_string($this->resource, $value) . "'";
 
-			case Neevo::BINARY:
-				if($this->escapeMethod)
-					return "'" . pg_escape_bytea($this->resource, $value) . "'";
-				else
-					return "'" . pg_escape_bytea($value) . "'";
+			case Neevo\Manager::BINARY:
+				return "'" . pg_escape_bytea($this->resource, $value) . "'";
 
-			case Neevo::IDENTIFIER:
+			case Neevo\Manager::IDENTIFIER:
 				 return '"' . str_replace('.', '"."', str_replace('"', '""', $value)) . '"';
 
-			case Neevo::DATETIME:
-				return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
+			case Neevo\Manager::DATETIME:
+				return ($value instanceof \DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
 
 			default:
-				throw new InvalidArgumentException('Unsupported data type.');
+				throw new \InvalidArgumentException('Unsupported data type.');
 				break;
 		}
 	}
@@ -276,12 +268,12 @@ class NeevoDriverPgSQL implements INeevoDriver {
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
 	public function unescape($value, $type){
-		if($type === Neevo::BINARY)
+		if($type === Neevo\Manager::BINARY)
 			return pg_unescape_bytea($value);
-		throw new InvalidArgumentException('Unsupported data type.');
+		throw new \InvalidArgumentException('Unsupported data type.');
 	}
 
 

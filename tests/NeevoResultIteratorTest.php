@@ -2,17 +2,17 @@
 
 
 /**
- * Tests for NeevoResultIterator.
+ * Tests for Neevo\ResultIterator.
  */
-class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
+class ResultIteratorTest extends PHPUnit_Framework_TestCase {
 
-	/** @var NeevoResult */
+	/** @var Neevo\Result */
 	private $result, $result2;
 
 
 	protected function setUp(){
-		$this->result = new NeevoResult(new NeevoConnection('driver=Dummy'), 'foo');
-		$this->result2 = new NeevoResult(new NeevoConnection('driver=Dummy&unbuffered=true'), 'foo');
+		$this->result = new Neevo\Result(new Neevo\Connection('driver=Dummy'), 'foo');
+		$this->result2 = new Neevo\Result(new Neevo\Connection('driver=Dummy&unbuffered=true'), 'foo');
 	}
 
 
@@ -45,7 +45,7 @@ class NeevoResultIteratorTest extends PHPUnit_Framework_TestCase {
 
 
 	/**
-	 * @expectedException NeevoDriverException
+	 * @expectedException Neevo\DriverException
 	 */
 	public function testSeekUnbuffered(){
 		$iterator = $this->result2->getIterator();

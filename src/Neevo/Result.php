@@ -9,16 +9,17 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
  * Represents a result. Can be iterated, counted and provides fluent interface.
  *
- * @method NeevoResult as($alias)
+ * @method Result as($alias)
  *
  * @author Martin Srank
- * @package Neevo
  */
-class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable {
+class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/** @var string */
@@ -43,41 +44,41 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 	protected $detectTypes;
 
 	/** @var string */
-	private $rowClass = 'NeevoRow';
+	private $rowClass = 'Neevo\\Row';
 
 
 	/**
 	 * Create SELECT statement.
-	 * @param NeevoConnection $connection
-	 * @param string|array|Traversable $columns
-	 * @param string|NeevoResult $source Table name or subquery
+	 * @param Connection $connection
+	 * @param string|array|\Traversable $columns
+	 * @param string|Result $source Table name or subquery
 	 * @return void
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
-	public function __construct(NeevoConnection $connection, $columns = null, $source = null){
+	public function __construct(Connection $connection, $columns = null, $source = null){
 		parent::__construct($connection);
 
 		// Input check
 		if($columns === null && $source === null)
-			throw new InvalidArgumentException('Missing select source.');
+			throw new \InvalidArgumentException('Missing select source.');
 		if($source === null){
 			$source = $columns;
 			$columns = '*';
 		}
 		if(!is_string($source) && !($source instanceof self))
-			throw new InvalidArgumentException('Source must be a string or NeevoResult.');
+			throw new \InvalidArgumentException('Source must be a string or \Result.');
 
 		$columns = is_string($columns)
-			? explode(',', $columns) : ($columns instanceof Traversable
+			? explode(',', $columns) : ($columns instanceof \Traversable
 				? iterator_to_array($columns) : (array) $columns);
 
 		if(empty($columns))
-			throw new InvalidArgumentException('No columns given.');
+			throw new \InvalidArgumentException('No columns given.');
 
 		if($source instanceof self)
 			$this->subqueries[] = $source;
 
-		$this->type = Neevo::STMT_SELECT;
+		$this->type = Manager::STMT_SELECT;
 		$this->columns = array_map('trim', $columns);
 		$this->source = $source;
 		$this->detectTypes = (bool) $connection['result']['detectTypes'];
@@ -92,7 +93,7 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 	public function __destruct(){
 		try{
 			$this->connection->getDriver()->freeResultSet($this->resultSet);
-		} catch(NeevoImplemenationException $e){}
+		} catch(ImplementationException $e){}
 
 		$this->resultSet = null;
 	}
@@ -113,7 +114,7 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 	 * Define grouping rule.
 	 * @param string $rule
 	 * @param string $having Optional
-	 * @return NeevoResult fluent interface
+	 * @return Result fluent interface
 	 */
 	public function group($rule, $having = null){
 		if($this->validateConditions())
@@ -127,18 +128,18 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 
 	/**
 	 * Perform JOIN on tables.
-	 * @param string|NeevoResult|NeevoLiteral $source Table name or subquery
-	 * @param string|NeevoLiteral $condition
-	 * @return NeevoResult fluent interface
+	 * @param string|Result|Literal $source Table name or subquery
+	 * @param string|Literal $condition
+	 * @return Result fluent interface
 	 */
 	public function join($source, $condition){
 		if($this->validateConditions())
 			return $this;
 
-		if(!(is_string($source) || $source instanceof self || $source instanceof NeevoLiteral))
-			throw new InvalidArgumentException('Source must be a string, NeevoLiteral or NeevoResult.');
-		if(!(is_string($condition) || $condition instanceof NeevoLiteral))
-			throw new InvalidArgumentException('Condition must be a string or NeevoLiteral.');
+		if(!(is_string($source) || $source instanceof self || $source instanceof Literal))
+			throw new \InvalidArgumentException('Source must be a string, Neevo\\Literal or Neevo\\Result.');
+		if(!(is_string($condition) || $condition instanceof Literal))
+			throw new \InvalidArgumentException('Condition must be a string or Neevo\\Literal.');
 
 		if($source instanceof self)
 			$this->subqueries[] = $source;
@@ -154,23 +155,23 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 
 	/**
 	 * Perform LEFT JOIN on tables.
-	 * @param string|NeevoResult|NeevoLiteral $source Table name or subquery
-	 * @param string|NeevoLiteral $condition
-	 * @return NeevoResult fluent interface
+	 * @param string|Result|Literal $source Table name or subquery
+	 * @param string|Literal $condition
+	 * @return Result fluent interface
 	 */
 	public function leftJoin($source, $condition){
-		return $this->join($source, $condition, Neevo::JOIN_LEFT);
+		return $this->join($source, $condition, Manager::JOIN_LEFT);
 	}
 
 
 	/**
 	 * Perform INNER JOIN on tables.
-	 * @param string|NeevoResult|NeevoLiteral $source Table name or subquery
-	 * @param string|NeevoLiteral $condition
-	 * @return NeevoResult fluent interface
+	 * @param string|Result|Literal $source Table name or subquery
+	 * @param string|Literal $condition
+	 * @return Result fluent interface
 	 */
 	public function innerJoin($source, $condition){
-		return $this->join($source, $condition, Neevo::JOIN_INNER);
+		return $this->join($source, $condition, Manager::JOIN_INNER);
 	}
 
 
@@ -179,7 +180,7 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 
 	/**
 	 * Fetch the row on current position.
-	 * @return NeevoRow|FALSE
+	 * @return Row|FALSE
 	 */
 	public function fetch(){
 		$this->performed || $this->run();
@@ -310,7 +311,7 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 	 * Count number of rows.
 	 * @param string $column
 	 * @return int
-	 * @throws NeevoDriverException
+	 * @throws DriverException
 	 */
 	public function count($column = null){
 		if($column === null){
@@ -387,7 +388,7 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 	 * Set column type.
 	 * @param string $column
 	 * @param string $type
-	 * @return NeevoResult fluent interface
+	 * @return Result fluent interface
 	 */
 	public function setType($column, $type){
 		$this->columnTypes[$column] = $type;
@@ -398,11 +399,11 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 	/**
 	 * Set multiple column types at once.
 	 * @param array|Traversable $types
-	 * @return NeevoResult fluent interface
+	 * @return Result fluent interface
 	 */
 	public function setTypes($types){
-		if(!($types instanceof Traversable || is_array($types)))
-			throw new InvalidArgumentException('Types must be an array or Traversable.');
+		if(!($types instanceof \Traversable || is_array($types)))
+			throw new \InvalidArgumentException('Types must be an array or Traversable.');
 		foreach($types as $column => $type){
 			$this->setType($column, $type);
 		}
@@ -412,7 +413,7 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 
 	/**
 	 * Detect column types.
-	 * @return NeevoResult fluent interface
+	 * @return Result fluent interface
 	 */
 	public function detectTypes(){
 		$table = $this->getTable();
@@ -445,19 +446,19 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 	 */
 	protected function resolveType($type){
 		static $patterns = array(
-			'bool|bit' => Neevo::BOOL,
-			'bin|blob|bytea' => Neevo::BINARY,
-			'string|char|text|bigint|longlong' => Neevo::TEXT,
-			'int|long|byte|serial|counter' => Neevo::INT,
-			'float|real|double|numeric|number|decimal|money|currency' => Neevo::FLOAT,
-			'time|date|year' => Neevo::DATETIME
+			'bool|bit' => Manager::BOOL,
+			'bin|blob|bytea' => Manager::BINARY,
+			'string|char|text|bigint|longlong' => Manager::TEXT,
+			'int|long|byte|serial|counter' => Manager::INT,
+			'float|real|double|numeric|number|decimal|money|currency' => Manager::FLOAT,
+			'time|date|year' => Manager::DATETIME
 		);
 
 		foreach($patterns as $vendor => $universal){
 			if(preg_match("~$vendor~i", $type))
 				return $universal;
 		}
-		return Neevo::TEXT;
+		return Manager::TEXT;
 	}
 
 
@@ -472,32 +473,32 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 		if($value === null)
 			return null;
 		switch($type){
-			case Neevo::TEXT:
+			case Manager::TEXT:
 				return (string) $value;
 
-			case Neevo::INT:
+			case Manager::INT:
 				return (int) $value;
 
-			case Neevo::FLOAT:
+			case Manager::FLOAT:
 				return (float) $value;
 
-			case Neevo::BOOL:
+			case Manager::BOOL:
 				return ((bool) $value) && $value !== 'f' && $value !== 'F';
 
-			case Neevo::BINARY:
+			case Manager::BINARY:
 				return $this->connection->getDriver()->unescape($value, $type);
 
-			case Neevo::DATETIME:
+			case Manager::DATETIME:
 				if((int) $value === 0)
 					return null;
 				elseif(!$dateFormat)
-					return new DateTime(is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value);
+					return new \DateTime(is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value);
 				elseif($dateFormat == 'U')
 					return is_numeric($value) ? (int) $value : strtotime($value);
 				elseif(is_numeric($value))
 					return date($dateFormat, $value);
 				else{
-					$d = new DateTime($value);
+					$d = new \DateTime($value);
 					return $d->format($dateFormat);
 				}
 
@@ -513,7 +514,7 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 	/**
 	 * Set table alias to be used when in subquery.
 	 * @param string $alias
-	 * @return NeevoResult fluent interface
+	 * @return Result fluent interface
 	 */
 	public function setAlias($alias){
 		$this->tableAlias = $alias;
@@ -533,7 +534,7 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 	/**
 	 * Set class to use as a row class.
 	 * @param string $className
-	 * @return NeevoResult fluent interface
+	 * @return Result fluent interface
 	 * @throws NeevoException
 	 */
 	public function setRowClass($className){
@@ -546,10 +547,10 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 
 	/**
 	 * Get the result iterator.
-	 * @return NeevoResultIterator
+	 * @return ResultIterator
 	 */
 	public function getIterator(){
-		return new NeevoResultIterator($this);
+		return new ResultIterator($this);
 	}
 
 
@@ -583,7 +584,7 @@ class NeevoResult extends NeevoBaseStmt implements IteratorAggregate, Countable 
 
 	/**
 	 * Get the source for the statement.
-	 * @return string|NeevoResult
+	 * @return string|Result
 	 */
 	public function getSource(){
 		return $this->source;

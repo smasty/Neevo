@@ -9,41 +9,42 @@
  *
  */
 
+namespace Neevo;
+
 
 /**
  * Autoloader responsible for loading Neevo classes and interfaces.
  * @author Martin Srank
- * @package Neevo
  */
-class NeevoLoader {
+class Loader {
 
 
 	/** @var array */
 	private $list = array(
-		'ineevocache' => '/NeevoCache.php',
-		'ineevodriver' => '/INeevoDriver.php',
-		'ineevoobservable' => '/INeevoObservable.php',
-		'ineevoobserver' => '/INeevoObserver.php',
-		'neevo' => '/Neevo.php',
-		'neevobasestmt' => '/NeevoBaseStmt.php',
-		'neevocachefile' => '/NeevoCache.php',
-		'neevocachememcache' => '/NeevoCache.php',
-		'neevocachememory' => '/NeevoCache.php',
-		'neevocachesession' => '/NeevoCache.php',
-		'neevoconnection' => '/NeevoConnection.php',
-		'neevodriverexception' => '/NeevoException.php',
-		'neevoexception' => '/NeevoException.php',
-		'neevoimplementationexception' => '/NeevoException.php',
-		'neevoliteral' => '/Neevo.php',
-		'neevoobservermap' => '/NeevoObserverMap.php',
-		'neevoparser' => '/NeevoParser.php',
-		'neevoresult' => '/NeevoResult.php',
-		'neevoresultiterator' => '/NeevoResultIterator.php',
-		'neevorow' => '/NeevoRow.php',
-		'neevostmt' => '/NeevoStmt.php',
+		'neevo\\icache' => '/ICache.php',
+		'neevo\\idriver' => '/IDriver.php',
+		'neevo\\iobservable' => '/IObservable.php',
+		'neevo\\iobserver' => '/IObserver.php',
+		'neevo\\manager' => '/Manager.php',
+		'neevo\\basestatement' => '/BaseStatement.php',
+		'neevo\\cache\\filestorage' => '/Cache/FileStorage.php',
+		'neevo\\cache\\memcachestorage' => '/Cache/MemcacheStorage.php',
+		'neevo\\cache\\memorystorage' => '/Cache/MemoryStorage.php',
+		'neevo\\cache\\sessionstorage' => '/Cache/SessionStorage.php',
+		'neevo\\connection' => '/Connection.php',
+		'neevo\\driverexception' => '/DriverException.php',
+		'neevo\\neevoexception' => '/NeevoException.php',
+		'neevo\\implementationexception' => '/ImplementationException.php',
+		'neevo\\literal' => '/Literal.php',
+		'neevo\\observermap' => '/ObserverMap.php',
+		'neevo\\parser' => '/Parser.php',
+		'neevo\\result' => '/Result.php',
+		'neevo\\resultiterator' => '/ResultIterator.php',
+		'neevo\\row' => '/Row.php',
+		'neevo\\statement' => '/Statement.php',
 	);
 
-	/** @var NeevoLoader */
+	/** @var Loader */
 	private static $instance;
 
 
@@ -52,7 +53,7 @@ class NeevoLoader {
 
 	/**
 	* Get the singleton instance.
-	* @return NeevoLoader
+	* @return Loader
 	*/
 	public static function getInstance(){
 		if(self::$instance === null)
