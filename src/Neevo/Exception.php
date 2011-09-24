@@ -60,7 +60,8 @@ class NeevoException extends \Exception implements IObservable {
 		return $this->sql;
 	}
 
-	/*  ============  Implementation of IObservable  ============  */
+
+	/*  ************  Implementation of IObservable  ************  */
 
 
 	/**
@@ -98,3 +99,23 @@ class NeevoException extends \Exception implements IObservable {
 
 
 }
+
+
+/**
+ * Neevo driver exception.
+ * @author Martin Srank
+ */
+class DriverException extends NeevoException {
+
+}
+
+
+/**
+ * Exception for features not implemented by the driver.
+ * @author Martin Srank
+ * @package Neevo\Drivers
+ */
+class ImplementationException extends NeevoException {
+
+}
+

@@ -325,7 +325,7 @@ abstract class BaseStatement implements IObservable {
 	}
 
 
-	/*	 * ***********  IObservable implementation  ************  */
+	/*  ************  IObservable implementation  ************  */
 
 
 	/**

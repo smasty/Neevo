@@ -110,7 +110,7 @@ class ObserverMap implements \Iterator, \Countable {
 
 	/**
 	 * Return the current observer.
-	 * @return Neevo\IObserver
+	 * @return IObserver
 	 */
 	public function current(){
 		$current = current($this->storage);

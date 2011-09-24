@@ -16,10 +16,13 @@ if(version_compare(PHP_VERSION, '5.3', '<')){
 }
 
 
+define('NEEVO_DIR', __DIR__);
+
+
 // Try to turn magic quotes off - Neevo handles SQL quoting.
 @set_magic_quotes_runtime(false);
 
 
 // Register autoloader responsible for loading Neevo classes and interfaces.
-require_once __DIR__ . '/Neevo/Loader.php';
+require_once NEEVO_DIR . '/Neevo/Loader.php';
 Neevo\Loader::getInstance()->register();

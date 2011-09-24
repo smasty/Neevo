@@ -80,7 +80,8 @@ class Manager implements IObservable, IObserver {
 		$this->attachObserver($this, self::QUERY);
 	}
 
-	/*	 * ***********  Statement factories  ************  */
+
+	/*  ************  Statement factories  ************  */
 
 
 	/**
@@ -180,7 +181,8 @@ class Manager implements IObservable, IObserver {
 		return $count;
 	}
 
-	/*	 * ***********  Transactions  ************  */
+
+	/*  ************  Transactions  ************  */
 
 
 	/**
@@ -218,7 +220,8 @@ class Manager implements IObservable, IObserver {
 		return $this;
 	}
 
-	/*	 * ***********  Implementation of IObservable & IObserver  ************  */
+
+	/*  ************  Implementation of IObservable & IObserver  ************  */
 
 
 	/**
