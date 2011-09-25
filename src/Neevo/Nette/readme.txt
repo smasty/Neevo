@@ -23,7 +23,7 @@ Instructions
 
 
 3.  In the same config file, add another section called "database".
-    That is the place for all your Neevo configuration, e.g.
+    That is the place for all your Neevo configuration, for example:
 
     database:
         driver: MySQLi
