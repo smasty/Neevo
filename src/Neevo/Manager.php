@@ -265,13 +265,13 @@ class Manager implements Observer\Subject, Observer\Observer {
 
 
 	/**
-	 * Receive update from observable.
-	 * @param Observer\Subject $observable
+	 * Receive update from observable subject.
+	 * @param Observer\Subject $subject
 	 * @param int $event Event type
 	 * @return void
 	 */
-	public function updateStatus(Observer\Subject $observable, $event){
-		$this->last = $observable->__toString();
+	public function updateStatus(Observer\Subject $subject, $event){
+		$this->last = $subject->__toString();
 		++$this->queries;
 	}
 
