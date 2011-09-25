@@ -21,19 +21,19 @@ class Loader {
 
 	/** @var array */
 	private $list = array(
-		'neevo\\cache' => '/Cache.php',
-		'neevo\\driver' => '/Driver.php',
-		'neevo\\manager' => '/Manager.php',
 		'neevo\\basestatement' => '/BaseStatement.php',
+		'neevo\\cache' => '/Cache.php',
 		'neevo\\cache\\filestorage' => '/Cache/FileStorage.php',
 		'neevo\\cache\\memcachestorage' => '/Cache/MemcacheStorage.php',
 		'neevo\\cache\\memorystorage' => '/Cache/MemoryStorage.php',
 		'neevo\\cache\\sessionstorage' => '/Cache/SessionStorage.php',
 		'neevo\\connection' => '/Connection.php',
+		'neevo\\driver' => '/Driver.php',
 		'neevo\\driverexception' => '/Exception.php',
-		'neevo\\neevoexception' => '/Exception.php',
 		'neevo\\implementationexception' => '/Exception.php',
 		'neevo\\literal' => '/Manager.php',
+		'neevo\\manager' => '/Manager.php',
+		'neevo\\neevoexception' => '/Exception.php',
 		'neevo\\observer\\objectmap' => '/Observer/ObjectMap.php',
 		'neevo\\observer\\observer' => '/Observer/Observer.php',
 		'neevo\\observer\\subject' => '/Observer/Subject.php',
