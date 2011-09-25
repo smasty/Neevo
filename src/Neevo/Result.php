@@ -93,7 +93,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	public function __destruct(){
 		try{
 			$this->connection->getDriver()->freeResultSet($this->resultSet);
-		} catch(ImplementationException $e){}
+		} catch(Drivers\ImplementationException $e){}
 
 		$this->resultSet = null;
 	}

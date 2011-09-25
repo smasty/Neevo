@@ -106,7 +106,7 @@ class Statement extends BaseStatement {
 		$this->performed || $this->run();
 		try{
 			return $this->connection->getDriver()->getInsertId();
-		} catch(ImplementationException $e){
+		} catch(Drivers\ImplementationException $e){
 			return false;
 		}
 	}

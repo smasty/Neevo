@@ -120,7 +120,7 @@ class Connection implements Observer\Subject, \ArrayAccess {
 	public function __destruct(){
 		try{
 			$this->driver->closeConnection();
-		} catch(ImplementationException $e){
+		} catch(Drivers\ImplementationException $e){
 
 		}
 

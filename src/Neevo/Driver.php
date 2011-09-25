@@ -18,7 +18,7 @@ namespace Neevo;
  * All Neevo drivers **must** implement this interface, not only reproduce all it's
  * methods, or they won't be recognised as valid drivers.
  *
- * If something is not implemented, the method **must** throw Neevo\ImplementationException.
+ * If something is not implemented, the method **must** throw Neevo\Drivers\ImplementationException.
  * The exception will be catched and Neevo will decide, what to do next.
  *
  * If something is not supported by the driver (e.g. number of result rows on unbuffered queries)
