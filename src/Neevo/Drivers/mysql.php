@@ -48,11 +48,11 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function __construct(Neevo\BaseStatement $statement = null){
 		if(!extension_loaded("mysql"))
-			throw new Neevo\DriverException("Cannot instantiate Neevo MySQL driver - PHP extension 'mysql' not loaded.");
+			throw new DriverException("Cannot instantiate Neevo MySQL driver - PHP extension 'mysql' not loaded.");
 		if($statement instanceof Neevo\BaseStatement)
 			parent::__construct($statement);
 	}
@@ -62,7 +62,7 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 	 * Create connection to database.
 	 * @param array $config Configuration options
 	 * @return void
-	 * @throws Neevo\NeevoException
+	 * @throws DriverException
 	 */
 	public function connect(array $config){
 
@@ -93,12 +93,12 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 			$connection = @mysql_connect($host, $config['username'], $config['password']);
 
 		if(!is_resource($connection))
-			throw new Neevo\NeevoException("Connection to host '$host' failed.");
+			throw new DriverException("Connection to host '$host' failed.");
 
 		// Select DB
 		if($config['database']){
 			$db = mysql_select_db($config['database']);
-			if(!$db) throw new Neevo\NeevoException("Could not select database '$config[database]'.");
+			if(!$db) throw new DriverException("Could not select database '$config[database]'.");
 		}
 
 		$this->resource = $connection;
@@ -138,7 +138,7 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 	 * Execute given SQL statement.
 	 * @param string $queryString
 	 * @return resource|bool
-	 * @throws Neevo\NeevoException
+	 * @throws DriverException
 	 */
 	public function runQuery($queryString){
 
@@ -150,7 +150,7 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 
 		$error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', @mysql_error($this->resource));
 		if($error && $result === false)
-			throw new Neevo\NeevoException("Query failed. $error", @mysql_errno($this->resource), $queryString);
+			throw new DriverException($error, @mysql_errno($this->resource), $queryString);
 
 		$this->affectedRows = @mysql_affected_rows($this->resource);
 		return $result;
@@ -202,11 +202,11 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 	 * @param resource $resultSet
 	 * @param int $offset
 	 * @return bool
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function seek($resultSet, $offset){
 		if($this->unbuffered){
-			throw new Neevo\DriverException('Cannot seek on unbuffered result.');
+			throw new DriverException('Cannot seek on unbuffered result.');
 		}
 		return @mysql_data_seek($resultSet, $offset);
 	}
@@ -235,11 +235,11 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 	 * Get the number of rows in the given result set.
 	 * @param resource $resultSet
 	 * @return int|FALSE
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function getNumRows($resultSet){
 		if($this->unbuffered)
-			throw new Neevo\DriverException('Cannot count rows on unbuffered result.');
+			throw new DriverException('Cannot count rows on unbuffered result.');
 		return @mysql_num_rows($resultSet);
 	}
 

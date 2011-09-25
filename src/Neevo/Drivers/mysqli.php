@@ -49,11 +49,11 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function __construct(Neevo\BaseStatement $statement = null){
 		if(!extension_loaded("mysqli"))
-			throw new Neevo\DriverException("Cannot instantiate Neevo MySQLi driver - PHP extension 'mysqli' not loaded.");
+			throw new DriverException("Cannot instantiate Neevo MySQLi driver - PHP extension 'mysqli' not loaded.");
 		if($statement instanceof Neevo\BaseStatement)
 			parent::__construct($statement);
 	}
@@ -63,7 +63,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 	 * Create connection to database.
 	 * @param array $config Configuration options
 	 * @return void
-	 * @throws Neevo\NeevoException
+	 * @throws DriverException
 	 */
 	public function connect(array $config){
 
@@ -89,7 +89,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 			$this->resource = new \mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
 
 		if($this->resource->connect_errno)
-			throw new Neevo\NeevoException($this->resource->connect_error, $this->resource->connect_errno);
+			throw new DriverException($this->resource->connect_error, $this->resource->connect_errno);
 
 		// Set charset
 		if($this->resource instanceof \mysqli){
@@ -124,7 +124,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 	 * Execute given SQL statement.
 	 * @param string $queryString
 	 * @return mysqli_result|bool
-	 * @throws Neevo\NeevoException
+	 * @throws DriverException
 	 */
 	public function runQuery($queryString){
 
@@ -133,7 +133,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 
 		$error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $this->resource->error);
 		if($error && $result === false)
-			throw new Neevo\NeevoException("Query failed. $error", $this->resource->errno, $queryString);
+			throw new DriverException($error, $this->resource->errno, $queryString);
 
 		$this->affectedRows = $this->resource->affected_rows;
 		return $result;
@@ -185,11 +185,11 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 	 * @param mysqli_result $resultSet
 	 * @param int
 	 * @return bool
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function seek($resultSet, $offset){
 		if($this->unbuffered)
-			throw new Neevo\DriverException('Cannot seek on unbuffered result.');
+			throw new DriverException('Cannot seek on unbuffered result.');
 		return $resultSet->data_seek($offset);
 	}
 
@@ -217,11 +217,11 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 	 * Get the number of rows in the given result set.
 	 * @param \mysqli_result $resultSet
 	 * @return int|FALSE
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function getNumRows($resultSet){
 		if($this->unbuffered)
-			throw new Neevo\DriverException('Cannot seek on unbuffered result.');
+			throw new DriverException('Cannot count rows on unbuffered result.');
 		if($resultSet instanceof \mysqli_result)
 			return $resultSet->num_rows;
 		return false;

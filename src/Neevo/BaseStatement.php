@@ -283,8 +283,12 @@ abstract class BaseStatement implements Observer\Subject {
 		if(!$this->performed)
 			$start = microtime(true);
 
-		$query = $this->performed
-			? $this->resultSet : $this->connection->getDriver()->runQuery($this->parse());
+		try{
+			$query = $this->performed
+				? $this->resultSet : $this->connection->getDriver()->runQuery($this->parse());
+		} catch(Drivers\DriverException $e){
+			throw new NeevoException('Query failed. ' . $e->getMessage(), $e->getCode(), $e->getSql(), $e);
+		}
 
 		if(!$this->performed)
 			$this->time = microtime(true) - $start;

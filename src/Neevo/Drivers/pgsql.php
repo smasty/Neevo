@@ -42,11 +42,11 @@ class PgSQLDriver implements Neevo\Driver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function __construct(Neevo\BaseStatement $statement = null){
 		if(!extension_loaded("pgsql"))
-			throw new Neevo\DriverException("Cannot instantiate Neevo PgSQL driver - PHP extension 'pgsql' not loaded.");
+			throw new DriverException("Cannot instantiate Neevo PgSQL driver - PHP extension 'pgsql' not loaded.");
 		if($statement instanceof Neevo\BaseStatement)
 			parent::__construct($statement);
 	}
@@ -56,7 +56,7 @@ class PgSQLDriver implements Neevo\Driver {
 	 * Create connection to database.
 	 * @param array $config Configuration options
 	 * @return void
-	 * @throws Neevo\NeevoException
+	 * @throws DriverException
 	 */
 	public function connect(array $config){
 
@@ -88,7 +88,7 @@ class PgSQLDriver implements Neevo\Driver {
 			$connection = @pg_connect($string, PGSQL_CONNECT_FORCE_NEW);
 
 		if(!is_resource($connection))
-			throw new Neevo\NeevoException("Connection to database failed.");
+			throw new DriverException("Connection to database failed.");
 
 		$this->resource = $connection;
 
@@ -124,14 +124,14 @@ class PgSQLDriver implements Neevo\Driver {
 	 * Execute given SQL statement.
 	 * @param string $queryString
 	 * @return resource|bool
-	 * @throws Neevo\NeevoException
+	 * @throws DriverException
 	 */
 	public function runQuery($queryString){
 		$this->affectedRows = false;
 
 		$result = @pg_query($this->resource, $queryString);
 		if($result === false)
-			throw new Neevo\NeevoException("Query failed. " . pg_last_error($this->resource), null, $queryString);
+			throw new DriverException(pg_last_error($this->resource), null, $queryString);
 
 		$this->affectedRows = @pg_affected_rows($result);
 		return $result;

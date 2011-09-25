@@ -57,11 +57,11 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function __construct(Neevo\BaseStatement $statement = null){
 		if(!extension_loaded("sqlite3"))
-			throw new Neevo\DriverException("Cannot instantiate Neevo SQLite 3 driver - PHP extension 'sqlite3' not loaded.");
+			throw new DriverException("Cannot instantiate Neevo SQLite 3 driver - PHP extension 'sqlite3' not loaded.");
 		if($statement instanceof Neevo\BaseStatement)
 			parent::__construct($statement);
 	}
@@ -71,10 +71,10 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 	 * Create connection to database.
 	 * @param array $config Configuration options
 	 * @return void
-	 * @throws Neevo\NeevoException
+	 * @throws DriverException
 	 */
 	public function connect(array $config){
-		//Neevo\Connection::alias($config, 'database', 'file');
+		Neevo\Connection::alias($config, 'database', 'file');
 		Neevo\Connection::alias($config, 'updateLimit', 'update_limit');
 
 		$defaults = array(
@@ -97,12 +97,12 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 			try{
 				$connection = new \SQLite3($config['database']);
 			} catch(Exception $e){
-					throw new Neevo\NeevoException($e->getMessage(), $e->getCode());
+					throw new DriverException($e->getMessage(), $e->getCode());
 			}
 		}
 
 		if(!($connection instanceof \SQLite3))
-			throw new Neevo\NeevoException("Opening database file '$config[database]' failed.");
+			throw new DriverException("Opening database file '$config[database]' failed.");
 
 		$this->resource = $connection;
 		$this->updateLimit = (bool) $config['updateLimit'];
@@ -141,7 +141,7 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 	 * Execute given SQL statement.
 	 * @param string $queryString
 	 * @return SQLite3Result|bool
-	 * @throws Neevo\NeevoException
+	 * @throws DriverException
 	 */
 	public function runQuery($queryString){
 
@@ -152,7 +152,7 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 		$result = $this->resource->query($queryString);
 
 		if($result === false)
-			throw new Neevo\NeevoException($this->resource->lastErrorMsg(), $this->resource->lastErrorCode(), $queryString);
+			throw new DriverException($this->resource->lastErrorMsg(), $this->resource->lastErrorCode(), $queryString);
 
 		$this->affectedRows = $this->resource->changes();
 		return $result;
@@ -218,10 +218,10 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 	 * @param SQLite3Result $resultSet
 	 * @param int $offset
 	 * @return bool
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function seek($resultSet, $offset){
-		throw new Neevo\DriverException('Cannot seek on unbuffered result.');
+		throw new DriverException('Cannot seek on unbuffered result.');
 	}
 
 
@@ -250,10 +250,10 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 	 * Not supported because of unbuffered queries.
 	 * @param SQLite3Result $resultSet
 	 * @return int|FALSE
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function getNumRows($resultSet){
-		throw new Neevo\DriverException('Cannot count rows on unbuffered result.');
+		throw new DriverException('Cannot count rows on unbuffered result.');
 	}
 
 

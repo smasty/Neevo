@@ -86,7 +86,7 @@ class Statement extends BaseStatement {
 
 		try{
 			$this->affectedRows = $this->connection->getDriver()->getAffectedRows();
-		} catch(DriverException $e){
+		} catch(Drivers\DriverException $e){
 			$this->affectedRows = false;
 		}
 
@@ -119,7 +119,7 @@ class Statement extends BaseStatement {
 	public function affectedRows(){
 		$this->performed || $this->run();
 		if($this->affectedRows === false)
-			throw new DriverException('Affected rows are not supported by this driver.');
+			throw new Drivers\DriverException('Affected rows are not supported by this driver.');
 		return $this->affectedRows;
 	}
 

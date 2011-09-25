@@ -22,7 +22,7 @@ namespace Neevo;
  * The exception will be catched and Neevo will decide, what to do next.
  *
  * If something is not supported by the driver (e.g. number of result rows on unbuffered queries)
- * the driver should throw Neevo\DriverException.
+ * the driver should throw Neevo\Drivers\DriverException.
  *
  * When the driver needs to rewrite default output of SQL commands, it **must**
  * extend **Neevo\Parser** class. For proper use, see
@@ -36,7 +36,7 @@ interface Driver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws DriverException
+	 * @throws Drivers\DriverException
 	 */
 	public function __construct();
 

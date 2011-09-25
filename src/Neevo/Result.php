@@ -311,7 +311,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	 * Count number of rows.
 	 * @param string $column
 	 * @return int
-	 * @throws DriverException
+	 * @throws Drivers\DriverException
 	 */
 	public function count($column = null){
 		if($column === null){

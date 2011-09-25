@@ -62,7 +62,7 @@ class DummyDriver implements Neevo\Driver {
 		elseif($savepoint === null)
 			$this->transactions[count($this->transactions)-1] = self::TRANSACTION_COMMIT;
 		else
-			throw new Neevo\DriverException("Invalid savepoint '$savepoint'.");
+			throw new DriverException("Invalid savepoint '$savepoint'.");
 	}
 
 
@@ -72,7 +72,7 @@ class DummyDriver implements Neevo\Driver {
 		elseif($savepoint === null)
 			$this->transactions[count($this->transactions)-1] = self::TRANSACTION_ROLLBACK;
 		else
-			throw new Neevo\DriverException("Invalid savepoint '$savepoint'.");
+			throw new DriverException("Invalid savepoint '$savepoint'.");
 	}
 
 
@@ -83,7 +83,7 @@ class DummyDriver implements Neevo\Driver {
 
 	public function seek($resultSet, $offset){
 		if($this->unbuffered)
-			throw new Neevo\DriverException('Cannot seek on unbuffered result.');
+			throw new DriverException('Cannot seek on unbuffered result.');
 		return $resultSet->seek($offset);
 	}
 
@@ -100,7 +100,7 @@ class DummyDriver implements Neevo\Driver {
 
 	public function getNumRows($resultSet){
 		if($this->unbuffered)
-			throw new Neevo\DriverException('Cannot count rows on unbuffered result.');
+			throw new DriverException('Cannot count rows on unbuffered result.');
 		return $resultSet ? 3 : false;
 	}
 

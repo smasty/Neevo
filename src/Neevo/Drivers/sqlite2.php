@@ -62,11 +62,11 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 	/**
 	 * Check for required PHP extension.
 	 * @return void
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function __construct(Neevo\BaseStatement $statement = null){
 		if(!extension_loaded("sqlite"))
-			throw new Neevo\DriverException("Cannot instantiate Neevo SQLite driver - PHP extension 'sqlite' not loaded.");
+			throw new DriverException("Cannot instantiate Neevo SQLite driver - PHP extension 'sqlite' not loaded.");
 		if($statement instanceof Neevo\BaseStatement)
 			parent::__construct($statement);
 	}
@@ -76,7 +76,7 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 	 * Create connection to database.
 	 * @param array $config Configuration options
 	 * @return void
-	 * @throws Neevo\NeevoException
+	 * @throws DriverException
 	 */
 	public function connect(array $config){
 		Neevo\Connection::alias($config, 'database', 'file');
@@ -106,7 +106,7 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 			$connection = @sqlite_open($config['database'], 0666, $error);
 
 		if(!is_resource($connection))
-			throw new Neevo\NeevoException("Opening database file '$config[database]' failed.");
+			throw new DriverException("Opening database file '$config[database]' failed.");
 
 		$this->resource = $connection;
 		$this->updateLimit = (bool) $config['updateLimit'];
@@ -146,7 +146,7 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 	 * Execute given SQL statement.
 	 * @param string $queryString
 	 * @return resource|bool
-	 * @throws Neevo\NeevoException
+	 * @throws DriverException
 	 */
 	public function runQuery($queryString){
 
@@ -160,7 +160,7 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 			$result = @sqlite_query($this->resource, $queryString, null, $error);
 
 		if($error && $result === false)
-			throw new Neevo\NeevoException("Query failed. $error", sqlite_last_error($this->resource), $queryString);
+			throw new DriverException($error, sqlite_last_error($this->resource), $queryString);
 
 		$this->affectedRows = @sqlite_changes($this->resource);
 		return $result;
@@ -228,11 +228,11 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 	 * @param resource $resultSet
 	 * @param int $offset
 	 * @return bool
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function seek($resultSet, $offset){
 		if($this->unbuffered)
-			throw new Neevo\DriverException('Cannot seek on unbuffered result.');
+			throw new DriverException('Cannot seek on unbuffered result.');
 		return @sqlite_seek($resultSet, $offset);
 	}
 
@@ -260,11 +260,11 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 	 * Get the number of rows in the given result set.
 	 * @param resource $resultSet
 	 * @return int|FALSE
-	 * @throws Neevo\DriverException
+	 * @throws DriverException
 	 */
 	public function getNumRows($resultSet){
 		if($this->unbuffered)
-			throw new Neevo\DriverException('Cannot count rows on unbuffered result.');
+			throw new DriverException('Cannot count rows on unbuffered result.');
 		return @sqlite_num_rows($resultSet);
 	}
 

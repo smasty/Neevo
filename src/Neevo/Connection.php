@@ -292,7 +292,7 @@ class Connection implements Observer\Subject, \ArrayAccess {
 	 * Set the driver and statement parser.
 	 * @param string $driver
 	 * @return void
-	 * @throws DriverException
+	 * @throws Drivers\DriverException
 	 */
 	protected function setDriver($driver){
 		if(strcasecmp($driver, 'sqlite') === 0) // Backward compatibility
@@ -303,15 +303,15 @@ class Connection implements Observer\Subject, \ArrayAccess {
 		if(!class_exists($class)){
 			$file = __DIR__ . '/Drivers/' . strtolower($driver) . '.php';
 			if(!file_exists($file))
-				throw new DriverException("$driver driver file ($file) does not exist.");
+				throw new Drivers\DriverException("$driver driver file ($file) does not exist.");
 			if(is_readable($file))
 				include_once $file;
 			else
-				throw new DriverException("$driver driver file ($file) is not readable.");
+				throw new Drivers\DriverException("$driver driver file ($file) is not readable.");
 
 		}
 		if(!$this->isDriver($class))
-			throw new DriverException("Class '$class' is not a valid Neevo driver class.");
+			throw new Drivers\DriverException("Class '$class' is not a valid Neevo driver class.");
 
 		$this->driver = new $class;
 
@@ -327,12 +327,12 @@ class Connection implements Observer\Subject, \ArrayAccess {
 	 * @return bool
 	 */
 	protected function isDriver($class){
-		//try{
+		try{
 			$reflection = new \ReflectionClass($class);
 			return $reflection->implementsInterface('Neevo\Driver');
-		//} catch(\ReflectionException $e){
-		//	return false;
-		//}
+		} catch(\ReflectionException $e){
+			return false;
+		}
 	}
 
 

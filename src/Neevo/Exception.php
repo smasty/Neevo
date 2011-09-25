@@ -99,23 +99,3 @@ class NeevoException extends \Exception implements Observer\Subject {
 
 
 }
-
-
-/**
- * Neevo driver exception.
- * @author Martin Srank
- */
-class DriverException extends NeevoException {
-
-}
-
-
-/**
- * Exception for features not implemented by the driver.
- * @author Martin Srank
- * @package Neevo\Drivers
- */
-class ImplementationException extends NeevoException {
-
-}
-
