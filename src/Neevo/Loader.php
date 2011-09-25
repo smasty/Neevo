@@ -42,6 +42,9 @@ class Loader {
 		'neevo\\resultiterator' => '/ResultIterator.php',
 		'neevo\\row' => '/Row.php',
 		'neevo\\statement' => '/Statement.php',
+		'neevocachenette' => '/Nette/NeevoCacheNette.php',
+		'neevofactory' => '/Nette/NeevoFactory.php',
+		'neevopanel' => '/Nette/NeevoPanel.php',
 	);
 
 	/** @var Loader */
