@@ -34,6 +34,9 @@ class Loader {
 		'neevo\\literal' => '/Manager.php',
 		'neevo\\manager' => '/Manager.php',
 		'neevo\\neevoexception' => '/Exception.php',
+		'neevo\\nette\\cacheadapter' => '/Nette/CacheAdapter.php',
+		'neevo\\nette\\debugpanel' => '/Nette/DebugPanel.php',
+		'neevo\\nette\\servicefactory' => '/Nette/ServiceFactory.php',
 		'neevo\\observer\\objectmap' => '/Observer/ObjectMap.php',
 		'neevo\\observer\\observer' => '/Observer/Observer.php',
 		'neevo\\observer\\subject' => '/Observer/Subject.php',
@@ -42,9 +45,6 @@ class Loader {
 		'neevo\\resultiterator' => '/ResultIterator.php',
 		'neevo\\row' => '/Row.php',
 		'neevo\\statement' => '/Statement.php',
-		'neevocachenette' => '/Nette/NeevoCacheNette.php',
-		'neevofactory' => '/Nette/NeevoFactory.php',
-		'neevopanel' => '/Nette/NeevoPanel.php',
 	);
 
 	/** @var Loader */

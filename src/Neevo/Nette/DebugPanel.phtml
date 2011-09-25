@@ -1,7 +1,7 @@
 <style>
-#nette-debug-panel-NeevoPanel td.sql{background:white !important;min-width:200px}
-#nette-debug-panel-NeevoPanel td.sql .link{color:#bbb !important;font-size:.9em}
-#nette-debug-panel-NeevoPanel tr table{margin:8px 0;max-height:150px;overflow:auto}
+#nette-debug-panel-Neevo-Nette-DebugPanel td.sql{background:white !important;min-width:200px}
+#nette-debug-panel-Neevo-Nette-DebugPanel td.sql .link{color:#bbb !important;font-size:.9em}
+#nette-debug-panel-Neevo-Nette-DebugPanel tr table{margin:8px 0;max-height:150px;overflow:auto}
 </style>
 <h1>Queries: <?php echo $numQueries; if($totalTime) echo ", time: {$timeFormat($totalTime)} ms" ?></h1>
 <div class="nette-inner">
@@ -17,14 +17,14 @@
 		<?php echo $timeFormat($ticket['time']);
 		if(isset($ticket['explain'])): ?>
 			<br/>
-			<a href='#' class='nette-toggler' rel='#nette-NeevoPanel-row-<?php echo ++$i ?>'>explain&nbsp;&#x25ba;</a>
+			<a href='#' class='nette-toggler' rel='#nette-Neevo-Nette-DebugPanel-row-<?php echo ++$i ?>'>explain&nbsp;&#x25ba;</a>
 		<?php endif ?>
 	</td>
 	<td class="sql">
 		<?php echo Neevo::highlightSql($ticket['sql']);
 		echo $sourceLink($ticket['source']);
 		if(isset($ticket['explain'])): ?>
-			<table id="nette-NeevoPanel-row-<?php echo $i ?>" class="nette-collapsed">
+			<table id="nette-Neevo-Nette-DebugPanel-row-<?php echo $i ?>" class="nette-collapsed">
 				<tr>
 					<th><?php echo implode('</th><th>', array_keys($ticket['explain'][0])) ?></th>
 				</tr>

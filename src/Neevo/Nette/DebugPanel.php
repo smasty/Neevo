@@ -8,7 +8,12 @@
  * Copyright (c) 2011 Martin Srank (http://smasty.net)
  *
  */
-use Nette\Diagnostics\IBarPanel,
+
+namespace Neevo\Nette;
+
+
+use Neevo,
+	Nette\Diagnostics\IBarPanel,
 	Nette\Diagnostics\Debugger,
 	Nette\Diagnostics\Helpers,
 	Nette\Diagnostics\BlueScreen,
@@ -19,10 +24,10 @@ use Nette\Diagnostics\IBarPanel,
 /**
  * Provides Nette DebugBar panel with info about performed queries.
  */
-class NeevoPanel implements INeevoObserver, IBarPanel {
+class DebugPanel implements Neevo\Observer\Observer, IBarPanel {
 
 
-	public static $templateFile = '/NeevoPanel.phtml';
+	public static $templateFile = '/DebugPanel.phtml';
 
 	/** @var array */
 	private $tickets = array();
@@ -52,11 +57,11 @@ class NeevoPanel implements INeevoObserver, IBarPanel {
 
 	/**
 	 * Register Neevo DebugBar and Bluescreen panels.
-	 * @param Neevo $neevo
+	 * @param Neevo\Manager $neevo
 	 * @param bool $explain Run EXPLAIN on all SELECT queries?
 	 * @return void
 	 */
-	public static function register(Neevo $neevo, $explain){
+	public static function register(Neevo\Manager $neevo, $explain){
 		$panel = new static($explain);
 		$neevo->attachObserver($panel, Debugger::$productionMode
 			? self::EXCEPTION : self::QUERY + self::EXCEPTION);
@@ -71,45 +76,46 @@ class NeevoPanel implements INeevoObserver, IBarPanel {
 
 
 	/**
-	 * Receives update from observable.
-	 * @param INeevoObservable $observable
+	 * Receives update from observable subject.
+	 * @param Neevo\Observer\Subject $subject
 	 * @param int $event
 	 * @return void
 	 */
-	public function updateStatus(INeevoObservable $observable, $event){
+	public function updateStatus(Neevo\Observer\Subject $subject, $event){
 		$source = null;
+		$path = realpath(defined('NEEVO_DIR') ? NEEVO_DIR : __DIR__ . '/../../');
 		foreach(debug_backtrace(false) as $t){
-			if(isset($t['file']) && strpos($t['file'], realpath(__DIR__ . '/../Neevo/')) !== 0){
+			if(isset($t['file']) && strpos($t['file'], $path) !== 0){
 				$source = array($t['file'], (int) $t['line']);
 				break;
 			}
 		}
 
-		if($event & INeevoObserver::QUERY){
+		if($event & self::QUERY){
 			$this->numQueries++;
-			$this->totalTime += $observable->getTime();
+			$this->totalTime += $subject->getTime();
 
-			if($observable instanceof NeevoResult){
+			if($subject instanceof Neevo\Result){
 				try{
-					$rows = count($observable);
-				} catch(Exception $e){
+					$rows = count($subject);
+				} catch(\Exception $e){
 					$rows = '?';
 				}
-				$explain = $this->explain ? $observable->explain() : null;
+				$explain = $this->explain ? $subject->explain() : null;
 			} else{
 				$rows = '-';
 			}
 
 			$this->tickets[] = array(
-				'sql' => $observable->__toString(),
-				'time' => $observable->getTime(),
+				'sql' => $subject->__toString(),
+				'time' => $subject->getTime(),
 				'rows' => $rows,
 				'source' => $source,
-				'connection' => $observable->getConnection(),
+				'connection' => $subject->getConnection(),
 				'explain' => isset($explain) ? $explain : null
 			);
 
-		} elseif($event === INeevoObserver::EXCEPTION){
+		} elseif($event === self::EXCEPTION){
 			$this->failedQuerySource = $source;
 		}
 	}
@@ -117,15 +123,15 @@ class NeevoPanel implements INeevoObserver, IBarPanel {
 
 	/**
 	 * Renders SQL query string to Nette debug bluescreen when available.
-	 * @param NeevoException $e
+	 * @param Neevo\NeevoException $e
 	 * @return array
 	 */
 	public function renderException($e){
-		if($e instanceof NeevoException && $e->getSql()){
+		if($e instanceof Neevo\NeevoException && $e->getSql()){
 			list($file, $line) = $this->failedQuerySource;
 			return array(
 				'tab' => 'SQL',
-				'panel' => Neevo::highlightSql($e->getSql())
+				'panel' => Neevo\Manager::highlightSql($e->getSql())
 				. '<p><b>File:</b> '
 				. Helpers::editorLink($file, $line)
 				. " &nbsp; <b>Line:</b> $line</p>"
@@ -142,7 +148,7 @@ class NeevoPanel implements INeevoObserver, IBarPanel {
 	 * @return string
 	 */
 	public function getTab(){
-		return '<span title="Neevo v' . Neevo::VERSION . '">'
+		return '<span title="Neevo v' . Neevo\Manager::VERSION . ', revision ' . Neevo\Manager::REVISION . '">'
 		. '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAEYSURBVBgZBcHPio5hGAfg6/2+R980k6wmJgsJ5U/ZOAqbSc2GnXOwUg7BESgLUeIQ1GSjLFnMwsKGGg1qxJRmPM97/1zXFAAAAEADdlfZzr26miup2svnelq7d2aYgt3rebl585wN6+K3I1/9fJe7O/uIePP2SypJkiRJ0vMhr55FLCA3zgIAOK9uQ4MS361ZOSX+OrTvkgINSjS/HIvhjxNNFGgQsbSmabohKDNoUGLohsls6BaiQIMSs2FYmnXdUsygQYmumy3Nhi6igwalDEOJEjPKP7CA2aFNK8Bkyy3fdNCg7r9/fW3jgpVJbDmy5+PB2IYp4MXFelQ7izPrhkPHB+P5/PjhD5gCgCenx+VR/dODEwD+A3T7nqbxwf1HAAAAAElFTkSuQmCC" width="16" height="16">'
 		. ($this->numQueries ? $this->numQueries : 'No') . ' queries'
 		. ($this->totalTime ? ' / ' . sprintf('%0.1f', $this->totalTime * 1000) . ' ms' : '')

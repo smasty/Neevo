@@ -38,12 +38,12 @@ interface Observer {
 
 
 	/**
-	 * Receive update from observable.
-	 * @param Subject $observable
+	 * Receive update from observable subject.
+	 * @param Subject $subject
 	 * @param int $event Event type
 	 * @return void
 	 */
-	public function updateStatus(Subject $observable, $event);
+	public function updateStatus(Subject $subject, $event);
 
 
 }
