@@ -29,6 +29,14 @@ Documentation for Neevo is available online: http://neevo.smasty.net/documentati
 Public API reference can be found on http://neevo.smasty.net/api/.
 
 
+Minified version
+----------------
+
+'neevo.min.php' is a single-file version of whole Neevo. It's useful if you don't
+want to make any changes to the library. It is exactly the same as the normal
+version but combined to one file with all comments and whitespace removed.
+
+
 ---------
 - Author: Martin Srank - Smasty (http://smasty.net)
 - Website: http://neevo.smasty.net/
