@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/../../src/neevo.php';
+require __DIR__ . '/../../src/loader.php';
 
 $db = new Neevo\Manager(array(
 	'driver' => 'sqlite3',
