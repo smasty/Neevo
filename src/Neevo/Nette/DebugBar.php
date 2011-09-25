@@ -22,12 +22,10 @@ use Neevo,
 
 
 /**
- * Provides Nette DebugBar panel with info about performed queries.
+ * DebugBar panel informing about performed queries.
  */
-class DebugPanel implements Neevo\Observer\Observer, IBarPanel {
+class DebugBar implements Neevo\Observer\Observer, IBarPanel {
 
-
-	public static $templateFile = '/DebugPanel.phtml';
 
 	/** @var array */
 	private $tickets = array();
@@ -107,7 +105,7 @@ class DebugPanel implements Neevo\Observer\Observer, IBarPanel {
 			}
 
 			$this->tickets[] = array(
-				'sql' => $subject->__toString(),
+				'sql' => (string) $subject,
 				'time' => $subject->getTime(),
 				'rows' => $rows,
 				'source' => $source,
@@ -132,12 +130,9 @@ class DebugPanel implements Neevo\Observer\Observer, IBarPanel {
 			return array(
 				'tab' => 'SQL',
 				'panel' => Neevo\Manager::highlightSql($e->getSql())
-				. '<p><b>File:</b> '
-				. Helpers::editorLink($file, $line)
-				. " &nbsp; <b>Line:</b> $line</p>"
-				. (is_file($file)
-					? '<pre>' . BlueScreen::highlightFile($file, $line) . '</pre>'
-					: '')
+				. '<p><b>File:</b> ' . Helpers::editorLink($file, $line)
+				. ' &nbsp; <b>Line:</b> ' . ($line ?: 'n/a') . '</p>'
+				. (is_file($file) ? '<pre>' . BlueScreen::highlightFile($file, $line) . '</pre>' : '')
 			);
 		}
 	}
@@ -148,11 +143,11 @@ class DebugPanel implements Neevo\Observer\Observer, IBarPanel {
 	 * @return string
 	 */
 	public function getTab(){
-		return '<span title="Neevo v' . Neevo\Manager::VERSION . ', revision ' . Neevo\Manager::REVISION . '">'
-		. '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAEYSURBVBgZBcHPio5hGAfg6/2+R980k6wmJgsJ5U/ZOAqbSc2GnXOwUg7BESgLUeIQ1GSjLFnMwsKGGg1qxJRmPM97/1zXFAAAAEADdlfZzr26miup2svnelq7d2aYgt3rebl585wN6+K3I1/9fJe7O/uIePP2SypJkiRJ0vMhr55FLCA3zgIAOK9uQ4MS361ZOSX+OrTvkgINSjS/HIvhjxNNFGgQsbSmabohKDNoUGLohsls6BaiQIMSs2FYmnXdUsygQYmumy3Nhi6igwalDEOJEjPKP7CA2aFNK8Bkyy3fdNCg7r9/fW3jgpVJbDmy5+PB2IYp4MXFelQ7izPrhkPHB+P5/PjhD5gCgCenx+VR/dODEwD+A3T7nqbxwf1HAAAAAElFTkSuQmCC" width="16" height="16">'
-		. ($this->numQueries ? $this->numQueries : 'No') . ' queries'
-		. ($this->totalTime ? ' / ' . sprintf('%0.1f', $this->totalTime * 1000) . ' ms' : '')
-		. '</span>';
+		$queries = $this->numQueries;
+		$time = $this->totalTime;
+		ob_start();
+		include_once __DIR__ . '/templates/DebugBar.tab.phtml';
+		return ob_get_clean();
 	}
 
 
@@ -185,7 +180,7 @@ class DebugPanel implements Neevo\Observer\Observer, IBarPanel {
 		$numQueries = $this->numQueries;
 
 		ob_start();
-		include_once __DIR__ . self::$templateFile;
+		include_once __DIR__ . '/templates/DebugBar.panel.phtml';
 		return ob_get_clean();
 	}
 

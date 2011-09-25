@@ -16,9 +16,9 @@ use Neevo,
 
 
 /**
- * Neevo factory class for Nette Framework Dependency Injection Container.
+ * Factory class for Nette Framework Dependency Injection Container.
  */
-class ServiceFactory {
+class Factory {
 
 
 	/**
@@ -29,8 +29,8 @@ class ServiceFactory {
 	 * @return Neevo\Manager
 	 */
 	public static function createService(Container $container, array $config = null, $explain = true){
-		$neevo = new Neevo\Manager((array) $config, new CacheAdapter($container->cacheStorage));
-		DebugPanel::register($neevo, $explain);
+		$neevo = new Neevo\Manager((array) $config, new Cache($container->cacheStorage));
+		DebugBar::register($neevo, $explain);
 		return $neevo;
 	}
 

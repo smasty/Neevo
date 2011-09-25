@@ -17,10 +17,10 @@ use Neevo,
 
 
 /**
- * Neevo cache adapter for Nette Framework cache storage system.
+ * Cache adapter for Nette Framework cache storage system.
  * @author Martin Srank
  */
-class CacheAdapter implements Neevo\Cache {
+class Cache implements Neevo\Cache {
 
 
 	/** @var string */
