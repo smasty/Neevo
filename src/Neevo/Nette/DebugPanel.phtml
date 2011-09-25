@@ -21,7 +21,7 @@
 		<?php endif ?>
 	</td>
 	<td class="sql">
-		<?php echo Neevo::highlightSql($ticket['sql']);
+		<?php echo Neevo\Manager::highlightSql($ticket['sql']);
 		echo $sourceLink($ticket['source']);
 		if(isset($ticket['explain'])): ?>
 			<table id="nette-Neevo-Nette-DebugPanel-row-<?php echo $i ?>" class="nette-collapsed">

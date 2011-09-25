@@ -38,7 +38,8 @@ class NeevoException extends \Exception implements Observer\Subject {
 
 		parent::__construct($message, (int) $code, $previous);
 		$this->sql = $sql;
-		self::$observers = new Observer\ObjectMap;
+		if(self::$observers === null)
+			self::$observers = new Observer\ObjectMap;
 		$this->notifyObservers(Observer\Observer::EXCEPTION);
 	}
 
