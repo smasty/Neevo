@@ -9,14 +9,14 @@
  *
  */
 
-namespace Neevo\Observer;
+namespace Neevo;
 
 
 /**
  * Neevo observable interface.
  * @author Martin Srank
  */
-interface Subject {
+interface IObservable {
 
 
 	/**
@@ -25,7 +25,7 @@ interface Subject {
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(Observer $observer, $event);
+	public function attachObserver(IObserver $observer, $event);
 
 
 	/**
@@ -33,7 +33,7 @@ interface Subject {
 	 * @param Observer $observer
 	 * @return void
 	 */
-	public function detachObserver(Observer $observer);
+	public function detachObserver(IObserver $observer);
 
 
 	/**

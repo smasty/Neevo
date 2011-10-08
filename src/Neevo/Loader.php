@@ -22,24 +22,23 @@ class Loader {
 	/** @var array */
 	private $list = array(
 		'neevo\\basestatement' => '/BaseStatement.php',
-		'neevo\\cache' => '/Cache.php',
 		'neevo\\cache\\filestorage' => '/Cache/FileStorage.php',
 		'neevo\\cache\\memcachestorage' => '/Cache/MemcacheStorage.php',
 		'neevo\\cache\\memorystorage' => '/Cache/MemoryStorage.php',
 		'neevo\\cache\\sessionstorage' => '/Cache/SessionStorage.php',
 		'neevo\\connection' => '/Connection.php',
-		'neevo\\driver' => '/Driver.php',
-		'neevo\\drivers\\driverexception' => '/DriverException.php',
-		'neevo\\drivers\\implementationexception' => '/DriverException.php',
+		'neevo\\driverexception' => '/exceptions.php',
+		'neevo\\icache' => '/ICache.php',
+		'neevo\\idriver' => '/IDriver.php',
+		'neevo\\implementationexception' => '/exceptions.php',
+		'neevo\\iobservable' => '/IObservable.php',
+		'neevo\\iobserver' => '/IObserver.php',
 		'neevo\\literal' => '/Manager.php',
 		'neevo\\manager' => '/Manager.php',
-		'neevo\\neevoexception' => '/Exception.php',
+		'neevo\\neevoexception' => '/exceptions.php',
 		'neevo\\nette\\cache' => '/Nette/Cache.php',
 		'neevo\\nette\\debugbar' => '/Nette/DebugBar.php',
 		'neevo\\nette\\factory' => '/Nette/Factory.php',
-		'neevo\\observer\\objectmap' => '/Observer/ObjectMap.php',
-		'neevo\\observer\\observer' => '/Observer/Observer.php',
-		'neevo\\observer\\subject' => '/Observer/Subject.php',
 		'neevo\\parser' => '/Parser.php',
 		'neevo\\result' => '/Result.php',
 		'neevo\\resultiterator' => '/ResultIterator.php',
@@ -51,13 +50,15 @@ class Loader {
 	private static $instance;
 
 
-	private function __construct(){}
+	private function __construct(){
+
+	}
 
 
 	/**
-	* Get the singleton instance.
-	* @return Loader
-	*/
+	 * Get the singleton instance.
+	 * @return Loader
+	 */
 	public static function getInstance(){
 		if(self::$instance === null)
 			self::$instance = new self;

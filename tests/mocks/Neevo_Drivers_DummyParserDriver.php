@@ -2,12 +2,13 @@
 
 namespace Neevo\Drivers;
 
-use Neevo;
+use Neevo,
+	Neevo\DriverException;
 
 /**
  * Dummy Neevo driver/parser.
  */
-class DummyParserDriver extends Neevo\Parser implements Neevo\Driver {
+class DummyParserDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/** @var Neevo\BaseStatement */

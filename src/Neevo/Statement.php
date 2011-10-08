@@ -26,9 +26,6 @@ class Statement extends BaseStatement {
 	protected $affectedRows;
 
 
-	/*  ************  Statement factories  ************  */
-
-
 	/**
 	 * Create UPDATE statement.
 	 * @param Connection $connection
@@ -86,7 +83,7 @@ class Statement extends BaseStatement {
 
 		try{
 			$this->affectedRows = $this->connection->getDriver()->getAffectedRows();
-		} catch(Drivers\DriverException $e){
+		} catch(DriverException $e){
 			$this->affectedRows = false;
 		}
 
@@ -119,7 +116,7 @@ class Statement extends BaseStatement {
 	public function affectedRows(){
 		$this->performed || $this->run();
 		if($this->affectedRows === false)
-			throw new Drivers\DriverException('Affected rows are not supported by this driver.');
+			throw new DriverException('Affected rows are not supported by this driver.');
 		return $this->affectedRows;
 	}
 

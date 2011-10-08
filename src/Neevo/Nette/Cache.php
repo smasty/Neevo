@@ -20,13 +20,13 @@ use Neevo,
  * Cache adapter for Nette Framework cache storage system.
  * @author Martin Srank
  */
-class Cache implements Neevo\Cache {
+class Cache implements Neevo\ICache {
 
 
 	/** @var string */
 	public static $cacheKey = 'Neevo.Cache';
 
-	/** @var Cache */
+	/** @var Nette\Caching\Cache */
 	private $cache;
 
 

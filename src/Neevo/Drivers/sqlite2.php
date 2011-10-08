@@ -11,7 +11,8 @@
 
 namespace Neevo\Drivers;
 
-use Neevo;
+use Neevo,
+	Neevo\DriverException;
 
 
 /**
@@ -31,7 +32,7 @@ use Neevo;
  *
  * @author Martin Srank
  */
-class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
+class SQLite2Driver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/** @var string */
@@ -205,7 +206,7 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 	public function fetch($resultSet){
 		$row = @sqlite_fetch_array($resultSet, SQLITE_ASSOC);
 		if($row){
-			$charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
+			$charset = $this->charset === null ? null : $this->charset . '//TRANSLIT';
 
 			$fields = array();
 			foreach($row as $key => $val){
@@ -288,11 +289,11 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 	public function escape($value, $type){
 		switch($type){
 			case Neevo\Manager::BOOL:
-				return $value ? 1 :0;
+				return $value ? 1 : 0;
 
 			case Neevo\Manager::TEXT:
 			case Neevo\Manager::BINARY:
-				return "'". sqlite_escape_string($value) ."'";
+				return "'" . sqlite_escape_string($value) . "'";
 
 			case Neevo\Manager::IDENTIFIER:
 				return str_replace('[*]', '*', '[' . str_replace('.', '].[', $value) . ']');
@@ -364,10 +365,10 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 			$sql = $this->tblData[$table];
 		else
 			$q = $this->runQuery("SELECT sql FROM sqlite_master WHERE tbl_name='$table'");
-			$r = $this->fetch($q);
-			if($r === false)
-				return array();
-			$this->tblData[$table] = $sql = $r['sql'];
+		$r = $this->fetch($q);
+		if($r === false)
+			return array();
+		$this->tblData[$table] = $sql = $r['sql'];
 		$sql = explode("\n", $sql);
 
 		$cols = array();
@@ -379,9 +380,6 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\Driver {
 		}
 		return $cols;
 	}
-
-
-	/*  ************  Neevo\Parser overrides  ************  */
 
 
 	/**

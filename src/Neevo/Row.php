@@ -104,23 +104,14 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 	}
 
 
-	/*  ************  Implementation of Countable  ************  */
-
-
 	public function count(){
 		return count(array_merge($this->data, $this->modified));
 	}
 
 
-	/*  ************  Implementation of IteratorAggregate  ************  */
-
-
 	public function getIterator(){
 		return new \ArrayIterator(array_merge($this->data, $this->modified));
 	}
-
-
-	/*  ************  Magic methods  ************  */
 
 
 	public function __get($name){
@@ -143,9 +134,6 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 	public function __unset($name){
 		$this->modified[$name] = null;
 	}
-
-
-	/*  ************  Implementation of ArrayAccess  ************  */
 
 
 	public function offsetGet($offset){

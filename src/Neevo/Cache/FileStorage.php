@@ -11,14 +11,14 @@
 
 namespace Neevo\Cache;
 
-use Neevo\Cache;
+use Neevo\ICache;
 
 
 /**
  * File cache storage.
  * @author Martin Srank
  */
-class FileStorage implements Cache {
+class FileStorage implements ICache {
 
 
 	/** @var string */

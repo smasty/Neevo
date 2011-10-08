@@ -9,32 +9,32 @@
  *
  */
 
-namespace Neevo\Observer;
+namespace Neevo;
 
 
 /**
  * Neevo observer interface.
  * @author Martin Srank
  */
-interface Observer {
+interface IObserver {
+
 
 	// Event types
 	const CONNECT = 2,
+	SELECT = 4,
+	INSERT = 8,
+	UPDATE = 16,
+	DELETE = 32,
+	QUERY = 60, // SELECT, INSERT, UPDATE, DELETE
 
-		SELECT = 4,
-		INSERT = 8,
-		UPDATE = 16,
-		DELETE = 32,
-		QUERY = 60, // SELECT, INSERT, UPDATE, DELETE
+	BEGIN = 64,
+	COMMIT = 128,
+	ROLLBACK = 256,
+	TRANSACTION = 448, // BEGIN, COMMIT, ROLLBACK
 
-		BEGIN = 64,
-		COMMIT = 128,
-		ROLLBACK = 256,
-		TRANSACTION = 448, // BEGIN, COMMIT, ROLLBACK
-
-		EXCEPTION = 512,
-		DISCONNECT =1024,
-		ALL = 2046;
+	EXCEPTION = 512,
+	DISCONNECT =1024,
+	ALL = 2046;
 
 
 	/**
@@ -43,7 +43,7 @@ interface Observer {
 	 * @param int $event Event type
 	 * @return void
 	 */
-	public function updateStatus(Subject $subject, $event);
+	public function updateStatus(IObservable $subject, $event);
 
 
 }

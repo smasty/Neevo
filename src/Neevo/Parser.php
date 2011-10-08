@@ -13,7 +13,7 @@ namespace Neevo;
 
 
 /**
- * Neevo\Statement to SQL command parser.
+ * Neevo\BaseStatement to SQL command parser.
  * @author Martin Srank
  */
 class Parser {
@@ -33,9 +33,6 @@ class Parser {
 	public function __construct(BaseStatement $statement){
 		$this->stmt = $statement;
 	}
-
-
-	/*  ************  Parsing  ************  */
 
 
 	/**
@@ -302,9 +299,6 @@ class Parser {
 		}
 		return $sql;
 	}
-
-
-	/*  ************  Escaping, formatting, quoting  ************  */
 
 
 	/**

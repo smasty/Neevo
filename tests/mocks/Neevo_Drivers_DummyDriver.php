@@ -2,12 +2,13 @@
 
 namespace Neevo\Drivers;
 
-use Neevo;
+use Neevo,
+	Neevo\DriverException;
 
 /**
  * Dummy Neevo driver.
  */
-class DummyDriver implements Neevo\Driver {
+class DummyDriver implements Neevo\IDriver {
 
 	private $unbuffered = false,
 			$connected = false,

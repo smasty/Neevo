@@ -45,7 +45,7 @@ class ResultIteratorTest extends PHPUnit_Framework_TestCase {
 
 
 	/**
-	 * @expectedException Neevo\Drivers\DriverException
+	 * @expectedException Neevo\DriverException
 	 */
 	public function testSeekUnbuffered(){
 		$iterator = $this->result2->getIterator();

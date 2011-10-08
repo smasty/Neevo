@@ -16,7 +16,7 @@ namespace Neevo;
  * Neevo cache storage interface.
  * @author Martin Srank
  */
-interface Cache {
+interface ICache {
 
 
 	/**

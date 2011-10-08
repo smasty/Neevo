@@ -16,13 +16,13 @@ namespace Neevo;
  * Main Neevo exception.
  * @author Martin Srank
  */
-class NeevoException extends \Exception implements Observer\Subject {
+class NeevoException extends \Exception implements IObservable {
 
 
 	/** @var string */
 	protected $sql;
 
-	/** @var Observer\ObjectMap */
+	/** @var \SplObjectStorage */
 	protected static $observers;
 
 
@@ -39,8 +39,8 @@ class NeevoException extends \Exception implements Observer\Subject {
 		parent::__construct($message, (int) $code, $previous);
 		$this->sql = $sql;
 		if(self::$observers === null)
-			self::$observers = new Observer\ObjectMap;
-		$this->notifyObservers(Observer\Observer::EXCEPTION);
+			self::$observers = new \SplObjectStorage;
+		$this->notifyObservers(IObserver::EXCEPTION);
 	}
 
 
@@ -62,26 +62,23 @@ class NeevoException extends \Exception implements Observer\Subject {
 	}
 
 
-	/*  ************  Implementation of Observer\Subject  ************  */
-
-
 	/**
 	 * Attach given observer to given event.
-	 * @param Observer\Observer $observer
+	 * @param IObserver $observer
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(Observer\Observer $observer, $event){
+	public function attachObserver(IObserver $observer, $event){
 		self::$observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detach given observer.
-	 * @param Observer\Observer $observer
+	 * @param IObserver $observer
 	 * @return void
 	 */
-	public function detachObserver(Observer\Observer $observer){
+	public function detachObserver(IObserver $observer){
 		self::$observers->detach($observer);
 	}
 
@@ -93,10 +90,28 @@ class NeevoException extends \Exception implements Observer\Subject {
 	 */
 	public function notifyObservers($event){
 		foreach(self::$observers as $observer){
-			if($event & self::$observers->getEvent())
+			if($event & self::$observers->getInfo())
 				$observer->updateStatus($this, $event);
 		}
 	}
 
+
+}
+
+
+/**
+ * Neevo driver exception.
+ * @author Martin Srank
+ */
+class DriverException extends NeevoException {
+
+}
+
+
+/**
+ * Exception for features not implemented by the driver.
+ * @author Martin Srank
+ */
+class ImplementationException extends NeevoException {
 
 }

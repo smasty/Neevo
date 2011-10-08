@@ -16,7 +16,7 @@ namespace Neevo;
  * Core Neevo class.
  * @author Martin Srank
  */
-class Manager implements Observer\Subject, Observer\Observer {
+class Manager implements IObservable, IObserver {
 
 
 	/** @var string Default Neevo driver */
@@ -31,7 +31,7 @@ class Manager implements Observer\Subject, Observer\Observer {
 	/** @var Connection */
 	private $connection;
 
-	/** @var Observer\ObjectMap */
+	/** @var \SplObjectStorage */
 	private $observers;
 
 
@@ -70,18 +70,15 @@ class Manager implements Observer\Subject, Observer\Observer {
 	 * Configure Neevo and establish a connection.
 	 * Configuration can be different - see the API for your driver.
 	 * @param mixed $config Connection configuration.
-	 * @param Cache $cache Cache to use.
+	 * @param ICache $cache Cache to use.
 	 * @return void
 	 * @throws NeevoException
 	 */
-	public function __construct($config, Cache $cache = null){
+	public function __construct($config, ICache $cache = null){
 		$this->connection = new Connection($config, $cache);
-		$this->observers = new Observer\ObjectMap;
+		$this->observers = new \SplObjectStorage;
 		$this->attachObserver($this, self::QUERY);
 	}
-
-
-	/*  ************  Statement factories  ************  */
 
 
 	/**
@@ -93,7 +90,7 @@ class Manager implements Observer\Subject, Observer\Observer {
 	public function select($columns = null, $table = null){
 		$result = new Result($this->connection, $columns, $table);
 		foreach($this->observers as $observer){
-			$result->attachObserver($observer, $this->observers->getEvent());
+			$result->attachObserver($observer, $this->observers->getInfo());
 		}
 		return $result;
 	}
@@ -108,7 +105,7 @@ class Manager implements Observer\Subject, Observer\Observer {
 	public function insert($table, array $values){
 		$statement = Statement::createInsert($this->connection, $table, $values);
 		foreach($this->observers as $observer){
-			$statement->attachObserver($observer, $this->observers->getEvent());
+			$statement->attachObserver($observer, $this->observers->getInfo());
 		}
 		return $statement;
 	}
@@ -123,7 +120,7 @@ class Manager implements Observer\Subject, Observer\Observer {
 	public function update($table, array $data){
 		$statement = Statement::createUpdate($this->connection, $table, $data);
 		foreach($this->observers as $observer){
-			$statement->attachObserver($observer, $this->observers->getEvent());
+			$statement->attachObserver($observer, $this->observers->getInfo());
 		}
 		return $statement;
 	}
@@ -137,7 +134,7 @@ class Manager implements Observer\Subject, Observer\Observer {
 	public function delete($table){
 		$statement = Statement::createDelete($this->connection, $table);
 		foreach($this->observers as $observer){
-			$statement->attachObserver($observer, $this->observers->getEvent());
+			$statement->attachObserver($observer, $this->observers->getInfo());
 		}
 		return $statement;
 	}
@@ -182,9 +179,6 @@ class Manager implements Observer\Subject, Observer\Observer {
 	}
 
 
-	/*  ************  Transactions  ************  */
-
-
 	/**
 	 * Begin a transaction if supported.
 	 * @param string $savepoint
@@ -192,7 +186,7 @@ class Manager implements Observer\Subject, Observer\Observer {
 	 */
 	public function begin($savepoint = null){
 		$this->connection->getDriver()->beginTransaction($savepoint);
-		$this->notifyObservers(Observer\Observer::BEGIN);
+		$this->notifyObservers(IObserver::BEGIN);
 		return $this;
 	}
 
@@ -204,7 +198,7 @@ class Manager implements Observer\Subject, Observer\Observer {
 	 */
 	public function commit($savepoint = null){
 		$this->connection->getDriver()->commit($savepoint);
-		$this->notifyObservers(Observer\Observer::COMMIT);
+		$this->notifyObservers(IObserver::COMMIT);
 		return $this;
 	}
 
@@ -216,21 +210,18 @@ class Manager implements Observer\Subject, Observer\Observer {
 	 */
 	public function rollback($savepoint = null){
 		$this->connection->getDriver()->rollback($savepoint);
-		$this->notifyObservers(Observer\Observer::ROLLBACK);
+		$this->notifyObservers(IObserver::ROLLBACK);
 		return $this;
 	}
 
 
-	/*  ************  Implementation of Observer\Subject & Observer\Observer  ************  */
-
-
 	/**
 	 * Attach an observer for debugging.
-	 * @param Observer\Observer $observer
+	 * @param IObserver $observer
 	 * @param int $event Event to attach the observer to.
 	 * @return void
 	 */
-	public function attachObserver(Observer\Observer $observer, $event){
+	public function attachObserver(IObserver $observer, $event){
 		$this->observers->attach($observer, $event);
 		$this->connection->attachObserver($observer, $event);
 		$e = new NeevoException;
@@ -240,10 +231,10 @@ class Manager implements Observer\Subject, Observer\Observer {
 
 	/**
 	 * Detach given observer.
-	 * @param Observer\Observer $observer
+	 * @param IObserver $observer
 	 * @return void
 	 */
-	public function detachObserver(Observer\Observer $observer){
+	public function detachObserver(IObserver $observer){
 		$this->connection->detachObserver($observer);
 		$this->observers->detach($observer);
 		$e = new NeevoException;
@@ -258,7 +249,7 @@ class Manager implements Observer\Subject, Observer\Observer {
 	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
-			if($event & $this->observers->getEvent())
+			if($event & $this->observers->getInfo())
 				$observer->updateStatus($this, $event);
 		}
 	}
@@ -266,11 +257,11 @@ class Manager implements Observer\Subject, Observer\Observer {
 
 	/**
 	 * Receive update from observable subject.
-	 * @param Observer\Subject $subject
+	 * @param IObservable $subject
 	 * @param int $event Event type
 	 * @return void
 	 */
-	public function updateStatus(Observer\Subject $subject, $event){
+	public function updateStatus(IObservable $subject, $event){
 		$this->last = $subject->__toString();
 		++$this->queries;
 	}
@@ -336,7 +327,6 @@ class Manager implements Observer\Subject, Observer\Observer {
 
 
 }
-
 
 
 /**

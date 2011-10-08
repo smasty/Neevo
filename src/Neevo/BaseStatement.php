@@ -11,6 +11,7 @@
 
 namespace Neevo;
 
+
 /**
  * Neevo statement abstract base ancestor.
  *
@@ -22,7 +23,7 @@ namespace Neevo;
  *
  * @author Martin Srank
  */
-abstract class BaseStatement implements Observer\Subject {
+abstract class BaseStatement implements IObservable {
 
 
 	/** @var string */
@@ -54,16 +55,16 @@ abstract class BaseStatement implements Observer\Subject {
 
 	/** @var array Event type conversion table */
 	protected static $eventTable = array(
-		Manager::STMT_SELECT => Observer\Observer::SELECT,
-		Manager::STMT_INSERT => Observer\Observer::INSERT,
-		Manager::STMT_UPDATE => Observer\Observer::UPDATE,
-		Manager::STMT_DELETE => Observer\Observer::DELETE
+		Manager::STMT_SELECT => IObserver::SELECT,
+		Manager::STMT_INSERT => IObserver::INSERT,
+		Manager::STMT_UPDATE => IObserver::UPDATE,
+		Manager::STMT_DELETE => IObserver::DELETE
 	);
 
 	/** @var array */
 	protected $subqueries = array();
 
-	/** @var Neevo\Observer\ObjectMap */
+	/** @var \SplObjectStorage */
 	protected $observers;
 
 	/** @var array */
@@ -77,7 +78,7 @@ abstract class BaseStatement implements Observer\Subject {
 	 */
 	public function __construct(Connection $connection){
 		$this->connection = $connection;
-		$this->observers = new Observer\ObjectMap;
+		$this->observers = new \SplObjectStorage;
 	}
 
 
@@ -115,7 +116,7 @@ abstract class BaseStatement implements Observer\Subject {
 
 			$this->resetState();
 			if(($count = count($this->conditions)) !== 0)
-				$this->conditions[$count-1]['glue'] = strtoupper($name);
+				$this->conditions[$count - 1]['glue'] = strtoupper($name);
 			if(count($args) >= 1)
 				call_user_func_array(array($this, 'where'), $args);
 			return $this;
@@ -126,24 +127,20 @@ abstract class BaseStatement implements Observer\Subject {
 
 			// Parameter counts
 			if(count($args) < 1 && $name == 'if')
-				throw new \InvalidArgumentException('Missing argument 1 for '.__CLASS__."::$name().");
+				throw new \InvalidArgumentException('Missing argument 1 for ' . __CLASS__ . "::$name().");
 
 			$conds = & $this->stmtConditions;
 			if($name == 'if')
 				$conds[] = (bool) $args[0];
 			elseif($name == 'else')
-				$conds[count($conds)-1] = !end($conds);
+				$conds[count($conds) - 1] = !end($conds);
 			elseif($name == 'end')
 				array_pop($conds);
 
 			return $this;
-
 		}
-		throw new \BadMethodCallException('Call to undefined method '.__CLASS__."::$name()");
+		throw new \BadMethodCallException('Call to undefined method ' . __CLASS__ . "::$name()");
 	}
-
-
-	/*  ************  Statement clauses  ************  */
 
 
 	/**
@@ -160,8 +157,7 @@ abstract class BaseStatement implements Observer\Subject {
 	 */
 	public function where($expr, $value = true){
 		if((is_array($expr) || $expr instanceof \Traversable) && $value === true){
-			foreach($expr as $key => $val)
-				$this->where($key, $val);
+			foreach($expr as $key => $val) $this->where($key, $val);
 			return $this;
 		}
 
@@ -259,9 +255,6 @@ abstract class BaseStatement implements Observer\Subject {
 	}
 
 
-	/*  ************  Statement manipulation  ************  */
-
-
 	/**
 	 * Print out syntax highlighted statement.
 	 * @param bool $return
@@ -286,7 +279,7 @@ abstract class BaseStatement implements Observer\Subject {
 		try{
 			$query = $this->performed
 				? $this->resultSet : $this->connection->getDriver()->runQuery($this->parse());
-		} catch(Drivers\DriverException $e){
+		} catch(DriverException $e){
 			throw new NeevoException('Query failed. ' . $e->getMessage(), $e->getCode(), $e->getSql(), $e);
 		}
 
@@ -297,7 +290,7 @@ abstract class BaseStatement implements Observer\Subject {
 		$this->resultSet = $query;
 
 		$this->notifyObservers(isset($this->type)
-			? self::$eventTable[$this->type] : Observer\Observer::QUERY);
+			? self::$eventTable[$this->type] : IObserver::QUERY);
 
 		return $query;
 	}
@@ -329,26 +322,23 @@ abstract class BaseStatement implements Observer\Subject {
 	}
 
 
-	/*  ************  Observer\Subject implementation  ************  */
-
-
 	/**
 	 * Attach given observer to given event.
-	 * @param Observer\Observer $observer
+	 * @param IObserver $observer
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(Observer\Observer $observer, $event){
+	public function attachObserver(IObserver $observer, $event){
 		$this->observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detach given observer.
-	 * @param Observer\Observer $observer
+	 * @param IObserver $observer
 	 * @return void
 	 */
-	public function detachObserver(Observer\Observer $observer){
+	public function detachObserver(IObserver $observer){
 		$this->observers->detach($observer);
 	}
 
@@ -360,13 +350,10 @@ abstract class BaseStatement implements Observer\Subject {
 	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
-			if($event & $this->observers->getEvent())
+			if($event & $this->observers->getInfo())
 				$observer->updateStatus($this, $event);
 		}
 	}
-
-
-	/*  ************  Getters  ************  */
 
 
 	/**
@@ -456,9 +443,6 @@ abstract class BaseStatement implements Observer\Subject {
 		}
 		return $cached === '' ? null : $cached;
 	}
-
-
-	/*  ************  Internal methods  ************  */
 
 
 	/**

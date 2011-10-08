@@ -85,7 +85,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 	/**
 	 * Implementation of Countable.
 	 * @return int
-	 * @throws Drivers\DriverException on unbuffered result.
+	 * @throws DriverException on unbuffered result.
 	 */
 	public function count(){
 		return $this->result->count();
@@ -95,12 +95,12 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 	/**
 	 * Implementation of SeekableIterator.
 	 * @param int $offset
-	 * @throws \OutOfRangeException|Drivers\DriverException
+	 * @throws \OutOfRangeException|DriverException
 	 */
 	public function seek($offset){
 		try{
 			$this->result->seek($offset);
-		} catch(Drivers\DriverException $e){
+		} catch(DriverException $e){
 			throw $e;
 		} catch(NeevoException $e){
 			throw new \OutOfRangeException("Cannot seek to offset $offset.", null, $e);

@@ -61,7 +61,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 			$msg = new Neevo\Connection(array(
 					'driver' => 'Foo'
 				));
-		} catch(Neevo\Drivers\DriverException $e){
+		} catch(Neevo\DriverException $e){
 			$msg = $e->getMessage();
 		}
 
@@ -74,7 +74,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 			$msg = new Neevo\Connection(array(
 					'driver' => 'Wrong'
 				));
-		} catch(Neevo\Drivers\DriverException $e){
+		} catch(Neevo\DriverException $e){
 			$msg = $e->getMessage();
 		}
 

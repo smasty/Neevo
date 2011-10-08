@@ -11,7 +11,8 @@
 
 namespace Neevo\Drivers;
 
-use Neevo;
+use Neevo,
+	Neevo\DriverException;
 
 
 /**
@@ -29,7 +30,7 @@ use Neevo;
  *
  * @author Martin Srank
  */
-class PgSQLDriver implements Neevo\Driver {
+class PgSQLDriver implements Neevo\IDriver {
 
 
 	/** @var resource */
@@ -96,8 +97,8 @@ class PgSQLDriver implements Neevo\Driver {
 		@pg_set_client_encoding($this->resource, $config['charset']);
 
 		// Schema
-		 if(isset($config['schema']))
-			 $this->runQuery('SET search_path TO "' . $config['schema'] . '"');
+		if(isset($config['schema']))
+			$this->runQuery('SET search_path TO "' . $config['schema'] . '"');
 	}
 
 
@@ -251,7 +252,7 @@ class PgSQLDriver implements Neevo\Driver {
 				return "'" . pg_escape_bytea($this->resource, $value) . "'";
 
 			case Neevo\Manager::IDENTIFIER:
-				 return '"' . str_replace('.', '"."', str_replace('"', '""', $value)) . '"';
+				return '"' . str_replace('.', '"."', str_replace('"', '""', $value)) . '"';
 
 			case Neevo\Manager::DATETIME:
 				return ($value instanceof \DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);

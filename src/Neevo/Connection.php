@@ -25,7 +25,7 @@ namespace Neevo;
  *
  * @author Martin Srank
  */
-class Connection implements Observer\Subject, \ArrayAccess {
+class Connection implements IObservable, \ArrayAccess {
 
 
 	/** @var array */
@@ -40,36 +40,34 @@ class Connection implements Observer\Subject, \ArrayAccess {
 	/** @var string */
 	private $parser = 'Neevo\\Parser';
 
-	/** @var Observer\ObjectMap */
+	/** @var \SplObjectStorage */
 	private $observers;
 
-	/** @var Cache */
+	/** @var ICache */
 	private $cache;
 
 
 	/**
 	 * Establish a connection.
 	 * @param array|string|\Traversable $config
-	 * @param Cache $cache
+	 * @param ICache $cache
 	 * @return void
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct($config, Cache $cache = null){
-		$this->observers = new Observer\ObjectMap;
+	public function __construct($config, ICache $cache = null){
+		$this->observers = new \SplObjectStorage;
 
 		$this->cache = $cache !== null ? $cache : new Cache\MemoryStorage;
 
 		// Parse config
 		if(is_string($config)){
 			parse_str($config, $config);
-
 		} elseif($config instanceof \Traversable){
 			$tmp = array();
 			foreach($config as $key => $val){
 				$tmp[$key] = $val instanceof \Traversable ? iterator_to_array($val) : $val;
 			}
 			$config = $tmp;
-
 		} elseif(!is_array($config)){
 			throw new \InvalidArgumentException('Configuration must be an array, string or Traversable.');
 		}
@@ -124,7 +122,7 @@ class Connection implements Observer\Subject, \ArrayAccess {
 
 		}
 
-		$this->notifyObservers(Observer\Observer::DISCONNECT);
+		$this->notifyObservers(IObserver::DISCONNECT);
 	}
 
 
@@ -138,7 +136,7 @@ class Connection implements Observer\Subject, \ArrayAccess {
 
 		$this->driver->connect($this->config);
 		$this->connected = true;
-		$this->notifyObservers(Observer\Observer::CONNECT);
+		$this->notifyObservers(IObserver::CONNECT);
 	}
 
 
@@ -183,7 +181,7 @@ class Connection implements Observer\Subject, \ArrayAccess {
 
 	/**
 	 * Get the current cache storage instance.
-	 * @return Cache
+	 * @return ICache
 	 */
 	public function getCache(){
 		return $this->cache;
@@ -192,33 +190,30 @@ class Connection implements Observer\Subject, \ArrayAccess {
 
 	/**
 	 * Set the cache storage.
-	 * @param Cache $cache
+	 * @param ICache $cache
 	 */
-	public function setCache(Cache $cache){
+	public function setCache(ICache $cache){
 		$this->cache = $cache;
 	}
 
 
-	/*  ************  Implementation of Observer\Subject  ************  */
-
-
 	/**
 	 * Attach given observer to given $event.
-	 * @param Observer\Observer $observer
+	 * @param IObserver $observer
 	 * @param int $event
 	 * @return void
 	 */
-	public function attachObserver(Observer\Observer $observer, $event){
+	public function attachObserver(IObserver $observer, $event){
 		$this->observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detach given observer.
-	 * @param Observer\Observer $observer
+	 * @param IObserver $observer
 	 * @return void
 	 */
-	public function detachObserver(Observer\Observer $observer){
+	public function detachObserver(IObserver $observer){
 		$this->observers->detach($observer);
 	}
 
@@ -230,13 +225,10 @@ class Connection implements Observer\Subject, \ArrayAccess {
 	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
-			if($event & $this->observers->getEvent())
+			if($event & $this->observers->getInfo())
 				$observer->updateStatus($this, $event);
 		}
 	}
-
-
-	/*  ************  Implementation of ArrayAccess  ************  */
 
 
 	/**
@@ -260,13 +252,15 @@ class Connection implements Observer\Subject, \ArrayAccess {
 
 
 	/** @internal */
-	public function offsetSet($offset, $value){}
+	public function offsetSet($offset, $value){
+
+	}
+
 
 	/** @internal */
-	public function offsetUnset($offset){}
+	public function offsetUnset($offset){
 
-
-	/*  ************  Internal methods  ************  */
+	}
 
 
 	/**
@@ -292,7 +286,7 @@ class Connection implements Observer\Subject, \ArrayAccess {
 	 * Set the driver and statement parser.
 	 * @param string $driver
 	 * @return void
-	 * @throws Drivers\DriverException
+	 * @throws DriverException
 	 */
 	protected function setDriver($driver){
 		if(strcasecmp($driver, 'sqlite') === 0) // Backward compatibility
@@ -303,15 +297,14 @@ class Connection implements Observer\Subject, \ArrayAccess {
 		if(!class_exists($class)){
 			$file = __DIR__ . '/Drivers/' . strtolower($driver) . '.php';
 			if(!file_exists($file))
-				throw new Drivers\DriverException("$driver driver file ($file) does not exist.");
+				throw new DriverException("$driver driver file ($file) does not exist.");
 			if(is_readable($file))
 				include_once $file;
 			else
-				throw new Drivers\DriverException("$driver driver file ($file) is not readable.");
-
+				throw new DriverException("$driver driver file ($file) is not readable.");
 		}
 		if(!$this->isDriver($class))
-			throw new Drivers\DriverException("Class '$class' is not a valid Neevo driver class.");
+			throw new DriverException("Class '$class' is not a valid Neevo driver class.");
 
 		$this->driver = new $class;
 
@@ -329,7 +322,7 @@ class Connection implements Observer\Subject, \ArrayAccess {
 	protected function isDriver($class){
 		try{
 			$reflection = new \ReflectionClass($class);
-			return $reflection->implementsInterface('Neevo\Driver');
+			return $reflection->implementsInterface('Neevo\\IDriver');
 		} catch(\ReflectionException $e){
 			return false;
 		}
@@ -344,7 +337,7 @@ class Connection implements Observer\Subject, \ArrayAccess {
 	protected function isParser($class){
 		try{
 			$reflection = new \ReflectionClass($class);
-			return $reflection->isSubclassOf('Neevo\Parser');
+			return $reflection->isSubclassOf('Neevo\\Parser');
 		} catch(\ReflectionException $e){
 			return false;
 		}

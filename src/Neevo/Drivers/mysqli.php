@@ -11,7 +11,8 @@
 
 namespace Neevo\Drivers;
 
-use Neevo;
+use Neevo,
+	Neevo\DriverException;
 
 
 /**
@@ -33,7 +34,7 @@ use Neevo;
  *
  * @author Martin Srank
  */
-class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
+class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/** @var mysqli_result */
@@ -94,7 +95,8 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 		// Set charset
 		if($this->resource instanceof \mysqli){
 			$ok = @$this->resource->set_charset($config['charset']);
-			if(!$ok) $this->runQuery("SET NAMES ".$config['charset']);
+			if(!$ok)
+				$this->runQuery("SET NAMES " . $config['charset']);
 		}
 
 		$this->unbuffered = $config['unbuffered'];
@@ -247,10 +249,10 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 	public function escape($value, $type){
 		switch($type){
 			case Neevo\Manager::BOOL:
-				return $value ? 1 :0;
+				return $value ? 1 : 0;
 
 			case Neevo\Manager::TEXT:
-				return "'". $this->resource->real_escape_string($value) ."'";
+				return "'" . $this->resource->real_escape_string($value) . "'";
 
 			case Neevo\Manager::IDENTIFIER:
 				return str_replace('`*`', '*', '`' . str_replace('.', '`.`', str_replace('`', '``', $value)) . '`');
@@ -289,7 +291,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 	 */
 	public function getPrimaryKey($table){
 		$key = '';
-		$q = $this->runQuery('SHOW FULL COLUMNS FROM '.$table);
+		$q = $this->runQuery('SHOW FULL COLUMNS FROM ' . $table);
 		while($col = $this->fetch($q)){
 			if(strtolower($col['Key']) === 'pri' && $key === '')
 				$key = $col['Field'];
@@ -321,9 +323,6 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\Driver {
 		}
 		return $cols;
 	}
-
-
-	/*  ************  Neevo\Parser overrides  ************  */
 
 
 	/**

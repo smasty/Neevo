@@ -22,7 +22,7 @@ class CacheTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @dataProvider getImplementations
 	 */
-	public function testBehaviour(Neevo\Cache $cache){
+	public function testBehaviour(Neevo\ICache $cache){
 		$cache->store($k = 'key', $v = 'value');
 		$this->assertEquals($v, $cache->fetch($k));
 

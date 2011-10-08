@@ -11,7 +11,6 @@
 
 namespace Neevo\Nette;
 
-
 use Neevo,
 	Nette\Diagnostics\IBarPanel,
 	Nette\Diagnostics\Debugger,
@@ -20,11 +19,10 @@ use Neevo,
 	Nette\Utils\Html;
 
 
-
 /**
  * DebugBar panel informing about performed queries.
  */
-class DebugBar implements Neevo\Observer\Observer, IBarPanel {
+class DebugBar implements Neevo\IObserver, IBarPanel {
 
 
 	/** @var array */
@@ -61,8 +59,7 @@ class DebugBar implements Neevo\Observer\Observer, IBarPanel {
 	 */
 	public static function register(Neevo\Manager $neevo, $explain){
 		$panel = new static($explain);
-		$neevo->attachObserver($panel, Debugger::$productionMode
-			? self::EXCEPTION : self::QUERY + self::EXCEPTION);
+		$neevo->attachObserver($panel, Debugger::$productionMode ? self::EXCEPTION : self::QUERY + self::EXCEPTION);
 
 		// Register DebugBar panel
 		if(!Debugger::$productionMode)
@@ -75,11 +72,11 @@ class DebugBar implements Neevo\Observer\Observer, IBarPanel {
 
 	/**
 	 * Receives update from observable subject.
-	 * @param Neevo\Observer\Subject $subject
+	 * @param Neevo\IObservable $subject
 	 * @param int $event
 	 * @return void
 	 */
-	public function updateStatus(Neevo\Observer\Subject $subject, $event){
+	public function updateStatus(Neevo\IObservable $subject, $event){
 		$source = null;
 		$path = realpath(defined('NEEVO_DIR') ? NEEVO_DIR : __DIR__ . '/../../');
 		foreach(debug_backtrace(false) as $t){
@@ -112,7 +109,6 @@ class DebugBar implements Neevo\Observer\Observer, IBarPanel {
 				'connection' => $subject->getConnection(),
 				'explain' => isset($explain) ? $explain : null
 			);
-
 		} elseif($event === self::EXCEPTION){
 			$this->failedQuerySource = $source;
 		}
@@ -131,7 +127,7 @@ class DebugBar implements Neevo\Observer\Observer, IBarPanel {
 				'tab' => 'SQL',
 				'panel' => Neevo\Manager::highlightSql($e->getSql())
 				. '<p><b>File:</b> ' . Helpers::editorLink($file, $line)
-				. ' &nbsp; <b>Line:</b> ' . ($line ?: 'n/a') . '</p>'
+				. ' &nbsp; <b>Line:</b> ' . ($line ? : 'n/a') . '</p>'
 				. (is_file($file) ? '<pre>' . BlueScreen::highlightFile($file, $line) . '</pre>' : '')
 			);
 		}
@@ -161,19 +157,18 @@ class DebugBar implements Neevo\Observer\Observer, IBarPanel {
 		}
 
 		$timeFormat = function($time){
-			return sprintf('%0.3f', $time * 1000);
-		};
+				return sprintf('%0.3f', $time * 1000);
+			};
 		$sourceLink = function($source){
-			$el = Html::el('a');
-			$el->class = 'link';
-			$el->href(strtr(Debugger::$editor,
-				array('%file' => rawurlencode($source[0]), '%line' => $source[1])
-			));
-			$el->setText(basename(dirname($source[0])) . '/' . basename($source[0]) . ":$source[1]");
-			$el->title = implode(':', $source);
+				$el = Html::el('a');
+				$el->class = 'link';
+				$el->href(strtr(Debugger::$editor, array('%file' => rawurlencode($source[0]), '%line' => $source[1])
+					));
+				$el->setText(basename(dirname($source[0])) . '/' . basename($source[0]) . ":$source[1]");
+				$el->title = implode(':', $source);
 
-			return $el;
-		};
+				return $el;
+			};
 
 		$tickets = $this->tickets;
 		$totalTime = $this->totalTime;

@@ -107,9 +107,6 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	}
 
 
-	/*  ************  Statement clauses  ************  */
-
-
 	/**
 	 * Define grouping rule.
 	 * @param string $rule
@@ -173,9 +170,6 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	public function innerJoin($source, $condition){
 		return $this->join($source, $condition, Manager::JOIN_INNER);
 	}
-
-
-	/*  ************  Result manipulation  ************  */
 
 
 	/**
@@ -304,14 +298,11 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	}
 
 
-	/*  ************  Aggregation  ************  */
-
-
 	/**
 	 * Count number of rows.
 	 * @param string $column
 	 * @return int
-	 * @throws Drivers\DriverException
+	 * @throws DriverException
 	 */
 	public function count($column = null){
 		if($column === null){
@@ -379,9 +370,6 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 		return $rows;
 	}
-
-
-	/*  ************  Column type detection  ************  */
 
 
 	/**
@@ -506,9 +494,6 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 				return $value;
 		}
 	}
-
-
-	/*  ************  Getters & setters  ************  */
 
 
 	/**

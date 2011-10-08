@@ -11,7 +11,8 @@
 
 namespace Neevo\Drivers;
 
-use Neevo;
+use Neevo,
+	Neevo\DriverException;
 
 
 /**
@@ -32,7 +33,7 @@ use Neevo;
  *
  * @author Martin Srank
  */
-class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
+class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/** @var string */
@@ -97,7 +98,7 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 			try{
 				$connection = new \SQLite3($config['database']);
 			} catch(Exception $e){
-					throw new DriverException($e->getMessage(), $e->getCode());
+				throw new DriverException($e->getMessage(), $e->getCode());
 			}
 		}
 
@@ -122,7 +123,6 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 	public function closeConnection(){
 		$this->resource->close();
 	}
-
 
 
 	/**
@@ -196,11 +196,11 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 	 */
 	public function fetch($resultSet){
 		$row = $resultSet->fetchArray(SQLITE3_ASSOC);
-		$charset = $this->charset === null ? null : $this->charset.'//TRANSLIT';
+		$charset = $this->charset === null ? null : $this->charset . '//TRANSLIT';
 
 		if($row){
 			$fields = array();
-			foreach($row as $key=>$val){
+			foreach($row as $key => $val){
 				if($charset !== null && is_string($val))
 					$val = iconv($this->dbcharset, $charset, $val);
 				$fields[str_replace(array('[', ']'), '', $key)] = $val;
@@ -276,10 +276,10 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 	public function escape($value, $type){
 		switch($type){
 			case Neevo\Manager::BOOL:
-				return $value ? 1 :0;
+				return $value ? 1 : 0;
 
 			case Neevo\Manager::TEXT:
-				return "'". $this->resource->escapeString($value) ."'";
+				return "'" . $this->resource->escapeString($value) . "'";
 
 			case Neevo\Manager::IDENTIFIER:
 				return str_replace('[*]', '*', '[' . str_replace('.', '].[', $value) . ']');
@@ -371,9 +371,6 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\Driver {
 		}
 		return $cols;
 	}
-
-
-	/*  ************  Neevo\Parser overrides  ************  */
 
 
 	/**

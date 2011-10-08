@@ -11,7 +11,8 @@
 
 namespace Neevo\Drivers;
 
-use Neevo;
+use Neevo,
+	Neevo\DriverException;
 
 
 /**
@@ -32,7 +33,7 @@ use Neevo;
  *
  * @author Martin Srank
  */
-class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
+class MySQLDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/** @var resource */
@@ -80,7 +81,7 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 
 		$config += $defaults;
 		if(isset($config['port']))
-			$host = $config['host'] .':'. $config['port'];
+			$host = $config['host'] . ':' . $config['port'];
 		else
 			$host = $config['host'];
 
@@ -98,7 +99,8 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 		// Select DB
 		if($config['database']){
 			$db = mysql_select_db($config['database']);
-			if(!$db) throw new DriverException("Could not select database '$config[database]'.");
+			if(!$db)
+				throw new DriverException("Could not select database '$config[database]'.");
 		}
 
 		$this->resource = $connection;
@@ -108,7 +110,7 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 			if(function_exists('mysql_set_charset'))
 				@mysql_set_charset($config['charset'], $connection);
 			else
-				$this->runQuery("SET NAMES ".$config['charset']);
+				$this->runQuery("SET NAMES " . $config['charset']);
 		}
 
 		$this->unbuffered = $config['unbuffered'];
@@ -266,7 +268,7 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 				return $value ? 1 : 0;
 
 			case Neevo\Manager::TEXT:
-				return "'". mysql_real_escape_string($value, $this->resource) ."'";
+				return "'" . mysql_real_escape_string($value, $this->resource) . "'";
 
 			case Neevo\Manager::IDENTIFIER:
 				return str_replace('`*`', '*', '`' . str_replace('.', '`.`', str_replace('`', '``', $value)) . '`');
@@ -305,7 +307,7 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 	 */
 	public function getPrimaryKey($table){
 		$key = '';
-		$q = $this->runQuery('SHOW FULL COLUMNS FROM '.$table);
+		$q = $this->runQuery('SHOW FULL COLUMNS FROM ' . $table);
 		while($col = $this->fetch($q)){
 			if(strtolower($col['Key']) === 'pri' && $key === '')
 				$key = $col['Field'];
@@ -329,9 +331,6 @@ class MySQLDriver extends Neevo\Parser implements Neevo\Driver {
 		}
 		return $cols;
 	}
-
-
-	/*  ************  Neevo\Parser overrides  ************  */
 
 
 	/**
