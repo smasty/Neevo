@@ -136,7 +136,7 @@ class Parser {
 		} else{
 			$subq = $this->stmt->getSource();
 			$alias = $this->escapeValue($subq->getAlias()
-				? $subq->getAlias() : '_t', Manager::IDENTIFIER);
+				? $subq->getAlias() : '_table_', Manager::IDENTIFIER);
 			$source = "($subq) $alias";
 		}
 		$source = $this->tryDelimite($source);
@@ -146,7 +146,7 @@ class Parser {
 
 			if($join_source instanceof Result){
 				$join_alias = $this->escapeValue($join_source->getAlias()
-					? $join_source->getAlias() : '_j' . ($key+1), Manager::IDENTIFIER);
+					? $join_source->getAlias() : '_join_' . ($key+1), Manager::IDENTIFIER);
 
 				$join_source = "($join_source) $join_alias";
 			} elseif($join_source instanceof Literal){
