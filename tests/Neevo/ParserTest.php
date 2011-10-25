@@ -274,7 +274,7 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testParseSourceJoinSubqueryAutoAliases(){
+	public function testParseSourceJoinSubqueryAutoAlias(){
 		$sq1 = new Neevo\Result($this->connection, 'tab2');
 		$sq2 = new Neevo\Result($this->connection, 'tab3');
 		$result = new Neevo\Result($this->connection, 'tab1');
