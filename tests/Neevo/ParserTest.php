@@ -274,12 +274,14 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testParseSourceJoinSubqueryAutoAlias(){
-		$subquery = new Neevo\Result($this->connection, 'tab2');
+	public function testParseSourceJoinSubqueryAutoAliases(){
+		$sq1 = new Neevo\Result($this->connection, 'tab2');
+		$sq2 = new Neevo\Result($this->connection, 'tab3');
 		$result = new Neevo\Result($this->connection, 'tab1');
 		$this->assertEquals(
-			':tab1 LEFT JOIN (SELECT * FROM :tab2) :_join_1 ON :tab1.id = :tab2.tab1_id',
-			$this->parser($result->leftJoin($subquery, ':tab1.id = :tab2.tab1_id'))->parseSource()
+			':tab1 LEFT JOIN (SELECT * FROM :tab2) :_join_1 ON :foo'
+			. ' LEFT JOIN (SELECT * FROM :tab3) :_join_2 ON :bar',
+			$this->parser($result->leftJoin($sq1, ':foo')->leftJoin($sq2, ':bar'))->parseSource()
 		);
 	}
 
