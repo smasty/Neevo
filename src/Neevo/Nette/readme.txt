@@ -22,7 +22,7 @@ Instructions
     performed SELECT queries for debugging purposes. Defaults to 'yes'.
 
 
-3.  In the same config file, add another section called "database".
+2.  In the same config file, add another section called "database".
     That is the place for all your Neevo configuration, for example:
 
     database:
