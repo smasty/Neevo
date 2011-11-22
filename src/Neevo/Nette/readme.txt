@@ -15,8 +15,8 @@ Instructions
     services:
         ...
         neevo:
-			factory: Neevo\Nette\Factory::createService
-			arguments: [%database%, explain: yes]
+		factory: Neevo\Nette\Factory::createService
+		arguments: [%database%, explain: yes]
 
 	'explain' option denotes whether or not you want to run EXPLAIN on all
 	performed SELECT queries for debugging purposes. Defaults to 'yes'.
