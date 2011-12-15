@@ -1,0 +1,90 @@
+<!-- Phing configuration for Neevo -->
+<project name="Neevo" default="dist">
+
+	<property name="vc.version" value="2.0beta"/>
+
+	<property name="srcDir" value="${project.basedir}/src"/>
+	<property name="testDir" value="${project.basedir}/tests"/>
+	<property name="buildDir" value="${project.basedir}/build"/>
+	<property name="apiDir" value="${buildDir}/api/2.0"/>
+
+
+	<target name="dist" depends="prepare,classList,test,copy,lint,api,tar,clean"/>
+
+
+	<target name="prepare" description="Prepare structure">
+		<delete dir="${apiDir}" />
+		<mkdir dir="${apiDir}"/>
+		<mkdir dir="${buildDir}/src"/>
+		<mkdir dir="${buildDir}/target"/>
+	</target>
+
+
+	<target name="classList" description="Rebuild class list in Neevo\Loader">
+		<echo level="info">Rebuilding class list</echo>
+		<!-- Requires pear.nette.org/Nette installed -->
+		<exec executable="${buildDir}/rebuildClassList.php" checkreturn="true" logoutput="true">
+			<arg value="${srcDir}"/>
+		</exec>
+	</target>
+
+
+	<target name="copy" description="Copy src to target and expand tokens">
+		<exec command="git log -1 --format=%h" outputProperty="vc.rev"/>
+		<exec command="git log -1 --format=%cd --date=short" outputProperty="vc.date"/>
+
+		<copy todir="${buildDir}/src">
+			<fileset dir="${srcDir}"/>
+			<fileset dir="${project.basedir}">
+				<include name="readme.txt"/>
+				<include name="license.txt"/>
+			</fileset>
+			<filterchain>
+				<replacetokens begintoken="@" endtoken="@">
+					<token key="VCREV" value="${vc.rev}" />
+					<token key="VCDATE" value="${vc.date}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+	</target>
+
+
+	<target name="test" description="Run PHPUnit">
+		<exec command="phpunit -c ${testDir}/phpunit.xml" checkreturn="true" logoutput="true"/>
+	</target>
+
+
+	<target name="api" description="Generate API documentation">
+		<!-- Requires pear.apigen.org/ApiGen installed -->
+		<exec executable="apigen" checkreturn="true" logoutput="true">
+			<arg value="--source"/>
+			<arg path="${srcDir}"/>
+			<arg value="--destination"/>
+			<arg path="${apiDir}"/>
+			<arg value="--title=Neevo Public API"/>
+			<arg value="--progressbar=no"/>
+		</exec>
+	</target>
+
+
+	<target name="lint">
+		<phplint>
+			<fileset dir="${buildDir}/src"/>
+		</phplint>
+	</target>
+
+
+	<target name="tar">
+		<property name="targetFile" value="${buildDir}/target/Neevo-${vc.version}.tar.gz"/>
+		<delete file="${targetFile}"/>
+		<tar destfile="${targetFile}" compression="gzip" prefix="Neevo-${vc.version}">
+			<tarfileset dir="${buildDir}/src"/>
+		</tar>
+	</target>
+
+
+	<target name="clean" description="Clean up">
+		<delete dir="${buildDir}/src" includeemptydirs="true"/>
+	</target>
+
+</project>
