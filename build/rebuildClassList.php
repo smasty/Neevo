@@ -1,5 +1,8 @@
 #!/usr/bin/env php
 <?php
+/**
+ * A "task" for Phing to reload the class list in Neevo\Loader.
+ */
 
 $dir = realpath($argv[1] . '/Neevo');
 $file = 'Loader.php';
