@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 /**
  * A Phing task for reloading the class list in Neevo\Loader.
