@@ -8,6 +8,8 @@
 	<property name="buildDir" value="${project.basedir}/build"/>
 	<property name="apiDir" value="${buildDir}/api/2.0"/>
 
+	<!-- Requires pear.nette.org/Nette to be installed. -->
+	<taskdef name="neevo-loader" classname="phing.tasks.smasty.NeevoLoaderTask"/>
 
 	<target name="dist" depends="prepare,classList,test,copy,lint,api,tar,clean"/>
 
@@ -21,11 +23,7 @@
 
 
 	<target name="classList" description="Rebuild class list in Neevo\Loader">
-		<echo level="info">Rebuilding class list</echo>
-		<!-- Requires pear.nette.org/Nette installed -->
-		<exec executable="${buildDir}/rebuildClassList.php" checkreturn="true" logoutput="true">
-			<arg value="${srcDir}"/>
-		</exec>
+		<neevo-loader directory="${srcDir}/Neevo" file="Loader.php"/>
 	</target>
 
 
@@ -55,7 +53,7 @@
 
 
 	<target name="api" description="Generate API documentation">
-		<!-- Requires pear.apigen.org/ApiGen installed -->
+		<!-- Requires pear.apigen.org/ApiGen to be installed. -->
 		<exec executable="apigen" checkreturn="true" logoutput="true">
 			<arg value="--source"/>
 			<arg path="${srcDir}"/>
