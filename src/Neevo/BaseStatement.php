@@ -345,7 +345,7 @@ abstract class BaseStatement implements IObservable {
 
 	/**
 	 * Notify all observers attached to given event.
-	 * @param type $event
+	 * @param int $event
 	 * @return void
 	 */
 	public function notifyObservers($event){

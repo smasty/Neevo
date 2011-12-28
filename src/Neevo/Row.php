@@ -109,6 +109,9 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 	}
 
 
+	/**
+	 * @return \ArrayIterator
+	 */
 	public function getIterator(){
 		return new \ArrayIterator(array_merge($this->data, $this->modified));
 	}
