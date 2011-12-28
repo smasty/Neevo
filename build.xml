@@ -1,7 +1,7 @@
 <!-- Phing configuration for Neevo -->
 <project name="Neevo" default="dist">
 
-	<property name="vc.version" value="2.0beta"/>
+	<property name="vc.version" value="2.0dev"/>
 
 	<property name="srcDir" value="${project.basedir}/src"/>
 	<property name="testDir" value="${project.basedir}/tests"/>

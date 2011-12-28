@@ -36,7 +36,7 @@ class Manager implements IObservable, IObserver {
 
 
 	// Neevo version
-	const VERSION = '2.0-beta',
+	const VERSION = '2.0-dev',
 	REVISION = '@VCREV@ released on @VCDATE@';
 
 	// Data types
