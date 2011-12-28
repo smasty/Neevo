@@ -8,14 +8,16 @@
 	<property name="buildDir" value="${project.basedir}/build"/>
 	<property name="apiDir" value="${buildDir}/api/2.0"/>
 
-	<!-- Requires pear.nette.org/Nette to be installed. -->
-	<taskdef name="neevo-loader" classname="phing.tasks.smasty.NeevoLoaderTask"/>
+	<!-- Requires pear.nette.org/Nette -->
+	<taskdef name="neevo-loader" classname="build.NeevoLoaderTask"/>
+	<!-- http://github.com/apigen/phing-task -->
+	<taskdef name="apigen" classname="phing.tasks.apigen.ApiGenTask"/>
 
 	<target name="dist" depends="prepare,classList,test,copy,lint,api,tar,clean"/>
 
 
 	<target name="prepare" description="Prepare structure">
-		<delete dir="${apiDir}" />
+		<delete dir="${apiDir}"/>
 		<mkdir dir="${apiDir}"/>
 		<mkdir dir="${buildDir}/src"/>
 		<mkdir dir="${buildDir}/target"/>
@@ -39,8 +41,8 @@
 			</fileset>
 			<filterchain>
 				<replacetokens begintoken="@" endtoken="@">
-					<token key="VCREV" value="${vc.rev}" />
-					<token key="VCDATE" value="${vc.date}" />
+					<token key="VCREV" value="${vc.rev}"/>
+					<token key="VCDATE" value="${vc.date}"/>
 				</replacetokens>
 			</filterchain>
 		</copy>
@@ -53,15 +55,7 @@
 
 
 	<target name="api" description="Generate API documentation">
-		<!-- Requires pear.apigen.org/ApiGen to be installed. -->
-		<exec executable="apigen" checkreturn="true" logoutput="true">
-			<arg value="--source"/>
-			<arg path="${srcDir}"/>
-			<arg value="--destination"/>
-			<arg path="${apiDir}"/>
-			<arg value="--title=Neevo Public API"/>
-			<arg value="--progressbar=no"/>
-		</exec>
+		<apigen source="${srcDir}" destination="${apiDir}" title="Neevo Public API" sourceCode="false"/>
 	</target>
 
 
