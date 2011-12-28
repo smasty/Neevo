@@ -9,7 +9,7 @@
 	<property name="apiDir" value="${buildDir}/api/2.0"/>
 
 	<!-- Requires pear.nette.org/Nette -->
-	<taskdef name="neevo-loader" classname="build.NeevoLoaderTask"/>
+	<taskdef name="neevo-loader" classname="build.tasks.NeevoLoaderTask"/>
 	<!-- http://github.com/apigen/phing-task -->
 	<taskdef name="apigen" classname="phing.tasks.apigen.ApiGenTask"/>
 
