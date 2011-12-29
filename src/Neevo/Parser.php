@@ -370,7 +370,7 @@ class Parser {
 	 */
 	protected function applyModifiers($expr, array $modifiers, array $values){
 		foreach($modifiers as &$mod){
-			$mod = "/$mod/";
+			$mod = preg_quote("/$mod/");
 		}
 		$expr = $this->tryDelimite($expr);
 		return preg_replace($modifiers, $values, $expr, 1);
