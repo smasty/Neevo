@@ -65,7 +65,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 			$source = $columns;
 			$columns = '*';
 		}
-		if(!is_string($source) && !($source instanceof self))
+		if(!is_string($source) && !$source instanceof self)
 			throw new \InvalidArgumentException('Source must be a string or \Result.');
 
 		$columns = is_string($columns)

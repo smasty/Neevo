@@ -128,7 +128,7 @@ class Parser {
 	 * @return string
 	 */
 	protected function parseSource(){
-		if(!($this->stmt instanceof Result))
+		if(!$this->stmt instanceof Result)
 			return $this->escapeValue($this->stmt->getTable(), Manager::IDENTIFIER);
 
 		if($this->stmt->getTable() !== null){
@@ -328,7 +328,7 @@ class Parser {
 					return $value->value;
 				} else{
 					return is_numeric($value)
-						? 1 * $value
+						? +$value
 						: $this->stmt->getConnection()->getDriver()->escape($value, Manager::TEXT);
 				}
 			}

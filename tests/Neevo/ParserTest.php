@@ -160,6 +160,7 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 			array(null, 'NULL'),
 			array(array('1', 'foo'), array(1, "'foo'")),
 			array('1', 1),
+			array('-1', -1),
 			array('foo', "'foo'"),
 			array(new Neevo\Literal(1), 1),
 			array($date, $date->format("'Y-m-d H:i:s'"))
@@ -171,7 +172,7 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider escapeValueNoType
 	 */
 	public function testEscapeValue($input, $output){
-		$this->assertEquals($output, $this->parser($this->createSelect())
+		$this->assertTrue($output === $this->parser($this->createSelect())
 				->escapeValue($input));
 	}
 
@@ -192,7 +193,7 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider escapeValueType
 	 */
 	public function testEscapeValueType($input, $type, $output){
-		$this->assertEquals($output, $this->parser($this->createSelect())
+		$this->assertTrue($output === $this->parser($this->createSelect())
 				->escapeValue($input, $type));
 	}
 

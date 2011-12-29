@@ -102,7 +102,7 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 			}
 		}
 
-		if(!($connection instanceof \SQLite3))
+		if(!$connection instanceof \SQLite3)
 			throw new DriverException("Opening database file '$config[database]' failed.");
 
 		$this->resource = $connection;
