@@ -1,3 +1,6 @@
+The MIT License
+===============
+
 Copyright (c) 2011 Martin Srank, http://smasty.net/
 
 Permission is hereby granted, free of charge, to any person obtaining
