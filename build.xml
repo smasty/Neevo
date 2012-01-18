@@ -36,7 +36,7 @@
 		<copy todir="${buildDir}/src">
 			<fileset dir="${srcDir}"/>
 			<fileset dir="${project.basedir}">
-				<include name="readme.txt"/>
+				<include name="readme.md"/>
 				<include name="license.txt"/>
 			</fileset>
 			<filterchain>
@@ -46,6 +46,7 @@
 				</replacetokens>
 			</filterchain>
 		</copy>
+		<move file="${buildDir}/src/readme.md" tofile="${buildDir}/src/readme.txt"/>
 	</target>
 
 
