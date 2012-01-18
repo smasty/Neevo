@@ -19,7 +19,8 @@ Features
  - Column type detection
  - Conditional statements
  - Query debugging
- And much more...
+
+And much more...
 
 
 Documentation
