@@ -31,7 +31,7 @@ Public API reference can be found on http://neevo.smasty.net/api/.
 
 
 ---------
-- Author: Martin Srank - Smasty (http://smasty.net)
+- Author: Smasty (http://smasty.net)
 - Website: http://neevo.smasty.net/
 - Public API: http://neevo.smasty.net/api/
 - Available under the MIT license (http://neevo.smasty.net/license)

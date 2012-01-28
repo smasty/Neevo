@@ -5,7 +5,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * Copyright (c) 2011 Martin Srank (http://smasty.net)
+ * Copyright (c) 2012 Smasty (http://smasty.net)
  *
  */
 
@@ -17,7 +17,7 @@ use Neevo\ICache;
 /**
  * Memory cache storage.
  * Default implementation of Neevo\ICache.
- * @author Martin Srank
+ * @author Smasty
  */
 class MemoryStorage implements ICache {
 

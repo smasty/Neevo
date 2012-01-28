@@ -5,7 +5,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * Copyright (c) 2011 Martin Srank (http://smasty.net)
+ * Copyright (c) 2012 Smasty (http://smasty.net)
  *
  */
 
@@ -23,7 +23,7 @@ namespace Neevo;
  *   - formatDate => Date/time format (empty for DateTime instance).
  * - rowClass => Name of class to use as a row class.
  *
- * @author Martin Srank
+ * @author Smasty
  */
 class Connection implements IObservable, \ArrayAccess {
 

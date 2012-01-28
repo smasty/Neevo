@@ -5,7 +5,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * Copyright (c) 2011 Martin Srank (http://smasty.net)
+ * Copyright (c) 2012 Smasty (http://smasty.net)
  *
  */
 
@@ -31,7 +31,7 @@ use Neevo,
  * Since SQLite 3 only allows unbuffered queries, number of result rows and seeking
  * is not supported for this driver.
  *
- * @author Martin Srank
+ * @author Smasty
  */
 class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 

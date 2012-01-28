@@ -5,7 +5,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * Copyright (c) 2011 Martin Srank (http://smasty.net)
+ * Copyright (c) 2012 Smasty (http://smasty.net)
  *
  */
 
@@ -31,7 +31,7 @@ use Neevo,
  *  - resource (type resource) => Existing MySQL link
  *  - lazy, table_prefix... => see Neevo\Connection
  *
- * @author Martin Srank
+ * @author Smasty
  */
 class MySQLDriver extends Neevo\Parser implements Neevo\IDriver {
 

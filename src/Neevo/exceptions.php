@@ -5,7 +5,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * Copyright (c) 2011 Martin Srank (http://smasty.net)
+ * Copyright (c) 2012 Smasty (http://smasty.net)
  *
  */
 
@@ -14,7 +14,7 @@ namespace Neevo;
 
 /**
  * Main Neevo exception.
- * @author Martin Srank
+ * @author Smasty
  */
 class NeevoException extends \Exception implements IObservable {
 
@@ -101,7 +101,7 @@ class NeevoException extends \Exception implements IObservable {
 
 /**
  * Neevo driver exception.
- * @author Martin Srank
+ * @author Smasty
  */
 class DriverException extends NeevoException {
 
@@ -110,7 +110,7 @@ class DriverException extends NeevoException {
 
 /**
  * Exception for features not implemented by the driver.
- * @author Martin Srank
+ * @author Smasty
  */
 class ImplementationException extends NeevoException {
 

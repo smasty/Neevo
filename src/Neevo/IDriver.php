@@ -5,7 +5,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * Copyright (c) 2011 Martin Srank (http://smasty.net)
+ * Copyright (c) 2012 Smasty (http://smasty.net)
  *
  */
 
@@ -28,7 +28,7 @@ namespace Neevo;
  * extend **Neevo\Parser** class. For proper use, see
  * "source of **Neevo\Parser** class":./source-neevo.Neevo.Parser.php.html.
  *
- * @author Martin Srank
+ * @author Smasty
  */
 interface IDriver {
 

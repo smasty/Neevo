@@ -5,7 +5,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * Copyright (c) 2011 Martin Srank (http://smasty.net)
+ * Copyright (c) 2012 Smasty (http://smasty.net)
  *
  */
 
@@ -14,7 +14,7 @@ namespace Neevo;
 
 /**
  * Core Neevo class.
- * @author Martin Srank
+ * @author Smasty
  */
 class Manager implements IObservable, IObserver {
 
@@ -331,7 +331,7 @@ class Manager implements IObservable, IObserver {
 
 /**
  * Representation of SQL literal.
- * @author Martin Srank
+ * @author Smasty
  * @package Neevo
  */
 class Literal {
