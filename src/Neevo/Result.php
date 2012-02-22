@@ -200,7 +200,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	 * Fetch all rows in result set.
 	 * @param int $limit Limit number of returned rows
 	 * @param int $offset Seek to offset (fails on unbuffered results)
-	 * @return array
+	 * @return Row[]
 	 */
 	public function fetchAll($limit = null, $offset = null){
 		$limit = $limit === null ? -1 : (int) $limit;
@@ -252,7 +252,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	 * Fetch rows as $key=>$value pairs.
 	 * @param string $key Key column
 	 * @param string $value Value column. NULL for whole row.
-	 * @return array
+	 * @return Row[]
 	 */
 	public function fetchPairs($key, $value = null){
 		$clone = clone $this;
