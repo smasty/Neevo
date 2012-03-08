@@ -8,7 +8,7 @@ Only Nette Framework 2.0 and above PHP 5.3 packages are supported.
 Instructions
 ============
 
-1.  In your Nette Framework config file (e.g. %appDir%/config.neon),
+1.  In your Nette Framework config file (e.g. `app/config/config.neon`),
     in "services" section, add the following service definition:
 
 		services:
