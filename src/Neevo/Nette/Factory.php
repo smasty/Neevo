@@ -12,7 +12,7 @@
 namespace Neevo\Nette;
 
 use Neevo,
-	Nette\DI\Container;
+	Nette;
 
 
 /**
@@ -23,14 +23,11 @@ class Factory {
 
 	/**
 	 * Neevo DI container factory.
-	 * @param Container $container
-	 * @param array $config Configuration options
-	 * @param bool $explain Run EXPLAIN on all queries?
 	 * @return Neevo\Manager
 	 */
-	public static function createService(Container $container, array $config = null, $explain = true){
-		$neevo = new Neevo\Manager((array) $config, new Cache($container->cacheStorage));
-		DebugBar::register($neevo, $explain);
+	public static function createService(Nette\Caching\IStorage $cacheStorage, array $config){
+		$neevo = new Neevo\Manager((array) $config, new Cache($cacheStorage));
+		DebugBar::register($neevo);
 		return $neevo;
 	}
 

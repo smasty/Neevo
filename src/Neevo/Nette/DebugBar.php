@@ -54,11 +54,10 @@ class DebugBar implements Neevo\IObserver, IBarPanel {
 	/**
 	 * Register Neevo DebugBar and Bluescreen panels.
 	 * @param Neevo\Manager $neevo
-	 * @param bool $explain Run EXPLAIN on all SELECT queries?
 	 * @return void
 	 */
-	public static function register(Neevo\Manager $neevo, $explain){
-		$panel = new static($explain);
+	public static function register(Neevo\Manager $neevo){
+		$panel = new static($neevo->getConnection()->getConfig('explain'));
 		$neevo->attachObserver($panel, Debugger::$productionMode ? self::EXCEPTION : self::QUERY + self::EXCEPTION);
 
 		// Register DebugBar panel
@@ -66,7 +65,7 @@ class DebugBar implements Neevo\IObserver, IBarPanel {
 			Debugger::$bar->addPanel($panel);
 
 		// Register Bluescreen panel
-		Debugger::$blueScreen->addPanel(callback($panel, 'renderException'), __CLASS__);
+		Debugger::$blueScreen->addPanel(callback($panel, 'renderException'));
 	}
 
 
@@ -128,7 +127,8 @@ class DebugBar implements Neevo\IObserver, IBarPanel {
 				'panel' => Neevo\Manager::highlightSql($e->getSql())
 				. '<p><b>File:</b> ' . Helpers::editorLink($file, $line)
 				. ' &nbsp; <b>Line:</b> ' . ($line ? : 'n/a') . '</p>'
-				. (is_file($file) ? '<pre>' . BlueScreen::highlightFile($file, $line) . '</pre>' : '')
+				. (is_file($file) ? BlueScreen::highlightFile($file, $line) : '')
+				. 'Neevo ' . Neevo\Manager::VERSION . ', revision ' . Neevo\Manager::REVISION
 			);
 		}
 	}
@@ -158,16 +158,6 @@ class DebugBar implements Neevo\IObserver, IBarPanel {
 
 		$timeFormat = function($time){
 				return sprintf('%0.3f', $time * 1000);
-			};
-		$sourceLink = function($source){
-				$el = Html::el('a');
-				$el->class = 'link';
-				$el->href(strtr(Debugger::$editor, array('%file' => rawurlencode($source[0]), '%line' => $source[1])
-					));
-				$el->setText(basename(dirname($source[0])) . '/' . basename($source[0]) . ":$source[1]");
-				$el->title = implode(':', $source);
-
-				return $el;
 			};
 
 		$tickets = $this->tickets;
