@@ -48,6 +48,7 @@
 		</copy>
 		<move file="${buildDir}/src/readme.md" tofile="${buildDir}/src/readme.txt"/>
 		<move file="${buildDir}/src/license.md" tofile="${buildDir}/src/license.txt"/>
+		<move file="${buildDir}/src/Neevo/Nette/readme.md" tofile="${buildDir}/src/Neevo/Nette/readme.txt"/>
 	</target>
 
 
