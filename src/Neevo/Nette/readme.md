@@ -11,19 +11,19 @@ Instructions
 1.  In your Nette Framework config file (e.g. %appDir%/config.neon),
     in "services" section, add the following service definition:
 
-    services:
-        ...
-        neevo: Neevo\Nette\Factory::createService(@cacheStorage, %database%)
+	services:
+		...
+		neevo: Neevo\Nette\Factory::createService(@cacheStorage, %database%)
 
 
 2.  In the "parameters" section, add another section called "database".
     That is the place for all your Neevo configuration, for example:
 
-    database:
-        driver: MySQLi
-        username: root
-        password: ****
-        database: my_database
+	database:
+		driver: MySQLi
+		username: root
+		password: ****
+		database: my_database
 		explain: yes
 
     'explain' option denotes whether or not you want to run EXPLAIN on all
