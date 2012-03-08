@@ -96,9 +96,8 @@ class DebugBar implements Neevo\IObserver, IBarPanel {
 					$rows = '?';
 				}
 				$explain = $this->explain ? $subject->explain() : null;
-			} else{
+			} else
 				$rows = '-';
-			}
 
 			$this->tickets[] = array(
 				'sql' => (string) $subject,
@@ -108,9 +107,8 @@ class DebugBar implements Neevo\IObserver, IBarPanel {
 				'connection' => $subject->getConnection(),
 				'explain' => isset($explain) ? $explain : null
 			);
-		} elseif($event === self::EXCEPTION){
+		} elseif($event === self::EXCEPTION)
 			$this->failedQuerySource = $source;
-		}
 	}
 
 
@@ -120,17 +118,17 @@ class DebugBar implements Neevo\IObserver, IBarPanel {
 	 * @return array
 	 */
 	public function renderException($e){
-		if($e instanceof Neevo\NeevoException && $e->getSql()){
-			list($file, $line) = $this->failedQuerySource;
-			return array(
-				'tab' => 'SQL',
-				'panel' => Neevo\Manager::highlightSql($e->getSql())
-				. '<p><b>File:</b> ' . Helpers::editorLink($file, $line)
-				. ' &nbsp; <b>Line:</b> ' . ($line ? : 'n/a') . '</p>'
-				. (is_file($file) ? BlueScreen::highlightFile($file, $line) : '')
-				. 'Neevo ' . Neevo\Manager::VERSION . ', revision ' . Neevo\Manager::REVISION
-			);
-		}
+		if(!($e instanceof Neevo\NeevoException && $e->getSql()))
+			return;
+		list($file, $line) = $this->failedQuerySource;
+		return array(
+			'tab' => 'SQL',
+			'panel' => Neevo\Manager::highlightSql($e->getSql())
+			. '<p><b>File:</b> ' . Helpers::editorLink($file, $line)
+			. ' &nbsp; <b>Line:</b> ' . ($line ? : 'n/a') . '</p>'
+			. (is_file($file) ? BlueScreen::highlightFile($file, $line) : '')
+			. 'Neevo ' . Neevo\Manager::VERSION . ', revision ' . Neevo\Manager::REVISION
+		);
 	}
 
 
@@ -152,13 +150,8 @@ class DebugBar implements Neevo\IObserver, IBarPanel {
 	 * @return string
 	 */
 	public function getPanel(){
-		if(!$this->numQueries){
+		if(!$this->numQueries)
 			return '';
-		}
-
-		$timeFormat = function($time){
-				return sprintf('%0.3f', $time * 1000);
-			};
 
 		$tickets = $this->tickets;
 		$totalTime = $this->totalTime;

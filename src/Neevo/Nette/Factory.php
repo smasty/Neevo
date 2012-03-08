@@ -12,7 +12,7 @@
 namespace Neevo\Nette;
 
 use Neevo,
-	Nette;
+	Nette\Caching\IStorage;
 
 
 /**
@@ -23,9 +23,11 @@ class Factory {
 
 	/**
 	 * Neevo DI container factory.
+	 * @param IStorage $cacheStorage Nette Cache storage service
+	 * @param array $config Configuration options
 	 * @return Neevo\Manager
 	 */
-	public static function createService(Nette\Caching\IStorage $cacheStorage, array $config){
+	public static function createService(IStorage $cacheStorage, array $config){
 		$neevo = new Neevo\Manager((array) $config, new Cache($cacheStorage));
 		DebugBar::register($neevo);
 		return $neevo;
