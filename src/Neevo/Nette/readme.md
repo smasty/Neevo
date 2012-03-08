@@ -1,4 +1,4 @@
-This part provides tools to optimize experience when using Neevo along
+This namespace provides tools to optimize experience when using Neevo along
 with Nette Framework. It will register Neevo as a service to a DI Container.
 It will add a panel to DebugBar showing performed queries and a panel to
 Bluescreen with SQL query in case of NeevoException.
