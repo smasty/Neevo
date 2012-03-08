@@ -9,14 +9,14 @@ Instructions
 ============
 
 1.  In your Nette Framework config file (e.g. `app/config/config.neon`),
-    in "services" section, add the following service definition:
+    in `services` section, add the following service definition:
 
 		services:
 			...
 			neevo: Neevo\Nette\Factory::createService(@cacheStorage, %database%)
 
 
-2.  In the "parameters" section, add another section called "database".
+2.  In the `parameters` section, add another section called `database`.
     That is the place for all your Neevo configuration, for example:
 
 		database:
@@ -26,5 +26,5 @@ Instructions
 			database: my_database
 			explain: yes
 
-    'explain' option denotes whether or not you want to run EXPLAIN on all
-    performed SELECT queries for debugging purposes. Defaults to 'yes'.
+    `explain` option denotes whether or not you want to run EXPLAIN on all
+    performed `SELECT` queries for debugging purposes. Defaults to `yes`.
