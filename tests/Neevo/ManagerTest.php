@@ -123,4 +123,26 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testLoadFile(){
+		$queries = array(
+			'SELECT 1 FROM 1;',
+			'SELECT 2 FROM 2;',
+			'SELECT 3 FROM 3;',
+		);
+		file_put_contents($f = './test-loadfile.tmp', implode("\n", $queries));
+
+		$this->neevo->loadFile($f);
+		$this->assertEquals($queries, array_map('trim', $this->neevo->getConnection()->getDriver()->performed()));
+		unlink($f);
+	}
+
+
+	/**
+	 * @expectedException Neevo\NeevoException
+	 */
+	public function testLoadFileNoFile(){
+		$this->neevo->loadFile($f = 'nofile');
+	}
+
+
 }

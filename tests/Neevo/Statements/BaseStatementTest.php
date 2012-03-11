@@ -292,4 +292,13 @@ class BaseStatementTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testDetachObserver(){
+		$o = new DummyObserver;
+		$this->stmt->attachObserver($o, 1);
+		$this->stmt->detachObserver($o);
+		$this->stmt->notifyObservers(1);
+		$this->assertFalse($o->isNotified());
+	}
+
+
 }

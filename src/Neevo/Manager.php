@@ -158,7 +158,7 @@ class Manager implements IObservable, IObserver {
 		$handle = @fopen($filename, 'r');
 		if($handle === false){
 			ignore_user_abort($abort);
-			throw new Exception("Cannot open file '$filename' for SQL import.");
+			throw new NeevoException("Cannot open file '$filename' for SQL import.");
 		}
 
 		$sql = '';

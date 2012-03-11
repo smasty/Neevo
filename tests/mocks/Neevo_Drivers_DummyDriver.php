@@ -13,7 +13,8 @@ class DummyDriver implements Neevo\IDriver {
 	private $unbuffered = false,
 			$connected = false,
 			$closed,
-			$transactions = array();
+			$transactions = array(),
+			$performed = array();
 
 
 
@@ -46,8 +47,10 @@ class DummyDriver implements Neevo\IDriver {
 
 
 	public function runQuery($queryString){
-		if($queryString)
+		if($queryString){
+			$this->performed[] = $queryString;
 			return new \DummyResult($queryString, $this);
+		}
 		return false;
 	}
 
@@ -157,6 +160,11 @@ class DummyDriver implements Neevo\IDriver {
 
 	public function transactionState(){
 		return end($this->transactions);
+	}
+
+
+	public function performed(){
+		return $this->performed;
 	}
 
 

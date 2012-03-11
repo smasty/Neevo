@@ -172,6 +172,12 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testFetchPairsNotDefinedRow(){
+		$result = new Neevo\Result($this->connection, 'col1, col2', 'table');
+		$this->assertEquals(array('1', '2', '3'), array_keys($result->fetchPairs('id', null)));
+	}
+
+
 	public function testSeek(){
 		$this->result->seek(2);
 		$this->assertEquals(
