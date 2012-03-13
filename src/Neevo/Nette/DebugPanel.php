@@ -20,9 +20,9 @@ use Neevo,
 
 
 /**
- * DebugBar panel informing about performed queries.
+ * Debug panel informing about performed queries.
  */
-class DebugBar implements Neevo\IObserver, IBarPanel {
+class DebugPanel implements Neevo\IObserver, IBarPanel {
 
 
 	/** @var array */
@@ -48,24 +48,6 @@ class DebugBar implements Neevo\IObserver, IBarPanel {
 	 */
 	public function __construct($explain){
 		$this->explain = (bool) $explain;
-	}
-
-
-	/**
-	 * Register Neevo DebugBar and Bluescreen panels.
-	 * @param Neevo\Manager $neevo
-	 * @return void
-	 */
-	public static function register(Neevo\Manager $neevo){
-		$panel = new static($neevo->getConnection()->getConfig('explain'));
-		$neevo->attachObserver($panel, Debugger::$productionMode ? self::EXCEPTION : self::QUERY + self::EXCEPTION);
-
-		// Register DebugBar panel
-		if(!Debugger::$productionMode)
-			Debugger::$bar->addPanel($panel);
-
-		// Register Bluescreen panel
-		Debugger::$blueScreen->addPanel(callback($panel, 'renderException'));
 	}
 
 

@@ -12,7 +12,8 @@
 namespace Neevo\Nette;
 
 use Neevo,
-	Nette\Caching\IStorage;
+	Nette\Caching\IStorage,
+	Nette\Diagnostics\Debugger;
 
 
 /**
@@ -23,13 +24,25 @@ class Factory {
 
 	/**
 	 * Neevo DI container factory.
-	 * @param IStorage $cacheStorage Nette Cache storage service
-	 * @param array $config Configuration options
+	 * @param array $config Neevo configuration options
+	 * @param IStorage $cacheStorage Nette CacheStorage service (autowired)
 	 * @return Neevo\Manager
 	 */
-	public static function createService(IStorage $cacheStorage, array $config){
-		$neevo = new Neevo\Manager((array) $config, new Cache($cacheStorage));
-		DebugBar::register($neevo);
+	public static function createService(array $config, IStorage $cacheStorage){
+		$neevo = new Neevo\Manager((array) $config, new CacheAdapter($cacheStorage));
+
+		// Setup Debug panel
+		$panel = new DebugPanel($config['explain']);
+		$neevo->attachObserver($panel, Debugger::$productionMode
+			? DebugPanel::EXCEPTION : DebugPanel::QUERY + DebugPanel::EXCEPTION);
+
+		// Register Debug panel
+		if(!Debugger::$productionMode)
+			Debugger::$bar->addPanel($panel);
+
+		// Register Bluescreen panel
+		Debugger::$blueScreen->addPanel(callback($panel, 'renderException'));
+
 		return $neevo;
 	}
 

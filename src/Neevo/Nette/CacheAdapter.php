@@ -20,7 +20,7 @@ use Neevo,
  * Cache adapter for Nette Framework cache storage system.
  * @author Smasty
  */
-class Cache implements Neevo\ICache {
+class CacheAdapter implements Neevo\ICache {
 
 
 	/** @var string */

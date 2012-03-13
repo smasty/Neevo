@@ -2,6 +2,7 @@ This namespace provides tools to optimize experience when using Neevo along
 with Nette Framework. It will register Neevo as a service to a DI Container.
 It will add a panel to DebugBar showing performed queries and a panel to
 Bluescreen with SQL query in case of NeevoException.
+It also provides an adapter for Nette cache storage system.
 
 Only Nette Framework 2.0 and above PHP 5.3 packages are supported.
 
@@ -13,7 +14,7 @@ Instructions
 
 		services:
 			...
-			neevo: Neevo\Nette\Factory::createService(@cacheStorage, %database%)
+			neevo: Neevo\Nette\Factory::createService(%database%)
 
 
 2.  In the `parameters` section, add another section called `database`.
