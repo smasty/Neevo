@@ -108,7 +108,7 @@ class DebugPanel implements Neevo\IObserver, IBarPanel {
 			'panel' => Neevo\Manager::highlightSql($e->getSql())
 			. '<p><b>File:</b> ' . Helpers::editorLink($file, $line)
 			. ' &nbsp; <b>Line:</b> ' . ($line ? : 'n/a') . '</p>'
-			. (is_file($file) ? BlueScreen::highlightFile($file, $line) : '')
+			. ($line ? BlueScreen::highlightFile($file, $line) : '')
 			. 'Neevo ' . Neevo\Manager::VERSION . ', revision ' . Neevo\Manager::REVISION
 		);
 	}
@@ -122,7 +122,7 @@ class DebugPanel implements Neevo\IObserver, IBarPanel {
 		$queries = $this->numQueries;
 		$time = $this->totalTime;
 		ob_start();
-		include_once __DIR__ . '/templates/DebugBar.tab.phtml';
+		include_once __DIR__ . '/templates/DebugPanel.tab.phtml';
 		return ob_get_clean();
 	}
 
@@ -140,7 +140,7 @@ class DebugPanel implements Neevo\IObserver, IBarPanel {
 		$numQueries = $this->numQueries;
 
 		ob_start();
-		include_once __DIR__ . '/templates/DebugBar.panel.phtml';
+		include_once __DIR__ . '/templates/DebugPanel.panel.phtml';
 		return ob_get_clean();
 	}
 
