@@ -26,7 +26,7 @@ namespace Neevo;
  *
  * When the driver needs to rewrite default output of SQL commands, it **must**
  * extend **Neevo\Parser** class. For proper use, see
- * "source of **Neevo\Parser** class":./source-neevo.Neevo.Parser.php.html.
+ * "source of **Neevo\Parser** class":https://github.com/smasty/Neevo/blob/master/src/Neevo/Parser.php.
  *
  * @author Smasty
  */
