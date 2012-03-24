@@ -109,6 +109,26 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testPage(){
+		$this->result->page(2, 10);
+		$this->assertEquals(array(10, 10), $this->result->getLimit());
+	}
+
+
+	public function testPageOne(){
+		$this->result->page(1, 10);
+		$this->assertEquals(array(10, 0), $this->result->getLimit());
+	}
+
+
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testPageNonPositive(){
+		$this->result->page(0, 0);
+	}
+
+
 	public function testFetch(){
 		$row = $this->result->fetch()->toArray();
 		$this->assertTrue(is_array($row) && count($row) === 3);

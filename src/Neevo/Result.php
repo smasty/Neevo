@@ -173,6 +173,20 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
+	 * Adjust the LIMIT and OFFSET clauses according to defined page number and number of items per page.
+	 * @param int $page Page number
+	 * @param int $items Number of items per page
+	 * @return Result fluent interface
+	 * @throws \InvalidArgumentException
+	 */
+	public function page($page, $items){
+		if($page < 1 || $page < 1)
+			throw new \InvalidArgumentException('Both arguments must be positive integers.');
+		return $this->limit((int) $items, (int) ($items * --$page));
+	}
+
+
+	/**
 	 * Fetch the row on current position.
 	 * @return Row|FALSE
 	 */
