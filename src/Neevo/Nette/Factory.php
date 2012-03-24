@@ -32,9 +32,8 @@ class Factory {
 		$neevo = new Neevo\Manager((array) $config, new CacheAdapter($cacheStorage));
 
 		// Setup Debug panel
-		$panel = new DebugPanel($config['explain']);
-		$neevo->attachObserver($panel, Debugger::$productionMode
-			? DebugPanel::EXCEPTION : DebugPanel::QUERY + DebugPanel::EXCEPTION);
+		$panel = new DebugPanel(isset($config['explain']) ? $config['explain'] : !Debugger::$productionMode);
+		$neevo->attachObserver($panel, Debugger::$productionMode ? DebugPanel::EXCEPTION : DebugPanel::QUERY + DebugPanel::EXCEPTION);
 
 		// Register Debug panel
 		if(!Debugger::$productionMode)
