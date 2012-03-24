@@ -37,7 +37,7 @@
 			<fileset dir="${srcDir}"/>
 			<fileset dir="${project.basedir}">
 				<include name="readme.md"/>
-				<include name="license.txt"/>
+				<include name="license.md"/>
 			</fileset>
 			<filterchain>
 				<replacetokens begintoken="@" endtoken="@">
