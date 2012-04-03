@@ -34,7 +34,7 @@ class Connection implements IObservable, \ArrayAccess {
 	/** @var bool */
 	private $connected = false;
 
-	/** @var Driver */
+	/** @var IDriver */
 	private $driver;
 
 	/** @var string */
@@ -163,7 +163,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 	/**
 	 * Get the current driver instance.
-	 * @return Driver
+	 * @return IDriver
 	 */
 	public function getDriver(){
 		return $this->driver;
