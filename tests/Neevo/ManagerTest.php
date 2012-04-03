@@ -129,10 +129,11 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 			'SELECT 2 FROM 2;',
 			'SELECT 3 FROM 3;',
 		);
-		file_put_contents($f = './test-loadfile.tmp', implode("\n", $queries));
+		file_put_contents($f = tempnam(sys_get_temp_dir(), 'Neevo'), implode("\n", $queries));
 
-		$this->neevo->loadFile($f);
+		$count = $this->neevo->loadFile($f);
 		$this->assertEquals($queries, array_map('trim', $this->neevo->getConnection()->getDriver()->performed()));
+		$this->assertEquals($count, count($queries));
 		unlink($f);
 	}
 
