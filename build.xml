@@ -10,8 +10,6 @@
 
 	<!-- Requires pear.nette.org/Nette -->
 	<taskdef name="neevo-loader" classname="build.tasks.NeevoLoaderTask"/>
-	<!-- As of Phing 2.4.10 -->
-	<taskdef name="apigen" classname="phing.tasks.ext.apigen.ApiGenTask"/>
 
 	<target name="dist" depends="prepare,classList,test,copy,lint,api,tar,clean"/>
 
