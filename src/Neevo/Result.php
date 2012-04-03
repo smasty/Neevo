@@ -180,7 +180,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	 * @throws \InvalidArgumentException
 	 */
 	public function page($page, $items){
-		if($page < 1 || $page < 1)
+		if($page < 1 || $items < 1)
 			throw new \InvalidArgumentException('Both arguments must be positive integers.');
 		return $this->limit((int) $items, (int) ($items * --$page));
 	}

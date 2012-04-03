@@ -265,8 +265,8 @@ class Manager implements IObservable, IObserver {
 	 * @return void
 	 */
 	public function updateStatus(IObservable $subject, $event){
-		$this->last = $subject->__toString();
-		++$this->queries;
+		$this->last = (string) $subject;
+		$this->queries++;
 	}
 
 
