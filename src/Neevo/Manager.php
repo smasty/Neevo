@@ -174,6 +174,7 @@ class Manager implements IObservable, IObserver {
 		}
 		if($sql !== ''){
 			$this->connection->getDriver()->runQuery($sql);
+			$count++;
 		}
 		fclose($handle);
 		ignore_user_abort($abort);
