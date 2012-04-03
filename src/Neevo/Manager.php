@@ -142,10 +142,9 @@ class Manager implements IObservable, IObserver {
 
 	/**
 	 * Import a SQL dump from given file.
-	 *
-	 * Based on implementation in Nette\Database,
-	 * Copyright (c) 2004, 2011 David Grudl (http://davidgrudl.com), new BSD license.
-	 * @copyright 2004, 2011 David Grudl
+	 * Based on implementation in Nette\Database.
+	 * @copyright 2004-2012 David Grudl, http://davidgrudl.com
+	 * @license New BSD license
 	 * @param string $filename
 	 * @return int Number of executed commands
 	 */
