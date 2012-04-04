@@ -172,7 +172,7 @@ class Manager implements IObservable, IObserver {
 				$count++;
 			}
 		}
-		if($sql !== ''){
+		if(trim($sql)){
 			$this->connection->getDriver()->runQuery($sql);
 			$count++;
 		}
