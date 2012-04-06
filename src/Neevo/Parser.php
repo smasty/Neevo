@@ -313,8 +313,8 @@ class Parser {
 			if($value === null)
 				return 'NULL';
 
-			// Multiple values w/o types
-			elseif(is_array($value) || $value instanceof \Traversable){
+			// Array of values w/o types
+			elseif(is_array($value)){
 				foreach($value as $k => $v)
 					$value[$k] = $this->escapeValue($v);
 				return $value;
