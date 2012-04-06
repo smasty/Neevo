@@ -38,9 +38,9 @@ class ResultIteratorTest extends PHPUnit_Framework_TestCase {
 	public function testSeek(){
 		$iterator = $this->result->getIterator();
 		$iterator->rewind();
-		$iterator->seek(1);
+		$iterator->seek(2);
 		$this->assertTrue($iterator->valid());
-		$this->assertEquals('2', $iterator->current()->id);
+		$this->assertEquals(2, $iterator->key());
 	}
 
 
@@ -82,6 +82,16 @@ class ResultIteratorTest extends PHPUnit_Framework_TestCase {
 			$ids[] = (int) $row['id'];
 		}
 		$this->assertEquals(array(2, 3), $ids);
+	}
+
+
+	public function testValidDoubleCall(){
+		$iterator = $this->result->getIterator();
+		$iterator->rewind();
+		$this->assertTrue($iterator->valid());
+		$c = $iterator->current();
+		$this->assertTrue($iterator->valid());
+		$this->assertEquals($c->toArray(), $iterator->current()->toArray());
 	}
 
 

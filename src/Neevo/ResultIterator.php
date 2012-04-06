@@ -43,6 +43,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 		if($this->row !== null)
 			$this->result = clone $this->result;
 		$this->pointer = 0;
+		$this->row = $this->result->fetch();
 	}
 
 
@@ -51,7 +52,8 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 	 * @return void
 	 */
 	public function next(){
-		++$this->pointer;
+		$this->row = $this->result->fetch();
+		$this->pointer++;
 	}
 
 
@@ -60,7 +62,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 	 * @return bool
 	 */
 	public function valid(){
-		return ($this->row = $this->result->fetch()) !== false;
+		return $this->row !== false;
 	}
 
 
@@ -105,6 +107,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 		} catch(NeevoException $e){
 			throw new \OutOfRangeException("Cannot seek to offset $offset.", null, $e);
 		}
+		$this->row = $this->result->fetch();
 		$this->pointer = $offset;
 	}
 
