@@ -303,7 +303,7 @@ class Manager implements IObservable, IObserver {
 	 * @return string
 	 */
 	public static function highlightSql($sql){
-		$keywords1 = 'SELECT|UPDATE|INSERT\s+INTO|DELETE|FROM|VALUES|SET|WHERE|HAVING|GROUP\s+BY|ORDER\s+BY|LIMIT|OFFSET|(?:LEFT |RIGHT |INNER )?JOIN';
+		$keywords1 = 'SELECT|UPDATE|INSERT\s+INTO|DELETE|FROM|VALUES|SET|WHERE|HAVING|GROUP\s+BY|ORDER\s+BY|LIMIT|OFFSET|(?:LEFT\s+|RIGHT\s+|INNER\s+)?JOIN';
 		$keywords2 = 'RANDOM|RAND|ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
 
 		$sql = str_replace("\\'", '\\&#39;', $sql);
@@ -319,7 +319,7 @@ class Manager implements IObservable, IObserver {
 			return '<em style="color:#999">' . $match[1] . '</em>';
 		// Basic keywords
 		if(!empty($match[2]))
-			return "\n" . '<strong style="color:#e71818">' . $match[2] . '</strong>';
+			return '<strong style="color:#e71818">' . $match[2] . '</strong>';
 		// Other keywords
 		if(!empty($match[3]))
 			return '<strong style="color:#d59401">' . $match[3] . '</strong>';

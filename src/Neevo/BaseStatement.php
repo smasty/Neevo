@@ -261,7 +261,9 @@ abstract class BaseStatement implements IObservable {
 	 * @return string|Neevo\BaseStatement fluent interface
 	 */
 	public function dump($return = false){
-		$sql = PHP_SAPI === 'cli' ? $this->parse() . "\n" : Manager::highlightSql($this->parse());
+		$sql = PHP_SAPI === 'cli'
+			? preg_replace('/\s+/', ' ', $this->parse()) . "\n"
+			: Manager::highlightSql($this->parse());
 		if(!$return)
 			echo $sql;
 		return $return ? $sql : $this;
@@ -278,7 +280,8 @@ abstract class BaseStatement implements IObservable {
 
 		try{
 			$query = $this->performed
-				? $this->resultSet : $this->connection->getDriver()->runQuery($this->parse());
+				? $this->resultSet
+				: $this->connection->getDriver()->runQuery(preg_replace('/\s+/', ' ', $this->parse()));
 		} catch(DriverException $e){
 			throw new NeevoException('Query failed. ' . $e->getMessage(), $e->getCode(), $e->getSql(), $e);
 		}

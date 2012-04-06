@@ -61,7 +61,7 @@ class Parser {
 		elseif($this->stmt->getType() === Manager::STMT_DELETE)
 			$q = $this->parseDeleteStmt();
 
-		return $q;
+		return trim($q);
 	}
 
 
@@ -78,7 +78,7 @@ class Parser {
 		}
 		$cols = implode(', ', $cols);
 
-		return $this->applyLimit("SELECT $cols FROM " . $source . $where . $group . $order);
+		return $this->applyLimit("SELECT $cols\nFROM " . $source . $where . $group . $order);
 	}
 
 
@@ -92,7 +92,7 @@ class Parser {
 			$cols[] = $this->parseFieldName($col);
 			$values[] = $value;
 		}
-		$data = ' (' . implode(', ', $cols) . ') VALUES (' . implode(', ', $values). ')';
+		$data = ' (' . implode(', ', $cols) . ")\nVALUES (" . implode(', ', $values). ')';
 
 		return 'INSERT INTO ' . $this->clauses[0] . $data;
 	}
@@ -108,7 +108,7 @@ class Parser {
 		foreach($this->escapeValue($this->stmt->getValues()) as $col => $value){
 			$values[] = $this->parseFieldName($col) . ' = ' . $value;
 		}
-		$data = ' SET ' . implode(', ', $values);
+		$data = "\nSET " . implode(', ', $values);
 		return 'UPDATE ' . $table . $data . $where;
 	}
 
@@ -137,7 +137,7 @@ class Parser {
 			$subq = $this->stmt->getSource();
 			$alias = $this->escapeValue($subq->getAlias()
 				? $subq->getAlias() : '_table_', Manager::IDENTIFIER);
-			$source = "($subq) $alias";
+			$source = "(\n\t" . implode("\n\t", explode("\n", $subq)) . "\n) $alias";
 		}
 		$source = $this->tryDelimite($source);
 
@@ -148,7 +148,7 @@ class Parser {
 				$join_alias = $this->escapeValue($join_source->getAlias()
 					? $join_source->getAlias() : '_join_' . ($key+1), Manager::IDENTIFIER);
 
-				$join_source = "($join_source) $join_alias";
+				$join_source = "(\n\t" . implode("\n\t", explode("\n", $join_source)) . "\n) $join_alias";
 			} elseif($join_source instanceof Literal){
 				$join_source = $join_source->value;
 			}
@@ -159,8 +159,8 @@ class Parser {
 			$type = strtoupper(substr($type, 5));
 			$type .= ($type === '') ? '' : ' ';
 				$source .= $cond instanceof Literal
-					? " {$type}JOIN $join_source ON $cond->value"
-					: $this->tryDelimite(" {$type}JOIN $join_source ON $cond");
+					? "\n{$type}JOIN $join_source ON $cond->value"
+					: $this->tryDelimite("\n{$type}JOIN $join_source ON $cond");
 		}
 		return $source;
 	}
@@ -224,7 +224,7 @@ class Parser {
 
 		}
 
-		return ' WHERE ' . implode(' ', $conditions);
+		return "\nWHERE " . implode(' ', $conditions);
 	}
 
 
@@ -238,7 +238,7 @@ class Parser {
 			list($field, $type) = $rule;
 			$order[] = $this->tryDelimite($field) . ($type !== null ? ' ' . $type : '');
 		}
-		return ' ORDER BY ' . implode(', ', $order);
+		return "\nORDER BY " . implode(', ', $order);
 	}
 
 
@@ -248,7 +248,7 @@ class Parser {
 	 */
 	protected function parseGrouping(){
 		list($group, $having) = $this->stmt->getGrouping();
-		return $this->tryDelimite(" GROUP BY $group" . ($having !== null ? " HAVING $having" : ''));
+		return $this->tryDelimite("\nGROUP BY $group" . ($having !== null ? " HAVING $having" : ''));
 	}
 
 
@@ -293,7 +293,7 @@ class Parser {
 		list($limit, $offset) = $this->stmt->getLimit();
 
 		if((int) $limit > 0){
-			$sql .= ' LIMIT ' . (int) $limit;
+			$sql .= "\nLIMIT " . (int) $limit;
 			if((int) $offset > 0)
 				$sql .= ' OFFSET ' . (int) $offset;
 		}
@@ -348,7 +348,7 @@ class Parser {
 			} elseif($type === Manager::FLOAT){
 				return (float) $value;
 			} elseif($type === Manager::SUBQUERY && $value instanceof Result){
-				return "($value)";
+				return "(\n\t" . implode("\n\t", explode("\n", $value)) . "\n)";
 			} elseif($type === Manager::ARR){
 				$arr = $value instanceof \Traversable ? iterator_to_array($value) : (array) $value;
 				return '(' . implode(', ', $this->escapeValue($arr)) . ')';

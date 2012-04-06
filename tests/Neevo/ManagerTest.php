@@ -117,8 +117,12 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 
 	public function testHighlightSql(){
 		$this->assertEquals(
-			"<pre style=\"color:#555\" class=\"sql-dump\"><strong style=\"color:#e71818\">SELECT</strong> * \n<strong style=\"color:#e71818\">FROM</strong> `table` \n<strong style=\"color:#e71818\">WHERE</strong> <strong style=\"color:#d59401\">RAND</strong>() = <em style=\"color:#008000\">'John Doe'</em>; <em style=\"color:#999\">/* comment */</em></pre>\n",
-			$v=Neevo\Manager::highlightSql("SELECT * FROM `table` WHERE RAND() = 'John Doe'; /* comment */")
+			'<pre style="color:#555" class="sql-dump"><strong style="color:#e71818">SELECT</strong>'
+			. ' * <strong style="color:#e71818">FROM</strong> `table` <strong style="color:#e71818">WHERE</strong>'
+			. ' <strong style="color:#d59401">RAND</strong>() = <em style="color:#008000">\'John Doe\'</em>;'
+			. ' <em style="color:#999">/* comment */</em></pre>'
+			. "\n",
+			Neevo\Manager::highlightSql("SELECT * FROM `table` WHERE RAND() = 'John Doe'; /* comment */")
 		);
 	}
 

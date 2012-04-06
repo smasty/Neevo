@@ -51,14 +51,14 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	public function parseWhere(){
 		$date = new DateTime;
 		return array(
-			array(array('bar', null), " WHERE (:bar IS NULL)"),
-			array(array('bar', true), " WHERE (:bar)"),
-			array(array('bar', false), " WHERE (NOT :bar)"),
-			array(array('bar', array(1, 2)), " WHERE (:bar IN (1, 2))"),
-			array(array('bar', new Neevo\Literal('NOW()')), " WHERE (:bar = NOW())"),
-			array(array('bar', $date), " WHERE (:bar = '{$date->format('Y-m-d H:i:s')}')"),
-			array(array('bar', 'baz'), " WHERE (:bar = 'baz')"),
-			array(array(':bar = %i AND :baz = %s', 1, 2), " WHERE (:bar = 1 AND :baz = '2')")
+			array(array('bar', null), "WHERE (:bar IS NULL)"),
+			array(array('bar', true), "WHERE (:bar)"),
+			array(array('bar', false), "WHERE (NOT :bar)"),
+			array(array('bar', array(1, 2)), "WHERE (:bar IN (1, 2))"),
+			array(array('bar', new Neevo\Literal('NOW()')), "WHERE (:bar = NOW())"),
+			array(array('bar', $date), "WHERE (:bar = '{$date->format('Y-m-d H:i:s')}')"),
+			array(array('bar', 'baz'), "WHERE (:bar = 'baz')"),
+			array(array(':bar = %i AND :baz = %s', 1, 2), "WHERE (:bar = 1 AND :baz = '2')")
 		);
 	}
 
@@ -67,59 +67,71 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider parseWhere
 	 */
 	public function testParseWhere($inputParams, $output){
-		$this->assertEquals($output, $this->parser(call_user_func_array(array($this->createSelect(), 'where'), $inputParams))->parseWhere());
+		$this->assertEquals(
+			$output,
+			trim($this->parser(call_user_func_array(array($this->createSelect(), 'where'), $inputParams))
+			->parseWhere())
+		);
 	}
 
 
 	public function testParseWhereSimpleGlue(){
 		$this->assertEquals(
-			" WHERE (:bar) AND (:baz)", $this->parser($this->createSelect()->where('bar')->and('baz'))->parseWhere()
+			"WHERE (:bar) AND (:baz)",
+			trim($this->parser($this->createSelect()->where('bar')->and('baz'))->parseWhere())
 		);
 	}
 
 
 	public function testParseWhereModifiersGlue(){
 		$this->assertEquals(
-			" WHERE (:bar = 1, :baz = 2) AND (:bar)",
-			$this->parser($this->createSelect()->where(':bar = %i, :baz = %i', 1, 2)->and(':bar'))
-				->parseWhere()
+			"WHERE (:bar = 1, :baz = 2) AND (:bar)",
+			trim($this->parser($this->createSelect()->where(':bar = %i, :baz = %i', 1, 2)->and(':bar'))
+			->parseWhere())
 		);
 	}
 
 
 	public function testParseSorting(){
 		$this->assertEquals(
-			" ORDER BY :bar, :baz DESC", $this->parser($this->createSelect()->order(':bar')->order(':baz', Neevo\Manager::DESC))
-				->parseSorting()
+			"ORDER BY :bar, :baz DESC",
+			trim($this->parser($this->createSelect()->order(':bar')->order(':baz', Neevo\Manager::DESC))
+			->parseSorting())
 		);
 	}
 
 
 	public function testParseGrouping(){
 		$this->assertEquals(
-			" GROUP BY :bar HAVING :baz", $this->parser($this->createSelect()->group(':bar', ':baz'))->parseGrouping()
+			"GROUP BY :bar HAVING :baz",
+			trim($this->parser($this->createSelect()->group(':bar', ':baz'))->parseGrouping())
 		);
 	}
 
 
 	public function testParseSource(){
-		$this->assertEquals(":foo", $this->parser($this->createInsert('foo', (array) 1))->parseSource());
-		$this->assertEquals(":foo", $this->parser($this->createSelect())->parseSource());
+		$this->assertEquals(
+			":foo",
+			$this->parser($this->createInsert('foo', (array) 1))->parseSource()
+		);
+		$this->assertEquals(
+			":foo",
+			$this->parser($this->createSelect())->parseSource()
+		);
 	}
 
 
 	public function testParseSourceJoin(){
 		$this->assertEquals(
-			":foo LEFT JOIN :bar ON :bar.id = :foo.bar_id",
-			$this->parser($this->createSelect()->leftJoin(':bar', ':bar.id = :foo.bar_id'))
-				->parseSource()
+			":foo\nLEFT JOIN :bar ON :bar.id = :foo.bar_id",
+			$this->parser($this->createSelect()->leftJoin(':bar', ':bar.id = :foo.bar_id'))->parseSource()
 		);
 	}
 
 
 	public function testParseSourceJoinLiteral(){
 		$this->assertEquals(
-			":foo LEFT JOIN GETTABLE(bar) ON bar.id = foo.bar_id",
+			":foo\nLEFT JOIN GETTABLE(bar) ON bar.id = foo.bar_id",
 			$this->parser($this->createSelect()
 				->leftJoin(new Neevo\Literal('GETTABLE(bar)'), new Neevo\Literal('bar.id = foo.bar_id')))
 			->parseSource()
@@ -129,7 +141,7 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 
 	public function testApplyLimit(){
 		$this->assertEquals(
-			"foo LIMIT 15 OFFSET 5",
+			"foo\nLIMIT 15 OFFSET 5",
 			$this->parser($this->createSelect()->limit(15, 5))->applyLimit('foo')
 		);
 	}
@@ -150,7 +162,10 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider parseFieldName
 	 */
 	public function testParseFieldName($input, $output){
-		$this->assertEquals($output, $this->parser($this->createSelect())->parseFieldName($input));
+		$this->assertEquals(
+			$output,
+			$this->parser($this->createSelect())->parseFieldName($input)
+		);
 	}
 
 
@@ -172,8 +187,9 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider escapeValueNoType
 	 */
 	public function testEscapeValue($input, $output){
-		$this->assertTrue($output === $this->parser($this->createSelect())
-				->escapeValue($input));
+		$this->assertTrue(
+			$output === $this->parser($this->createSelect())->escapeValue($input)
+		);
 	}
 
 
@@ -193,8 +209,9 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider escapeValueType
 	 */
 	public function testEscapeValueType($input, $type, $output){
-		$this->assertTrue($output === $this->parser($this->createSelect())
-				->escapeValue($input, $type));
+		$this->assertTrue(
+			$output === $this->parser($this->createSelect())->escapeValue($input, $type)
+		);
 	}
 
 
@@ -207,23 +224,23 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testTryDelimiteLiteral(){
-		$this->assertEquals('NOW()', $this->parser($this->createSelect())
-				->tryDelimite(new Neevo\Literal('NOW()')));
+		$this->assertEquals('NOW()',
+			$this->parser($this->createSelect())->tryDelimite(new Neevo\Literal('NOW()'))
+		);
 	}
 
 
 	public function testParseSelect(){
 		$this->assertEquals(
-			'SELECT * FROM :foo WHERE (:id = 5) GROUP BY :id ORDER BY :id',
-			$this->parser($this->createSelect()->where(':id', 5)
-					->group(':id')->order(':id'))->parse()
+			"SELECT *\nFROM :foo\nWHERE (:id = 5)\nGROUP BY :id\nORDER BY :id",
+			trim($this->parser($this->createSelect()->where(':id', 5)->group(':id')->order(':id'))->parse())
 		);
 	}
 
 
 	public function testParseInsert(){
 		$this->assertEquals(
-			"INSERT INTO :table (:id, :name) VALUES (5, 'John Doe')",
+			"INSERT INTO :table (:id, :name)\nVALUES (5, 'John Doe')",
 			$this->parser($this->createInsert(':table', array(
 					'id' => 5,
 					'name' => 'John Doe'
@@ -234,7 +251,7 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 
 	public function testParseUpdate(){
 		$this->assertEquals(
-			"UPDATE :table SET :id = 5, :name = 'John Doe' WHERE (:id = 5)",
+			"UPDATE :table\nSET :id = 5, :name = 'John Doe'\nWHERE (:id = 5)",
 			$this->parser($this->createUpdate(':table', array(
 					'id' => 5,
 					'name' => 'John Doe'
@@ -245,7 +262,7 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 
 	public function testParseDelete(){
 		$this->assertEquals(
-			'DELETE FROM :table WHERE (:id = 5)',
+			"DELETE FROM :table\nWHERE (:id = 5)",
 			$this->parser($this->createDelete(':table')->where(':id', 5))->parse()
 		);
 	}
@@ -254,14 +271,20 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	public function testParseSourceSubquery(){
 		$subquery = new Neevo\Result($this->connection, 'foo');
 		$result = new Neevo\Result($this->connection, $subquery->as('alias'));
-		$this->assertEquals('(SELECT * FROM :foo) :alias', $this->parser($result)->parseSource());
+		$this->assertEquals(
+			"(\n\tSELECT *\n\tFROM :foo\n) :alias",
+			$this->parser($result)->parseSource()
+		);
 	}
 
 
 	public function testParseSourceSubqueryAutoAlias(){
 		$subquery = new Neevo\Result($this->connection, 'foo');
 		$result = new Neevo\Result($this->connection, $subquery);
-		$this->assertEquals('(SELECT * FROM :foo) :_table_', $this->parser($result)->parseSource());
+		$this->assertEquals(
+			"(\n\tSELECT *\n\tFROM :foo\n) :_table_",
+			$this->parser($result)->parseSource()
+		);
 	}
 
 
@@ -269,7 +292,7 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 		$subquery = new Neevo\Result($this->connection, 'tab2');
 		$result = new Neevo\Result($this->connection, 'tab1');
 		$this->assertEquals(
-			':tab1 LEFT JOIN (SELECT * FROM :tab2) :tab2 ON :tab1.id = :tab2.tab1_id',
+			":tab1\nLEFT JOIN (\n\tSELECT *\n\tFROM :tab2\n) :tab2 ON :tab1.id = :tab2.tab1_id",
 			$this->parser($result->leftJoin($subquery->as('tab2'), ':tab1.id = :tab2.tab1_id'))->parseSource()
 		);
 	}
@@ -280,8 +303,8 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 		$sq2 = new Neevo\Result($this->connection, 'tab3');
 		$result = new Neevo\Result($this->connection, 'tab1');
 		$this->assertEquals(
-			':tab1 LEFT JOIN (SELECT * FROM :tab2) :_join_1 ON :foo'
-			. ' LEFT JOIN (SELECT * FROM :tab3) :_join_2 ON :bar',
+			":tab1\nLEFT JOIN (\n\tSELECT *\n\tFROM :tab2\n) :_join_1 ON :foo"
+			. "\nLEFT JOIN (\n\tSELECT *\n\tFROM :tab3\n) :_join_2 ON :bar",
 			$this->parser($result->leftJoin($sq1, ':foo')->leftJoin($sq2, ':bar'))->parseSource()
 		);
 	}
@@ -289,7 +312,7 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 
 	public function testParseWhereSimpleSubquery(){
 		$this->assertEquals(
-			" WHERE (:bar IN (SELECT * FROM :foo))",
+			"\nWHERE (:bar IN (\n\tSELECT *\n\tFROM :foo\n))",
 			$this->parser($this->createSelect()->where('bar', $this->createSelect()))->parseWhere()
 		);
 	}

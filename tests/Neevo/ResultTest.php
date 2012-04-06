@@ -99,13 +99,19 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 
 	public function testLeftJoin(){
 		$this->result->leftJoin($s = 'foo', $c = 'c');
-		$this->assertEquals(array(array($s, $c, Neevo\Manager::JOIN_LEFT)), $this->result->getJoins());
+		$this->assertEquals(
+			array(array($s, $c, Neevo\Manager::JOIN_LEFT)),
+			$this->result->getJoins()
+		);
 	}
 
 
 	public function testInnerJoin(){
 		$this->result->innerJoin($s = 'foo', $c = 'c');
-		$this->assertEquals(array(array($s, $c, Neevo\Manager::JOIN_INNER)), $this->result->getJoins());
+		$this->assertEquals(
+			array(array($s, $c, Neevo\Manager::JOIN_INNER)),
+			$this->result->getJoins()
+		);
 	}
 
 
@@ -157,7 +163,8 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 
 	public function testFetchAllOffset(){
 		$this->assertEquals(
-			array($this->result->getConnection()->getDriver()->getRow(1)), array_map('iterator_to_array', $this->result->fetchAll(1, 1))
+			array($this->result->getConnection()->getDriver()->getRow(1)),
+			array_map('iterator_to_array', $this->result->fetchAll(1, 1))
 		);
 	}
 
@@ -201,7 +208,8 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	public function testSeek(){
 		$this->result->seek(2);
 		$this->assertEquals(
-			$this->result->getConnection()->getDriver()->getRow(2), $this->result->fetch()->toArray()
+			$this->result->getConnection()->getDriver()->getRow(2),
+			$this->result->fetch()->toArray()
 		);
 	}
 
@@ -367,7 +375,9 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 		$r = new ReflectionMethod('Neevo\Result', 'convertType');
 		$r->setAccessible(true);
 
-		$this->assertTrue($r->invoke($result, date('Y-m-d H:i:s', $t = time()), Neevo\Manager::DATETIME) === date('Y-m-d', $t));
+		$this->assertTrue(
+			$r->invoke($result, date('Y-m-d H:i:s', $t = time()), Neevo\Manager::DATETIME) === date('Y-m-d', $t)
+		);
 	}
 
 
