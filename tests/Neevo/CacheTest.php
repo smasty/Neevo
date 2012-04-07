@@ -37,6 +37,10 @@ class CacheTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testMemcache(){
+		// Memcache not available in Travis CI
+		//if(!class_exists('Memcache'))
+		//	return;
+
 		$memcache = new Memcache();
 		$memcache->connect('localhost');
 		$cache = new Neevo\Cache\MemcacheStorage($memcache);
