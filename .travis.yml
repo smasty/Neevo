@@ -4,4 +4,5 @@ php:
   - 5.3
   - 5.4
 
+before_script: git clone git://github.com/pear/pear-core.git lib
 script: phpunit -c tests/phpunit.xml
