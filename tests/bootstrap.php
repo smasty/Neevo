@@ -5,7 +5,7 @@ require_once __DIR__ . '/../src/loader.php';
 
 // Add PEAR to include path for Travis CI
 if(!class_exists('PEAR_RunTest'))
-	set_include_path(get_include_path() . PATH_SEPARATOR . '../lib/pear-core');
+	set_include_path(get_include_path() . PATH_SEPARATOR . realpath(__DIR__ . '(../lib/pear-core'));
 
 
 // Test helper objects autoloader
