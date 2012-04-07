@@ -6,7 +6,4 @@ php:
 
 script: phpunit -c tests/phpunit.xml
 
-before_script:
-  - pyrus install -f http://download.pear.php.net/package/PEAR-1.9.4.tgz
-#  - pyrus install -f -p pyrus/Pyrus_Developer
-#  - pyrus install -f pear2.php.net/PEAR2_Exception
+before_script: pyrus install -f http://download.pear.php.net/package/PEAR-1.9.4.tgz
