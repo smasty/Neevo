@@ -103,7 +103,7 @@ class Statement extends BaseStatement {
 		$this->performed || $this->run();
 		try{
 			return $this->connection->getDriver()->getInsertId();
-		} catch(ImplementationException $e){
+		} catch(ImplementationException $e){
 			return false;
 		}
 	}
