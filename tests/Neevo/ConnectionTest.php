@@ -151,7 +151,12 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 	public function testArrayAccess(){
 		$this->assertEquals('Dummy', $this->instance['driver'], 'offsetGet()');
-		$this->assertTrue(isset($this->instance['driver']), 'offsetSet()');
+		$this->assertTrue(isset($this->instance['driver']), 'offsetExists()');
+
+		$this->instance['driver'] = 'foo';
+		unset($this->instance['driver']);
+		$this->assertEquals('Dummy', $this->instance['driver'], 'offsetSet(), offsetUnset()');
+
 	}
 
 

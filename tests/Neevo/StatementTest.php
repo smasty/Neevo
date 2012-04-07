@@ -67,9 +67,27 @@ class StatementTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testInsertIdNotSupported(){
+		$stmt = Neevo\Statement::createInsert($this->connection, 'table', array('column', 'value'));
+		$this->connection->getDriver()->setError('insert-id');
+		$this->assertFalse($stmt->insertId());
+	}
+
+
 	public function testAffectedRows(){
 		$stmt = Neevo\Statement::createDelete($this->connection, 'table');
 		$this->assertEquals(1, $stmt->affectedRows());
+	}
+
+
+
+	public function testAffectedRowsError(){
+		$this->connection->getDriver()->setError('affected-rows');
+		$stmt = Neevo\Statement::createDelete($this->connection, 'table');
+		$stmt->run();
+		$r = new ReflectionProperty($stmt, 'affectedRows');
+		$r->setAccessible(true);
+		$this->assertFalse($r->getValue($stmt));
 	}
 
 

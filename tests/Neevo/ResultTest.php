@@ -235,6 +235,7 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 
 	public function testCount(){
 		$this->assertTrue(count($this->result) === 3);
+		$this->assertTrue($this->result->rows() === 3);
 	}
 
 
@@ -275,6 +276,15 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testDetectTypesError(){
+		$r = new ReflectionProperty('Neevo\Result', 'columnTypes');
+		$r->setAccessible(true);
+		$this->result->getConnection()->getDriver()->setError('column-types');
+		$this->result->detectTypes();
+		$this->assertEquals(array(), $r->getValue($this->result));
+	}
+
+
 	public function testSetTypes(){
 		$r = new ReflectionProperty('Neevo\Result', 'columnTypes');
 		$r->setAccessible(true);
@@ -285,6 +295,13 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 		));
 
 		$this->assertEquals($t, $r->getValue($this->result));
+	}
+
+
+	public function testResolveTypeUnknown(){
+		$r = new ReflectionMethod('Neevo\Result', 'resolveType');
+		$r->setAccessible(true);
+		$this->assertTrue($r->invoke($this->result, 'foo') === Neevo\Manager::TEXT);
 	}
 
 
@@ -408,6 +425,11 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	public function testHasCircularReferencesDeeper(){
 		$subquery = new Neevo\Result($this->connection, $this->result);
 		$this->result->leftJoin($subquery, 'foo')->dump(true);
+	}
+
+
+	public function testExplain(){
+		$this->assertEquals(DummyResult::$dataExplain, $this->result->explain());
 	}
 
 

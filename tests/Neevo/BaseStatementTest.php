@@ -211,6 +211,15 @@ class BaseStatementTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	/**
+	 * @expectedException Neevo\NeevoException
+	 */
+	public function testRunQueryError(){
+		$this->stmt->getConnection()->getDriver()->setError('query');
+		$this->stmt->run();
+	}
+
+
 	public function testGetTable(){
 		$r = new ReflectionProperty('DummyStmt', 'source');
 		$r->setAccessible(true);
@@ -230,6 +239,16 @@ class BaseStatementTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testGetPrimaryKeyNull(){
+		$this->assertNull($this->stmt->getPrimaryKey());
+	}
+
+
+	public function testGetPrimaryKeyError(){
+		$r = new ReflectionProperty('DummyStmt', 'source');
+		$r->setAccessible(true);
+		$r->setValue($this->stmt, 'table');
+
+		$this->stmt->getConnection()->getDriver()->setError('primary-key');
 		$this->assertNull($this->stmt->getPrimaryKey());
 	}
 

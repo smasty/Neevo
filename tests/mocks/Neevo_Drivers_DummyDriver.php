@@ -14,7 +14,8 @@ class DummyDriver implements Neevo\IDriver {
 			$connected = false,
 			$closed,
 			$transactions = array(),
-			$performed = array();
+			$performed = array(),
+			$error = false;
 
 
 
@@ -47,6 +48,8 @@ class DummyDriver implements Neevo\IDriver {
 
 
 	public function runQuery($queryString){
+		if($this->error == 'query')
+			throw new DriverException;
 		if($queryString){
 			$this->performed[] = $queryString;
 			return new \DummyResult($queryString, $this);
@@ -93,6 +96,8 @@ class DummyDriver implements Neevo\IDriver {
 
 
 	public function getInsertId(){
+		if($this->error == 'insert-id')
+			throw new Neevo\ImplementationException;
 		return 4;
 	}
 
@@ -110,6 +115,8 @@ class DummyDriver implements Neevo\IDriver {
 
 
 	public function getAffectedRows(){
+		if($this->error == 'affected-rows')
+			throw new DriverException;
 		return 1;
 	}
 
@@ -126,11 +133,15 @@ class DummyDriver implements Neevo\IDriver {
 
 
 	public function getPrimaryKey($table){
+		if($this->error == 'primary-key')
+			throw new DriverException;
 		return 'id';
 	}
 
 
 	public function getColumnTypes($resultSet, $table){
+		if($this->error == 'column-types')
+			throw new DriverException;
 		return array(
 			'id' => 'int',
 			'name' => 'text',
@@ -146,6 +157,9 @@ class DummyDriver implements Neevo\IDriver {
 			return \DummyResult::$data[$i];
 		return false;
 	}
+
+
+	// =========== State methods
 
 
 	public function isClosed(){
@@ -165,6 +179,11 @@ class DummyDriver implements Neevo\IDriver {
 
 	public function performed(){
 		return $this->performed;
+	}
+
+
+	public function setError($error){
+		$this->error = $error;
 	}
 
 

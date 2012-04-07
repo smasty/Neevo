@@ -3,7 +3,7 @@
 class DummyResult {
 
 
-	private $queryString, $driver, $cursor = 0;
+	private $queryString, $driver, $cursor = 0, $explain = false;
 
 	public static $data = array(
 		array(
@@ -24,9 +24,18 @@ class DummyResult {
 	);
 
 
+	public static $dataExplain = array(
+		array('foo' => 'bar'),
+		array('foo' => 'baz'),
+		array('foo' => 'qux')
+	);
+
+
 	public function __construct($queryString, Neevo\Drivers\DummyDriver $driver){
 		$this->queryString = $queryString;
 		$this->driver= $driver;
+		if(strtolower(substr($queryString, 0, 7)) == 'explain')
+			$this->explain = true;
 	}
 
 
@@ -36,14 +45,14 @@ class DummyResult {
 
 
 	public function fetch(){
-		if($this->cursor >= count(self::$data))
+		if($this->cursor >= count($this->explain ? self::$dataExplain : self::$data))
 			return false;
-		return self::$data[$this->cursor++];
+		return $this->explain ? self::$dataExplain[$this->cursor++] : self::$data[$this->cursor++];
 	}
 
 
 	public function seek($offset){
-		if($offset >= count(self::$data))
+		if($offset >= count($this->explain ? self::$dataExplain : self::$data))
 			return false;
 		$this->cursor = $offset;
 		return true;
