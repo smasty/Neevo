@@ -9,4 +9,5 @@ before_script:
   - ls -l
   - ls lib -l
   - ls lib/pear-core -l
+
 script: phpunit -c tests/phpunit.xml
