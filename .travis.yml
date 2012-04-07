@@ -4,6 +4,9 @@ php:
   - 5.3
   - 5.4
 
-before_script: git clone git://github.com/pear/pear-core.git lib/pear-core; ls -l; ls lib -l; ls lib/pear-core -l
-
 script: phpunit -c tests/phpunit.xml
+
+before_script:
+  - pyrus install -f http://download.pear.php.net/package/PEAR-1.9.4.tgz
+  - pyrus install -f -p pyrus/Pyrus_Developer
+  - pyrus install -f pear2.php.net/PEAR2_Exception
