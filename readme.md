@@ -1,6 +1,6 @@
 Neevo - Tiny open-source database layer for PHP
 ===============================================
-
+[![Build Status](https://secure.travis-ci.org/smasty/Neevo.png?branch=master)](http://travis-ci.org/smasty/Neevo)
 
 Introduction
 ------------
