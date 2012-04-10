@@ -11,7 +11,7 @@
 	<!-- Requires pear.nette.org/Nette -->
 	<taskdef name="neevo-loader" classname="build.tasks.NeevoLoaderTask"/>
 
-	<target name="dist" depends="prepare,classList,test,copy,lint,api,tar,clean"/>
+	<target name="dist" depends="prepare,classList,test,copy,lint,api,tar,phar,clean"/>
 
 
 	<target name="prepare" description="Prepare structure">
@@ -74,6 +74,20 @@
 		<tar destfile="${targetFile}" compression="gzip" prefix="Neevo-${vc.version}">
 			<tarfileset dir="${buildDir}/src"/>
 		</tar>
+	</target>
+
+
+	<target name="phar">
+		<pharpackage destfile="${buildDir}/target/Neevo.phar" basedir="${buildDir}/src" stub="${buildDir}/phar-stub.php">
+			<fileset dir="${buildDir}/src"/>
+			<metadata>
+				<element name="version" value="${vc.version}"/>
+				<element name="revision" value="${vc.rev}"/>
+				<element name="date" value="${vc.date}"/>
+			</metadata>
+		</pharpackage>
+
+		<phplint file="${buildDir}/target/Neevo.phar"/>
 	</target>
 
 
