@@ -20,7 +20,8 @@ define('NEEVO_DIR', __DIR__);
 
 
 // Try to turn magic quotes off - Neevo handles SQL quoting.
-@set_magic_quotes_runtime(false);
+if(function_exists('set_magic_quotes_runtime'))
+	@set_magic_quotes_runtime(false);
 
 
 // Register autoloader responsible for loading Neevo classes and interfaces.
