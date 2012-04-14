@@ -1,12 +1,12 @@
 <!-- Phing configuration for Neevo -->
 <project name="Neevo" default="dist">
 
-	<property name="vc.version" value="2.0"/>
+	<property name="vc.version" value="2.0.1"/>
 
 	<property name="srcDir" value="${project.basedir}/src"/>
 	<property name="testDir" value="${project.basedir}/tests"/>
 	<property name="buildDir" value="${project.basedir}/build"/>
-	<property name="apiDir" value="${buildDir}/api/2.0"/>
+	<property name="apiDir" value="${buildDir}/api/${vc.version}"/>
 
 	<!-- Requires pear.nette.org/Nette -->
 	<taskdef name="neevo-loader" classname="build.tasks.NeevoLoaderTask"/>
