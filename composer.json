@@ -1,0 +1,20 @@
+{
+	"name": "smasty/Neevo",
+	"type": "library",
+	"description": "Neevo - Tiny open-source database layer for PHP",
+	"keywords": ["database", "dbal"],
+	"homepage": "http://neevo.smasty.net",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Smasty",
+			"homepage": "http://smasty.net"
+		}
+	],
+	"require": {
+		"php": ">=5.3.0"
+	},
+	"autoload": {
+		"classmap": ["src/"]
+	}
+}
