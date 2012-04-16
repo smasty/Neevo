@@ -48,7 +48,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Create SELECT statement.
+	 * Creates SELECT statement.
 	 * @param Connection $connection
 	 * @param string|array|\Traversable $columns
 	 * @param string|Result $source Table name or subquery
@@ -87,7 +87,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Destroy the result set resource and free memory.
+	 * Destroys the result set resource and free memory.
 	 * @return void
 	 */
 	public function __destruct(){
@@ -108,7 +108,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Define grouping rule.
+	 * Defines grouping rule.
 	 * @param string $rule
 	 * @param string $having Optional
 	 * @return Result fluent interface
@@ -124,7 +124,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Perform JOIN on tables.
+	 * Performs JOIN on tables.
 	 * @param string|Result|Literal $source Table name or subquery
 	 * @param string|Literal $condition
 	 * @return Result fluent interface
@@ -151,7 +151,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Perform LEFT JOIN on tables.
+	 * Performs LEFT JOIN on tables.
 	 * @param string|Result|Literal $source Table name or subquery
 	 * @param string|Literal $condition
 	 * @return Result fluent interface
@@ -162,7 +162,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Perform INNER JOIN on tables.
+	 * Performs INNER JOIN on tables.
 	 * @param string|Result|Literal $source Table name or subquery
 	 * @param string|Literal $condition
 	 * @return Result fluent interface
@@ -173,7 +173,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Adjust the LIMIT and OFFSET clauses according to defined page number and number of items per page.
+	 * Adjusts the LIMIT and OFFSET clauses according to defined page number and number of items per page.
 	 * @param int $page Page number
 	 * @param int $items Number of items per page
 	 * @return Result fluent interface
@@ -187,7 +187,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Fetch the row on current position.
+	 * Fetches the row on current position.
 	 * @return Row|FALSE
 	 */
 	public function fetch(){
@@ -211,7 +211,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Fetch all rows in result set.
+	 * Fetches all rows in result set.
 	 * @param int $limit Limit number of returned rows
 	 * @param int $offset Seek to offset (fails on unbuffered results)
 	 * @return Row[]
@@ -238,7 +238,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Fetch the first value from current row.
+	 * Fetches the first value from current row.
 	 * @return mixed
 	 */
 	public function fetchSingle(){
@@ -263,7 +263,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Fetch rows as $key=>$value pairs.
+	 * Fetches rows as $key=>$value pairs.
 	 * @param string $key Key column
 	 * @param string $value Value column. NULL for whole row.
 	 * @return Row[]
@@ -293,7 +293,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Move internal result pointer.
+	 * Moves internal result pointer.
 	 * @param int $offset
 	 * @return bool
 	 * @throws NeevoException
@@ -313,7 +313,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Count number of rows.
+	 * Counts number of rows.
 	 * @param string $column
 	 * @return int
 	 * @throws DriverException
@@ -328,7 +328,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Execute aggregation function.
+	 * Executes aggregation function.
 	 * @param string $function
 	 * @return mixed
 	 */
@@ -340,7 +340,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Get the sum of column values.
+	 * Returns the sum of column values.
 	 * @param string $column
 	 * @return mixed
 	 */
@@ -350,7 +350,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Get the minimum value of column.
+	 * Returns the minimum value of column.
 	 * @param string $column
 	 * @return mixed
 	 */
@@ -360,7 +360,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Get the maximum value of column.
+	 * Returns the maximum value of column.
 	 * @param string $column
 	 * @return mixed
 	 */
@@ -370,7 +370,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Explain performed query.
+	 * Explains performed query.
 	 * @return array
 	 */
 	public function explain(){
@@ -387,7 +387,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Set column type.
+	 * Sets column type.
 	 * @param string $column
 	 * @param string $type
 	 * @return Result fluent interface
@@ -399,7 +399,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Set multiple column types at once.
+	 * Sets multiple column types at once.
 	 * @param array|Traversable $types
 	 * @return Result fluent interface
 	 */
@@ -414,7 +414,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Detect column types.
+	 * Detects column types.
 	 * @return Result fluent interface
 	 */
 	public function detectTypes(){
@@ -442,7 +442,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Resolve vendor column type.
+	 * Resolves vendor column type.
 	 * @param string $type
 	 * @return string
 	 */
@@ -465,7 +465,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Convert value to a specified type.
+	 * Converts value to a specified type.
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
@@ -511,7 +511,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Set table alias to be used when in subquery.
+	 * Sets table alias to be used when in subquery.
 	 * @param string $alias
 	 * @return Result fluent interface
 	 */
@@ -522,7 +522,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Get table alias used in subquery.
+	 * Returns table alias used in subquery.
 	 * @return string|null
 	 */
 	public function getAlias(){
@@ -531,7 +531,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Set class to use as a row class.
+	 * Sets class to use as a row class.
 	 * @param string $className
 	 * @return Result fluent interface
 	 * @throws NeevoException
@@ -545,7 +545,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Get the result iterator.
+	 * Returns the result iterator.
 	 * @return ResultIterator
 	 */
 	public function getIterator(){
@@ -571,7 +571,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Get full table name (with prefix) if available.
+	 * Returns full table name (with prefix) if available.
 	 * @return string|null
 	 */
 	public function getTable(){
@@ -582,7 +582,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 
 	/**
-	 * Get the source for the statement.
+	 * Returns the source for the statement.
 	 * @return string|Result
 	 */
 	public function getSource(){

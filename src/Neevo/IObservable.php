@@ -20,7 +20,7 @@ interface IObservable {
 
 
 	/**
-	 * Attach given observer to given event.
+	 * Attaches given observer to given event.
 	 * @param Observer $observer
 	 * @param int $event
 	 * @return void
@@ -29,7 +29,7 @@ interface IObservable {
 
 
 	/**
-	 * Detach given observer.
+	 * Detaches given observer.
 	 * @param Observer $observer
 	 * @return void
 	 */
@@ -37,7 +37,7 @@ interface IObservable {
 
 
 	/**
-	 * Notify all observers attached to given event.
+	 * Notifies all observers attached to given event.
 	 * @param int $event
 	 * @return void
 	 */

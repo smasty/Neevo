@@ -56,7 +56,7 @@ class Loader {
 
 
 	/**
-	 * Get the singleton instance.
+	 * Returns the singleton instance.
 	 * @return Loader
 	 */
 	public static function getInstance(){
@@ -67,7 +67,7 @@ class Loader {
 
 
 	/**
-	 * Register the autoloader.
+	 * Registers the autoloader.
 	 * @return void
 	 */
 	public function register(){
@@ -76,7 +76,7 @@ class Loader {
 
 
 	/**
-	 * Unregister the autoloader.
+	 * Unregisters the autoloader.
 	 * @return void
 	 */
 	public function unregister(){
@@ -85,7 +85,7 @@ class Loader {
 
 
 	/**
-	 * Try load Neevo class/interface.
+	 * Tries to load Neevo class/interface.
 	 * @param string $type
 	 * @return bool
 	 */

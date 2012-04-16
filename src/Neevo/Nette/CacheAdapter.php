@@ -31,7 +31,7 @@ class CacheAdapter implements Neevo\ICache {
 
 
 	/**
-	 * Create the cache adapter.
+	 * Creates the cache adapter.
 	 * @param Nette\Caching\IStorage $storage
 	 */
 	public function __construct(Nette\Caching\IStorage $storage){

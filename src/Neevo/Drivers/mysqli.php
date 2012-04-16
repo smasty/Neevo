@@ -48,7 +48,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Check for required PHP extension.
+	 * Checks for required PHP extension.
 	 * @return void
 	 * @throws DriverException
 	 */
@@ -61,7 +61,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Create connection to database.
+	 * Creates connection to database.
 	 * @param array $config Configuration options
 	 * @return void
 	 * @throws DriverException
@@ -104,7 +104,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Close the connection.
+	 * Closes the connection.
 	 * @return void
 	 */
 	public function closeConnection(){
@@ -113,7 +113,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Free memory used by given result set.
+	 * Frees memory used by given result set.
 	 * @param mysqli_result $resultSet
 	 * @return bool
 	 */
@@ -123,7 +123,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Execute given SQL statement.
+	 * Executes given SQL statement.
 	 * @param string $queryString
 	 * @return mysqli_result|bool
 	 * @throws DriverException
@@ -143,7 +143,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Begin a transaction if supported.
+	 * Begins a transaction if supported.
 	 * @param string $savepoint
 	 * @return void
 	 */
@@ -153,7 +153,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Commit statements in a transaction.
+	 * Commits statements in a transaction.
 	 * @param string $savepoint
 	 * @return void
 	 */
@@ -163,7 +163,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Rollback changes in a transaction.
+	 * Rollbacks changes in a transaction.
 	 * @param string $savepoint
 	 * @return void
 	 */
@@ -173,7 +173,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Fetch row from given result set as an associative array.
+	 * Fetches row from given result set as an associative array.
 	 * @param mysqli_result $resultSet
 	 * @return array
 	 */
@@ -183,7 +183,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Move internal result pointer.
+	 * Moves internal result pointer.
 	 * @param mysqli_result $resultSet
 	 * @param int
 	 * @return bool
@@ -197,7 +197,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Get the ID generated in the INSERT statement.
+	 * Returns the ID generated in the INSERT statement.
 	 * @return int
 	 */
 	public function getInsertId(){
@@ -206,7 +206,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Randomize result order.
+	 * Randomizes result order.
 	 * @param Neevo\BaseStatement $statement
 	 * @return void
 	 */
@@ -216,7 +216,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Get the number of rows in the given result set.
+	 * Returns the number of rows in the given result set.
 	 * @param \mysqli_result $resultSet
 	 * @return int|FALSE
 	 * @throws DriverException
@@ -231,7 +231,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Get the number of affected rows in previous operation.
+	 * Returns the number of affected rows in previous operation.
 	 * @return int
 	 */
 	public function getAffectedRows(){
@@ -240,7 +240,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Escape given value.
+	 * Escapes given value.
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
@@ -271,7 +271,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Decode given value.
+	 * Decodes given value.
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
@@ -285,7 +285,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Get the PRIMARY KEY column for given table.
+	 * Returns the PRIMARY KEY column for given table.
 	 * @param string $table
 	 * @return string
 	 */
@@ -301,7 +301,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Get types of columns in given result set.
+	 * Returns types of columns in given result set.
 	 * @param mysqli_result $resultset
 	 * @param string $table
 	 * @return array
@@ -326,7 +326,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Parse UPDATE statement.
+	 * Parses UPDATE statement.
 	 * @return string
 	 */
 	protected function parseUpdateStmt(){
@@ -336,7 +336,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 
 	/**
-	 * Parse DELETE statement.
+	 * Parses DELETE statement.
 	 * @return string
 	 */
 	protected function parseDeleteStmt(){

@@ -144,7 +144,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Set WHERE condition. Accepts infinite arguments.
+	 * Sets WHERE condition. Accepts infinite arguments.
 	 *
 	 * More calls append conditions with 'AND' operator. Conditions can also be specified
 	 * by calling and() / or() methods the same way as where().
@@ -201,7 +201,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Define order. More calls append rules.
+	 * Defines order. More calls append rules.
 	 * @param string|array|\Traversable $rule
 	 * @param string $order Use constants - Manager::ASC, Manager::DESC
 	 * @return BaseStatement fluent interface
@@ -225,7 +225,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Set LIMIT and OFFSET clauses.
+	 * Sets LIMIT and OFFSET clauses.
 	 * @param int $limit
 	 * @param int $offset
 	 * @return BaseStatement fluent interface
@@ -242,7 +242,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Randomize order. Removes any other order clause.
+	 * Randomizes order. Removes any other order clause.
 	 * @return BaseStatement fluent interface
 	 */
 	public function rand(){
@@ -256,7 +256,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Print out syntax highlighted statement.
+	 * Prints out syntax highlighted statement.
 	 * @param bool $return
 	 * @return string|Neevo\BaseStatement fluent interface
 	 */
@@ -271,7 +271,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Perform the statement.
+	 * Performs the statement.
 	 * @return resource|bool
 	 */
 	public function run(){
@@ -300,7 +300,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Perform the statement. Alias for run().
+	 * Performs the statement. Alias for run().
 	 * @return resource|bool
 	 */
 	public function exec(){
@@ -309,7 +309,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Build the SQL statement from the instance.
+	 * Builds the SQL statement from the instance.
 	 * @return string The SQL statement
 	 * @internal
 	 */
@@ -326,7 +326,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Attach given observer to given event.
+	 * Attaches given observer to given event.
 	 * @param IObserver $observer
 	 * @param int $event
 	 * @return void
@@ -337,7 +337,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Detach given observer.
+	 * Detaches given observer.
 	 * @param IObserver $observer
 	 * @return void
 	 */
@@ -347,7 +347,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Notify all observers attached to given event.
+	 * Notifies all observers attached to given event.
 	 * @param int $event
 	 * @return void
 	 */
@@ -360,7 +360,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Query execution time.
+	 * Returns query execution time.
 	 * @return int
 	 */
 	public function getTime(){
@@ -369,7 +369,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * If query was performed.
+	 * Returns wheter query was performed.
 	 * @return bool
 	 */
 	public function isPerformed(){
@@ -378,7 +378,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Get full table name (with prefix).
+	 * Returns full table name (with prefix).
 	 * @return string
 	 */
 	public function getTable(){
@@ -389,7 +389,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Statement type.
+	 * Returns tatement type.
 	 * @return string
 	 */
 	public function getType(){
@@ -398,7 +398,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Get LIMIT and OFFSET clauses.
+	 * Returns LIMIT and OFFSET clauses.
 	 * @return array
 	 */
 	public function getLimit(){
@@ -407,7 +407,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Statement WHERE clause.
+	 * Returns statement WHERE clause.
 	 * @return array
 	 */
 	public function getConditions(){
@@ -416,7 +416,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Statement ORDER BY clause.
+	 * Returns statement ORDER BY clause.
 	 * @return array
 	 */
 	public function getSorting(){
@@ -425,7 +425,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Name of the PRIMARY KEY column.
+	 * Returns the name of the PRIMARY KEY column.
 	 * @return string|null
 	 */
 	public function getPrimaryKey(){
@@ -449,7 +449,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Get the connection instance.
+	 * Returns the connection instance.
 	 * @return Connection
 	 */
 	public function getConnection(){
@@ -458,7 +458,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Reset the state of the statement.
+	 * Resets the state of the statement.
 	 * @return void
 	 */
 	protected function resetState(){
@@ -469,7 +469,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Validate the current statement condition.
+	 * Validates the current statement condition.
 	 * @return bool
 	 */
 	protected function validateConditions(){
@@ -484,7 +484,7 @@ abstract class BaseStatement implements IObservable {
 
 
 	/**
-	 * Check the query tree for circular references.
+	 * Checks the query tree for circular references.
 	 * @param BaseStatement $parent
 	 * @param array $visited
 	 * @return bool True if circular reference found.

@@ -39,7 +39,7 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 
 
 	/**
-	 * Create a row instance.
+	 * Creates a row instance.
 	 * @param array $data
 	 * @param Result $result
 	 * @return void
@@ -56,7 +56,7 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 
 
 	/**
-	 * Update corresponding database row if available.
+	 * Updates corresponding database row if available.
 	 * @throws NeevoException
 	 * @return int Number of affected rows.
 	 */
@@ -73,7 +73,7 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 
 
 	/**
-	 * Delete corresponding database row if available.
+	 * Deletes corresponding database row if available.
 	 * @throws NeevoException
 	 * @return int Number of affected rows.
 	 */
@@ -87,7 +87,7 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 
 
 	/**
-	 * Return values as an array.
+	 * Returns values as an array.
 	 * @return array
 	 */
 	public function toArray(){
@@ -96,7 +96,7 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 
 
 	/**
-	 * If row is not able to update it's state.
+	 * Returns whether the row is not able to update it's state.
 	 * @return bool
 	 */
 	public function isFrozen(){

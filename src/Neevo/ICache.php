@@ -20,7 +20,7 @@ interface ICache {
 
 
 	/**
-	 * Fetch stored data.
+	 * Fetches stored data.
 	 * @param string $key
 	 * @return mixed|null null if not found
 	 */
@@ -28,7 +28,7 @@ interface ICache {
 
 
 	/**
-	 * Store data in cache.
+	 * Stores data in cache.
 	 * @param string $key
 	 * @param mixed $value
 	 * @return void

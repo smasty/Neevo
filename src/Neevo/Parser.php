@@ -27,7 +27,7 @@ class Parser {
 
 
 	/**
-	 * Instantiate the parser for given statement.
+	 * Instantiates the parser for given statement.
 	 * @param BaseStatement $statement
 	 */
 	public function __construct(BaseStatement $statement){
@@ -36,7 +36,7 @@ class Parser {
 
 
 	/**
-	 * Parse the given statement.
+	 * Parses the given statement.
 	 * @return string The SQL statement
 	 */
 	public function parse(){
@@ -66,7 +66,7 @@ class Parser {
 
 
 	/**
-	 * Parse SELECT statement.
+	 * Parses SELECT statement.
 	 * @return string
 	 */
 	protected function parseSelectStmt(){
@@ -83,7 +83,7 @@ class Parser {
 
 
 	/**
-	 * Parse INSERT statement.
+	 * Parses INSERT statement.
 	 * @return string
 	 */
 	protected function parseInsertStmt(){
@@ -99,7 +99,7 @@ class Parser {
 
 
 	/**
-	 * Parse UPDATE statement.
+	 * Parses UPDATE statement.
 	 * @return string
 	 */
 	protected function parseUpdateStmt(){
@@ -114,7 +114,7 @@ class Parser {
 
 
 	/**
-	 * Parse DELETE statement.
+	 * Parses DELETE statement.
 	 * @return string
 	 */
 	protected function parseDeleteStmt(){
@@ -124,7 +124,7 @@ class Parser {
 
 
 	/**
-	 * Parse statement source.
+	 * Parses statement source.
 	 * @return string
 	 */
 	protected function parseSource(){
@@ -167,7 +167,7 @@ class Parser {
 
 
 	/**
-	 * Parse WHERE clause.
+	 * Parses WHERE clause.
 	 * @return string
 	 */
 	protected function parseWhere(){
@@ -229,7 +229,7 @@ class Parser {
 
 
 	/**
-	 * Parse ORDER BY clause.
+	 * Parses ORDER BY clause.
 	 * @return string
 	 */
 	protected function parseSorting(){
@@ -243,7 +243,7 @@ class Parser {
 
 
 	/**
-	 * Parse GROUP BY clause.
+	 * Parses GROUP BY clause.
 	 * @return string
 	 */
 	protected function parseGrouping(){
@@ -253,7 +253,7 @@ class Parser {
 
 
 	/**
-	 * Parse column name.
+	 * Parses column name.
 	 * @param string|array|Literal $field
 	 * @param bool $table Parse table name.
 	 * @return string
@@ -285,7 +285,7 @@ class Parser {
 
 
 	/**
-	 * Apply LIMIT/OFFSET to SQL command.
+	 * Applies LIMIT/OFFSET to SQL command.
 	 * @param string $sql SQL command
 	 * @return string
 	 */
@@ -302,7 +302,7 @@ class Parser {
 
 
 	/**
-	 * Escape given value.
+	 * Escapes given value.
 	 * @param mixed|array|\Traversable $value
 	 * @param string|array|null $type
 	 * @return mixed|array
@@ -362,7 +362,7 @@ class Parser {
 
 
 	/**
-	 * Apply modifiers to expression.
+	 * Applies modifiers to expression.
 	 * @param string $expr
 	 * @param array $modifiers
 	 * @param array $values
@@ -378,7 +378,7 @@ class Parser {
 
 
 	/**
-	 * Try delimite fields in given expression.
+	 * Tries to delimite fields in given expression.
 	 * @param string|Literal $expr
 	 * @return string
 	 */

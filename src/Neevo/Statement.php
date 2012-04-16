@@ -27,7 +27,7 @@ class Statement extends BaseStatement {
 
 
 	/**
-	 * Create UPDATE statement.
+	 * Creates UPDATE statement.
 	 * @param Connection $connection
 	 * @param string $table
 	 * @param array|\Traversable $data
@@ -46,7 +46,7 @@ class Statement extends BaseStatement {
 
 
 	/**
-	 * Create INSERT statement.
+	 * Creates INSERT statement.
 	 * @param Connection $connection
 	 * @param string $table
 	 * @param array|\Traversable $values
@@ -65,7 +65,7 @@ class Statement extends BaseStatement {
 
 
 	/**
-	 * Create DELETE statement.
+	 * Creates DELETE statement.
 	 * @param Connection $connection
 	 * @param string $table
 	 * @return Statement fluent interface
@@ -92,7 +92,7 @@ class Statement extends BaseStatement {
 
 
 	/**
-	 * Get the ID generated in the last INSERT statement.
+	 * Returns the ID generated in the last INSERT statement.
 	 * @return int|FALSE
 	 * @throws NeevoException on non-INSERT statements.
 	 */
@@ -110,7 +110,7 @@ class Statement extends BaseStatement {
 
 
 	/**
-	 * Get the number of rows affected by the statement.
+	 * Returns the number of rows affected by the statement.
 	 * @return int
 	 */
 	public function affectedRows(){
@@ -122,7 +122,7 @@ class Statement extends BaseStatement {
 
 
 	/**
-	 * Get values of statement.
+	 * Returns the values of statement.
 	 * @return array
 	 */
 	public function getValues(){
@@ -131,7 +131,7 @@ class Statement extends BaseStatement {
 
 
 	/**
-	 * Reset state of the statement.
+	 * Resets the state of the statement.
 	 * @return void
 	 */
 	public function resetState(){

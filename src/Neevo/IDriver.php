@@ -34,7 +34,7 @@ interface IDriver {
 
 
 	/**
-	 * Check for required PHP extension.
+	 * Checks for required PHP extension.
 	 * @return void
 	 * @throws DriverException
 	 */
@@ -42,7 +42,7 @@ interface IDriver {
 
 
 	/**
-	 * Create connection to database.
+	 * Creates connection to database.
 	 * @param array $config Configuration options
 	 * @return void
 	 */
@@ -50,14 +50,14 @@ interface IDriver {
 
 
 	/**
-	 * Close the connection.
+	 * Closes the connection.
 	 * @return void
 	 */
 	public function closeConnection();
 
 
 	/**
-	 * Free memory used by given result.
+	 * Frees memory used by given result.
 	 * @param resource $resultSet
 	 * @return bool
 	 */
@@ -65,7 +65,7 @@ interface IDriver {
 
 
 	/**
-	 * Execute given SQL statement.
+	 * Executes given SQL statement.
 	 * @param string $queryString
 	 * @return resource|bool
 	 */
@@ -73,7 +73,7 @@ interface IDriver {
 
 
 	/**
-	 * Begin a transaction if supported.
+	 * Begins a transaction if supported.
 	 * @param string $savepoint
 	 * @return void
 	 */
@@ -81,7 +81,7 @@ interface IDriver {
 
 
 	/**
-	 * Commit statements in a transaction.
+	 * Commits statements in a transaction.
 	 * @param string $avepoint
 	 * @return void
 	 */
@@ -89,7 +89,7 @@ interface IDriver {
 
 
 	/**
-	 * Rollback changes in a transaction.
+	 * Rollbacks changes in a transaction.
 	 * @param string $savepoint
 	 * @return void
 	 */
@@ -97,7 +97,7 @@ interface IDriver {
 
 
 	/**
-	 * Fetch row from given result set as an associative array.
+	 * Fetches row from given result set as an associative array.
 	 * @param resource $resultSet
 	 * @return array
 	 */
@@ -105,7 +105,7 @@ interface IDriver {
 
 
 	/**
-	 * Move internal result pointer.
+	 * Moves internal result pointer.
 	 * @param resource $resultSet
 	 * @param int $offset
 	 * @return bool
@@ -114,14 +114,14 @@ interface IDriver {
 
 
 	/**
-	 * Get the ID generated in the INSERT statement.
+	 * Returns the ID generated in the INSERT statement.
 	 * @return int
 	 */
 	public function getInsertId();
 
 
 	/**
-	 * Randomize result order.
+	 * Randomizes result order.
 	 * @param BaseStatement $statement
 	 * @return void
 	 */
@@ -129,7 +129,7 @@ interface IDriver {
 
 
 	/**
-	 * Get the number of rows in the given result set.
+	 * Returns the number of rows in the given result set.
 	 * @param resource $resultSet
 	 * @return int|FALSE
 	 */
@@ -137,14 +137,14 @@ interface IDriver {
 
 
 	/**
-	 * Get the number of affected rows in previous operation.
+	 * Returns the number of affected rows in previous operation.
 	 * @return int
 	 */
 	public function getAffectedRows();
 
 
 	/**
-	 * Escape given value.
+	 * Escapes given value.
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
@@ -153,7 +153,7 @@ interface IDriver {
 
 
 	/**
-	 * Decode given value.
+	 * Decodes given value.
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
@@ -162,7 +162,7 @@ interface IDriver {
 
 
 	/**
-	 * Get the PRIMARY KEY column for given table.
+	 * Returns the PRIMARY KEY column for given table.
 	 * @param string $table
 	 * @return string|NULL
 	 */
@@ -170,7 +170,7 @@ interface IDriver {
 
 
 	/**
-	 * Get types of columns in given result set.
+	 * Returns types of columns in given result set.
 	 * @param resource $resultSet
 	 * @param string $table
 	 * @return array

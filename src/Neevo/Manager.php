@@ -67,7 +67,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Configure Neevo and establish a connection.
+	 * Configures Neevo and establish a connection.
 	 * Configuration can be different - see the API for your driver.
 	 * @param mixed $config Connection configuration.
 	 * @param ICache $cache Cache to use.
@@ -141,7 +141,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Import a SQL dump from given file.
+	 * Imports a SQL dump from given file.
 	 * Based on implementation in Nette\Database.
 	 * @copyright 2004-2012 David Grudl, http://davidgrudl.com
 	 * @license New BSD license
@@ -183,7 +183,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Begin a transaction if supported.
+	 * Begins a transaction if supported.
 	 * @param string $savepoint
 	 * @return Neevo fluent interface
 	 */
@@ -195,7 +195,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Commit statements in a transaction.
+	 * Commits statements in a transaction.
 	 * @param string $savepoint
 	 * @return Neevo fluent interface
 	 */
@@ -207,7 +207,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Rollback changes in a transaction.
+	 * Rollbacks changes in a transaction.
 	 * @param string $savepoint
 	 * @return Neevo fluent interface
 	 */
@@ -219,7 +219,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Attach an observer for debugging.
+	 * Attaches an observer for debugging.
 	 * @param IObserver $observer
 	 * @param int $event Event to attach the observer to.
 	 * @return void
@@ -233,7 +233,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Detach given observer.
+	 * Detaches given observer.
 	 * @param IObserver $observer
 	 * @return void
 	 */
@@ -246,7 +246,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Notify all observers attached to given event.
+	 * Notifies all observers attached to given event.
 	 * @param int $event
 	 * @return void
 	 */
@@ -259,7 +259,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Receive update from observable subject.
+	 * Receives update from observable subject.
 	 * @param IObservable $subject
 	 * @param int $event Event type
 	 * @return void
@@ -271,7 +271,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Current Connection instance.
+	 * Returns current Connection instance.
 	 * @return Connection
 	 */
 	public function getConnection(){
@@ -280,7 +280,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Last executed query.
+	 * Returns last executed query.
 	 * @return string
 	 */
 	public function getLast(){
@@ -289,7 +289,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Get number of executed queries.
+	 * Returns the number of executed queries.
 	 * @return int
 	 */
 	public function getQueries(){
@@ -298,7 +298,7 @@ class Manager implements IObservable, IObserver {
 
 
 	/**
-	 * Highlight given SQL code.
+	 * Highlights given SQL code.
 	 * @param string $sql
 	 * @return string
 	 */
@@ -345,7 +345,7 @@ class Literal {
 
 
 	/**
-	 * Create instance of SQL literal.
+	 * Creates instance of SQL literal.
 	 * @param string $value
 	 * @return void
 	 */

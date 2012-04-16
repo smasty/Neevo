@@ -38,7 +38,7 @@ interface IObserver {
 
 
 	/**
-	 * Receive update from observable subject.
+	 * Receives update from observable subject.
 	 * @param Subject $subject
 	 * @param int $event Event type
 	 * @return void

@@ -35,7 +35,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 
 
 	/**
-	 * Rewind the iterator.
+	 * Rewinds the iterator.
 	 * Force execution for future iterations.
 	 * @return void
 	 */
@@ -48,7 +48,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 
 
 	/**
-	 * Move to next row.
+	 * Moves to next row.
 	 * @return void
 	 */
 	public function next(){
@@ -58,7 +58,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 
 
 	/**
-	 * Check for valid current row.
+	 * Checks for valid current row.
 	 * @return bool
 	 */
 	public function valid(){
@@ -67,7 +67,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 
 
 	/**
-	 * Return the current row.
+	 * Returns the current row.
 	 * @return Row
 	 */
 	public function current(){
@@ -76,7 +76,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 
 
 	/**
-	 * Return the key of current row.
+	 * Returns the key of current row.
 	 * @return int
 	 */
 	public function key(){

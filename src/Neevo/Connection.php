@@ -48,7 +48,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Establish a connection.
+	 * Establishes a connection.
 	 * @param array|string|\Traversable $config
 	 * @param ICache $cache
 	 * @return void
@@ -112,7 +112,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Close database connection.
+	 * Closes database connection.
 	 * @return void
 	 */
 	public function __destruct(){
@@ -127,7 +127,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Open database connection.
+	 * Opens database connection.
 	 * @return void
 	 */
 	public function connect(){
@@ -141,7 +141,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Get configuration.
+	 * Returns configuration.
 	 * @param string $key
 	 * @return mixed
 	 */
@@ -153,7 +153,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Get defined table prefix.
+	 * Returns defined table prefix.
 	 * @return string
 	 */
 	public function getPrefix(){
@@ -162,7 +162,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Get the current driver instance.
+	 * Returns the current driver instance.
 	 * @return IDriver
 	 */
 	public function getDriver(){
@@ -171,7 +171,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Get the current parser class name.
+	 * Returns the current parser class name.
 	 * @return string
 	 */
 	public function getParser(){
@@ -180,7 +180,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Get the current cache storage instance.
+	 * Returns the current cache storage instance.
 	 * @return ICache
 	 */
 	public function getCache(){
@@ -189,7 +189,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Set the cache storage.
+	 * Sets the cache storage.
 	 * @param ICache $cache
 	 */
 	public function setCache(ICache $cache){
@@ -198,7 +198,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Attach given observer to given $event.
+	 * Attaches given observer to given $event.
 	 * @param IObserver $observer
 	 * @param int $event
 	 * @return void
@@ -209,7 +209,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Detach given observer.
+	 * Detaches given observer.
 	 * @param IObserver $observer
 	 * @return void
 	 */
@@ -219,7 +219,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Notify all observers attached to given event.
+	 * Notifies all observers attached to given event.
 	 * @param int $event
 	 * @return void
 	 */
@@ -232,7 +232,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Get configuration value.
+	 * Returns configuration value.
 	 * @param string $key
 	 * @return mixed
 	 */
@@ -242,7 +242,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Check if configuration value exists.
+	 * Checks if configuration value exists.
 	 * @param mixed $key
 	 * @return bool
 	 */
@@ -264,7 +264,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Create an alias for configuration value.
+	 * Creates an alias for configuration value.
 	 * @param array $config Passed by reference
 	 * @param string $key
 	 * @param string $alias Alias of $key
@@ -283,7 +283,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Set the driver and statement parser.
+	 * Sets the driver and statement parser.
 	 * @param string $driver
 	 * @return void
 	 * @throws DriverException
@@ -315,7 +315,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Check wether the given class is valid Neevo driver.
+	 * Checks wether the given class is valid Neevo driver.
 	 * @param string $class
 	 * @return bool
 	 */
@@ -330,7 +330,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 
 	/**
-	 * Check wether the given class is valid Neevo statement parser.
+	 * Checks wether the given class is valid Neevo statement parser.
 	 * @param string $class
 	 * @return bool
 	 */

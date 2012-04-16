@@ -27,7 +27,7 @@ class NeevoException extends \Exception implements IObservable {
 
 
 	/**
-	 * Construct exception.
+	 * Constructs exception.
 	 * @param string $message
 	 * @param int $code
 	 * @param string $sql Optional SQL command
@@ -45,7 +45,7 @@ class NeevoException extends \Exception implements IObservable {
 
 
 	/**
-	 * String representation of exception.
+	 * Returns string representation of exception.
 	 * @return string
 	 */
 	public function __toString(){
@@ -54,7 +54,7 @@ class NeevoException extends \Exception implements IObservable {
 
 
 	/**
-	 * Get given SQL command.
+	 * Returns given SQL command.
 	 * @return string
 	 */
 	public function getSql(){
@@ -63,7 +63,7 @@ class NeevoException extends \Exception implements IObservable {
 
 
 	/**
-	 * Attach given observer to given event.
+	 * Attaches given observer to given event.
 	 * @param IObserver $observer
 	 * @param int $event
 	 * @return void
@@ -74,7 +74,7 @@ class NeevoException extends \Exception implements IObservable {
 
 
 	/**
-	 * Detach given observer.
+	 * Detaches given observer.
 	 * @param IObserver $observer
 	 * @return void
 	 */
@@ -84,7 +84,7 @@ class NeevoException extends \Exception implements IObservable {
 
 
 	/**
-	 * Notify all observers attached to given event.
+	 * Notifies all observers attached to given event.
 	 * @param int $event
 	 * @return void
 	 */
