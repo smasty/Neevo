@@ -41,13 +41,8 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testConfigFormatElse(){
-		try{
-			$msg = new Neevo\Connection(false);
-		} catch(InvalidArgumentException $e){
-			$msg = $e->getMessage();
-		}
-
-		$this->assertStringStartsWith('Configuration must be', $msg);
+		$this->setExpectedException('InvalidArgumentException', 'Configuration must be an array, string or Traversable.');
+		new Neevo\Connection(false);
 	}
 
 
@@ -57,28 +52,18 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testSetDriverNoFile(){
-		try{
-			$msg = new Neevo\Connection(array(
-					'driver' => 'Foo'
-				));
-		} catch(Neevo\DriverException $e){
-			$msg = $e->getMessage();
-		}
-
-		$this->assertStringEndsWith('does not exist.', $msg);
+		$this->setExpectedException("Neevo\\DriverException");
+		new Neevo\Connection(array(
+			'driver' => 'Foo'
+		));
 	}
 
 
 	public function testSetDriverNoDriver(){
-		try{
-			$msg = new Neevo\Connection(array(
-					'driver' => 'Wrong'
-				));
-		} catch(Neevo\DriverException $e){
-			$msg = $e->getMessage();
-		}
-
-		$this->assertStringStartsWith("Wrong driver file", $msg);
+		$this->setExpectedException("Neevo\\DriverException");
+		new Neevo\Connection(array(
+			'driver' => 'Wrong'
+		));
 	}
 
 

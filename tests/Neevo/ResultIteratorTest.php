@@ -44,20 +44,16 @@ class ResultIteratorTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException Neevo\DriverException
-	 */
 	public function testSeekUnbuffered(){
+		$this->setExpectedException('Neevo\\DriverException');
 		$iterator = $this->result2->getIterator();
 		$iterator->rewind();
 		$iterator->seek(2);
 	}
 
 
-	/**
-	 * @expectedException OutOfRangeException
-	 */
 	public function testSeekOutOfRange(){
+		$this->setExpectedException('OutOfRangeException');
 		$iterator = $this->result->getIterator();
 		$iterator->rewind();
 		$iterator->seek(50);

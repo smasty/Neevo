@@ -58,10 +58,8 @@ class StatementTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException Neevo\NeevoException
-	 */
 	public function testInsertIdException(){
+		$this->setExpectedException('Neevo\\NeevoException');
 		$stmt = Neevo\Statement::createDelete($this->connection, 'table');
 		$stmt->insertId();
 	}

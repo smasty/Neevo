@@ -211,10 +211,8 @@ class BaseStatementTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException Neevo\NeevoException
-	 */
 	public function testRunQueryError(){
+		$this->setExpectedException('Neevo\\NeevoException');
 		$this->stmt->getConnection()->getDriver()->setError('query');
 		$this->stmt->run();
 	}
@@ -295,18 +293,14 @@ class BaseStatementTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function testIfException(){
+		$this->setExpectedException('InvalidArgumentException');
 		$this->stmt->if();
 	}
 
 
-	/**
-	 * @expectedException BadMethodCallException
-	 */
 	public function testBadMethodCall(){
+		$this->setExpectedException('BadMethodCallException');
 		$this->stmt->foobarbaz();
 	}
 

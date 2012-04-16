@@ -215,10 +215,8 @@ class ParserTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function testEscapeValueUnknownType(){
+		$this->setExpectedException('InvalidArgumentException');
 		$this->parser($this->createSelect())->escapeValue('foo', 'unknown_type');
 	}
 

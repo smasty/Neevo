@@ -26,10 +26,8 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function testInstantiationNoTable(){
+		$this->setExpectedException('InvalidArgumentException');
 		new Neevo\Result($this->connection);
 	}
 
@@ -41,18 +39,14 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function testInstantiationWrongSource(){
+		$this->setExpectedException('InvalidArgumentException');
 		new Neevo\Result($this->connection, new stdClass);
 	}
 
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function testInstantiationNoCols(){
+		$this->setExpectedException('InvalidArgumentException');
 		new Neevo\Result($this->connection, array(), 'table');
 	}
 
@@ -89,10 +83,8 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function testJoinWrongSource(){
+		$this->setExpectedException('InvalidArgumentException');
 		$this->result->join(new stdClass, true);
 	}
 
@@ -127,10 +119,8 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function testPageNonPositive(){
+		$this->setExpectedException('InvalidArgumentException');
 		$this->result->page(0, 0);
 	}
 
@@ -214,10 +204,8 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException Neevo\NeevoException
-	 */
 	public function testSeekOverflow(){
+		$this->setExpectedException('Neevo\\NeevoException');
 		$this->result->seek(5);
 	}
 
@@ -403,26 +391,20 @@ class ResultTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException Neevo\NeevoException
-	 */
 	public function testSetRowClassNoClass(){
+		$this->setExpectedException('Neevo\\NeevoException');
 		$this->result->setRowClass('NoClass');
 	}
 
 
-	/**
-	 * @expectedException RuntimeException
-	 */
 	public function testHasCircularReferences(){
+		$this->setExpectedException('RuntimeException');
 		$this->result->leftJoin($this->result, 'foo')->dump(true);
 	}
 
 
-	/**
-	 * @expectedException RuntimeException
-	 */
 	public function testHasCircularReferencesDeeper(){
+		$this->setExpectedException('RuntimeException');
 		$subquery = new Neevo\Result($this->connection, $this->result);
 		$this->result->leftJoin($subquery, 'foo')->dump(true);
 	}

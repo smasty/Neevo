@@ -142,10 +142,8 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	/**
-	 * @expectedException Neevo\NeevoException
-	 */
 	public function testLoadFileNoFile(){
+		$this->setExpectedException('Neevo\\NeevoException');
 		$this->neevo->loadFile($f = 'nofile');
 	}
 
