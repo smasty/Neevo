@@ -15,11 +15,11 @@ namespace Neevo;
 /**
  * Neevo statement abstract base ancestor.
  *
- * @method BaseStatement and($expr, $value = true)
- * @method BaseStatement or($expr, $value = true)
- * @method BaseStatement if($condition)
- * @method BaseStatement else()
- * @method BaseStatement end()
+ * @method and() BaseStatement and($expr, $value = true)
+ * @method or() BaseStatement or($expr, $value = true)
+ * @method if() BaseStatement if($condition)
+ * @method else() BaseStatement else()
+ * @method end() BaseStatement end()
  *
  * @author Smasty
  */
