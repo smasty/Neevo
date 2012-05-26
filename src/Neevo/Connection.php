@@ -49,7 +49,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 	/**
 	 * Establishes a connection.
-	 * @param array|string|\Traversable $config
+	 * @param array|string|\Traversable|\PDO $config
 	 * @param ICache $cache
 	 * @throws \InvalidArgumentException
 	 */
@@ -67,6 +67,11 @@ class Connection implements IObservable, \ArrayAccess {
 				$tmp[$key] = $val instanceof \Traversable ? iterator_to_array($val) : $val;
 			}
 			$config = $tmp;
+		} elseif(class_exists('PDO') && $config instanceof \PDO){
+			$config = array(
+				'driver' => 'pdo',
+				'pdo' => $config
+			);
 		} elseif(!is_array($config)){
 			throw new \InvalidArgumentException('Configuration must be an array, string or Traversable.');
 		}
