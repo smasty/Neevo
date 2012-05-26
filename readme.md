@@ -15,7 +15,7 @@ Features
 
  - Easy and intuitive manipulation
  - Transaction support
- - Multiple database drivers (MySQL, MySQLi, SQLite 2/3 and PostgreSQL)
+ - Multiple database drivers (MySQL, MySQLi, SQLite 2/3 and PostgreSQL + PDO)
  - Column type detection
  - Conditional statements
  - Query debugging
