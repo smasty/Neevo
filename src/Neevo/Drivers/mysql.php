@@ -19,17 +19,17 @@ use Neevo,
  * Neevo MySQL driver (PHP extension 'mysql')
  *
  * Driver configuration:
- *  - host => MySQL server name or address
- *  - port (int) => MySQL server port
- *  - username
- *  - password
- *  - database => database to select
- *  - charset => Character encoding to set (defaults to utf8)
- *  - persistent (bool) => Try to find a persistent link
- *  - unbuffered (bool) => Sends query without fetching and buffering the result
+ * - host => MySQL server name or address
+ * - port (int) => MySQL server port
+ * - username
+ * - password
+ * - database => database to select
+ * - charset => Character encoding to set (defaults to utf8)
+ * - persistent (bool) => Try to find a persistent link
+ * - unbuffered (bool) => Sends query without fetching and buffering the result
  *
- *  - resource (type resource) => Existing MySQL link
- *  - lazy, table_prefix... => see Neevo\Connection
+ * - resource (type resource) => Existing MySQL link
+ * - lazy, table_prefix... => see {@see Neevo\Connection}
  *
  * @author Smasty
  */

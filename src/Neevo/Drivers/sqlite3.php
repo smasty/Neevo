@@ -19,14 +19,14 @@ use Neevo,
  * Neevo SQLite 3 driver (PHP extension 'sqlite3')
  *
  * Driver configuration:
- *  - database (or file)
- *  - memory (bool) => use an in-memory database (overrides 'database')
- *  - charset => Character encoding to set (defaults to utf-8)
- *  - dbcharset => Database character encoding (will be converted to 'charset')
+ * - database (or file)
+ * - memory (bool) => use an in-memory database (overrides 'database')
+ * - charset => Character encoding to set (defaults to utf-8)
+ * - dbcharset => Database character encoding (will be converted to 'charset')
  *
- *  - updateLimit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
- *  - resource (instance of SQLite3) => Existing SQLite 3 link
- *  - lazy, table_prefix => see Neevo\Connection
+ * - updateLimit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
+ * - resource (instance of SQLite3) => Existing SQLite 3 link
+ * - lazy, table_prefix => see {@see Neevo\Connection}
  *
  * Since SQLite 3 only allows unbuffered queries, number of result rows and seeking
  * is not supported for this driver.

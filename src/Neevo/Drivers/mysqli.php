@@ -19,18 +19,18 @@ use Neevo,
  * Neevo MySQLi driver (PHP extension 'mysqli')
  *
  * Driver configuration:
- *  - host => MySQL server name or address
- *  - port (int) => MySQL server port
- *  - socket
- *  - username
- *  - password
- *  - database => database to select
- *  - charset => Character encoding to set (defaults to utf8)
- *  - peristent (bool) => Try to find a persistent link
- *  - unbuffered (bool) => Sends query without fetching and buffering the result
+ * - host => MySQL server name or address
+ * - port (int) => MySQL server port
+ * - socket
+ * - username
+ * - password
+ * - database => database to select
+ * - charset => Character encoding to set (defaults to utf8)
+ * - peristent (bool) => Try to find a persistent link
+ * - unbuffered (bool) => Sends query without fetching and buffering the result
  *
- *  - resource (instance of mysqli) => Existing MySQLi link
- *  - lazy, table_prefix... => see Neevo\Connection
+ * - resource (instance of mysqli) => Existing MySQLi link
+ * - lazy, table_prefix... => see {@see Neevo\Connection}
  *
  * @author Smasty
  */

@@ -19,14 +19,14 @@ use Neevo,
  * Neevo PostgreSQL driver (PHP extension 'pgsql')
  *
  * Driver configuration:
- *  - host, hostaddr, port, dbname, user, password, connect_timeout, options, sslmode, service => see PHP pg_connect()
- *  - string => Use connection string instead
- *  - schema => Schema search path
- *  - charset => Character encoding to set (defaults to utf-8)
- *  - persistent (bool) => Try to find a persistent link
+ * - host, hostaddr, port, dbname, user, password, connect_timeout, options, sslmode, service => see pg_connect()
+ * - string => Use connection string instead
+ * - schema => Schema search path
+ * - charset => Character encoding to set (defaults to utf-8)
+ * - persistent (bool) => Try to find a persistent link
  *
- *  - resource (type resource) => Existing SQLite link
- *  - lazy, table_prefix... => see Neevo\Connection
+ * - resource (type resource) => Existing SQLite link
+ * - lazy, table_prefix... => see {@see Neevo\Connection}
  *
  * @author Smasty
  */

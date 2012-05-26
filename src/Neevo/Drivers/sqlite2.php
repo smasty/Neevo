@@ -19,16 +19,16 @@ use Neevo,
  * Neevo SQLite 2 driver (PHP extension 'sqlite')
  *
  * Driver configuration:
- *  - database (or file)
- *  - memory (bool) => use an in-memory database (overrides 'database')
- *  - charset => Character encoding to set (defaults to utf-8)
- *  - dbcharset => Database character encoding (will be converted to 'charset')
- *  - persistent (bool) => Try to find a persistent link
- *  - unbuffered (bool) => Sends query without fetching and buffering the result
+ * - database (or file)
+ * - memory (bool) => use an in-memory database (overrides 'database')
+ * - charset => Character encoding to set (defaults to utf-8)
+ * - dbcharset => Database character encoding (will be converted to 'charset')
+ * - persistent (bool) => Try to find a persistent link
+ * - unbuffered (bool) => Sends query without fetching and buffering the result
  *
- *  - updateLimit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
- *  - resource (type resource) => Existing SQLite 2 link
- *  - lazy, table_prefix... => see Neevo\Connection
+ * - updateLimit (bool) => Set TRUE if SQLite driver was compiled with SQLITE_ENABLE_UPDATE_DELETE_LIMIT
+ * - resource (type resource) => Existing SQLite 2 link
+ * - lazy, table_prefix... => see {@see Neevo\Connection}
  *
  * @author Smasty
  */
