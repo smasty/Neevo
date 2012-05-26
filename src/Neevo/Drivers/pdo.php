@@ -316,22 +316,42 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Returns the PRIMARY KEY column for given table.
+	 *
+	 * Not supported by all PDO drivers.
 	 * @param string $table
-	 * @throws Neevo\ImplementationException Not implemented
+	 * @throws Neevo\ImplementationException
 	 */
-	public function getPrimaryKey($table){
+	public function getPrimaryKey($table, $resultSet = null){
+		if($resultSet instanceof \PDOStatement){
+			$i = 0;
+			while($col = $resultSet->getColumnMeta($i++)){
+				if(in_array('primary_key', $col['flags']))
+					$primaryKey = $col['name'];
+			}
+		}
+		if(isset($primaryKey))
+			return $primaryKey;
 		throw new Neevo\ImplementationException;
 	}
 
 
 	/**
 	 * Returns types of columns in given result set.
-	 * @param mysqli_result $resultset
+	 *
+	 * Not supported by all PDO drivers.
+	 * @param \PDOStatement $resultset
 	 * @param string $table
-	 * @throws Neevo\ImplementationException Not implemented
+	 * @throws Neevo\ImplementationException
 	 */
 	public function getColumnTypes($resultSet, $table){
-		throw new Neevo\ImplementationException;
+		$types = array();
+		$i = 0;
+		while($col = $resultSet->getColumnMeta($i++))
+			$types[$col['name']] = strtolower($col['native_type']);
+
+		if(empty($types))
+			throw new Neevo\ImplementationException;
+		return $types;
 	}
 
 

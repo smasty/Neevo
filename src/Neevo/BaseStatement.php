@@ -432,7 +432,7 @@ abstract class BaseStatement implements IObservable {
 
 		if($cached === null){
 			try{
-				$key = $this->connection->getDriver()->getPrimaryKey($table);
+				$key = $this->connection->getDriver()->getPrimaryKey($table, $this->resultSet);
 			} catch(NeevoException $e){
 				return null;
 			}

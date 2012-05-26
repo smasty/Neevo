@@ -79,7 +79,7 @@ class Connection implements IObservable, \ArrayAccess {
 		// Default values
 		$defaults = array(
 			'driver' => Manager::$defaultDriver,
-			'lazy' => false,
+			'lazy' => true,
 			'rowClass' => 'Neevo\\Row',
 			'tablePrefix' => '',
 			'result' => array(

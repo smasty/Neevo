@@ -48,9 +48,7 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 		$this->connection = $result->getConnection();
 		$this->table = $result->getTable();
 		$this->primary = $result->getPrimaryKey();
-
-		if(!$this->table || !$this->primary || !isset($this->data[$this->primary]))
-			$this->frozen = true;
+		$this->frozen = !$this->table || !$this->primary || !isset($this->data[$this->primary]);
 	}
 
 
