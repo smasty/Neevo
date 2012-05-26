@@ -57,7 +57,6 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Checks for required PHP extension.
-	 * @return void
 	 * @throws DriverException
 	 */
 	public function __construct(Neevo\BaseStatement $statement = null){
@@ -71,7 +70,6 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Creates connection to database.
 	 * @param array $config Configuration options
-	 * @return void
 	 * @throws DriverException
 	 */
 	public function connect(array $config){
@@ -118,7 +116,6 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Closes the connection.
-	 * @return void
 	 */
 	public function closeConnection(){
 		$this->resource->close();
@@ -162,7 +159,6 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Begins a transaction if supported.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function beginTransaction($savepoint = null){
 		$this->runQuery($savepoint ? "SAVEPOINT $savepoint" : 'BEGIN');
@@ -172,7 +168,6 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Commits statements in a transaction.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function commit($savepoint = null){
 		$this->runQuery($savepoint ? "RELEASE SAVEPOINT $savepoint" : 'COMMIT');
@@ -182,7 +177,6 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Rollbacks changes in a transaction.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function rollback($savepoint = null){
 		$this->runQuery($savepoint ? "ROLLBACK TO SAVEPOINT $savepoint" : 'ROLLBACK');
@@ -237,7 +231,6 @@ class SQLite3Driver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Randomizes result order.
 	 * @param Neevo\BaseStatement $tatement
-	 * @return void
 	 */
 	public function randomizeOrder(Neevo\BaseStatement $statement){
 		$statement->order('RANDOM()');

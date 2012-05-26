@@ -52,7 +52,6 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	 * @param Connection $connection
 	 * @param string|array|\Traversable $columns
 	 * @param string|Result $source Table name or subquery
-	 * @return void
 	 * @throws \InvalidArgumentException
 	 */
 	public function __construct(Connection $connection, $columns = null, $source = null){
@@ -88,7 +87,6 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 	/**
 	 * Destroys the result set resource and free memory.
-	 * @return void
 	 */
 	public function __destruct(){
 		try{

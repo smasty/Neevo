@@ -42,7 +42,6 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 	 * Creates a row instance.
 	 * @param array $data
 	 * @param Result $result
-	 * @return void
 	 */
 	public function __construct(array $data, Result $result){
 		$this->data = $data;

@@ -132,7 +132,6 @@ class Statement extends BaseStatement {
 
 	/**
 	 * Resets the state of the statement.
-	 * @return void
 	 */
 	public function resetState(){
 		parent::resetState();

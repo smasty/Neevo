@@ -31,7 +31,6 @@ interface ICache {
 	 * Stores data in cache.
 	 * @param string $key
 	 * @param mixed $value
-	 * @return void
 	 */
 	public function store($key, $value);
 

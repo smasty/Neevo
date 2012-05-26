@@ -43,7 +43,6 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Checks for required PHP extension.
-	 * @return void
 	 * @throws DriverException
 	 */
 	public function __construct(Neevo\BaseStatement $statement = null){
@@ -57,7 +56,6 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Creates connection to database.
 	 * @param array $config Configuration options
-	 * @return void
 	 * @throws DriverException
 	 */
 	public function connect(array $config){
@@ -92,7 +90,6 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Closes the connection.
-	 * @return void
 	 */
 	public function closeConnection(){
 		@$this->resource = null;
@@ -144,7 +141,6 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Begins a transaction if supported.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function beginTransaction($savepoint = null){
 		if(!$this->resource->beginTransaction()){
@@ -157,7 +153,6 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Commits statements in a transaction.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function commit($savepoint = null){
 		if(!$this->resource->commit()){
@@ -170,7 +165,6 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Rollbacks changes in a transaction.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function rollback($savepoint = null){
 		if(!$this->resource->rollBack()){
@@ -214,7 +208,6 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Randomizes result order.
 	 * @param Neevo\BaseStatement $statement
-	 * @return void
 	 */
 	public function randomizeOrder(Neevo\BaseStatement $statement){
 		switch($this->driverName){

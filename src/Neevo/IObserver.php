@@ -41,7 +41,6 @@ interface IObserver {
 	 * Receives update from observable subject.
 	 * @param Subject $subject
 	 * @param int $event Event type
-	 * @return void
 	 */
 	public function updateStatus(IObservable $subject, $event);
 

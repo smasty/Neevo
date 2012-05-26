@@ -71,7 +71,6 @@ class Manager implements IObservable, IObserver {
 	 * Configuration can be different - see the API for your driver.
 	 * @param mixed $config Connection configuration.
 	 * @param ICache $cache Cache to use.
-	 * @return void
 	 * @throws NeevoException
 	 */
 	public function __construct($config, ICache $cache = null){
@@ -222,7 +221,6 @@ class Manager implements IObservable, IObserver {
 	 * Attaches an observer for debugging.
 	 * @param IObserver $observer
 	 * @param int $event Event to attach the observer to.
-	 * @return void
 	 */
 	public function attachObserver(IObserver $observer, $event){
 		$this->observers->attach($observer, $event);
@@ -235,7 +233,6 @@ class Manager implements IObservable, IObserver {
 	/**
 	 * Detaches given observer.
 	 * @param IObserver $observer
-	 * @return void
 	 */
 	public function detachObserver(IObserver $observer){
 		$this->connection->detachObserver($observer);
@@ -248,7 +245,6 @@ class Manager implements IObservable, IObserver {
 	/**
 	 * Notifies all observers attached to given event.
 	 * @param int $event
-	 * @return void
 	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
@@ -262,7 +258,6 @@ class Manager implements IObservable, IObserver {
 	 * Receives update from observable subject.
 	 * @param IObservable $subject
 	 * @param int $event Event type
-	 * @return void
 	 */
 	public function updateStatus(IObservable $subject, $event){
 		$this->last = (string) $subject;
@@ -347,7 +342,6 @@ class Literal {
 	/**
 	 * Creates instance of SQL literal.
 	 * @param string $value
-	 * @return void
 	 */
 	public function __construct($value){
 		$this->value = $value;

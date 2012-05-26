@@ -23,7 +23,6 @@ interface IObservable {
 	 * Attaches given observer to given event.
 	 * @param Observer $observer
 	 * @param int $event
-	 * @return void
 	 */
 	public function attachObserver(IObserver $observer, $event);
 
@@ -31,7 +30,6 @@ interface IObservable {
 	/**
 	 * Detaches given observer.
 	 * @param Observer $observer
-	 * @return void
 	 */
 	public function detachObserver(IObserver $observer);
 
@@ -39,7 +37,6 @@ interface IObservable {
 	/**
 	 * Notifies all observers attached to given event.
 	 * @param int $event
-	 * @return void
 	 */
 	public function notifyObservers($event);
 

@@ -62,7 +62,6 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Checks for required PHP extension.
-	 * @return void
 	 * @throws DriverException
 	 */
 	public function __construct(Neevo\BaseStatement $statement = null){
@@ -76,7 +75,6 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Creates connection to database.
 	 * @param array $config Configuration options
-	 * @return void
 	 * @throws DriverException
 	 */
 	public function connect(array $config){
@@ -125,7 +123,6 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Closes the connection.
-	 * @return void
 	 */
 	public function closeConnection(){
 		if(!$this->persistent && $this->resource !== null)
@@ -171,7 +168,6 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Begins a transaction if supported.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function beginTransaction($savepoint = null){
 		$this->runQuery('BEGIN');
@@ -181,7 +177,6 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Commits statements in a transaction.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function commit($savepoint = null){
 		$this->runQuery('COMMIT');
@@ -191,7 +186,6 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Rollbacks changes in a transaction.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function rollback($savepoint = null){
 		$this->runQuery('ROLLBACK');
@@ -250,7 +244,6 @@ class SQLite2Driver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Randomizes result order.
 	 * @param Neevo\BaseStatement $statement
-	 * @return void
 	 */
 	public function randomizeOrder(Neevo\BaseStatement $statement){
 		$statement->order('RANDOM()');

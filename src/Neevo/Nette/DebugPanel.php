@@ -44,7 +44,6 @@ class DebugPanel implements Neevo\IObserver, IBarPanel {
 	/**
 	 * Do not call directly, use static method register().
 	 * @param bool $explain
-	 * @return void
 	 */
 	public function __construct($explain){
 		$this->explain = (bool) $explain;
@@ -55,7 +54,6 @@ class DebugPanel implements Neevo\IObserver, IBarPanel {
 	 * Receives update from observable subject.
 	 * @param Neevo\IObservable $subject
 	 * @param int $event
-	 * @return void
 	 */
 	public function updateStatus(Neevo\IObservable $subject, $event){
 		$source = null;

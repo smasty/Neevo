@@ -32,7 +32,6 @@ class NeevoException extends \Exception implements IObservable {
 	 * @param int $code
 	 * @param string $sql Optional SQL command
 	 * @param Exception $previous
-	 * @return void
 	 */
 	public function __construct($message = '', $code = 0, $sql = null, \Exception $previous = null){
 
@@ -66,7 +65,6 @@ class NeevoException extends \Exception implements IObservable {
 	 * Attaches given observer to given event.
 	 * @param IObserver $observer
 	 * @param int $event
-	 * @return void
 	 */
 	public function attachObserver(IObserver $observer, $event){
 		self::$observers->attach($observer, $event);
@@ -76,7 +74,6 @@ class NeevoException extends \Exception implements IObservable {
 	/**
 	 * Detaches given observer.
 	 * @param IObserver $observer
-	 * @return void
 	 */
 	public function detachObserver(IObserver $observer){
 		self::$observers->detach($observer);
@@ -86,7 +83,6 @@ class NeevoException extends \Exception implements IObservable {
 	/**
 	 * Notifies all observers attached to given event.
 	 * @param int $event
-	 * @return void
 	 */
 	public function notifyObservers($event){
 		foreach(self::$observers as $observer){

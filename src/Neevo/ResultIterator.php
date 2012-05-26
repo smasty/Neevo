@@ -37,7 +37,6 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 	/**
 	 * Rewinds the iterator.
 	 * Force execution for future iterations.
-	 * @return void
 	 */
 	public function rewind(){
 		if($this->row !== null)
@@ -49,7 +48,6 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 
 	/**
 	 * Moves to next row.
-	 * @return void
 	 */
 	public function next(){
 		$this->row = $this->result->fetch();

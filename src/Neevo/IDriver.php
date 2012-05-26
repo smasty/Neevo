@@ -35,7 +35,6 @@ interface IDriver {
 
 	/**
 	 * Checks for required PHP extension.
-	 * @return void
 	 * @throws DriverException
 	 */
 	public function __construct();
@@ -44,14 +43,12 @@ interface IDriver {
 	/**
 	 * Creates connection to database.
 	 * @param array $config Configuration options
-	 * @return void
 	 */
 	public function connect(array $config);
 
 
 	/**
 	 * Closes the connection.
-	 * @return void
 	 */
 	public function closeConnection();
 
@@ -75,7 +72,6 @@ interface IDriver {
 	/**
 	 * Begins a transaction if supported.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function beginTransaction($savepoint = null);
 
@@ -83,7 +79,6 @@ interface IDriver {
 	/**
 	 * Commits statements in a transaction.
 	 * @param string $avepoint
-	 * @return void
 	 */
 	public function commit($savepoint = null);
 
@@ -91,7 +86,6 @@ interface IDriver {
 	/**
 	 * Rollbacks changes in a transaction.
 	 * @param string $savepoint
-	 * @return void
 	 */
 	public function rollback($savepoint = null);
 
@@ -123,7 +117,6 @@ interface IDriver {
 	/**
 	 * Randomizes result order.
 	 * @param BaseStatement $statement
-	 * @return void
 	 */
 	public function randomizeOrder(BaseStatement $statement);
 

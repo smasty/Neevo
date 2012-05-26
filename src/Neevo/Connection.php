@@ -51,7 +51,6 @@ class Connection implements IObservable, \ArrayAccess {
 	 * Establishes a connection.
 	 * @param array|string|\Traversable $config
 	 * @param ICache $cache
-	 * @return void
 	 * @throws \InvalidArgumentException
 	 */
 	public function __construct($config, ICache $cache = null){
@@ -113,7 +112,6 @@ class Connection implements IObservable, \ArrayAccess {
 
 	/**
 	 * Closes database connection.
-	 * @return void
 	 */
 	public function __destruct(){
 		try{
@@ -128,7 +126,6 @@ class Connection implements IObservable, \ArrayAccess {
 
 	/**
 	 * Opens database connection.
-	 * @return void
 	 */
 	public function connect(){
 		if($this->connected !== false)
@@ -201,7 +198,6 @@ class Connection implements IObservable, \ArrayAccess {
 	 * Attaches given observer to given $event.
 	 * @param IObserver $observer
 	 * @param int $event
-	 * @return void
 	 */
 	public function attachObserver(IObserver $observer, $event){
 		$this->observers->attach($observer, $event);
@@ -211,7 +207,6 @@ class Connection implements IObservable, \ArrayAccess {
 	/**
 	 * Detaches given observer.
 	 * @param IObserver $observer
-	 * @return void
 	 */
 	public function detachObserver(IObserver $observer){
 		$this->observers->detach($observer);
@@ -221,7 +216,6 @@ class Connection implements IObservable, \ArrayAccess {
 	/**
 	 * Notifies all observers attached to given event.
 	 * @param int $event
-	 * @return void
 	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
@@ -268,7 +262,6 @@ class Connection implements IObservable, \ArrayAccess {
 	 * @param array $config Passed by reference
 	 * @param string $key
 	 * @param string $alias Alias of $key
-	 * @return void
 	 */
 	public static function alias(&$config, $key, $alias){
 		if(!isset($config[$alias]))
@@ -285,7 +278,6 @@ class Connection implements IObservable, \ArrayAccess {
 	/**
 	 * Sets the driver and statement parser.
 	 * @param string $driver
-	 * @return void
 	 * @throws DriverException
 	 */
 	protected function setDriver($driver){

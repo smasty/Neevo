@@ -74,7 +74,6 @@ abstract class BaseStatement implements IObservable {
 	/**
 	 * Create statement.
 	 * @param Connection $connection
-	 * @return void
 	 */
 	public function __construct(Connection $connection){
 		$this->connection = $connection;
@@ -93,7 +92,6 @@ abstract class BaseStatement implements IObservable {
 
 	/**
 	 * Create clone of object.
-	 * @return void
 	 */
 	public function __clone(){
 		$this->resetState();
@@ -329,7 +327,6 @@ abstract class BaseStatement implements IObservable {
 	 * Attaches given observer to given event.
 	 * @param IObserver $observer
 	 * @param int $event
-	 * @return void
 	 */
 	public function attachObserver(IObserver $observer, $event){
 		$this->observers->attach($observer, $event);
@@ -339,7 +336,6 @@ abstract class BaseStatement implements IObservable {
 	/**
 	 * Detaches given observer.
 	 * @param IObserver $observer
-	 * @return void
 	 */
 	public function detachObserver(IObserver $observer){
 		$this->observers->detach($observer);
@@ -349,7 +345,6 @@ abstract class BaseStatement implements IObservable {
 	/**
 	 * Notifies all observers attached to given event.
 	 * @param int $event
-	 * @return void
 	 */
 	public function notifyObservers($event){
 		foreach($this->observers as $observer){
@@ -459,7 +454,6 @@ abstract class BaseStatement implements IObservable {
 
 	/**
 	 * Resets the state of the statement.
-	 * @return void
 	 */
 	protected function resetState(){
 		$this->performed = false;
