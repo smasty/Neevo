@@ -16,15 +16,15 @@ use Neevo,
 
 
 /**
- * Neevo DO driver (PHP extension 'pdo')
+ * Neevo PDO driver (PHP extension 'pdo')
  *
  * Driver configuration:
- *  - dsn => Driver-specific DSN
- *  - username
- *  - password
- *  - options (array) => Driver-specific options for {@see \PDO::__construct}
- *  - resource (instance of PDO) => Existing PDO connection
- *  - lazy, table_prefix... => see Neevo\Connection
+ * - dsn => Driver-specific DSN
+ * - username
+ * - password
+ * - options (array) => Driver-specific options for {@see PDO::__construct}
+ * - resource (instance of PDO) => Existing PDO connection
+ * - lazy, table_prefix... => see {@see Neevo\Connection}
  *
  * @author Smasty
  */
@@ -401,6 +401,19 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	}
 
 
+	/**
+	 * Returns PDO instance.
+	 * @return \PDO
+	 */
+	public function getResource(){
+		return $this->resource;
+	}
+
+
+	/**
+	 * Returns PDO driver name.
+	 * @return string
+	 */
 	public function getDriverName(){
 		return $this->driverName;
 	}
