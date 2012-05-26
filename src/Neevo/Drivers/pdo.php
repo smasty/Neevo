@@ -16,7 +16,7 @@ use Neevo,
 
 
 /**
- * Neevo PDO driver (PHP extension 'pdo')
+ * Neevo PDO driver (PHP extension 'pdo') Experimental!
  *
  * Driver configuration:
  * - dsn => Driver-specific DSN
@@ -317,7 +317,7 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Returns the PRIMARY KEY column for given table.
 	 * @param string $table
-	 * @throws Neevo\ImplementationException
+	 * @throws Neevo\ImplementationException Not implemented
 	 */
 	public function getPrimaryKey($table){
 		throw new Neevo\ImplementationException;
@@ -328,7 +328,7 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	 * Returns types of columns in given result set.
 	 * @param mysqli_result $resultset
 	 * @param string $table
-	 * @throws Neevo\ImplementationException
+	 * @throws Neevo\ImplementationException Not implemented
 	 */
 	public function getColumnTypes($resultSet, $table){
 		throw new Neevo\ImplementationException;
@@ -389,7 +389,7 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 						 . implode("\n\t", explode("\n", $sql)) . "\n)";
 
 			default:
-				throw new DriverException('PDO or selected driver does not allow apllying limitor offset.');
+				throw new DriverException('PDO or selected driver does not allow apllying limit or offset.');
 		}
 	}
 
