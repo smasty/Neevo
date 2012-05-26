@@ -374,8 +374,10 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	 */
 	protected function applyLimit($sql){
 		list($limit, $offset) = $this->stmt->getLimit();
+		if((int) $limit < 1 && (int) $offset < 1)
+			return $sql;
 
-		switch($this->driverName){
+		switch($this->stmt->getConnection()->getDriver()->getDriverName()){
 			case 'mysql':
 			case 'pgsql':
 			case 'sqlite':
@@ -396,6 +398,11 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 			default:
 				throw new DriverException('PDO or selected driver does not allow apllying limitor offset.');
 		}
+	}
+
+
+	public function getDriverName(){
+		return $this->driverName;
 	}
 
 
