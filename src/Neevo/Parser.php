@@ -131,9 +131,12 @@ class Parser {
 		if(!$this->stmt instanceof Result)
 			return $this->escapeValue($this->stmt->getTable(), Manager::IDENTIFIER);
 
+		// Simple table
 		if($this->stmt->getTable() !== null){
 			$source = $this->escapeValue($this->stmt->getTable(), Manager::IDENTIFIER);
-		} else{
+		}
+		// Sub-select
+		else{
 			$subq = $this->stmt->getSource();
 			$alias = $this->escapeValue($subq->getAlias()
 				? $subq->getAlias() : '_table_', Manager::IDENTIFIER);
@@ -141,18 +144,22 @@ class Parser {
 		}
 		$source = $this->tryDelimite($source);
 
+		// JOINs
 		foreach($this->stmt->getJoins() as $key => $join){
 			list($join_source, $cond, $type) = $join;
 
+			// JOIN sub-select
 			if($join_source instanceof Result){
 				$join_alias = $this->escapeValue($join_source->getAlias()
 					? $join_source->getAlias() : '_join_' . ($key+1), Manager::IDENTIFIER);
 
 				$join_source = "(\n\t" . implode("\n\t", explode("\n", $join_source)) . "\n) $join_alias";
-			} elseif($join_source instanceof Literal){
+			}
+			// JOIN Literal
+			elseif($join_source instanceof Literal){
 				$join_source = $join_source->value;
 			}
-
+			// JOIN table
 			elseif(is_scalar($join_source)){
 				$join_source = $this->parseFieldName($join_source, true);
 			}
