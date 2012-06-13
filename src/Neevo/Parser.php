@@ -392,7 +392,7 @@ class Parser {
 	protected function tryDelimite($expr){
 		if($expr instanceof Literal)
 			return $expr->value;
-		return preg_replace_callback('~:([a-z_\*][a-z0-9._\*]*)~', array($this, 'parseFieldName'), $expr);
+		return preg_replace_callback('~:([a-z_\*][a-z0-9._\*]*)~i', array($this, 'parseFieldName'), $expr);
 	}
 
 
