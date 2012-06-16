@@ -48,7 +48,7 @@ class DummyParserDriver extends Neevo\Parser implements Neevo\IDriver {
 				return "'$value'";
 
 			case Neevo\Manager::IDENTIFIER:
-				return ":$value";
+				return "`$value`";
 
 			case Neevo\Manager::BINARY:
 				return "bin:'$value'";
