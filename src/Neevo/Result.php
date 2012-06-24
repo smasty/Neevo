@@ -398,7 +398,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 	/**
 	 * Sets multiple column types at once.
-	 * @param array|Traversable $types
+	 * @param array|\Traversable $types
 	 * @return Result fluent interface
 	 */
 	public function setTypes($types){
