@@ -40,7 +40,7 @@ class Statement extends BaseStatement {
 		$obj = new self($connection);
 		$obj->type = Manager::STMT_UPDATE;
 		$obj->source = $table;
-		$obj->values = $data instanceof Traversable ? iterator_to_array($data) : $data;
+		$obj->values = $data instanceof \Traversable ? iterator_to_array($data) : $data;
 		return $obj;
 	}
 
