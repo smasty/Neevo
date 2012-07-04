@@ -93,21 +93,3 @@ class NeevoException extends \Exception implements IObservable {
 
 
 }
-
-
-/**
- * Neevo driver exception.
- * @author Smasty
- */
-class DriverException extends NeevoException {
-
-}
-
-
-/**
- * Exception for features not implemented by the driver.
- * @author Smasty
- */
-class ImplementationException extends NeevoException {
-
-}

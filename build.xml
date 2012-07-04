@@ -11,7 +11,7 @@
 	<!-- Requires pear.nette.org/Nette -->
 	<taskdef name="neevo-loader" classname="build.tasks.NeevoLoaderTask"/>
 
-	<target name="dist" depends="prepare,classList,test,copy,lint,api,tar,phar,clean"/>
+	<target name="dist" depends="prepare,test,copy,lint,api,tar,phar,clean"/>
 
 
 	<target name="prepare" description="Prepare structure">
@@ -19,11 +19,6 @@
 		<mkdir dir="${apiDir}"/>
 		<mkdir dir="${buildDir}/src"/>
 		<mkdir dir="${buildDir}/target"/>
-	</target>
-
-
-	<target name="classList" description="Rebuild class list in Neevo\Loader">
-		<neevo-loader directory="${srcDir}/Neevo" file="Loader.php"/>
 	</target>
 
 
