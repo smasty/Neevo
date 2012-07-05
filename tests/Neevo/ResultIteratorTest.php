@@ -56,7 +56,7 @@ class ResultIteratorTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testSeekUnbuffered(){
-		$this->setExpectedException('Neevo\\DriverException');
+		$this->setExpectedException('Neevo\\DriverException', 'Cannot seek on unbuffered result.');
 		$iterator = $this->result2->getIterator();
 		$iterator->rewind();
 		$iterator->seek(2);
@@ -64,7 +64,7 @@ class ResultIteratorTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testSeekOutOfRange(){
-		$this->setExpectedException('OutOfRangeException');
+		$this->setExpectedException('OutOfRangeException', 'Cannot seek to offset');
 		$iterator = $this->result->getIterator();
 		$iterator->rewind();
 		$iterator->seek(50);

@@ -76,7 +76,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testSetDriverNoFile(){
-		$this->setExpectedException('Neevo\\DriverException');
+		$this->setExpectedException('Neevo\\DriverException', 'does not exist.');
 		new Connection(array(
 			'driver' => 'Foo'
 		));
@@ -84,7 +84,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testSetDriverNoDriver(){
-		$this->setExpectedException('Neevo\\DriverException');
+		$this->setExpectedException('Neevo\\DriverException', 'is not a valid Neevo driver class.');
 		new Connection(array(
 			'driver' => 'Wrong'
 		));
@@ -203,12 +203,3 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase {
 
 
 }
-
-
-
-/**
- * Class with Neevo driver convention name, but not a driver.
- */
-class NeevoDriverWrong {}
-
-?>

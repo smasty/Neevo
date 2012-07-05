@@ -71,7 +71,7 @@ class Result extends BaseStatement implements IteratorAggregate, Countable {
 			$columns = '*';
 		}
 		if(!is_string($source) && !$source instanceof self)
-			throw new InvalidArgumentException('Source must be a string or \Result.');
+			throw new InvalidArgumentException('Source must be a string or Neevo\\Result.');
 
 		$columns = is_string($columns)
 			? explode(',', $columns) : ($columns instanceof Traversable

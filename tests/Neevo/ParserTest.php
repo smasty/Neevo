@@ -234,7 +234,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testEscapeValueUnknownType(){
-		$this->setExpectedException('InvalidArgumentException');
+		$this->setExpectedException('InvalidArgumentException', 'Unsupported data type.');
 		$this->parser($this->createSelect())->escapeValue('foo', 'unknown_type');
 	}
 

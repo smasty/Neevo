@@ -73,7 +73,7 @@ class StatementTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testInsertIdException(){
-		$this->setExpectedException('Neevo\\NeevoException');
+		$this->setExpectedException('Neevo\\NeevoException', 'can be called only on INSERT statements.');
 		$stmt = Statement::createDelete($this->connection, 'table');
 		$stmt->insertId();
 	}
@@ -100,6 +100,9 @@ class StatementTest extends \PHPUnit_Framework_TestCase {
 		$r = new ReflectionProperty($stmt, 'affectedRows');
 		$r->setAccessible(true);
 		$this->assertFalse($r->getValue($stmt));
+
+		$this->setExpectedException('Neevo\\DriverException', 'Affected rows are not supported by this driver.');
+		$stmt->affectedRows();
 	}
 
 

@@ -223,7 +223,7 @@ class BaseStatementTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testRunQueryError(){
-		$this->setExpectedException('Neevo\\NeevoException');
+		$this->setExpectedException('Neevo\\NeevoException', 'Query failed');
 		$this->stmt->getConnection()->getDriver()->setError('query');
 		$this->stmt->run();
 	}
@@ -305,13 +305,13 @@ class BaseStatementTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testIfException(){
-		$this->setExpectedException('InvalidArgumentException');
+		$this->setExpectedException('InvalidArgumentException', 'Missing argument 1');
 		$this->stmt->if();
 	}
 
 
 	public function testBadMethodCall(){
-		$this->setExpectedException('BadMethodCallException');
+		$this->setExpectedException('BadMethodCallException', 'Call to undefined method');
 		$this->stmt->foobarbaz();
 	}
 

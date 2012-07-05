@@ -157,7 +157,7 @@ class ManagerTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testLoadFileNoFile(){
-		$this->setExpectedException('Neevo\\NeevoException');
+		$this->setExpectedException('Neevo\\NeevoException', 'Cannot open file');
 		$this->neevo->loadFile($f = 'nofile');
 	}
 

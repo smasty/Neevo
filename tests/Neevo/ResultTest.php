@@ -43,7 +43,7 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testInstantiationNoTable(){
-		$this->setExpectedException('InvalidArgumentException');
+		$this->setExpectedException('InvalidArgumentException', 'Missing select source.');
 		new Result($this->connection);
 	}
 
@@ -56,13 +56,13 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testInstantiationWrongSource(){
-		$this->setExpectedException('InvalidArgumentException');
+		$this->setExpectedException('InvalidArgumentException', 'Source must be a string or Neevo\\Result.');
 		new Result($this->connection, new stdClass);
 	}
 
 
 	public function testInstantiationNoCols(){
-		$this->setExpectedException('InvalidArgumentException');
+		$this->setExpectedException('InvalidArgumentException', 'No columns given.');
 		new Result($this->connection, array(), 'table');
 	}
 
@@ -100,7 +100,7 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testJoinWrongSource(){
-		$this->setExpectedException('InvalidArgumentException');
+		$this->setExpectedException('InvalidArgumentException', 'Source must be a string, Neevo\\Literal or Neevo\\Result.');
 		$this->result->join(new stdClass, true);
 	}
 
@@ -136,7 +136,7 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testPageNonPositive(){
-		$this->setExpectedException('InvalidArgumentException');
+		$this->setExpectedException('InvalidArgumentException', 'Both arguments must be positive integers.');
 		$this->result->page(0, 0);
 	}
 
@@ -221,7 +221,7 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testSeekOverflow(){
-		$this->setExpectedException('Neevo\\NeevoException');
+		$this->setExpectedException('Neevo\\NeevoException', 'Cannot seek to offset');
 		$this->result->seek(5);
 	}
 
@@ -408,19 +408,19 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testSetRowClassNoClass(){
-		$this->setExpectedException('Neevo\\NeevoException');
+		$this->setExpectedException('Neevo\\NeevoException', 'Cannot set row class');
 		$this->result->setRowClass('NoClass');
 	}
 
 
 	public function testHasCircularReferences(){
-		$this->setExpectedException('RuntimeException');
+		$this->setExpectedException('RuntimeException', 'Circular reference found, aborting.');
 		$this->result->leftJoin($this->result, 'foo')->dump(true);
 	}
 
 
 	public function testHasCircularReferencesDeeper(){
-		$this->setExpectedException('RuntimeException');
+		$this->setExpectedException('RuntimeException', 'Circular reference found, aborting.');
 		$subquery = new Result($this->connection, $this->result);
 		$this->result->leftJoin($subquery, 'foo')->dump(true);
 	}
