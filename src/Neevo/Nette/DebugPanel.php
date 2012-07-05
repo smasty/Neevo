@@ -60,7 +60,7 @@ class DebugPanel implements ObserverInterface, IBarPanel {
 	 */
 	public function updateStatus(SubjectInterface $subject, $event){
 		$source = null;
-		$path = realpath(defined('NEEVO_DIR') ? NEEVO_DIR : __DIR__ . '/../../');
+		$path = realpath(__DIR__ . '/../../');
 		foreach(debug_backtrace(false) as $t){
 			if(isset($t['file']) && strpos($t['file'], $path) !== 0){
 				$source = array($t['file'], (int) $t['line']);

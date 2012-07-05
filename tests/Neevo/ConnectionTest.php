@@ -13,8 +13,10 @@ namespace Neevo\Test;
 
 use ArrayObject;
 use DummyObserver;
+use DummyPDO;
 use Neevo\Cache\SessionStorage;
 use Neevo\Connection;
+use Neevo\DriverException;
 
 
 class ConnectionTest extends \PHPUnit_Framework_TestCase {
@@ -53,6 +55,15 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testConfigFormatPDOInstance(){
+		$pdo = new DummyPDO;
+		$connection = new Connection($pdo);
+
+		$this->assertEquals('pdo', $connection['driver']);
+		$this->assertSame($pdo, $connection['pdo']);
+	}
+
+
 	public function testConfigFormatElse(){
 		$this->setExpectedException('InvalidArgumentException', 'Configuration must be an array, string or Traversable.');
 		new Connection(false);
@@ -65,7 +76,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testSetDriverNoFile(){
-		$this->setExpectedException("Neevo\\DriverException");
+		$this->setExpectedException('Neevo\\DriverException');
 		new Connection(array(
 			'driver' => 'Foo'
 		));
@@ -73,10 +84,34 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testSetDriverNoDriver(){
-		$this->setExpectedException("Neevo\\DriverException");
+		$this->setExpectedException('Neevo\\DriverException');
 		new Connection(array(
 			'driver' => 'Wrong'
 		));
+	}
+
+
+	public function testSetDriverUnreadableFile(){
+		// Prepare unreadable file
+		file_put_contents($file = __DIR__ . '/../../src/Neevo/Drivers/foo.php', $content = 'foo driver');
+		$this->assertEquals($content, file_get_contents($file));
+		umask(0);
+		chmod($file, 0333);
+
+		try{
+			new Connection(array(
+				'driver' => 'Foo'
+			));
+		} catch(DriverException $e){
+			$this->assertRegExp('~driver file .* is not readable.~i', $e->getMessage());
+
+			// Remove file
+			chmod($file, 0666);
+			unlink($file);
+			$this->assertFileNotExists($file);
+			return;
+		}
+		$this->fail('An expected exception has not been raised.');
 	}
 
 
