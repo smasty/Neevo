@@ -107,7 +107,7 @@ class DebugPanel implements ObserverInterface, IBarPanel {
 			. '<p><b>File:</b> ' . Helpers::editorLink($file, $line)
 			. ' &nbsp; <b>Line:</b> ' . ($line ? : 'n/a') . '</p>'
 			. ($line ? BlueScreen::highlightFile($file, $line) : '')
-			. 'Neevo ' . Manager::VERSION . ', revision ' . Manager::REVISION
+			. 'Neevo v' . Manager::VERSION
 		);
 	}
 

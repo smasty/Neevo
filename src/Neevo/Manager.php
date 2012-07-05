@@ -41,8 +41,7 @@ class Manager implements SubjectInterface, ObserverInterface {
 
 
 	// Neevo version
-	const VERSION = '2.2.0',
-	REVISION = '@VCREV@ released on @VCDATE@';
+	const VERSION = '2.2.0';
 
 	// Data types
 	const BOOL = 'b',
