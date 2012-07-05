@@ -16,7 +16,7 @@ namespace Neevo\Cache;
  * File cache storage.
  * @author Smasty
  */
-class FileStorage implements CacheInterface {
+class FileStorage implements StorageInterface {
 
 
 	/** @var string */

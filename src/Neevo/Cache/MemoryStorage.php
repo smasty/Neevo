@@ -17,7 +17,7 @@ namespace Neevo\Cache;
  * Default implementation of Neevo\ICache.
  * @author Smasty
  */
-class MemoryStorage implements CacheInterface {
+class MemoryStorage implements StorageInterface {
 
 
 	/** @var array */

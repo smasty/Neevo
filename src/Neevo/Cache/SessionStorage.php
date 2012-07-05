@@ -16,7 +16,7 @@ namespace Neevo\Cache;
  * Session cache storage.
  * @author Smasty
  */
-class SessionStorage implements CacheInterface {
+class SessionStorage implements StorageInterface {
 
 
 	public function fetch($key){

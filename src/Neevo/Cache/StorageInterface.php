@@ -16,7 +16,7 @@ namespace Neevo\Cache;
  * Neevo cache storage interface.
  * @author Smasty
  */
-interface CacheInterface {
+interface StorageInterface {
 
 
 	/**

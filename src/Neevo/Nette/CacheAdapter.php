@@ -11,7 +11,7 @@
 
 namespace Neevo\Nette;
 
-use Neevo\Cache\CacheInterface;
+use Neevo\Cache\StorageInterface;
 use Nette\Caching\Cache;
 use Nette\Caching\IStorage;
 
@@ -20,7 +20,7 @@ use Nette\Caching\IStorage;
  * Cache adapter for Nette Framework cache storage system.
  * @author Smasty
  */
-class CacheAdapter implements CacheInterface {
+class CacheAdapter implements StorageInterface {
 
 
 	/** @var string */

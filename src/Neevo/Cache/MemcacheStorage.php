@@ -18,7 +18,7 @@ use Memcache;
  * Memcache cache storage.
  * @author Smasty
  */
-class MemcacheStorage implements CacheInterface {
+class MemcacheStorage implements StorageInterface {
 
 
 	/** @var Memcache */

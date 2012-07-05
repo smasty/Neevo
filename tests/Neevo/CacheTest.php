@@ -1,6 +1,6 @@
 <?php
 
-use Neevo\Cache\CacheInterface;
+use Neevo\Cache\StorageInterface;
 use Neevo\Cache\FileStorage;
 use Neevo\Cache\MemcacheStorage;
 use Neevo\Cache\MemoryStorage;
@@ -28,7 +28,7 @@ class CacheTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @dataProvider getImplementations
 	 */
-	public function testBehaviour(CacheInterface $cache){
+	public function testBehaviour(StorageInterface $cache){
 		$cache->store($k = 'key', $v = 'value');
 		$this->assertEquals($v, $cache->fetch($k));
 

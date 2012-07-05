@@ -11,7 +11,7 @@
 
 namespace Neevo;
 
-use Neevo\Cache\CacheInterface;
+use Neevo\Cache\StorageInterface;
 use Neevo\Observable\ObserverInterface;
 use Neevo\Observable\SubjectInterface;
 use SplObjectStorage;
@@ -75,10 +75,10 @@ class Manager implements SubjectInterface, ObserverInterface {
 	 * Configures Neevo and establish a connection.
 	 * Configuration can be different - see the API for your driver.
 	 * @param mixed $config Connection configuration.
-	 * @param CacheInterface $cache Cache to use.
+	 * @param StorageInterface $cache Cache to use.
 	 * @throws NeevoException
 	 */
-	public function __construct($config, CacheInterface $cache = null){
+	public function __construct($config, StorageInterface $cache = null){
 		$this->connection = new Connection($config, $cache);
 		$this->observers = new SplObjectStorage;
 		$this->attachObserver($this, self::QUERY);

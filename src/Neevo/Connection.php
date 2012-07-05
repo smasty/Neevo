@@ -13,7 +13,7 @@ namespace Neevo;
 
 use ArrayAccess;
 use InvalidArgumentException;
-use Neevo\Cache\CacheInterface;
+use Neevo\Cache\StorageInterface;
 use Neevo\Cache\MemoryStorage;
 use Neevo\DriverInterface;
 use Neevo\Observable\ObserverInterface;
@@ -56,17 +56,17 @@ class Connection implements SubjectInterface, ArrayAccess {
 	/** @var SplObjectStorage */
 	private $observers;
 
-	/** @var CacheInterface */
+	/** @var StorageInterface */
 	private $cache;
 
 
 	/**
 	 * Establishes a connection.
 	 * @param array|string|Traversable|PDO $config
-	 * @param CacheInterface $cache
+	 * @param StorageInterface $cache
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct($config, CacheInterface $cache = null){
+	public function __construct($config, StorageInterface $cache = null){
 		$this->observers = new SplObjectStorage;
 
 		$this->cache = $cache !== null ? $cache : new MemoryStorage;
@@ -196,7 +196,7 @@ class Connection implements SubjectInterface, ArrayAccess {
 
 	/**
 	 * Returns the current cache storage instance.
-	 * @return CacheInterface
+	 * @return StorageInterface
 	 */
 	public function getCache(){
 		return $this->cache;
@@ -205,9 +205,9 @@ class Connection implements SubjectInterface, ArrayAccess {
 
 	/**
 	 * Sets the cache storage.
-	 * @param CacheInterface $cache
+	 * @param StorageInterface $cache
 	 */
-	public function setCache(CacheInterface $cache){
+	public function setCache(StorageInterface $cache){
 		$this->cache = $cache;
 	}
 
