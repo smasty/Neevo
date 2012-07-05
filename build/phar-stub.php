@@ -24,8 +24,16 @@ if(function_exists('set_magic_quotes_runtime'))
 	@set_magic_quotes_runtime(false);
 
 
-// Register autoloader responsible for loading Neevo classes and interfaces.
-require_once 'phar://this.phar/Neevo/Loader.php';
-Neevo\Loader::getInstance()->register();
+// Register PSR-0 autoloader.
+spl_autoload_register(function($class){
+	$class = ltrim($class, '\\');
+	if(strncmp($class, 'Neevo', 5) === 0){
+		$file = 'phar://this.phar/' . strtr($class, '\\', '/') . '.php';
+		if(file_exists($file)){
+			require_once $file;
+			return true;
+		}
+	}
+});
 
 __HALT_COMPILER();
