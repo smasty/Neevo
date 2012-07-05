@@ -1,5 +1,17 @@
 <?php
+/**
+ * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this package in the file license.txt.
+ *
+ * Copyright (c) 2012 Smasty (http://smasty.net)
+ *
+ */
 
+namespace Neevo\Test;
+
+use DateTime;
 use Neevo\BaseStatement;
 use Neevo\Connection;
 use Neevo\Drivers\DummyParserDriver;
@@ -9,10 +21,7 @@ use Neevo\Result;
 use Neevo\Statement;
 
 
-/**
- * Tests for Neevo\Parser.
- */
-class ParserTest extends PHPUnit_Framework_TestCase {
+class ParserTest extends \PHPUnit_Framework_TestCase {
 
 
 	/** @var Connection */

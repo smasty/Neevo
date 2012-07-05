@@ -13,7 +13,17 @@
 	>
 	<testsuites>
 		<testsuite name="Neevo Unit tests">
-			<directory suffix="Test.php">./Neevo</directory>
+			<directory>./Neevo</directory>
 		</testsuite>
 	</testsuites>
+
+	<filter>
+		<whitelist>
+			<directory>../src/Neevo/</directory>
+			<exclude>
+				<directory>../src/Neevo/Drivers/</directory>
+				<directory>../src/Neevo/Nette/</directory>
+			</exclude>
+		</whitelist>
+	</filter>
 </phpunit>

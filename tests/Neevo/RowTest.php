@@ -1,14 +1,22 @@
 <?php
+/**
+ * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this package in the file license.txt.
+ *
+ * Copyright (c) 2012 Smasty (http://smasty.net)
+ *
+ */
+
+namespace Neevo\Test;
 
 use Neevo\Connection;
 use Neevo\Result;
 use Neevo\Row;
 
 
-/**
- * Tests for Neevo\Row.
- */
-class RowTest extends PHPUnit_Framework_TestCase {
+class RowTest extends \PHPUnit_Framework_TestCase {
 
 
 	/** @var Result */

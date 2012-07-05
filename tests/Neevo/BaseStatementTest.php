@@ -1,19 +1,26 @@
 <?php
+/**
+ * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this package in the file license.txt.
+ *
+ * Copyright (c) 2012 Smasty (http://smasty.net)
+ *
+ */
 
-use Neevo\BaseStatement;
+namespace Neevo\Test;
+
+use DummyObserver;
+use DummyStmt;
 use Neevo\Connection;
 use Neevo\Manager;
+use ReflectionMethod;
+use ReflectionProperty;
 
 
-class DummyStmt extends BaseStatement {
 
-}
-
-
-/**
- * Tests for Neevo\BaseStatement.
- */
-class BaseStatementTest extends PHPUnit_Framework_TestCase {
+class BaseStatementTest extends \PHPUnit_Framework_TestCase {
 
 
 	/** @var DummyStmt */

@@ -17,6 +17,9 @@ use Neevo\NeevoException;
 use Neevo\Observable\ObserverInterface;
 use Neevo\Observable\SubjectInterface;
 use Neevo\Result;
+use Nette\Database\Helpers;
+use Nette\Diagnostics\BlueScreen;
+use Nette\Diagnostics\IBarPanel;
 
 
 /**

@@ -1,16 +1,25 @@
 <?php
+/**
+ * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this package in the file license.txt.
+ *
+ * Copyright (c) 2012 Smasty (http://smasty.net)
+ *
+ */
 
-use Neevo\Cache\StorageInterface;
+namespace Neevo\Test;
+
+use Memcache;
 use Neevo\Cache\FileStorage;
 use Neevo\Cache\MemcacheStorage;
 use Neevo\Cache\MemoryStorage;
 use Neevo\Cache\SessionStorage;
+use Neevo\Cache\StorageInterface;
 
 
-/**
- * Tests for NeevoCache.
- */
-class CacheTest extends PHPUnit_Framework_TestCase {
+class CacheTest extends \PHPUnit_Framework_TestCase {
 
 
 	private $filename = 'neevo.cache';
