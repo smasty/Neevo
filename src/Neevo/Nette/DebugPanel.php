@@ -1,11 +1,4 @@
 <?php
-
-use Exception;
-use Neevo\Manager;
-use Neevo\NeevoException;
-use Neevo\Observable\ObserverInterface;
-use Neevo\Observable\SubjectInterface;
-use Neevo\Result;
 /**
  * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
  *
@@ -17,6 +10,13 @@ use Neevo\Result;
  */
 
 namespace Neevo\Nette;
+
+use Exception;
+use Neevo\Manager;
+use Neevo\NeevoException;
+use Neevo\Observable\ObserverInterface;
+use Neevo\Observable\SubjectInterface;
+use Neevo\Result;
 
 
 /**
