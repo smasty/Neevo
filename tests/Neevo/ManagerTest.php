@@ -1,17 +1,21 @@
 <?php
 
+use Neevo\Cache\SessionStorage;
+use Neevo\Drivers\DummyDriver;
+use Neevo\Manager;
+
 
 /**
  * Tests for Neevo.
  */
 class ManagerTest extends PHPUnit_Framework_TestCase {
 
-	/** @var Neevo */
+	/** @var Manager */
 	private $neevo;
 
 
 	protected function setUp(){
-		$this->neevo = new Neevo\Manager('driver=Dummy&lazy=1');
+		$this->neevo = new Manager('driver=Dummy&lazy=1');
 	}
 
 
@@ -21,7 +25,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testConnect(){
-		$neevo = new Neevo\Manager('driver=Dummy', new Neevo\Cache\SessionStorage);
+		$neevo = new Manager('driver=Dummy', new SessionStorage);
 		$this->assertInstanceOf('Neevo\\Drivers\\DummyDriver', $neevo->getConnection()->getDriver());
 		$this->assertInstanceOf('Neevo\\Cache\\SessionStorage', $neevo->getConnection()->getCache());
 
@@ -34,7 +38,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 	public function testBeginTransaction(){
 		$this->neevo->begin();
 		$this->assertEquals(
-			Neevo\Drivers\DummyDriver::TRANSACTION_OPEN,
+			DummyDriver::TRANSACTION_OPEN,
 			$this->neevo->getConnection()->getDriver()->transactionState()
 		);
 	}
@@ -44,7 +48,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 		$this->neevo->begin();
 		$this->neevo->commit();
 		$this->assertEquals(
-			Neevo\Drivers\DummyDriver::TRANSACTION_COMMIT,
+			DummyDriver::TRANSACTION_COMMIT,
 			$this->neevo->getConnection()->getDriver()->transactionState()
 		);
 	}
@@ -54,7 +58,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 		$this->neevo->begin();
 		$this->neevo->rollback();
 		$this->assertEquals(
-			Neevo\Drivers\DummyDriver::TRANSACTION_ROLLBACK,
+			DummyDriver::TRANSACTION_ROLLBACK,
 			$this->neevo->getConnection()->getDriver()->transactionState()
 		);
 	}
@@ -63,7 +67,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 	public function testSelect(){
 		$res = $this->neevo->select($c = 'col', $t = 'table');
 		$this->assertInstanceOf('Neevo\Result', $res);
-		$this->assertEquals(Neevo\Manager::STMT_SELECT, $res->getType());
+		$this->assertEquals(Manager::STMT_SELECT, $res->getType());
 		$this->assertEquals(array($c), $res->getColumns());
 		$this->assertEquals($t, $res->getSource());
 		$this->assertTrue($res->getConnection() === $this->neevo->getConnection());
@@ -73,7 +77,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 	public function testInsert(){
 		$ins = $this->neevo->insert($t = 'table', $v = array('val1', 'val2'));
 		$this->assertInstanceOf('Neevo\Statement', $ins);
-		$this->assertEquals(Neevo\Manager::STMT_INSERT, $ins->getType());
+		$this->assertEquals(Manager::STMT_INSERT, $ins->getType());
 		$this->assertEquals($t, $ins->getTable());
 		$this->assertEquals($v, $ins->getValues());
 	}
@@ -82,7 +86,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 	public function testUpdate(){
 		$upd = $this->neevo->update($t = 'table', $d = array('val1', 'val2'));
 		$this->assertInstanceOf('Neevo\Statement', $upd);
-		$this->assertEquals(Neevo\Manager::STMT_UPDATE, $upd->getType());
+		$this->assertEquals(Manager::STMT_UPDATE, $upd->getType());
 		$this->assertEquals($t, $upd->getTable());
 		$this->assertEquals($d, $upd->getValues());
 	}
@@ -90,7 +94,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 
 	public function testDelete(){
 		$del = $this->neevo->delete($t = 'table');
-		$this->assertEquals(Neevo\Manager::STMT_DELETE, $del->getType());
+		$this->assertEquals(Manager::STMT_DELETE, $del->getType());
 		$this->assertInstanceOf('Neevo\Statement', $del);
 		$this->assertEquals($t, $del->getTable());
 	}
@@ -122,7 +126,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase {
 			. ' <strong style="color:#d59401">RAND</strong>() = <em style="color:#008000">\'John Doe\'</em>;'
 			. ' <em style="color:#999">/* comment */</em></pre>'
 			. "\n",
-			Neevo\Manager::highlightSql("SELECT * FROM `table` WHERE RAND() = 'John Doe'; /* comment */")
+			Manager::highlightSql("SELECT * FROM `table` WHERE RAND() = 'John Doe'; /* comment */")
 		);
 	}
 

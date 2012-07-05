@@ -11,18 +11,23 @@
 
 namespace Neevo;
 
+use Exception;
+use Neevo\Observable\ObserverInterface;
+use Neevo\Observable\SubjectInterface;
+use SplObjectStorage;
+
 
 /**
  * Main Neevo exception.
  * @author Smasty
  */
-class NeevoException extends \Exception implements IObservable {
+class NeevoException extends Exception implements SubjectInterface {
 
 
 	/** @var string */
 	protected $sql;
 
-	/** @var \SplObjectStorage */
+	/** @var SplObjectStorage */
 	protected static $observers;
 
 
@@ -33,13 +38,13 @@ class NeevoException extends \Exception implements IObservable {
 	 * @param string $sql Optional SQL command
 	 * @param Exception $previous
 	 */
-	public function __construct($message = '', $code = 0, $sql = null, \Exception $previous = null){
+	public function __construct($message = '', $code = 0, $sql = null, Exception $previous = null){
 
 		parent::__construct($message, (int) $code, $previous);
 		$this->sql = $sql;
 		if(self::$observers === null)
-			self::$observers = new \SplObjectStorage;
-		$this->notifyObservers(IObserver::EXCEPTION);
+			self::$observers = new SplObjectStorage;
+		$this->notifyObservers(ObserverInterface::EXCEPTION);
 	}
 
 
@@ -63,19 +68,19 @@ class NeevoException extends \Exception implements IObservable {
 
 	/**
 	 * Attaches given observer to given event.
-	 * @param IObserver $observer
+	 * @param ObserverInterface $observer
 	 * @param int $event
 	 */
-	public function attachObserver(IObserver $observer, $event){
+	public function attachObserver(ObserverInterface $observer, $event){
 		self::$observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detaches given observer.
-	 * @param IObserver $observer
+	 * @param ObserverInterface $observer
 	 */
-	public function detachObserver(IObserver $observer){
+	public function detachObserver(ObserverInterface $observer){
 		self::$observers->detach($observer);
 	}
 

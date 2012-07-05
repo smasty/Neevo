@@ -30,7 +30,7 @@ namespace Neevo;
  *
  * @author Smasty
  */
-interface IDriver {
+interface DriverInterface {
 
 
 	/**
@@ -124,7 +124,7 @@ interface IDriver {
 	/**
 	 * Returns the number of rows in the given result set.
 	 * @param resource $resultSet
-	 * @return int|FALSE
+	 * @return int|bool
 	 */
 	public function getNumRows($resultSet);
 

@@ -1,4 +1,11 @@
 <?php
+
+use Exception;
+use Neevo\Manager;
+use Neevo\NeevoException;
+use Neevo\Observable\ObserverInterface;
+use Neevo\Observable\SubjectInterface;
+use Neevo\Result;
 /**
  * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
  *
@@ -11,18 +18,11 @@
 
 namespace Neevo\Nette;
 
-use Neevo,
-	Nette\Diagnostics\IBarPanel,
-	Nette\Diagnostics\Debugger,
-	Nette\Diagnostics\Helpers,
-	Nette\Diagnostics\BlueScreen,
-	Nette\Utils\Html;
-
 
 /**
  * Debug panel informing about performed queries.
  */
-class DebugPanel implements Neevo\IObserver, IBarPanel {
+class DebugPanel implements ObserverInterface, IBarPanel {
 
 
 	/** @var array */
@@ -52,10 +52,10 @@ class DebugPanel implements Neevo\IObserver, IBarPanel {
 
 	/**
 	 * Receives update from observable subject.
-	 * @param Neevo\IObservable $subject
+	 * @param SubjectInterface $subject
 	 * @param int $event
 	 */
-	public function updateStatus(Neevo\IObservable $subject, $event){
+	public function updateStatus(SubjectInterface $subject, $event){
 		$source = null;
 		$path = realpath(defined('NEEVO_DIR') ? NEEVO_DIR : __DIR__ . '/../../');
 		foreach(debug_backtrace(false) as $t){
@@ -69,10 +69,10 @@ class DebugPanel implements Neevo\IObserver, IBarPanel {
 			$this->numQueries++;
 			$this->totalTime += $subject->getTime();
 
-			if($subject instanceof Neevo\Result){
+			if($subject instanceof Result){
 				try{
 					$rows = count($subject);
-				} catch(\Exception $e){
+				} catch(Exception $e){
 					$rows = '?';
 				}
 				$explain = $this->explain ? $subject->explain() : null;
@@ -94,20 +94,20 @@ class DebugPanel implements Neevo\IObserver, IBarPanel {
 
 	/**
 	 * Renders SQL query string to Nette debug bluescreen when available.
-	 * @param Neevo\NeevoException $e
+	 * @param NeevoException $e
 	 * @return array
 	 */
 	public function renderException($e){
-		if(!($e instanceof Neevo\NeevoException && $e->getSql()))
+		if(!($e instanceof NeevoException && $e->getSql()))
 			return;
 		list($file, $line) = $this->failedQuerySource;
 		return array(
 			'tab' => 'SQL',
-			'panel' => Neevo\Manager::highlightSql($e->getSql())
+			'panel' => Manager::highlightSql($e->getSql())
 			. '<p><b>File:</b> ' . Helpers::editorLink($file, $line)
 			. ' &nbsp; <b>Line:</b> ' . ($line ? : 'n/a') . '</p>'
 			. ($line ? BlueScreen::highlightFile($file, $line) : '')
-			. 'Neevo ' . Neevo\Manager::VERSION . ', revision ' . Neevo\Manager::REVISION
+			. 'Neevo ' . Manager::VERSION . ', revision ' . Manager::REVISION
 		);
 	}
 

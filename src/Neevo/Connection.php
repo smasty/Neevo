@@ -11,6 +11,19 @@
 
 namespace Neevo;
 
+use ArrayAccess;
+use InvalidArgumentException;
+use Neevo\Cache\CacheInterface;
+use Neevo\Cache\MemoryStorage;
+use Neevo\DriverInterface;
+use Neevo\Observable\ObserverInterface;
+use Neevo\Observable\SubjectInterface;
+use PDO;
+use ReflectionClass;
+use ReflectionException;
+use SplObjectStorage;
+use Traversable;
+
 
 /**
  * Representation of database connection.
@@ -25,7 +38,7 @@ namespace Neevo;
  *
  * @author Smasty
  */
-class Connection implements IObservable, \ArrayAccess {
+class Connection implements SubjectInterface, ArrayAccess {
 
 
 	/** @var array */
@@ -34,46 +47,46 @@ class Connection implements IObservable, \ArrayAccess {
 	/** @var bool */
 	private $connected = false;
 
-	/** @var IDriver */
+	/** @var DriverInterface */
 	private $driver;
 
 	/** @var string */
 	private $parser = 'Neevo\\Parser';
 
-	/** @var \SplObjectStorage */
+	/** @var SplObjectStorage */
 	private $observers;
 
-	/** @var ICache */
+	/** @var CacheInterface */
 	private $cache;
 
 
 	/**
 	 * Establishes a connection.
-	 * @param array|string|\Traversable|\PDO $config
-	 * @param ICache $cache
-	 * @throws \InvalidArgumentException
+	 * @param array|string|Traversable|PDO $config
+	 * @param CacheInterface $cache
+	 * @throws InvalidArgumentException
 	 */
-	public function __construct($config, ICache $cache = null){
-		$this->observers = new \SplObjectStorage;
+	public function __construct($config, CacheInterface $cache = null){
+		$this->observers = new SplObjectStorage;
 
-		$this->cache = $cache !== null ? $cache : new Cache\MemoryStorage;
+		$this->cache = $cache !== null ? $cache : new MemoryStorage;
 
 		// Parse config
 		if(is_string($config)){
 			parse_str($config, $config);
-		} elseif($config instanceof \Traversable){
+		} elseif($config instanceof Traversable){
 			$tmp = array();
 			foreach($config as $key => $val){
-				$tmp[$key] = $val instanceof \Traversable ? iterator_to_array($val) : $val;
+				$tmp[$key] = $val instanceof Traversable ? iterator_to_array($val) : $val;
 			}
 			$config = $tmp;
-		} elseif(class_exists('PDO') && $config instanceof \PDO){
+		} elseif(class_exists('PDO') && $config instanceof PDO){
 			$config = array(
 				'driver' => 'pdo',
 				'pdo' => $config
 			);
 		} elseif(!is_array($config)){
-			throw new \InvalidArgumentException('Configuration must be an array, string or Traversable.');
+			throw new InvalidArgumentException('Configuration must be an array, string or Traversable.');
 		}
 
 		// Default values
@@ -121,11 +134,11 @@ class Connection implements IObservable, \ArrayAccess {
 	public function __destruct(){
 		try{
 			$this->driver->closeConnection();
-		} catch(Drivers\ImplementationException $e){
+		} catch(ImplementationException $e){
 
 		}
 
-		$this->notifyObservers(IObserver::DISCONNECT);
+		$this->notifyObservers(ObserverInterface::DISCONNECT);
 	}
 
 
@@ -138,7 +151,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 		$this->driver->connect($this->config);
 		$this->connected = true;
-		$this->notifyObservers(IObserver::CONNECT);
+		$this->notifyObservers(ObserverInterface::CONNECT);
 	}
 
 
@@ -165,7 +178,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 	/**
 	 * Returns the current driver instance.
-	 * @return IDriver
+	 * @return DriverInterface
 	 */
 	public function getDriver(){
 		return $this->driver;
@@ -183,7 +196,7 @@ class Connection implements IObservable, \ArrayAccess {
 
 	/**
 	 * Returns the current cache storage instance.
-	 * @return ICache
+	 * @return CacheInterface
 	 */
 	public function getCache(){
 		return $this->cache;
@@ -192,28 +205,28 @@ class Connection implements IObservable, \ArrayAccess {
 
 	/**
 	 * Sets the cache storage.
-	 * @param ICache $cache
+	 * @param CacheInterface $cache
 	 */
-	public function setCache(ICache $cache){
+	public function setCache(CacheInterface $cache){
 		$this->cache = $cache;
 	}
 
 
 	/**
 	 * Attaches given observer to given $event.
-	 * @param IObserver $observer
+	 * @param ObserverInterface $observer
 	 * @param int $event
 	 */
-	public function attachObserver(IObserver $observer, $event){
+	public function attachObserver(ObserverInterface $observer, $event){
 		$this->observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detaches given observer.
-	 * @param IObserver $observer
+	 * @param ObserverInterface $observer
 	 */
-	public function detachObserver(IObserver $observer){
+	public function detachObserver(ObserverInterface $observer){
 		$this->observers->detach($observer);
 	}
 
@@ -318,9 +331,9 @@ class Connection implements IObservable, \ArrayAccess {
 	 */
 	protected function isDriver($class){
 		try{
-			$reflection = new \ReflectionClass($class);
-			return $reflection->implementsInterface('Neevo\\IDriver');
-		} catch(\ReflectionException $e){
+			$reflection = new ReflectionClass($class);
+			return $reflection->implementsInterface('Neevo\\DriverInterface');
+		} catch(ReflectionException $e){
 			return false;
 		}
 	}
@@ -333,9 +346,9 @@ class Connection implements IObservable, \ArrayAccess {
 	 */
 	protected function isParser($class){
 		try{
-			$reflection = new \ReflectionClass($class);
+			$reflection = new ReflectionClass($class);
 			return $reflection->isSubclassOf('Neevo\\Parser');
-		} catch(\ReflectionException $e){
+		} catch(ReflectionException $e){
 			return false;
 		}
 	}

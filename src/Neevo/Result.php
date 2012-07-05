@@ -11,6 +11,12 @@
 
 namespace Neevo;
 
+use Countable;
+use DateTime;
+use InvalidArgumentException;
+use IteratorAggregate;
+use Traversable;
+
 
 /**
  * Represents a result. Can be iterated, counted and provides fluent interface.
@@ -19,7 +25,7 @@ namespace Neevo;
  *
  * @author Smasty
  */
-class Result extends BaseStatement implements \IteratorAggregate, \Countable {
+class Result extends BaseStatement implements IteratorAggregate, Countable {
 
 
 	/** @var string */
@@ -50,29 +56,29 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	/**
 	 * Creates SELECT statement.
 	 * @param Connection $connection
-	 * @param string|array|\Traversable $columns
+	 * @param string|array|Traversable $columns
 	 * @param string|Result $source Table name or subquery
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function __construct(Connection $connection, $columns = null, $source = null){
 		parent::__construct($connection);
 
 		// Input check
 		if($columns === null && $source === null)
-			throw new \InvalidArgumentException('Missing select source.');
+			throw new InvalidArgumentException('Missing select source.');
 		if($source === null){
 			$source = $columns;
 			$columns = '*';
 		}
 		if(!is_string($source) && !$source instanceof self)
-			throw new \InvalidArgumentException('Source must be a string or \Result.');
+			throw new InvalidArgumentException('Source must be a string or \Result.');
 
 		$columns = is_string($columns)
-			? explode(',', $columns) : ($columns instanceof \Traversable
+			? explode(',', $columns) : ($columns instanceof Traversable
 				? iterator_to_array($columns) : (array) $columns);
 
 		if(empty($columns))
-			throw new \InvalidArgumentException('No columns given.');
+			throw new InvalidArgumentException('No columns given.');
 
 		if($source instanceof self)
 			$this->subqueries[] = $source;
@@ -91,7 +97,7 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	public function __destruct(){
 		try{
 			$this->connection->getDriver()->freeResultSet($this->resultSet);
-		} catch(Drivers\ImplementationException $e){}
+		} catch(ImplementationException $e){}
 
 		$this->resultSet = null;
 	}
@@ -132,9 +138,9 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 			return $this;
 
 		if(!(is_string($source) || $source instanceof self || $source instanceof Literal))
-			throw new \InvalidArgumentException('Source must be a string, Neevo\\Literal or Neevo\\Result.');
+			throw new InvalidArgumentException('Source must be a string, Neevo\\Literal or Neevo\\Result.');
 		if(!(is_string($condition) || $condition instanceof Literal))
-			throw new \InvalidArgumentException('Condition must be a string or Neevo\\Literal.');
+			throw new InvalidArgumentException('Condition must be a string or Neevo\\Literal.');
 
 		if($source instanceof self)
 			$this->subqueries[] = $source;
@@ -175,18 +181,18 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 	 * @param int $page Page number
 	 * @param int $items Number of items per page
 	 * @return Result fluent interface
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function page($page, $items){
 		if($page < 1 || $items < 1)
-			throw new \InvalidArgumentException('Both arguments must be positive integers.');
+			throw new InvalidArgumentException('Both arguments must be positive integers.');
 		return $this->limit((int) $items, (int) ($items * --$page));
 	}
 
 
 	/**
 	 * Fetches the row on current position.
-	 * @return Row|FALSE
+	 * @return Row|bool
 	 */
 	public function fetch(){
 		$this->performed || $this->run();
@@ -398,12 +404,12 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 
 	/**
 	 * Sets multiple column types at once.
-	 * @param array|\Traversable $types
+	 * @param array|Traversable $types
 	 * @return Result fluent interface
 	 */
 	public function setTypes($types){
-		if(!($types instanceof \Traversable || is_array($types)))
-			throw new \InvalidArgumentException('Types must be an array or Traversable.');
+		if(!($types instanceof Traversable || is_array($types)))
+			throw new InvalidArgumentException('Types must be an array or Traversable.');
 		foreach($types as $column => $type){
 			$this->setType($column, $type);
 		}
@@ -492,13 +498,13 @@ class Result extends BaseStatement implements \IteratorAggregate, \Countable {
 				if((int) $value === 0)
 					return null;
 				elseif(!$dateFormat)
-					return new \DateTime(is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value);
+					return new DateTime(is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value);
 				elseif($dateFormat == 'U')
 					return is_numeric($value) ? (int) $value : strtotime($value);
 				elseif(is_numeric($value))
 					return date($dateFormat, $value);
 				else{
-					$d = new \DateTime($value);
+					$d = new DateTime($value);
 					return $d->format($dateFormat);
 				}
 

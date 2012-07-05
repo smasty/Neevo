@@ -11,8 +11,16 @@
 
 namespace Neevo\Drivers;
 
-use Neevo,
-	Neevo\DriverException;
+use DateTime;
+use InvalidArgumentException;
+use mysqli;
+use mysqli_result;
+use mysqli_result as mysqli_result2;
+use Neevo\BaseStatement;
+use Neevo\DriverException;
+use Neevo\DriverInterface;
+use Neevo\Manager;
+use Neevo\Parser;
 
 
 /**
@@ -34,10 +42,10 @@ use Neevo,
  *
  * @author Smasty
  */
-class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
+class MySQLiDriver extends Parser implements DriverInterface {
 
 
-	/** @var mysqli_result */
+	/** @var mysqli_result2\mysqli_result */
 	private $resource;
 
 	/** @var bool */
@@ -51,10 +59,10 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 	 * Checks for required PHP extension.
 	 * @throws DriverException
 	 */
-	public function __construct(Neevo\BaseStatement $statement = null){
+	public function __construct(BaseStatement $statement = null){
 		if(!extension_loaded("mysqli"))
 			throw new DriverException("Cannot instantiate Neevo MySQLi driver - PHP extension 'mysqli' not loaded.");
-		if($statement instanceof Neevo\BaseStatement)
+		if($statement instanceof BaseStatement)
 			parent::__construct($statement);
 	}
 
@@ -82,16 +90,16 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 		$config += $defaults;
 
 		// Connect
-		if($config['resource'] instanceof \mysqli)
+		if($config['resource'] instanceof mysqli)
 			$this->resource = $config['resource'];
 		else
-			$this->resource = new \mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
+			$this->resource = new mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $config['socket']);
 
 		if($this->resource->connect_errno)
 			throw new DriverException($this->resource->connect_error, $this->resource->connect_errno);
 
 		// Set charset
-		if($this->resource instanceof \mysqli){
+		if($this->resource instanceof mysqli){
 			$ok = @$this->resource->set_charset($config['charset']);
 			if(!$ok)
 				$this->runQuery("SET NAMES " . $config['charset']);
@@ -111,7 +119,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Frees memory used by given result set.
-	 * @param mysqli_result $resultSet
+	 * @param mysqli_result2\mysqli_result $resultSet
 	 * @return bool
 	 */
 	public function freeResultSet($resultSet){
@@ -122,7 +130,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Executes given SQL statement.
 	 * @param string $queryString
-	 * @return mysqli_result|bool
+	 * @return mysqli_result2\mysqli_result|bool
 	 * @throws DriverException
 	 */
 	public function runQuery($queryString){
@@ -168,7 +176,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Fetches row from given result set as an associative array.
-	 * @param mysqli_result $resultSet
+	 * @param mysqli_result2\mysqli_result $resultSet
 	 * @return array
 	 */
 	public function fetch($resultSet){
@@ -178,7 +186,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Moves internal result pointer.
-	 * @param mysqli_result $resultSet
+	 * @param mysqli_result2\mysqli_result $resultSet
 	 * @param int
 	 * @return bool
 	 * @throws DriverException
@@ -201,23 +209,23 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Randomizes result order.
-	 * @param Neevo\BaseStatement $statement
+	 * @param BaseStatement $statement
 	 */
-	public function randomizeOrder(Neevo\BaseStatement $statement){
+	public function randomizeOrder(BaseStatement $statement){
 		$statement->order('RAND()');
 	}
 
 
 	/**
 	 * Returns the number of rows in the given result set.
-	 * @param \mysqli_result $resultSet
-	 * @return int|FALSE
+	 * @param mysqli_result $resultSet
+	 * @return int|bool
 	 * @throws DriverException
 	 */
 	public function getNumRows($resultSet){
 		if($this->unbuffered)
 			throw new DriverException('Cannot count rows on unbuffered result.');
-		if($resultSet instanceof \mysqli_result)
+		if($resultSet instanceof mysqli_result)
 			return $resultSet->num_rows;
 		return false;
 	}
@@ -237,27 +245,27 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function escape($value, $type){
 		switch($type){
-			case Neevo\Manager::BOOL:
+			case Manager::BOOL:
 				return $value ? 1 : 0;
 
-			case Neevo\Manager::TEXT:
+			case Manager::TEXT:
 				return "'" . $this->resource->real_escape_string($value) . "'";
 
-			case Neevo\Manager::IDENTIFIER:
+			case Manager::IDENTIFIER:
 				return str_replace('`*`', '*', '`' . str_replace('.', '`.`', str_replace('`', '``', $value)) . '`');
 
-			case Neevo\Manager::BINARY:
+			case Manager::BINARY:
 				return "_binary'" . mysqli_real_escape_string($this->resource, $value) . "'";
 
-			case Neevo\Manager::DATETIME:
-				return ($value instanceof \DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
+			case Manager::DATETIME:
+				return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
 
 			default:
-				throw new \InvalidArgumentException('Unsupported data type.');
+				throw new InvalidArgumentException('Unsupported data type.');
 				break;
 		}
 	}
@@ -268,12 +276,12 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function unescape($value, $type){
-		if($type === Neevo\Manager::BINARY)
+		if($type === Manager::BINARY)
 			return $value;
-		throw new \InvalidArgumentException('Unsupported data type.');
+		throw new InvalidArgumentException('Unsupported data type.');
 	}
 
 
@@ -295,7 +303,7 @@ class MySQLiDriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Returns types of columns in given result set.
-	 * @param mysqli_result $resultset
+	 * @param mysqli_result2\mysqli_result $resultset
 	 * @param string $table
 	 * @return array
 	 */

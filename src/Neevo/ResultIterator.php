@@ -11,12 +11,17 @@
 
 namespace Neevo;
 
+use Countable;
+use Iterator;
+use OutOfRangeException;
+use SeekableIterator;
+
 
 /**
  * Result set iterator.
  * @author Smasty
  */
-class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
+class ResultIterator implements Iterator, Countable, SeekableIterator {
 
 
 	/** @var int */
@@ -95,7 +100,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 	/**
 	 * Implementation of SeekableIterator.
 	 * @param int $offset
-	 * @throws \OutOfRangeException|DriverException
+	 * @throws OutOfRangeException|DriverException
 	 */
 	public function seek($offset){
 		try{
@@ -103,7 +108,7 @@ class ResultIterator implements \Iterator, \Countable, \SeekableIterator {
 		} catch(DriverException $e){
 			throw $e;
 		} catch(NeevoException $e){
-			throw new \OutOfRangeException("Cannot seek to offset $offset.", null, $e);
+			throw new OutOfRangeException("Cannot seek to offset $offset.", null, $e);
 		}
 		$this->row = $this->result->fetch();
 		$this->pointer = $offset;

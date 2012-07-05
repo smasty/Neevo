@@ -2,13 +2,17 @@
 
 namespace Neevo\Drivers;
 
-use Neevo,
-	Neevo\DriverException;
+use DummyResult;
+use Neevo\BaseStatement;
+use Neevo\DriverException;
+use Neevo\DriverInterface;
+use Neevo\ImplementationException;
+use Neevo\Manager;
 
 /**
  * Dummy Neevo driver.
  */
-class DummyDriver implements Neevo\IDriver {
+class DummyDriver implements DriverInterface {
 
 	private $unbuffered = false,
 			$connected = false,
@@ -52,7 +56,7 @@ class DummyDriver implements Neevo\IDriver {
 			throw new DriverException;
 		if($queryString){
 			$this->performed[] = $queryString;
-			return new \DummyResult($queryString, $this);
+			return new DummyResult($queryString, $this);
 		}
 		return false;
 	}
@@ -97,12 +101,12 @@ class DummyDriver implements Neevo\IDriver {
 
 	public function getInsertId(){
 		if($this->error == 'insert-id')
-			throw new Neevo\ImplementationException;
+			throw new ImplementationException;
 		return 4;
 	}
 
 
-	public function randomizeOrder(Neevo\BaseStatement $statement){
+	public function randomizeOrder(BaseStatement $statement){
 		$statement->order('RANDOM()');
 	}
 
@@ -127,7 +131,7 @@ class DummyDriver implements Neevo\IDriver {
 
 
 	public function unescape($value, $type){
-		if($type === Neevo\Manager::BINARY)
+		if($type === Manager::BINARY)
 			return "bin:$value";
 	}
 
@@ -152,9 +156,9 @@ class DummyDriver implements Neevo\IDriver {
 
 	public function getRow($i = null){
 		if($i === null)
-			return \DummyResult::$data;
-		if(isset(\DummyResult::$data[$i]))
-			return \DummyResult::$data[$i];
+			return DummyResult::$data;
+		if(isset(DummyResult::$data[$i]))
+			return DummyResult::$data[$i];
 		return false;
 	}
 

@@ -1,18 +1,21 @@
 <?php
 
+use Neevo\Connection;
+use Neevo\Result;
+
 
 /**
  * Tests for Neevo\ResultIterator.
  */
 class ResultIteratorTest extends PHPUnit_Framework_TestCase {
 
-	/** @var Neevo\Result */
+	/** @var Result */
 	private $result, $result2;
 
 
 	protected function setUp(){
-		$this->result = new Neevo\Result(new Neevo\Connection('driver=Dummy'), 'foo');
-		$this->result2 = new Neevo\Result(new Neevo\Connection('driver=Dummy&unbuffered=true'), 'foo');
+		$this->result = new Result(new Connection('driver=Dummy'), 'foo');
+		$this->result2 = new Result(new Connection('driver=Dummy&unbuffered=true'), 'foo');
 	}
 
 

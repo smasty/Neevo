@@ -9,14 +9,14 @@
  *
  */
 
-namespace Neevo;
+namespace Neevo\Cache;
 
 
 /**
  * Neevo cache storage interface.
  * @author Smasty
  */
-interface ICache {
+interface CacheInterface {
 
 
 	/**

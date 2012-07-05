@@ -1,16 +1,19 @@
 <?php
 
+use Neevo\Observable\ObserverInterface;
+use Neevo\Observable\SubjectInterface;
+
 
 /**
  * Dummy Neevo observer.
  */
-class DummyObserver implements Neevo\IObserver {
+class DummyObserver implements ObserverInterface {
 
 
 	private $notified = false;
 
 
-	public function updateStatus(Neevo\IObservable $observable, $event){
+	public function updateStatus(SubjectInterface $observable, $event){
 		$this->notified = $event;
 	}
 

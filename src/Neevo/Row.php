@@ -11,12 +11,17 @@
 
 namespace Neevo;
 
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
+
 
 /**
  * Representation of a row in a result.
  * @author Smasty
  */
-class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
+class Row implements ArrayAccess, Countable, IteratorAggregate {
 
 
 	/** @var bool */
@@ -107,10 +112,10 @@ class Row implements \ArrayAccess, \Countable, \IteratorAggregate {
 
 
 	/**
-	 * @return \ArrayIterator
+	 * @return ArrayIterator
 	 */
 	public function getIterator(){
-		return new \ArrayIterator(array_merge($this->data, $this->modified));
+		return new ArrayIterator(array_merge($this->data, $this->modified));
 	}
 
 

@@ -1,5 +1,8 @@
  <?php
 
+use Neevo\Cache\SessionStorage;
+use Neevo\Connection;
+
 
 /**
  * Tests for Neevo\Connection.
@@ -7,7 +10,7 @@
 class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 
-	/** @var Neevo\Connection */
+	/** @var Connection */
 	protected $instance;
 
 
@@ -16,7 +19,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 			'testConfig' => true,
 			'driver' => 'Dummy'
 		);
-		$this->instance = new Neevo\Connection($config);
+		$this->instance = new Connection($config);
 	}
 
 
@@ -26,7 +29,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testConfigFormatString(){
-		$connection = new Neevo\Connection('driver=Dummy');
+		$connection = new Connection('driver=Dummy');
 
 		$this->assertInstanceOf('Neevo\\Drivers\\DummyDriver', $connection->getDriver());
 	}
@@ -34,7 +37,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 	public function testConfigFormatTraversable(){
 		$config = new ArrayObject(array('driver' => 'Dummy'));
-		$connection = new Neevo\Connection($config);
+		$connection = new Connection($config);
 
 		$this->assertInstanceOf('Neevo\\Drivers\\DummyDriver', $connection->getDriver());
 	}
@@ -42,7 +45,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 	public function testConfigFormatElse(){
 		$this->setExpectedException('InvalidArgumentException', 'Configuration must be an array, string or Traversable.');
-		new Neevo\Connection(false);
+		new Connection(false);
 	}
 
 
@@ -53,7 +56,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 	public function testSetDriverNoFile(){
 		$this->setExpectedException("Neevo\\DriverException");
-		new Neevo\Connection(array(
+		new Connection(array(
 			'driver' => 'Foo'
 		));
 	}
@@ -61,7 +64,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 	public function testSetDriverNoDriver(){
 		$this->setExpectedException("Neevo\\DriverException");
-		new Neevo\Connection(array(
+		new Connection(array(
 			'driver' => 'Wrong'
 		));
 	}
@@ -73,7 +76,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testSetCustomParser(){
-		$connection = new Neevo\Connection(array(
+		$connection = new Connection(array(
 				'driver' => 'DummyParser'
 			));
 
@@ -82,7 +85,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testSetCache(){
-		$cache = new Neevo\Cache\SessionStorage;
+		$cache = new SessionStorage;
 		$this->instance->setCache($cache);
 
 		$this->assertEquals(spl_object_hash($this->instance->getCache()), spl_object_hash($cache));
@@ -123,7 +126,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$config = array(
 			'alias' => 'value',
 		);
-		Neevo\Connection::alias($config, 'key', 'alias');
+		Connection::alias($config, 'key', 'alias');
 
 		$this->assertEquals('value', $config['key']);
 	}

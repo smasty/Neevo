@@ -11,31 +11,31 @@
 
 namespace Neevo\Nette;
 
-
-use Neevo,
-	Nette;
+use Neevo\Cache\CacheInterface;
+use Nette\Caching\Cache;
+use Nette\Caching\IStorage;
 
 
 /**
  * Cache adapter for Nette Framework cache storage system.
  * @author Smasty
  */
-class CacheAdapter implements Neevo\ICache {
+class CacheAdapter implements CacheInterface {
 
 
 	/** @var string */
 	public static $cacheKey = 'Neevo.Cache';
 
-	/** @var Nette\Caching\Cache */
+	/** @var Cache */
 	private $cache;
 
 
 	/**
 	 * Creates the cache adapter.
-	 * @param Nette\Caching\IStorage $storage
+	 * @param IStorage $storage
 	 */
-	public function __construct(Nette\Caching\IStorage $storage){
-		$this->cache = new Nette\Caching\Cache($storage, self::$cacheKey);
+	public function __construct(IStorage $storage){
+		$this->cache = new Cache($storage, self::$cacheKey);
 	}
 
 

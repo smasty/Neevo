@@ -9,29 +9,29 @@
  *
  */
 
-namespace Neevo;
+namespace Neevo\Observable;
 
 
 /**
- * Neevo observable interface.
+ * Neevo observable subject interface.
  * @author Smasty
  */
-interface IObservable {
+interface SubjectInterface {
 
 
 	/**
 	 * Attaches given observer to given event.
-	 * @param Observer $observer
+	 * @param ObserverInterface $observer
 	 * @param int $event
 	 */
-	public function attachObserver(IObserver $observer, $event);
+	public function attachObserver(ObserverInterface $observer, $event);
 
 
 	/**
 	 * Detaches given observer.
-	 * @param Observer $observer
+	 * @param ObserverInterface $observer
 	 */
-	public function detachObserver(IObserver $observer);
+	public function detachObserver(ObserverInterface $observer);
 
 
 	/**

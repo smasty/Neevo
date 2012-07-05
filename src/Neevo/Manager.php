@@ -11,12 +11,17 @@
 
 namespace Neevo;
 
+use Neevo\Cache\CacheInterface;
+use Neevo\Observable\ObserverInterface;
+use Neevo\Observable\SubjectInterface;
+use SplObjectStorage;
+
 
 /**
  * Core Neevo class.
  * @author Smasty
  */
-class Manager implements IObservable, IObserver {
+class Manager implements SubjectInterface, ObserverInterface {
 
 
 	/** @var string Default Neevo driver */
@@ -31,7 +36,7 @@ class Manager implements IObservable, IObserver {
 	/** @var Connection */
 	private $connection;
 
-	/** @var \SplObjectStorage */
+	/** @var SplObjectStorage */
 	private $observers;
 
 
@@ -70,12 +75,12 @@ class Manager implements IObservable, IObserver {
 	 * Configures Neevo and establish a connection.
 	 * Configuration can be different - see the API for your driver.
 	 * @param mixed $config Connection configuration.
-	 * @param ICache $cache Cache to use.
+	 * @param CacheInterface $cache Cache to use.
 	 * @throws NeevoException
 	 */
-	public function __construct($config, ICache $cache = null){
+	public function __construct($config, CacheInterface $cache = null){
 		$this->connection = new Connection($config, $cache);
-		$this->observers = new \SplObjectStorage;
+		$this->observers = new SplObjectStorage;
 		$this->attachObserver($this, self::QUERY);
 	}
 
@@ -184,11 +189,11 @@ class Manager implements IObservable, IObserver {
 	/**
 	 * Begins a transaction if supported.
 	 * @param string $savepoint
-	 * @return Neevo fluent interface
+	 * @return Manager fluent interface
 	 */
 	public function begin($savepoint = null){
 		$this->connection->getDriver()->beginTransaction($savepoint);
-		$this->notifyObservers(IObserver::BEGIN);
+		$this->notifyObservers(ObserverInterface::BEGIN);
 		return $this;
 	}
 
@@ -196,11 +201,11 @@ class Manager implements IObservable, IObserver {
 	/**
 	 * Commits statements in a transaction.
 	 * @param string $savepoint
-	 * @return Neevo fluent interface
+	 * @return Manager fluent interface
 	 */
 	public function commit($savepoint = null){
 		$this->connection->getDriver()->commit($savepoint);
-		$this->notifyObservers(IObserver::COMMIT);
+		$this->notifyObservers(ObserverInterface::COMMIT);
 		return $this;
 	}
 
@@ -208,21 +213,21 @@ class Manager implements IObservable, IObserver {
 	/**
 	 * Rollbacks changes in a transaction.
 	 * @param string $savepoint
-	 * @return Neevo fluent interface
+	 * @return Manager fluent interface
 	 */
 	public function rollback($savepoint = null){
 		$this->connection->getDriver()->rollback($savepoint);
-		$this->notifyObservers(IObserver::ROLLBACK);
+		$this->notifyObservers(ObserverInterface::ROLLBACK);
 		return $this;
 	}
 
 
 	/**
 	 * Attaches an observer for debugging.
-	 * @param IObserver $observer
+	 * @param ObserverInterface $observer
 	 * @param int $event Event to attach the observer to.
 	 */
-	public function attachObserver(IObserver $observer, $event){
+	public function attachObserver(ObserverInterface $observer, $event){
 		$this->observers->attach($observer, $event);
 		$this->connection->attachObserver($observer, $event);
 		$e = new NeevoException;
@@ -232,9 +237,9 @@ class Manager implements IObservable, IObserver {
 
 	/**
 	 * Detaches given observer.
-	 * @param IObserver $observer
+	 * @param ObserverInterface $observer
 	 */
-	public function detachObserver(IObserver $observer){
+	public function detachObserver(ObserverInterface $observer){
 		$this->connection->detachObserver($observer);
 		$this->observers->detach($observer);
 		$e = new NeevoException;
@@ -256,10 +261,10 @@ class Manager implements IObservable, IObserver {
 
 	/**
 	 * Receives update from observable subject.
-	 * @param IObservable $subject
+	 * @param SubjectInterface $subject
 	 * @param int $event Event type
 	 */
-	public function updateStatus(IObservable $subject, $event){
+	public function updateStatus(SubjectInterface $subject, $event){
 		$this->last = (string) $subject;
 		$this->queries++;
 	}

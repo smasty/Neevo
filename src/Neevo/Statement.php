@@ -11,6 +11,9 @@
 
 namespace Neevo;
 
+use InvalidArgumentException;
+use Traversable;
+
 
 /**
  * Class for data manipulation statements (INSERT, UPDATE, DELETE)
@@ -30,17 +33,17 @@ class Statement extends BaseStatement {
 	 * Creates UPDATE statement.
 	 * @param Connection $connection
 	 * @param string $table
-	 * @param array|\Traversable $data
+	 * @param array|Traversable $data
 	 * @return Statement fluent interface
 	 */
 	public static function createUpdate(Connection $connection, $table, $data){
-		if(!($data instanceof \Traversable || (is_array($data) && !empty($data))))
-			throw new \InvalidArgumentException('Data must be a non-empty array or Traversable.');
+		if(!($data instanceof Traversable || (is_array($data) && !empty($data))))
+			throw new InvalidArgumentException('Data must be a non-empty array or Traversable.');
 
 		$obj = new self($connection);
 		$obj->type = Manager::STMT_UPDATE;
 		$obj->source = $table;
-		$obj->values = $data instanceof \Traversable ? iterator_to_array($data) : $data;
+		$obj->values = $data instanceof Traversable ? iterator_to_array($data) : $data;
 		return $obj;
 	}
 
@@ -49,17 +52,17 @@ class Statement extends BaseStatement {
 	 * Creates INSERT statement.
 	 * @param Connection $connection
 	 * @param string $table
-	 * @param array|\Traversable $values
+	 * @param array|Traversable $values
 	 * @return Statement fluent interface
 	 */
 	public static function createInsert(Connection $connection, $table, array $values){
-		if(!($values instanceof \Traversable || (is_array($values) && !empty($values))))
-			throw new \InvalidArgumentException('Values must be a non-empty array or Traversable.');
+		if(!($values instanceof Traversable || (is_array($values) && !empty($values))))
+			throw new InvalidArgumentException('Values must be a non-empty array or Traversable.');
 
 		$obj = new self($connection);
 		$obj->type = Manager::STMT_INSERT;
 		$obj->source = $table;
-		$obj->values = $values instanceof \Traversable ? iterator_to_array($values) : $values;
+		$obj->values = $values instanceof Traversable ? iterator_to_array($values) : $values;
 		return $obj;
 	}
 
@@ -93,7 +96,7 @@ class Statement extends BaseStatement {
 
 	/**
 	 * Returns the ID generated in the last INSERT statement.
-	 * @return int|FALSE
+	 * @return int|bool
 	 * @throws NeevoException on non-INSERT statements.
 	 */
 	public function insertId(){

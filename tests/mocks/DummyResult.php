@@ -1,5 +1,7 @@
 <?php
 
+use Neevo\Drivers\DummyDriver;
+
 class DummyResult {
 
 
@@ -31,7 +33,7 @@ class DummyResult {
 	);
 
 
-	public function __construct($queryString, Neevo\Drivers\DummyDriver $driver){
+	public function __construct($queryString, DummyDriver $driver){
 		$this->queryString = $queryString;
 		$this->driver= $driver;
 		if(strtolower(substr($queryString, 0, 7)) == 'explain')

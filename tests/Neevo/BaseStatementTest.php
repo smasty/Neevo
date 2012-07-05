@@ -1,7 +1,11 @@
 <?php
 
+use Neevo\BaseStatement;
+use Neevo\Connection;
+use Neevo\Manager;
 
-class DummyStmt extends Neevo\BaseStatement {
+
+class DummyStmt extends BaseStatement {
 
 }
 
@@ -17,7 +21,7 @@ class BaseStatementTest extends PHPUnit_Framework_TestCase {
 
 
 	protected function setUp(){
-		$this->stmt = new DummyStmt(new Neevo\Connection(array(
+		$this->stmt = new DummyStmt(new Connection(array(
 					'driver' => 'Dummy'
 				)));
 	}
@@ -40,7 +44,7 @@ class BaseStatementTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testWhereValue(){
-		$this->stmt->where($f = 'two', $v = new DummyStmt(new Neevo\Connection('driver=Dummy')));
+		$this->stmt->where($f = 'two', $v = new DummyStmt(new Connection('driver=Dummy')));
 		$this->assertEquals(array(array(
 				'simple' => true,
 				'field' => $f,
@@ -52,12 +56,12 @@ class BaseStatementTest extends PHPUnit_Framework_TestCase {
 
 	public function testWhereModifiers(){
 		$this->stmt->where($e = 'one = %s AND two = %i AND three = %sub', $a[] = 'one', $a[] = 2,
-			$a[] = new DummyStmt(new Neevo\Connection('driver=Dummy')));
+			$a[] = new DummyStmt(new Connection('driver=Dummy')));
 		$this->assertEquals(array(array(
 				'simple' => false,
 				'expr' => $e,
 				'modifiers' => array('%s', '%i', '%sub'),
-				'types' => array(Neevo\Manager::TEXT, Neevo\Manager::INT, Neevo\Manager::SUBQUERY),
+				'types' => array(Manager::TEXT, Manager::INT, Manager::SUBQUERY),
 				'values' => $a,
 				'glue' => 'AND'
 			)), $this->stmt->getConditions());
@@ -153,7 +157,7 @@ class BaseStatementTest extends PHPUnit_Framework_TestCase {
 	public function testLimitOffset(){
 		$r = new ReflectionProperty('DummyStmt', 'type');
 		$r->setAccessible(true);
-		$r->setValue($this->stmt, Neevo\Manager::STMT_SELECT);
+		$r->setValue($this->stmt, Manager::STMT_SELECT);
 
 		$this->stmt->limit(5, 10);
 		$this->assertEquals(array(5, 10), $this->stmt->getLimit());

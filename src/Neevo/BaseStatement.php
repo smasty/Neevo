@@ -11,19 +11,27 @@
 
 namespace Neevo;
 
+use BadMethodCallException;
+use InvalidArgumentException;
+use Neevo\Observable\ObserverInterface;
+use Neevo\Observable\SubjectInterface;
+use RuntimeException;
+use SplObjectStorage;
+use Traversable;
+
 
 /**
  * Neevo statement abstract base ancestor.
  *
- * @method and() BaseStatement and($expr, $value = true)
- * @method or() BaseStatement or($expr, $value = true)
- * @method if() BaseStatement if($condition)
- * @method else() BaseStatement else()
- * @method end() BaseStatement end()
+ * @method BaseStatement and($expr, $value = true)
+ * @method BaseStatement or($expr, $value = true)
+ * @method BaseStatement if($condition)
+ * @method BaseStatement else()
+ * @method BaseStatement end()
  *
  * @author Smasty
  */
-abstract class BaseStatement implements IObservable {
+abstract class BaseStatement implements SubjectInterface {
 
 
 	/** @var string */
@@ -55,16 +63,16 @@ abstract class BaseStatement implements IObservable {
 
 	/** @var array Event type conversion table */
 	protected static $eventTable = array(
-		Manager::STMT_SELECT => IObserver::SELECT,
-		Manager::STMT_INSERT => IObserver::INSERT,
-		Manager::STMT_UPDATE => IObserver::UPDATE,
-		Manager::STMT_DELETE => IObserver::DELETE
+		Manager::STMT_SELECT => ObserverInterface::SELECT,
+		Manager::STMT_INSERT => ObserverInterface::INSERT,
+		Manager::STMT_UPDATE => ObserverInterface::UPDATE,
+		Manager::STMT_DELETE => ObserverInterface::DELETE
 	);
 
 	/** @var array */
 	protected $subqueries = array();
 
-	/** @var \SplObjectStorage */
+	/** @var SplObjectStorage */
 	protected $observers;
 
 	/** @var array */
@@ -77,7 +85,7 @@ abstract class BaseStatement implements IObservable {
 	 */
 	public function __construct(Connection $connection){
 		$this->connection = $connection;
-		$this->observers = new \SplObjectStorage;
+		$this->observers = new SplObjectStorage;
 	}
 
 
@@ -101,8 +109,8 @@ abstract class BaseStatement implements IObservable {
 	/**
 	 * @return BaseStatement fluent interface
 	 * @internal
-	 * @throws \BadMethodCallException
-	 * @throws \InvalidArgumentException
+	 * @throws BadMethodCallException
+	 * @throws InvalidArgumentException
 	 */
 	public function __call($name, $args){
 		$name = strtolower($name);
@@ -125,7 +133,7 @@ abstract class BaseStatement implements IObservable {
 
 			// Parameter counts
 			if(count($args) < 1 && $name == 'if')
-				throw new \InvalidArgumentException('Missing argument 1 for ' . __CLASS__ . "::$name().");
+				throw new InvalidArgumentException('Missing argument 1 for ' . __CLASS__ . "::$name().");
 
 			$conds = & $this->stmtConditions;
 			if($name == 'if')
@@ -137,7 +145,7 @@ abstract class BaseStatement implements IObservable {
 
 			return $this;
 		}
-		throw new \BadMethodCallException('Call to undefined method ' . __CLASS__ . "::$name()");
+		throw new BadMethodCallException('Call to undefined method ' . __CLASS__ . "::$name()");
 	}
 
 
@@ -149,12 +157,12 @@ abstract class BaseStatement implements IObservable {
 	 * Corresponding operator will be used.
 	 *
 	 * Accepts associative array in field => value form.
-	 * @param string|array|\Traversable $expr
+	 * @param string|array|Traversable $expr
 	 * @param mixed $value
 	 * @return BaseStatement fluent interface
 	 */
 	public function where($expr, $value = true){
-		if((is_array($expr) || $expr instanceof \Traversable) && $value === true){
+		if((is_array($expr) || $expr instanceof Traversable) && $value === true){
 			foreach($expr as $key => $val) $this->where($key, $val);
 			return $this;
 		}
@@ -200,7 +208,7 @@ abstract class BaseStatement implements IObservable {
 
 	/**
 	 * Defines order. More calls append rules.
-	 * @param string|array|\Traversable $rule
+	 * @param string|array|Traversable $rule
 	 * @param string $order Use constants - Manager::ASC, Manager::DESC
 	 * @return BaseStatement fluent interface
 	 */
@@ -210,7 +218,7 @@ abstract class BaseStatement implements IObservable {
 
 		$this->resetState();
 
-		if(is_array($rule) || $rule instanceof \Traversable){
+		if(is_array($rule) || $rule instanceof Traversable){
 			foreach($rule as $key => $val){
 				$this->order($key, $val);
 			}
@@ -256,7 +264,7 @@ abstract class BaseStatement implements IObservable {
 	/**
 	 * Prints out syntax highlighted statement.
 	 * @param bool $return
-	 * @return string|Neevo\BaseStatement fluent interface
+	 * @return string|BaseStatement fluent interface
 	 */
 	public function dump($return = false){
 		$sql = PHP_SAPI === 'cli'
@@ -291,7 +299,7 @@ abstract class BaseStatement implements IObservable {
 		$this->resultSet = $query;
 
 		$this->notifyObservers(isset($this->type)
-			? self::$eventTable[$this->type] : IObserver::QUERY);
+			? self::$eventTable[$this->type] : ObserverInterface::QUERY);
 
 		return $query;
 	}
@@ -313,7 +321,7 @@ abstract class BaseStatement implements IObservable {
 	 */
 	public function parse(){
 		if($this->hasCircularReferences($this))
-			throw new \RuntimeException('Circular reference found, aborting.');
+			throw new RuntimeException('Circular reference found, aborting.');
 
 		$this->connection->connect();
 
@@ -325,19 +333,19 @@ abstract class BaseStatement implements IObservable {
 
 	/**
 	 * Attaches given observer to given event.
-	 * @param IObserver $observer
+	 * @param ObserverInterface $observer
 	 * @param int $event
 	 */
-	public function attachObserver(IObserver $observer, $event){
+	public function attachObserver(ObserverInterface $observer, $event){
 		$this->observers->attach($observer, $event);
 	}
 
 
 	/**
 	 * Detaches given observer.
-	 * @param IObserver $observer
+	 * @param ObserverInterface $observer
 	 */
-	public function detachObserver(IObserver $observer){
+	public function detachObserver(ObserverInterface $observer){
 		$this->observers->detach($observer);
 	}
 

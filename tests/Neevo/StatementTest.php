@@ -1,5 +1,9 @@
 <?php
 
+use Neevo\Connection;
+use Neevo\Manager;
+use Neevo\Statement;
+
 
 /**
  * Tests for Neevo\Statement.
@@ -7,12 +11,12 @@
 class StatementTest extends PHPUnit_Framework_TestCase {
 
 
-	/** @var Neevo\Connection */
+	/** @var Connection */
 	private $connection;
 
 
 	protected function setUp(){
-		$this->connection = new Neevo\Connection(array(
+		$this->connection = new Connection(array(
 				'driver' => 'Dummy'
 			));
 	}
@@ -24,56 +28,56 @@ class StatementTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testCreateUpdate(){
-		$stmt = Neevo\Statement::createUpdate($this->connection, $s = 'table', $d = array('column' => 'value'));
+		$stmt = Statement::createUpdate($this->connection, $s = 'table', $d = array('column' => 'value'));
 		$this->assertEquals($d, $stmt->getValues());
 		$this->assertEquals($s, $stmt->getTable());
-		$this->assertEquals(Neevo\Manager::STMT_UPDATE, $stmt->getType());
+		$this->assertEquals(Manager::STMT_UPDATE, $stmt->getType());
 	}
 
 
 	public function testCreateInsert(){
-		$stmt = Neevo\Statement::createInsert($this->connection, $s = 'table', $d = array('column' => 'value'));
+		$stmt = Statement::createInsert($this->connection, $s = 'table', $d = array('column' => 'value'));
 		$this->assertEquals($d, $stmt->getValues());
 		$this->assertEquals($s, $stmt->getTable());
-		$this->assertEquals(Neevo\Manager::STMT_INSERT, $stmt->getType());
+		$this->assertEquals(Manager::STMT_INSERT, $stmt->getType());
 	}
 
 
 	public function testCreateDelete(){
-		$stmt = Neevo\Statement::createDelete($this->connection, $s = 'table');
+		$stmt = Statement::createDelete($this->connection, $s = 'table');
 		$this->assertEquals($s, $stmt->getTable());
-		$this->assertEquals(Neevo\Manager::STMT_DELETE, $stmt->getType());
+		$this->assertEquals(Manager::STMT_DELETE, $stmt->getType());
 	}
 
 
 	public function testRun(){
-		$stmt = Neevo\Statement::createDelete($this->connection, 'table');
+		$stmt = Statement::createDelete($this->connection, 'table');
 		$this->assertInstanceOf('DummyResult', $stmt->run());
 	}
 
 
 	public function testInsertId(){
-		$stmt = Neevo\Statement::createInsert($this->connection, 'table', array('column', 'value'));
+		$stmt = Statement::createInsert($this->connection, 'table', array('column', 'value'));
 		$this->assertEquals(4, $stmt->insertId());
 	}
 
 
 	public function testInsertIdException(){
 		$this->setExpectedException('Neevo\\NeevoException');
-		$stmt = Neevo\Statement::createDelete($this->connection, 'table');
+		$stmt = Statement::createDelete($this->connection, 'table');
 		$stmt->insertId();
 	}
 
 
 	public function testInsertIdNotSupported(){
-		$stmt = Neevo\Statement::createInsert($this->connection, 'table', array('column', 'value'));
+		$stmt = Statement::createInsert($this->connection, 'table', array('column', 'value'));
 		$this->connection->getDriver()->setError('insert-id');
 		$this->assertFalse($stmt->insertId());
 	}
 
 
 	public function testAffectedRows(){
-		$stmt = Neevo\Statement::createDelete($this->connection, 'table');
+		$stmt = Statement::createDelete($this->connection, 'table');
 		$this->assertEquals(1, $stmt->affectedRows());
 	}
 
@@ -81,7 +85,7 @@ class StatementTest extends PHPUnit_Framework_TestCase {
 
 	public function testAffectedRowsError(){
 		$this->connection->getDriver()->setError('affected-rows');
-		$stmt = Neevo\Statement::createDelete($this->connection, 'table');
+		$stmt = Statement::createDelete($this->connection, 'table');
 		$stmt->run();
 		$r = new ReflectionProperty($stmt, 'affectedRows');
 		$r->setAccessible(true);
@@ -90,7 +94,7 @@ class StatementTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testResetState(){
-		$stmt = Neevo\Statement::createDelete($this->connection, 'table');
+		$stmt = Statement::createDelete($this->connection, 'table');
 		$stmt->affectedRows();
 
 		$res = new ReflectionMethod($stmt, 'resetState');

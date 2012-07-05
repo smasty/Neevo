@@ -11,21 +11,21 @@
 
 namespace Neevo\Cache;
 
-use Neevo\ICache;
+use Memcache;
 
 
 /**
  * Memcache cache storage.
  * @author Smasty
  */
-class MemcacheStorage implements ICache {
+class MemcacheStorage implements CacheInterface {
 
 
-	/** @var \Memcache */
+	/** @var Memcache */
 	private $memcache;
 
 
-	public function __construct(\Memcache $memcache){
+	public function __construct(Memcache $memcache){
 		$this->memcache = $memcache;
 	}
 

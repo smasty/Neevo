@@ -1,5 +1,7 @@
 <?php
 
+use Neevo\NeevoException;
+
 
 /**
  * Tests for Neevo\NeevoException additional features.
@@ -8,7 +10,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testConstructor(){
-		$e = new Neevo\NeevoException($m = 'error', $c = 0, $s = 'SELECT * FROM error', $p = new Exception);
+		$e = new NeevoException($m = 'error', $c = 0, $s = 'SELECT * FROM error', $p = new Exception);
 		$this->assertEquals($m, $e->getMessage());
 		$this->assertEquals($c, $e->getCode());
 		$this->assertEquals($p, $e->getPrevious());
@@ -17,13 +19,13 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testToString(){
-		$e = new Neevo\NeevoException(null, 0, $sql = 'SELECT * FROM error');
+		$e = new NeevoException(null, 0, $sql = 'SELECT * FROM error');
 		$this->assertContains("\nSQL: $sql", (string) $e);
 	}
 
 
 	public function testObservable(){
-		$e = new Neevo\NeevoException;
+		$e = new NeevoException;
 		$observer = new DummyObserver;
 
 		$e->attachObserver($observer, $event = DummyObserver::EXCEPTION);

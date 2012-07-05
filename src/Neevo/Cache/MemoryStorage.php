@@ -11,15 +11,13 @@
 
 namespace Neevo\Cache;
 
-use Neevo\ICache;
-
 
 /**
  * Memory cache storage.
  * Default implementation of Neevo\ICache.
  * @author Smasty
  */
-class MemoryStorage implements ICache {
+class MemoryStorage implements CacheInterface {
 
 
 	/** @var array */

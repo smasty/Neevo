@@ -11,8 +11,18 @@
 
 namespace Neevo\Drivers;
 
-use Neevo,
-	Neevo\DriverException;
+use DateTime;
+use InvalidArgumentException;
+use Neevo\BaseStatement;
+use Neevo\Connection;
+use Neevo\DriverException;
+use Neevo\DriverInterface;
+use Neevo\ImplementationException;
+use Neevo\Manager;
+use Neevo\Parser;
+use PDO;
+use PDOException;
+use PDOStatement;
 
 
 /**
@@ -28,10 +38,10 @@ use Neevo,
  *
  * @author Smasty
  */
-class PDODriver extends Neevo\Parser implements Neevo\IDriver {
+class PDODriver extends Parser implements DriverInterface {
 
 
-	/** @var \PDO */
+	/** @var PDO */
 	private $resource;
 
 	/** @var string */
@@ -45,10 +55,10 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	 * Checks for required PHP extension.
 	 * @throws DriverException
 	 */
-	public function __construct(Neevo\BaseStatement $statement = null){
+	public function __construct(BaseStatement $statement = null){
 		if(!extension_loaded("pdo"))
 			throw new DriverException("Cannot instantiate Neevo PDO driver - PHP extension 'pdo' not loaded.");
-		if($statement instanceof Neevo\BaseStatement)
+		if($statement instanceof BaseStatement)
 			parent::__construct($statement);
 	}
 
@@ -59,7 +69,7 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	 * @throws DriverException
 	 */
 	public function connect(array $config){
-		Neevo\Connection::alias($config, 'resource', 'pdo');
+		Connection::alias($config, 'resource', 'pdo');
 
 		// Defaults
 		$defaults = array(
@@ -73,18 +83,18 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 		$config += $defaults;
 
 		// Connect
-		if($config['resource'] instanceof \PDO)
+		if($config['resource'] instanceof PDO)
 			$this->resource = $config['resource'];
 		else try{
-			$this->resource = new \PDO($config['dsn'], $config['username'], $config['password'], $config['options']);
-		} catch(\PDOException $e){
+			$this->resource = new PDO($config['dsn'], $config['username'], $config['password'], $config['options']);
+		} catch(PDOException $e){
 			throw new DriverException($e->getMessage(), $e->getCode());
 		}
 
 		if(!$this->resource)
 			throw new DriverException('Connection failed.');
 
-		$this->driverName = $this->resource->getAttribute(\PDO::ATTR_DRIVER_NAME);
+		$this->driverName = $this->resource->getAttribute(PDO::ATTR_DRIVER_NAME);
 	}
 
 
@@ -98,7 +108,7 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Frees memory used by given result set.
-	 * @param \PDOStatement $resultSet
+	 * @param PDOStatement $resultSet
 	 * @return bool
 	 */
 	public function freeResultSet($resultSet){
@@ -109,7 +119,7 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	/**
 	 * Executes given SQL statement.
 	 * @param string $queryString
-	 * @return \PDOStatement|bool
+	 * @return PDOStatement|bool
 	 * @throws DriverException
 	 */
 	public function runQuery($queryString){
@@ -176,23 +186,23 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Fetches row from given result set as an associative array.
-	 * @param \PDOStatement $resultSet
+	 * @param PDOStatement $resultSet
 	 * @return array
 	 */
 	public function fetch($resultSet){
-		return $resultSet->fetch(\PDO::FETCH_ASSOC);
+		return $resultSet->fetch(PDO::FETCH_ASSOC);
 	}
 
 
 	/**
 	 * Moves internal result pointer.
-	 * @param mysqli_result $resultSet
+	 * @param PDOStatement $resultSet
 	 * @param int
 	 * @return bool
-	 * @throws Neevo\ImplementationException
+	 * @throws ImplementationException
 	 */
 	public function seek($resultSet, $offset){
-		throw new Neevo\ImplementationException('Cannot seek on unbuffered result.');
+		throw new ImplementationException('Cannot seek on unbuffered result.');
 	}
 
 
@@ -207,9 +217,9 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Randomizes result order.
-	 * @param Neevo\BaseStatement $statement
+	 * @param BaseStatement $statement
 	 */
-	public function randomizeOrder(Neevo\BaseStatement $statement){
+	public function randomizeOrder(BaseStatement $statement){
 		switch($this->driverName){
 			case 'mysql':
 			case 'pgsql':
@@ -234,7 +244,7 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Returns the number of rows in the given result set.
-	 * @param \PDOStatement $resultSet
+	 * @param PDOStatement $resultSet
 	 * @return int
 	 */
 	public function getNumRows($resultSet){
@@ -256,17 +266,17 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function escape($value, $type){
 		switch($type){
-			case Neevo\Manager::BOOL:
-				return $this->resource->quote($value, \PDO::PARAM_BOOL);
+			case Manager::BOOL:
+				return $this->resource->quote($value, PDO::PARAM_BOOL);
 
-			case Neevo\Manager::TEXT:
-				return $this->resource->quote($value, \PDO::PARAM_STR);
+			case Manager::TEXT:
+				return $this->resource->quote($value, PDO::PARAM_STR);
 
-			case Neevo\Manager::IDENTIFIER:
+			case Manager::IDENTIFIER:
 				switch($this->driverName){
 					case 'mysql':
 						return str_replace('`*`', '*', '`' . str_replace('.', '`.`', str_replace('`', '``', $value)) . '`');
@@ -287,14 +297,14 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 						return $value;
 				}
 
-			case Neevo\Manager::BINARY:
-				return $this->resource->quote($value, \PDO::PARAM_LOB);
+			case Manager::BINARY:
+				return $this->resource->quote($value, PDO::PARAM_LOB);
 
-			case Neevo\Manager::DATETIME:
-				return ($value instanceof \DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
+			case Manager::DATETIME:
+				return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
 
 			default:
-				throw new \InvalidArgumentException('Unsupported data type.');
+				throw new InvalidArgumentException('Unsupported data type.');
 				break;
 		}
 	}
@@ -305,12 +315,12 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	 * @param mixed $value
 	 * @param string $type
 	 * @return mixed
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function unescape($value, $type){
-		if($type === Neevo\Manager::BINARY)
+		if($type === Manager::BINARY)
 			return $value;
-		throw new \InvalidArgumentException('Unsupported data type.');
+		throw new InvalidArgumentException('Unsupported data type.');
 	}
 
 
@@ -319,10 +329,10 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	 *
 	 * Not supported by all PDO drivers.
 	 * @param string $table
-	 * @throws Neevo\ImplementationException
+	 * @throws ImplementationException
 	 */
 	public function getPrimaryKey($table, $resultSet = null){
-		if($resultSet instanceof \PDOStatement){
+		if($resultSet instanceof PDOStatement){
 			$i = 0;
 			while($col = $resultSet->getColumnMeta($i++)){
 				if(in_array('primary_key', $col['flags']))
@@ -331,7 +341,7 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 		}
 		if(isset($primaryKey))
 			return $primaryKey;
-		throw new Neevo\ImplementationException;
+		throw new ImplementationException;
 	}
 
 
@@ -339,9 +349,9 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 	 * Returns types of columns in given result set.
 	 *
 	 * Not supported by all PDO drivers.
-	 * @param \PDOStatement $resultset
+	 * @param PDOStatement $resultset
 	 * @param string $table
-	 * @throws Neevo\ImplementationException
+	 * @throws ImplementationException
 	 */
 	public function getColumnTypes($resultSet, $table){
 		$types = array();
@@ -350,7 +360,7 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 			$types[$col['name']] = strtolower($col['native_type']);
 
 		if(empty($types))
-			throw new Neevo\ImplementationException;
+			throw new ImplementationException;
 		return $types;
 	}
 
@@ -416,7 +426,7 @@ class PDODriver extends Neevo\Parser implements Neevo\IDriver {
 
 	/**
 	 * Returns PDO instance.
-	 * @return \PDO
+	 * @return PDO
 	 */
 	public function getResource(){
 		return $this->resource;

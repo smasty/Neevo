@@ -2,23 +2,27 @@
 
 namespace Neevo\Drivers;
 
-use Neevo,
-	Neevo\DriverException;
+use DateTime;
+use InvalidArgumentException;
+use Neevo\BaseStatement;
+use Neevo\DriverInterface;
+use Neevo\Manager;
+use Neevo\Parser;
 
 /**
  * Dummy Neevo driver/parser.
  */
-class DummyParserDriver extends Neevo\Parser implements Neevo\IDriver {
+class DummyParserDriver extends Parser implements DriverInterface {
 
 
-	/** @var Neevo\BaseStatement */
+	/** @var BaseStatement */
 	protected $stmt;
 
 	/** @var array */
 	protected $clauses = array();
 
 
-	function __construct(Neevo\BaseStatement $statement = null){
+	function __construct(BaseStatement $statement = null){
 		if($statement !== null)
 			return parent::__construct($statement);
 	}
@@ -33,7 +37,7 @@ class DummyParserDriver extends Neevo\Parser implements Neevo\IDriver {
 	function fetch($resultSet){}
 	function seek($resultSet, $offset){}
 	function getInsertId(){}
-	function randomizeOrder(Neevo\BaseStatement $statement){}
+	function randomizeOrder(BaseStatement $statement){}
 	function getNumRows($resultSet){}
 	function getAffectedRows(){}
 	function getPrimaryKey($table){}
@@ -41,23 +45,23 @@ class DummyParserDriver extends Neevo\Parser implements Neevo\IDriver {
 
 	function escape($value, $type){
 		switch($type){
-			case Neevo\Manager::BOOL:
+			case Manager::BOOL:
 				return $value ? 'true' : 'false';
 
-			case Neevo\Manager::TEXT:
+			case Manager::TEXT:
 				return "'$value'";
 
-			case Neevo\Manager::IDENTIFIER:
+			case Manager::IDENTIFIER:
 				return "`$value`";
 
-			case Neevo\Manager::BINARY:
+			case Manager::BINARY:
 				return "bin:'$value'";
 
-			case Neevo\Manager::DATETIME:
-				return ($value instanceof \DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
+			case Manager::DATETIME:
+				return ($value instanceof DateTime) ? $value->format("'Y-m-d H:i:s'") : date("'Y-m-d H:i:s'", $value);
 
 			default:
-				throw new \InvalidArgumentException('Unsupported data type.');
+				throw new InvalidArgumentException('Unsupported data type.');
 				break;
 		}
 	}

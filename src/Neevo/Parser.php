@@ -11,6 +11,9 @@
 
 namespace Neevo;
 
+use DateTime;
+use Traversable;
+
 
 /**
  * Neevo\BaseStatement to SQL command parser.
@@ -211,12 +214,12 @@ class Parser {
 			} elseif($value instanceof Result){
 				$operator = ' IN ';
 				$value = $this->escapeValue($value, Manager::SUBQUERY);
-			} elseif(is_array($value) || $value instanceof \Traversable){ // field IN (array)
+			} elseif(is_array($value) || $value instanceof Traversable){ // field IN (array)
 				$value = ' IN ' . $this->escapeValue($value, Manager::ARR);
 			} elseif($value instanceof Literal){ // field = SQL literal
 				$operator = ' = ';
 				$value = $this->escapeValue($value, Manager::LITERAL);
-			} elseif($value instanceof \DateTime){ // field = DateTime
+			} elseif($value instanceof DateTime){ // field = DateTime
 				$operator = ' = ';
 				$value = $this->escapeValue($value, Manager::DATETIME);
 			} else{ // field = value
@@ -310,7 +313,7 @@ class Parser {
 
 	/**
 	 * Escapes given value.
-	 * @param mixed|array|\Traversable $value
+	 * @param mixed|array|Traversable $value
 	 * @param string|array|null $type
 	 * @return mixed|array
 	 */
@@ -329,7 +332,7 @@ class Parser {
 
 			// Value w/o type
 			else{
-				if($value instanceof \DateTime){
+				if($value instanceof DateTime){
 					return $this->escapeValue($value, Manager::DATETIME);
 				} elseif($value instanceof Literal){
 					return $value->value;
@@ -357,7 +360,7 @@ class Parser {
 			} elseif($type === Manager::SUBQUERY && $value instanceof Result){
 				return "(\n\t" . implode("\n\t", explode("\n", $value)) . "\n)";
 			} elseif($type === Manager::ARR){
-				$arr = $value instanceof \Traversable ? iterator_to_array($value) : (array) $value;
+				$arr = $value instanceof Traversable ? iterator_to_array($value) : (array) $value;
 				return '(' . implode(', ', $this->escapeValue($arr)) . ')';
 			} elseif($type === Manager::LITERAL){
 				return $value instanceof Literal ? $value->value : $value;

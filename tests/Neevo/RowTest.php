@@ -1,5 +1,9 @@
 <?php
 
+use Neevo\Connection;
+use Neevo\Result;
+use Neevo\Row;
+
 
 /**
  * Tests for Neevo\Row.
@@ -7,16 +11,16 @@
 class RowTest extends PHPUnit_Framework_TestCase {
 
 
-	/** @var Neevo\Result */
+	/** @var Result */
 	private $result;
 
-	/** @var Neevo\Row */
+	/** @var Row */
 	private $row;
 
 
 	protected function setUp(){
-		$this->result = new Neevo\Result(new Neevo\Connection('driver=Dummy'), 'author');
-		$this->row = new Neevo\Row($this->result->getConnection()->getDriver()->getRow(0), $this->result);
+		$this->result = new Result(new Connection('driver=Dummy'), 'author');
+		$this->row = new Row($this->result->getConnection()->getDriver()->getRow(0), $this->result);
 	}
 
 
