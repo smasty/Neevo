@@ -15,9 +15,5 @@
 		<testsuite name="Neevo Unit tests">
 			<directory suffix="Test.php">./Neevo</directory>
 		</testsuite>
-
-		<testsuite name="Neevo integration tests">
-			<directory suffix=".phpt">./integration</directory>
-		</testsuite>
 	</testsuites>
 </phpunit>
