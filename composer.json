@@ -1,6 +1,6 @@
 {
 	"name": "smasty/Neevo",
-	"description": "Neevo - Tiny open-source database layer for PHP",
+	"description": "Tiny but powerful database abstraction layer",
 	"keywords": ["database", "dbal"],
 	"homepage": "http://neevo.smasty.net",
 	"license": "MIT",
@@ -12,6 +12,9 @@
 	],
 	"require": {
 		"php": ">=5.3.0"
+	},
+	"suggest": {
+		"ext-memcache": "Install Memcache to use it as a cache storage."
 	},
 	"autoload": {
 		"psr-0": {"Neevo": "src/"}
