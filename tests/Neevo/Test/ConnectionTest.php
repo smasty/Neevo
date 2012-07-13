@@ -93,7 +93,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase {
 
 	public function testSetDriverUnreadableFile(){
 		// Prepare unreadable file
-		file_put_contents($file = __DIR__ . '/../../src/Neevo/Drivers/foo.php', $content = 'foo driver');
+		file_put_contents($file = __DIR__ . '/../../../src/Neevo/Drivers/foo.php', $content = 'foo driver');
 		$this->assertEquals($content, file_get_contents($file));
 		umask(0);
 		chmod($file, 0333);
