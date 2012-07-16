@@ -9,14 +9,14 @@
  *
  */
 
-namespace Neevo\Observable;
+namespace Neevo;
 
 
 /**
- * Neevo observable subject interface.
+ * Neevo observable interface.
  * @author Smasty
  */
-interface SubjectInterface {
+interface ObservableInterface {
 
 
 	/**

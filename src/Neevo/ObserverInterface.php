@@ -9,7 +9,7 @@
  *
  */
 
-namespace Neevo\Observable;
+namespace Neevo;
 
 
 /**
@@ -39,10 +39,10 @@ interface ObserverInterface {
 
 	/**
 	 * Receives update from observable subject.
-	 * @param SubjectInterface $subject
+	 * @param ObservableInterface $subject
 	 * @param int $event Event type
 	 */
-	public function updateStatus(SubjectInterface $subject, $event);
+	public function updateStatus(ObservableInterface $subject, $event);
 
 
 }

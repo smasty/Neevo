@@ -9,8 +9,8 @@
  *
  */
 
-use Neevo\Observable\ObserverInterface;
-use Neevo\Observable\SubjectInterface;
+use Neevo\ObservableInterface;
+use Neevo\ObserverInterface;
 
 
 /**
@@ -22,7 +22,7 @@ class DummyObserver implements ObserverInterface {
 	private $notified = false;
 
 
-	public function updateStatus(SubjectInterface $observable, $event){
+	public function updateStatus(ObservableInterface $observable, $event){
 		$this->notified = $event;
 	}
 

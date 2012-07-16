@@ -13,8 +13,6 @@ namespace Neevo;
 
 use BadMethodCallException;
 use InvalidArgumentException;
-use Neevo\Observable\ObserverInterface;
-use Neevo\Observable\SubjectInterface;
 use RuntimeException;
 use SplObjectStorage;
 use Traversable;
@@ -31,7 +29,7 @@ use Traversable;
  *
  * @author Smasty
  */
-abstract class BaseStatement implements SubjectInterface {
+abstract class BaseStatement implements ObservableInterface {
 
 
 	/** @var string */

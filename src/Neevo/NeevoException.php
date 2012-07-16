@@ -12,8 +12,6 @@
 namespace Neevo;
 
 use Exception;
-use Neevo\Observable\ObserverInterface;
-use Neevo\Observable\SubjectInterface;
 use SplObjectStorage;
 
 
@@ -21,7 +19,7 @@ use SplObjectStorage;
  * Main Neevo exception.
  * @author Smasty
  */
-class NeevoException extends Exception implements SubjectInterface {
+class NeevoException extends Exception implements ObservableInterface {
 
 
 	/** @var string */

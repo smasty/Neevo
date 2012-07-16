@@ -14,8 +14,8 @@ namespace Neevo\Nette;
 use Exception;
 use Neevo\Manager;
 use Neevo\NeevoException;
-use Neevo\Observable\ObserverInterface;
-use Neevo\Observable\SubjectInterface;
+use Neevo\ObservableInterface;
+use Neevo\ObserverInterface;
 use Neevo\Result;
 use Nette\Database\Helpers;
 use Nette\Diagnostics\BlueScreen;
@@ -55,10 +55,10 @@ class DebugPanel implements ObserverInterface, IBarPanel {
 
 	/**
 	 * Receives update from observable subject.
-	 * @param SubjectInterface $subject
+	 * @param ObservableInterface $subject
 	 * @param int $event
 	 */
-	public function updateStatus(SubjectInterface $subject, $event){
+	public function updateStatus(ObservableInterface $subject, $event){
 		$source = null;
 		$path = realpath(__DIR__ . '/../../');
 		foreach(debug_backtrace(false) as $t){

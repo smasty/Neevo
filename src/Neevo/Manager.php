@@ -12,8 +12,6 @@
 namespace Neevo;
 
 use Neevo\Cache\StorageInterface;
-use Neevo\Observable\ObserverInterface;
-use Neevo\Observable\SubjectInterface;
 use SplObjectStorage;
 
 
@@ -21,7 +19,7 @@ use SplObjectStorage;
  * Core Neevo class.
  * @author Smasty
  */
-class Manager implements SubjectInterface, ObserverInterface {
+class Manager implements ObservableInterface, ObserverInterface {
 
 
 	/** @var string Default Neevo driver */
@@ -260,10 +258,10 @@ class Manager implements SubjectInterface, ObserverInterface {
 
 	/**
 	 * Receives update from observable subject.
-	 * @param SubjectInterface $subject
+	 * @param ObservableInterface $subject
 	 * @param int $event Event type
 	 */
-	public function updateStatus(SubjectInterface $subject, $event){
+	public function updateStatus(ObservableInterface $subject, $event){
 		$this->last = (string) $subject;
 		$this->queries++;
 	}

@@ -13,11 +13,9 @@ namespace Neevo;
 
 use ArrayAccess;
 use InvalidArgumentException;
-use Neevo\Cache\StorageInterface;
 use Neevo\Cache\MemoryStorage;
+use Neevo\Cache\StorageInterface;
 use Neevo\DriverInterface;
-use Neevo\Observable\ObserverInterface;
-use Neevo\Observable\SubjectInterface;
 use PDO;
 use ReflectionClass;
 use ReflectionException;
@@ -38,7 +36,7 @@ use Traversable;
  *
  * @author Smasty
  */
-class Connection implements SubjectInterface, ArrayAccess {
+class Connection implements ObservableInterface, ArrayAccess {
 
 
 	/** @var array */
