@@ -1,7 +1,7 @@
-This namespace provides tools to optimize experience when using Neevo along
-with Nette Framework. It will register Neevo as a service to a DI Container.
-It will add a panel to DebugBar showing performed queries and a panel to
-Bluescreen with SQL query in case of NeevoException.
+This namespace provides tools to optimize Neevo for use in
+a Nette Framework application. It will register Neevo as a service to
+the DI Container, add a panel to DebugBar showing performed queries
+and a panel to Bluescreen with SQL query in case of NeevoException.
 It also provides an adapter for Nette cache storage system.
 
 Only Nette Framework 2.0 and above PHP 5.3 packages are supported.
@@ -9,16 +9,18 @@ Only Nette Framework 2.0 and above PHP 5.3 packages are supported.
 Instructions
 ============
 
-1.  In your Nette Framework config file (e.g. `app/config/config.neon`),
-    in `services` section, add the following service definition:
+1.  Register the Neevo compiler extension in your application bootstrap
+    (e.g. `app/bootstrap.php`):
 
-		services:
-			...
-			neevo: Neevo\Nette\Factory::createService(%database%)
+	```php
+	<?php
+	$configurator->onCompile[] = function($configurator, $compiler){
+		$compiler->addExtension('neevo', new Neevo\Nette\Extension);
+	};
+	```
 
-
-2.  In the `parameters` section, add another section called `database`.
-    That is the place for all your Neevo configuration, for example:
+2.  Add a new section `neevo` to your config file (e.g. `app/config/config.neon`)
+    and place all your Neevo configuration there, for example:
 
 		database:
 			driver: MySQLi
@@ -29,3 +31,6 @@ Instructions
 
     `explain` option denotes whether or not you want to run EXPLAIN on all
     performed `SELECT` queries for debugging purposes. Defaults to `yes`.
+
+
+3.  There is no step three.

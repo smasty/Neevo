@@ -17,8 +17,8 @@ use Neevo\NeevoException;
 use Neevo\ObservableInterface;
 use Neevo\ObserverInterface;
 use Neevo\Result;
-use Nette\Database\Helpers;
 use Nette\Diagnostics\BlueScreen;
+use Nette\Diagnostics\Helpers;
 use Nette\Diagnostics\IBarPanel;
 
 
@@ -45,11 +45,42 @@ class DebugPanel implements ObserverInterface, IBarPanel {
 
 
 	/**
-	 * Do not call directly, use static method register().
+	 * @return bool
+	 */
+	public function getExplain(){
+		return $this->explain;
+	}
+
+
+	/**
 	 * @param bool $explain
 	 */
-	public function __construct($explain){
+	public function setExplain($explain){
 		$this->explain = (bool) $explain;
+	}
+
+
+	/**
+	 * @return array
+	 */
+	public function getTickets(){
+		return $this->tickets;
+	}
+
+
+	/**
+	 * @return int
+	 */
+	public function getNumQueries(){
+		return $this->numQueries;
+	}
+
+
+	/**
+	 * @return int
+	 */
+	public function getTotalTime(){
+		return $this->totalTime;
 	}
 
 

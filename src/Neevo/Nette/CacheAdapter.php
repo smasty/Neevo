@@ -23,19 +23,17 @@ use Nette\Caching\IStorage;
 class CacheAdapter implements StorageInterface {
 
 
-	/** @var string */
-	public static $cacheKey = 'Neevo.Cache';
-
 	/** @var Cache */
 	private $cache;
 
 
 	/**
 	 * Creates the cache adapter.
+	 * @param string $cacheKey Generated from service name
 	 * @param IStorage $storage
 	 */
-	public function __construct(IStorage $storage){
-		$this->cache = new Cache($storage, self::$cacheKey);
+	public function __construct($cacheKey, IStorage $storage){
+		$this->cache = new Cache($storage, $cacheKey);
 	}
 
 
