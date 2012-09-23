@@ -41,7 +41,7 @@ class Extension extends CompilerExtension {
 		$panel = $container->addDefinition($this->prefix('panel'))
 			->setClass('Neevo\Nette\DebugPanel')
 			->addSetup('$service->setExplain(?)', !$container->parameters['productionMode'])
-			->addSetup('Nette\Diagnostics\Debugger::$bar->addPanel(?)', array('@self'))
+			->addSetup('Nette\Diagnostics\Debugger::$bar->addPanel(?, ?)', array('@self', strtr('.', '-', $this->prefix('panel'))))
 			->addSetup('Nette\Diagnostics\Debugger::$blueScreen->addPanel(?)', array(array('@self', 'renderException')));
 
 		$manager->addSetup('$service->attachObserver(?, ?)', array($panel, $panelEvents));
