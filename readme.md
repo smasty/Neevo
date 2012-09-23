@@ -26,8 +26,8 @@ And much more...
 Documentation
 -------------
 
-Documentation for Neevo is available online: http://neevo.smasty.net/documentation.
-Public API reference can be found on http://neevo.smasty.net/api/.
+- Documentation for Neevo is available online: http://neevo.smasty.net/documentation.
+- Public API reference can be found on http://neevo.smasty.net/api/.
 
 
 ---------
