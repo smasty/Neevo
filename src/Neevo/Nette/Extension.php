@@ -37,7 +37,7 @@ class Extension extends CompilerExtension {
 
 		// Cache
 		$container->addDefinition($this->prefix($c = 'cache'))
-			->setClass('Neevo\Nette\CacheAdapter', array('...', ucfirst($this->prefix($c))));
+			->setClass('Neevo\Nette\CacheAdapter', array(ucfirst($this->prefix($c))));
 
 		// Manager
 		$manager = $container->addDefinition($this->prefix('manager'))
