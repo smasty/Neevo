@@ -27,6 +27,8 @@ use Nette\Diagnostics\IBarPanel;
  */
 class DebugPanel implements ObserverInterface, IBarPanel {
 
+	/** @var string */
+	private $name;
 
 	/** @var array */
 	private $tickets = array();
@@ -42,6 +44,14 @@ class DebugPanel implements ObserverInterface, IBarPanel {
 
 	/** @var bool */
 	private $explain = true;
+
+
+	/**
+	 * @param string $name
+	 */
+	public function __construct($name){
+		$this->name = $name;
+	}
 
 
 	/**
@@ -151,10 +161,11 @@ class DebugPanel implements ObserverInterface, IBarPanel {
 	 * @return string
 	 */
 	public function getTab(){
+		$name = $this->name;
 		$queries = $this->numQueries;
 		$time = $this->totalTime;
 		ob_start();
-		include_once __DIR__ . '/templates/DebugPanel.tab.phtml';
+		include __DIR__ . '/templates/DebugPanel.tab.phtml';
 		return ob_get_clean();
 	}
 
@@ -167,12 +178,13 @@ class DebugPanel implements ObserverInterface, IBarPanel {
 		if(!$this->numQueries)
 			return '';
 
+		$name = $this->name;
 		$tickets = $this->tickets;
 		$totalTime = $this->totalTime;
 		$numQueries = $this->numQueries;
 
 		ob_start();
-		include_once __DIR__ . '/templates/DebugPanel.panel.phtml';
+		include __DIR__ . '/templates/DebugPanel.panel.phtml';
 		return ob_get_clean();
 	}
 

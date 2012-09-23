@@ -25,29 +25,24 @@ class Extension extends CompilerExtension {
 		$container = $this->getContainerBuilder();
 		$config = $this->getConfig();
 
-		// Config
-		$explain = isset($config['explain'])
-			? $config['explain']
-			: !$container->parameters['productionMode'];
-		unset($config['explain']);
-
 		$panelEvents = $container->parameters['productionMode']
 			? DebugPanel::EXCEPTION
 			: DebugPanel::QUERY + DebugPanel::EXCEPTION;
 
 		// Cache
-		$container->addDefinition($this->prefix($c = 'cache'))
-			->setClass('Neevo\Nette\CacheAdapter', array(ucfirst($this->prefix(ucfirst($c)))));
+		$cache = $container->addDefinition($this->prefix($c = 'cache'))
+			->setClass('Neevo\Nette\CacheAdapter', array(ucfirst($this->prefix($c))));
 
 		// Manager
 		$manager = $container->addDefinition($this->prefix('manager'))
-			->setClass('Neevo\Manager', array($config));
+			->setClass('Neevo\Manager', array($config, $this->prefix('@cache')));
 
 		// Panel
+		$panelName = 'Neevo-Nette-DebugPanel-' . ucfirst($this->name);
 		$panel = $container->addDefinition($this->prefix('panel'))
-			->setClass('Neevo\Nette\DebugPanel')
-			->addSetup('$service->setExplain(?)', $explain)
-			->addSetup('Nette\Diagnostics\Debugger::$bar->addPanel(?)', array('@self'))
+			->setClass('Neevo\Nette\DebugPanel', array(ucfirst($this->name)))
+			->addSetup('$service->setExplain(?)', !$container->parameters['productionMode'])
+			->addSetup('Nette\Diagnostics\Debugger::$bar->addPanel(?, ?)', array('@self', $panelName))
 			->addSetup('Nette\Diagnostics\Debugger::$blueScreen->addPanel(?)', array(array('@self', 'renderException')));
 
 		$manager->addSetup('$service->attachObserver(?, ?)', array($panel, $panelEvents));
