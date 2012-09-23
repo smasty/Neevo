@@ -36,12 +36,12 @@ class Extension extends CompilerExtension {
 			: DebugPanel::QUERY + DebugPanel::EXCEPTION;
 
 		// Cache
-		$container->addDefinition($this->prefix($c = 'cache'))
+		$cache = $container->addDefinition($this->prefix($c = 'cache'))
 			->setClass('Neevo\Nette\CacheAdapter', array(ucfirst($this->prefix($c))));
 
 		// Manager
 		$manager = $container->addDefinition($this->prefix('manager'))
-			->setClass('Neevo\Manager', array($config, $this->prefix($c)));
+			->setClass('Neevo\Manager', array($config, $this->prefix('@cache')));
 
 		// Panel
 		$panel = $container->addDefinition($this->prefix('panel'))
