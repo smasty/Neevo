@@ -38,10 +38,11 @@ class Extension extends CompilerExtension {
 			->setClass('Neevo\Manager', array($config, $this->prefix('@cache')));
 
 		// Panel
+		$panelName = 'Neevo-Nette-DebugPanel-' . ucfirst($this->name);
 		$panel = $container->addDefinition($this->prefix('panel'))
-			->setClass('Neevo\Nette\DebugPanel')
+			->setClass('Neevo\Nette\DebugPanel', array(ucfirst($this->name)))
 			->addSetup('$service->setExplain(?)', !$container->parameters['productionMode'])
-			->addSetup('Nette\Diagnostics\Debugger::$bar->addPanel(?, ?)', array('@self', strtr('.', '-', $this->prefix('panel'))))
+			->addSetup('Nette\Diagnostics\Debugger::$bar->addPanel(?, ?)', array('@self', $panelName))
 			->addSetup('Nette\Diagnostics\Debugger::$blueScreen->addPanel(?)', array(array('@self', 'renderException')));
 
 		$manager->addSetup('$service->attachObserver(?, ?)', array($panel, $panelEvents));

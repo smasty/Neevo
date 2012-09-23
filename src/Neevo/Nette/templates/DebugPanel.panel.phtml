@@ -1,9 +1,9 @@
 <style>
-#nette-debug-panel-Neevo-Nette-DebugPanel td.sql{background:white !important;min-width:200px}
-#nette-debug-panel-Neevo-Nette-DebugPanel td.sql a{font-size:.8em}
-#nette-debug-panel-Neevo-Nette-DebugPanel tr table{margin:8px 0;max-height:150px;overflow:auto}
+#nette-debug-panel-Neevo-Nette-DebugPanel-<?php echo $name ?> td.sql{background:white !important;min-width:200px}
+#nette-debug-panel-Neevo-Nette-DebugPanel-<?php echo $name ?> td.sql a{font-size:.8em}
+#nette-debug-panel-Neevo-Nette-DebugPanel-<?php echo $name ?> tr table{margin:8px 0;max-height:150px;overflow:auto}
 </style>
-<h1>Queries: <?php echo $numQueries; if($totalTime) printf(', time: %0.3f ms', $totalTime * 1000) ?></h1>
+<h1><?php echo $name ?>: <?php echo $numQueries . ($numQueries === 1 ? ' query' : ' queries'); if($totalTime) printf(', %0.3f ms', $totalTime * 1000) ?></h1>
 <div class="nette-inner">
 <table>
 <tr>
@@ -17,14 +17,14 @@
 		<?php printf('%0.3f', $ticket['time'] * 1000);
 		if(isset($ticket['explain'])): ?>
 			<br/>
-			<a href='#' class='nette-toggler' rel='#nette-Neevo-Nette-DebugPanel-row-<?php echo ++$i ?>'>explain&nbsp;&#x25ba;</a>
+			<a href='#' class='nette-toggler' rel='#nette-Neevo-Nette-DebugPanel-<?php echo "$name-row-" . ++$i ?>'>explain&nbsp;&#x25ba;</a>
 		<?php endif ?>
 	</td>
 	<td class="sql">
 		<?php echo Neevo\Manager::highlightSql($ticket['sql']);
 		echo Nette\Diagnostics\Helpers::editorLink($ticket['source'][0], $ticket['source'][1]);
 		if(isset($ticket['explain'])): ?>
-			<table id="nette-Neevo-Nette-DebugPanel-row-<?php echo $i ?>" class="nette-collapsed">
+			<table id="nette-Neevo-Nette-DebugPanel-<?php echo "$name-row-$i" ?>" class="nette-collapsed">
 				<tr>
 					<th><?php echo implode('</th><th>', array_keys($ticket['explain'][0])) ?></th>
 				</tr>
