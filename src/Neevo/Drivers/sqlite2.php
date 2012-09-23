@@ -105,6 +105,8 @@ class SQLite2Driver extends Parser implements DriverInterface {
 		// Connect
 		if(is_resource($config['resource']))
 			$connection = $config['resource'];
+		elseif(!isset($config['database']))
+			throw new DriverException("No database file selected.");
 		elseif($config['persistent'])
 			$connection = @sqlite_popen($config['database'], 0666, $error);
 		else

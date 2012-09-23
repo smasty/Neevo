@@ -100,6 +100,8 @@ class SQLite3Driver extends Parser implements DriverInterface {
 		// Connect
 		if($config['resource'] instanceof SQLite3)
 			$connection = $config['resource'];
+		elseif(!isset($config['database']))
+			throw new DriverException("No database file selected.");
 		else{
 			try{
 				$connection = new SQLite3($config['database']);
@@ -126,7 +128,8 @@ class SQLite3Driver extends Parser implements DriverInterface {
 	 * Closes the connection.
 	 */
 	public function closeConnection(){
-		$this->resource->close();
+		if($this->resource instanceof SQLite3)
+			$this->resource->close();
 	}
 
 

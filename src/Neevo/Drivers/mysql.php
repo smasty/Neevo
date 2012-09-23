@@ -100,7 +100,7 @@ class MySQLDriver extends Parser implements DriverInterface {
 			throw new DriverException("Connection to host '$host' failed.");
 
 		// Select DB
-		if($config['database']){
+		if(isset($config['database'])){
 			$db = mysql_select_db($config['database']);
 			if(!$db)
 				throw new DriverException("Could not select database '$config[database]'.");

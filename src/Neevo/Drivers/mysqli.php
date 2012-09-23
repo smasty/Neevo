@@ -80,6 +80,7 @@ class MySQLiDriver extends Parser implements DriverInterface {
 			'charset' => 'utf8',
 			'username' => ini_get('mysqli.default_user'),
 			'password' => ini_get('mysqli.default_pw'),
+			'database' => '',
 			'socket' => ini_get('mysqli.default_socket'),
 			'port' => ini_get('mysqli.default_port'),
 			'host' => ini_get('mysqli.default_host'),
