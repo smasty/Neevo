@@ -41,16 +41,16 @@ class Extension extends CompilerExtension {
 
 		// Manager
 		$manager = $container->addDefinition($this->prefix('manager'))
-			->setClass('Neevo\Manager', array($config, $this->prefix('@cache')));
+			->setClass('Neevo\Manager', array($config, $this->prefix("@$c")));
 
 		// Panel
 		$panel = $container->addDefinition($this->prefix('panel'))
 			->setClass('Neevo\Nette\DebugPanel')
-			->addSetup('$service->setExplain(?)', $explain)
+			->addSetup('setExplain(?)', $explain)
 			->addSetup('Nette\Diagnostics\Debugger::$bar->addPanel(?)', array('@self'))
 			->addSetup('Nette\Diagnostics\Debugger::$blueScreen->addPanel(?)', array(array('@self', 'renderException')));
 
-		$manager->addSetup('$service->attachObserver(?, ?)', array($panel, $panelEvents));
+		$manager->addSetup('attachObserver(?, ?)', array($panel, $panelEvents));
 	}
 
 
