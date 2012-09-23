@@ -25,12 +25,6 @@ class Extension extends CompilerExtension {
 		$container = $this->getContainerBuilder();
 		$config = $this->getConfig();
 
-		// Config
-		$explain = isset($config['explain'])
-			? $config['explain']
-			: !$container->parameters['productionMode'];
-		unset($config['explain']);
-
 		$panelEvents = $container->parameters['productionMode']
 			? DebugPanel::EXCEPTION
 			: DebugPanel::QUERY + DebugPanel::EXCEPTION;
@@ -46,7 +40,7 @@ class Extension extends CompilerExtension {
 		// Panel
 		$panel = $container->addDefinition($this->prefix('panel'))
 			->setClass('Neevo\Nette\DebugPanel')
-			->addSetup('$service->setExplain(?)', $explain)
+			->addSetup('$service->setExplain(?)', !$container->parameters['productionMode'])
 			->addSetup('Nette\Diagnostics\Debugger::$bar->addPanel(?)', array('@self'))
 			->addSetup('Nette\Diagnostics\Debugger::$blueScreen->addPanel(?)', array(array('@self', 'renderException')));
 
