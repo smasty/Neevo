@@ -49,7 +49,7 @@ class DebugPanel implements ObserverInterface, IBarPanel {
 	/**
 	 * @param string $name
 	 */
-	public function __construct($name){
+	public function __construct($name = 'Default'){
 		$this->name = $name;
 	}
 
