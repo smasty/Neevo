@@ -41,7 +41,7 @@ class Extension extends CompilerExtension {
 
 		// Manager
 		$manager = $container->addDefinition($this->prefix('manager'))
-			->setClass('Neevo\Manager', array($config));
+			->setClass('Neevo\Manager', array($config, $this->prefix($c)));
 
 		// Panel
 		$panel = $container->addDefinition($this->prefix('panel'))
