@@ -29,10 +29,10 @@ class CacheAdapter implements StorageInterface {
 
 	/**
 	 * Creates the cache adapter.
-	 * @param string $cacheKey Generated from service name
 	 * @param IStorage $storage
+	 * @param string $cacheKey Generated from service name
 	 */
-	public function __construct($cacheKey, IStorage $storage){
+	public function __construct(IStorage $storage, $cacheKey){
 		$this->cache = new Cache($storage, $cacheKey);
 	}
 

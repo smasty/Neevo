@@ -20,17 +20,12 @@ Instructions
 	```
 
 2.  Add a new section `neevo` to your config file (e.g. `app/config/config.neon`)
-    and place all your Neevo configuration there, for example:
+    and place there your Neevo configuration:
 
-		database:
+		neevo:
 			driver: MySQLi
 			username: root
 			password: ****
 			database: my_database
-			explain: yes
-
-    `explain` option denotes whether or not you want to run EXPLAIN on all
-    performed `SELECT` queries for debugging purposes. Defaults to `yes`.
-
 
 3.  There is no step three.
