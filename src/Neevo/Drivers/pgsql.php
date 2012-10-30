@@ -283,9 +283,9 @@ class PgSQLDriver implements DriverInterface {
 	 * @return string
 	 */
 	public function getPrimaryKey($table){
-		$def = $this->fetch(
-			$this->runQuery("SELECT indexdef FROM pg_indexes WHERE indexname = '{$table}_pkey'")
-		);
+		$def = $this->fetch($this->runQuery("SELECT indexdef FROM pg_indexes WHERE indexname = '{$table}_pkey'"));
+		if(!$def)
+			return false;
 		$def = reset($def);
 		if(preg_match("~{$table}_pkey\s+ON\s+{$table}.*\((\w+).*\)~i", $def, $matches))
 			return $matches[1];
