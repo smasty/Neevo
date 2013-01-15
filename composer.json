@@ -1,5 +1,5 @@
 {
-	"name": "smasty/Neevo",
+	"name": "smasty/neevo",
 	"description": "Tiny but powerful database abstraction layer",
 	"keywords": ["database", "dbal"],
 	"homepage": "http://neevo.smasty.net",
