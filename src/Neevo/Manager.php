@@ -39,7 +39,7 @@ class Manager implements ObservableInterface, ObserverInterface {
 
 
 	// Neevo version
-	const VERSION = '2.2.1';
+	const VERSION = '2.3.0';
 
 	// Data types
 	const BOOL = 'b',
