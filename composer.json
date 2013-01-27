@@ -17,6 +17,7 @@
 		"phpunit/phpunit": "~3.7@dev"
 	},
 	"suggest": {
+		"smasty/neevo-nette-ext": "Neevo extension for Nette Framework.",
 		"ext-memcache": "Install Memcache to use it as a cache storage."
 	},
 	"autoload": {
