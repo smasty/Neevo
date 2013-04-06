@@ -408,7 +408,7 @@ class PDODriver extends Parser implements DriverInterface {
 				if((int) $limit > 0){
 					$sql .= "\nLIMIT " . (int) $limit;
 					if((int) $offset > 0)
-					$sql .= ' OFFSET ' . (int) $offset;
+						$sql .= ' OFFSET ' . (int) $offset;
 				}
 				return $sql;
 
