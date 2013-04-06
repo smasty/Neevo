@@ -12,6 +12,7 @@
 namespace Neevo;
 
 use Countable;
+use Exception;
 use Iterator;
 use OutOfRangeException;
 use SeekableIterator;
@@ -41,13 +42,28 @@ class ResultIterator implements Iterator, Countable, SeekableIterator {
 
 	/**
 	 * Rewinds the iterator.
-	 * Force execution for future iterations.
+	 * For future iterations seeks if possible, clones otherwise.
 	 */
 	public function rewind(){
-		if($this->row !== null)
-			$this->result = clone $this->result;
-		$this->pointer = 0;
-		$this->row = $this->result->fetch();
+		try{
+			$count = count($this);
+		} catch(DriverException $e){
+			$count = -1;
+		}
+		if($this->row !== null && $count > 0){
+			try{
+				$this->seek(0);
+			} catch(DriverException $e){
+				$clone = clone $this->result;
+				$this->result->__destruct();
+				$this->result = $clone;
+				$this->pointer = 0;
+				$this->row = $this->result->fetch();
+			}
+		} else{
+			$this->pointer = 0;
+			$this->row = $this->result->fetch();
+		}
 	}
 
 

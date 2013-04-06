@@ -52,6 +52,9 @@ class Result extends BaseStatement implements IteratorAggregate, Countable {
 	/** @var string */
 	private $rowClass = 'Neevo\\Row';
 
+	/** @var ResultIterator */
+	private $iterator;
+
 
 	/**
 	 * Creates SELECT statement.
@@ -553,7 +556,9 @@ class Result extends BaseStatement implements IteratorAggregate, Countable {
 	 * @return ResultIterator
 	 */
 	public function getIterator(){
-		return new ResultIterator($this);
+		if(!isset($this->iterator))
+			$this->iterator = new ResultIterator($this);
+		return $this->iterator;
 	}
 
 
