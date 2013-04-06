@@ -15,7 +15,6 @@ use DateTime;
 use InvalidArgumentException;
 use mysqli;
 use mysqli_result;
-use mysqli_result as mysqli_result2;
 use Neevo\BaseStatement;
 use Neevo\DriverException;
 use Neevo\DriverInterface;
@@ -45,7 +44,7 @@ use Neevo\Parser;
 class MySQLiDriver extends Parser implements DriverInterface {
 
 
-	/** @var mysqli_result2\mysqli_result */
+	/** @var mysqli_result */
 	private $resource;
 
 	/** @var bool */
@@ -120,18 +119,19 @@ class MySQLiDriver extends Parser implements DriverInterface {
 
 	/**
 	 * Frees memory used by given result set.
-	 * @param mysqli_result2\mysqli_result $resultSet
+	 * @param mysqli_result $resultSet
 	 * @return bool
 	 */
 	public function freeResultSet($resultSet){
-		return true;
+		if($resultSet instanceof mysqli_result)
+			$resultSet->free();
 	}
 
 
 	/**
 	 * Executes given SQL statement.
 	 * @param string $queryString
-	 * @return mysqli_result2\mysqli_result|bool
+	 * @return mysqli_result|bool
 	 * @throws DriverException
 	 */
 	public function runQuery($queryString){
@@ -177,7 +177,7 @@ class MySQLiDriver extends Parser implements DriverInterface {
 
 	/**
 	 * Fetches row from given result set as an associative array.
-	 * @param mysqli_result2\mysqli_result $resultSet
+	 * @param mysqli_result $resultSet
 	 * @return array
 	 */
 	public function fetch($resultSet){
@@ -187,7 +187,7 @@ class MySQLiDriver extends Parser implements DriverInterface {
 
 	/**
 	 * Moves internal result pointer.
-	 * @param mysqli_result2\mysqli_result $resultSet
+	 * @param mysqli_result $resultSet
 	 * @param int
 	 * @return bool
 	 * @throws DriverException
@@ -304,7 +304,7 @@ class MySQLiDriver extends Parser implements DriverInterface {
 
 	/**
 	 * Returns types of columns in given result set.
-	 * @param mysqli_result2\mysqli_result $resultset
+	 * @param mysqli_result $resultset
 	 * @param string $table
 	 * @return array
 	 */
