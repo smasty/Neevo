@@ -55,7 +55,7 @@ class Statement extends BaseStatement {
 	 * @param array|Traversable $values
 	 * @return Statement fluent interface
 	 */
-	public static function createInsert(Connection $connection, $table, array $values){
+	public static function createInsert(Connection $connection, $table, $values){
 		if(!($values instanceof Traversable || (is_array($values) && !empty($values))))
 			throw new InvalidArgumentException('Values must be a non-empty array or Traversable.');
 

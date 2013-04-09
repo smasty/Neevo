@@ -100,10 +100,10 @@ class Manager implements ObservableInterface, ObserverInterface {
 	/**
 	 * INSERT statement factory.
 	 * @param string $table
-	 * @param array $values
+	 * @param array|\Traversable $values
 	 * @return Statement fluent interface
 	 */
-	public function insert($table, array $values){
+	public function insert($table, $values){
 		$statement = Statement::createInsert($this->connection, $table, $values);
 		foreach($this->observers as $observer){
 			$statement->attachObserver($observer, $this->observers->getInfo());
@@ -115,10 +115,10 @@ class Manager implements ObservableInterface, ObserverInterface {
 	/**
 	 * UPDATE statement factory.
 	 * @param string $table
-	 * @param array $data
+	 * @param array|\Traversable $data
 	 * @return Statement fluent interface
 	 */
-	public function update($table, array $data){
+	public function update($table, $data){
 		$statement = Statement::createUpdate($this->connection, $table, $data);
 		foreach($this->observers as $observer){
 			$statement->attachObserver($observer, $this->observers->getInfo());
