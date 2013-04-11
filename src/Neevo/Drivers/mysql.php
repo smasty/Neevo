@@ -5,7 +5,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file license.txt.
  *
- * Copyright (c) 2012 Smasty (http://smasty.net)
+ * Copyright (c) 2013 Smasty (http://smasty.net)
  *
  */
 
