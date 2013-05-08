@@ -100,7 +100,7 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testJoinWrongSource(){
-		$this->setExpectedException('InvalidArgumentException', 'Source must be a string, Neevo\\Literal or Neevo\\Result.');
+		$this->setExpectedException('InvalidArgumentException', 'must be a string, Neevo\\Literal or Neevo\\Result.');
 		$this->result->join(new stdClass, true);
 	}
 
@@ -136,7 +136,7 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testPageNonPositive(){
-		$this->setExpectedException('InvalidArgumentException', 'Both arguments must be positive integers.');
+		$this->setExpectedException('InvalidArgumentException', 'Arguments must be positive integers.');
 		$this->result->page(0, 0);
 	}
 
@@ -414,13 +414,13 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testHasCircularReferences(){
-		$this->setExpectedException('RuntimeException', 'Circular reference found, aborting.');
+		$this->setExpectedException('RuntimeException', 'Circular reference found');
 		$this->result->leftJoin($this->result, 'foo')->dump(true);
 	}
 
 
 	public function testHasCircularReferencesDeeper(){
-		$this->setExpectedException('RuntimeException', 'Circular reference found, aborting.');
+		$this->setExpectedException('RuntimeException', 'Circular reference found');
 		$subquery = new Result($this->connection, $this->result);
 		$this->result->leftJoin($subquery, 'foo')->dump(true);
 	}

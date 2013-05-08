@@ -84,7 +84,7 @@ class Connection implements ObservableInterface, ArrayAccess {
 				'pdo' => $config
 			);
 		} elseif(!is_array($config)){
-			throw new InvalidArgumentException('Configuration must be an array, string or Traversable.');
+			throw new InvalidArgumentException('Argument 1 must be an array, string or Traversable.');
 		}
 
 		// Default values

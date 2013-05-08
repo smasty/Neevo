@@ -12,6 +12,7 @@
 namespace Neevo;
 
 use InvalidArgumentException;
+use LogicException;
 use Traversable;
 
 
@@ -38,7 +39,7 @@ class Statement extends BaseStatement {
 	 */
 	public static function createUpdate(Connection $connection, $table, $data){
 		if(!($data instanceof Traversable || (is_array($data) && !empty($data))))
-			throw new InvalidArgumentException('Data must be a non-empty array or Traversable.');
+			throw new InvalidArgumentException('Argument 3 must be a non-empty array or Traversable.');
 
 		$obj = new self($connection);
 		$obj->type = Manager::STMT_UPDATE;
@@ -57,7 +58,7 @@ class Statement extends BaseStatement {
 	 */
 	public static function createInsert(Connection $connection, $table, $values){
 		if(!($values instanceof Traversable || (is_array($values) && !empty($values))))
-			throw new InvalidArgumentException('Values must be a non-empty array or Traversable.');
+			throw new InvalidArgumentException('Argument 3 must be a non-empty array or Traversable.');
 
 		$obj = new self($connection);
 		$obj->type = Manager::STMT_INSERT;
@@ -101,7 +102,7 @@ class Statement extends BaseStatement {
 	 */
 	public function insertId(){
 		if($this->type !== Manager::STMT_INSERT)
-			throw new NeevoException(__METHOD__ . ' can be called only on INSERT statements.');
+			throw new LogicException(__METHOD__ . ' can be called only on INSERT statements.');
 
 		$this->performed || $this->run();
 		try{

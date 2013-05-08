@@ -139,7 +139,7 @@ class MySQLiDriver extends Parser implements DriverInterface {
 		$this->affectedRows = false;
 		$result = $this->resource->query($queryString, $this->unbuffered ? MYSQLI_USE_RESULT : MYSQLI_STORE_RESULT);
 
-		$error = str_replace('You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use', 'Syntax error', $this->resource->error);
+		$error = preg_replace('~You have an error in your SQL syntax; check the manual that corresponds to your \w+ server version for the right syntax to use~i', 'Syntax error', $this->resource->error);
 		if($error && $result === false)
 			throw new DriverException($error, $this->resource->errno, $queryString);
 

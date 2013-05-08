@@ -141,9 +141,9 @@ class Result extends BaseStatement implements IteratorAggregate, Countable {
 			return $this;
 
 		if(!(is_string($source) || $source instanceof self || $source instanceof Literal))
-			throw new InvalidArgumentException('Source must be a string, Neevo\\Literal or Neevo\\Result.');
+			throw new InvalidArgumentException('Argument 1 must be a string, Neevo\\Literal or Neevo\\Result.');
 		if(!(is_string($condition) || $condition instanceof Literal))
-			throw new InvalidArgumentException('Condition must be a string or Neevo\\Literal.');
+			throw new InvalidArgumentException('Argument 2 must be a string or Neevo\\Literal.');
 
 		if($source instanceof self)
 			$this->subqueries[] = $source;
@@ -188,7 +188,7 @@ class Result extends BaseStatement implements IteratorAggregate, Countable {
 	 */
 	public function page($page, $items){
 		if($page < 1 || $items < 1)
-			throw new InvalidArgumentException('Both arguments must be positive integers.');
+			throw new InvalidArgumentException('Arguments must be positive integers.');
 		return $this->limit((int) $items, (int) ($items * --$page));
 	}
 
@@ -412,7 +412,7 @@ class Result extends BaseStatement implements IteratorAggregate, Countable {
 	 */
 	public function setTypes($types){
 		if(!($types instanceof Traversable || is_array($types)))
-			throw new InvalidArgumentException('Types must be an array or Traversable.');
+			throw new InvalidArgumentException('Argument 1 must be an array or Traversable.');
 		foreach($types as $column => $type){
 			$this->setType($column, $type);
 		}
@@ -545,7 +545,7 @@ class Result extends BaseStatement implements IteratorAggregate, Countable {
 	 */
 	public function setRowClass($className){
 		if(!class_exists($className))
-			throw new NeevoException("Cannot set row class '$className'.");
+			throw new NeevoException("Cannot set row class '$className', class does not exist.");
 		$this->rowClass = $className;
 		return $this;
 	}

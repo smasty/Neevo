@@ -319,7 +319,7 @@ abstract class BaseStatement implements ObservableInterface {
 	 */
 	public function parse(){
 		if($this->hasCircularReferences($this))
-			throw new RuntimeException('Circular reference found, aborting.');
+			throw new RuntimeException('Circular reference found in the query tree, cannot parse the query.');
 
 		$this->connection->connect();
 

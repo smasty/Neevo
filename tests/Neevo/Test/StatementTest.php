@@ -73,7 +73,7 @@ class StatementTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testInsertIdException(){
-		$this->setExpectedException('Neevo\\NeevoException', 'can be called only on INSERT statements.');
+		$this->setExpectedException('LogicException', 'can be called only on INSERT statements.');
 		$stmt = Statement::createDelete($this->connection, 'table');
 		$stmt->insertId();
 	}

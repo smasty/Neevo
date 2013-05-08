@@ -65,7 +65,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testConfigFormatElse(){
-		$this->setExpectedException('InvalidArgumentException', 'Configuration must be an array, string or Traversable.');
+		$this->setExpectedException('InvalidArgumentException', 'must be an array, string or Traversable.');
 		new Connection(false);
 	}
 
