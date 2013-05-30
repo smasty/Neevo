@@ -28,7 +28,7 @@ class RowTest extends \PHPUnit_Framework_TestCase {
 
 	protected function setUp(){
 		$this->result = new Result(new Connection('driver=Dummy'), 'author');
-		$this->row = new Row($this->result->getConnection()->getDriver()->getRow(0), $this->result);
+		$this->row = new Row($this->result->getConnection()->getDriver()->getRow(0));
 	}
 
 
@@ -55,24 +55,6 @@ class RowTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetIterator(){
 		$this->assertInstanceOf('ArrayIterator', $this->row->getIterator());
-	}
-
-
-	public function testUpdate(){
-		$this->row['id'] = 5;
-		$this->assertEquals(1, $this->row->update());
-	}
-
-	public function testUpdateNotModified(){
-		$this->assertEquals(0, $this->row->update());
-	}
-
-	public function testDelete(){
-		$this->assertEquals(1, $this->row->delete());
-	}
-
-	public function testIsFrozen(){
-		$this->assertFalse($this->row->isFrozen());
 	}
 
 

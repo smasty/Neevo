@@ -24,72 +24,17 @@ class Row implements ArrayAccess, Countable, IteratorAggregate
 {
 
 
-    /** @var bool */
-    protected $frozen;
-
-    /** @var string */
-    protected $primary;
-
     /** @var array */
     protected $data = array();
-
-    /** @var array */
-    protected $modified = array();
-
-    /** @var string */
-    protected $table;
-
-    /** @var Connection */
-    protected $connection;
 
 
     /**
      * Creates a row instance.
      * @param array $data
-     * @param Result $result
      */
-    public function __construct(array $data, Result $result)
+    public function __construct(array $data)
     {
         $this->data = $data;
-        $this->connection = $result->getConnection();
-        $this->table = $result->getTable();
-        $this->primary = $result->getPrimaryKey();
-        $this->frozen = !$this->table || !$this->primary || !isset($this->data[$this->primary]);
-    }
-
-
-    /**
-     * Updates corresponding database row if available.
-     * @throws NeevoException
-     * @return int Number of affected rows.
-     */
-    public function update()
-    {
-        if ($this->frozen) {
-            throw new NeevoException('Update disabled - cannot get primary key or table.');
-        }
-
-        if (!empty($this->modified)) {
-            return Statement::createUpdate($this->connection, $this->table, $this->modified)
-                    ->where($this->primary, $this->data[$this->primary])->limit(1)->affectedRows();
-        }
-        return 0;
-    }
-
-
-    /**
-     * Deletes corresponding database row if available.
-     * @throws NeevoException
-     * @return int Number of affected rows.
-     */
-    public function delete()
-    {
-        if ($this->frozen) {
-            throw new NeevoException('Delete disabled - cannot get primary key or table.');
-        }
-
-        return Statement::createDelete($this->connection, $this->table)
-                ->where($this->primary, $this->data[$this->primary])->limit(1)->affectedRows();
     }
 
 
@@ -99,23 +44,13 @@ class Row implements ArrayAccess, Countable, IteratorAggregate
      */
     public function toArray()
     {
-        return array_merge($this->data, $this->modified);
-    }
-
-
-    /**
-     * Returns whether the row is not able to update it's state.
-     * @return bool
-     */
-    public function isFrozen()
-    {
-        return (bool) $this->frozen;
+        return $this->data;
     }
 
 
     public function count()
     {
-        return count(array_merge($this->data, $this->modified));
+        return count($this->data);
     }
 
 
@@ -124,32 +59,31 @@ class Row implements ArrayAccess, Countable, IteratorAggregate
      */
     public function getIterator()
     {
-        return new ArrayIterator(array_merge($this->data, $this->modified));
+        return new ArrayIterator($this->data);
     }
 
 
     public function __get($name)
     {
-        return array_key_exists($name, $this->modified)
-            ? $this->modified[$name] : (isset($this->data[$name]) ? $this->data[$name] : null);
+        return isset($this->data[$name]) ? $this->data[$name] : null;
     }
 
 
     public function __set($name, $value)
     {
-        $this->modified[$name] = $value;
+        $this->data[$name] = $value;
     }
 
 
     public function __isset($name)
     {
-        return isset($this->data[$name]) || isset($this->modified[$name]);
+        return isset($this->data[$name]);
     }
 
 
     public function __unset($name)
     {
-        $this->modified[$name] = null;
+        unset($this->data[$name]);
     }
 
 
