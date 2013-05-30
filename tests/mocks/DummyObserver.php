@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
  *
@@ -9,31 +10,35 @@
  *
  */
 
+namespace Neevo\Test\Mocks;
+
 use Neevo\ObservableInterface;
 use Neevo\ObserverInterface;
-
 
 /**
  * Dummy Neevo observer.
  */
-class DummyObserver implements ObserverInterface {
+class DummyObserver implements ObserverInterface
+{
 
 
-	private $notified = false;
+    private $notified = false;
 
 
-	public function updateStatus(ObservableInterface $observable, $event){
-		$this->notified = $event;
-	}
+    public function updateStatus(ObservableInterface $observable, $event)
+    {
+        $this->notified = $event;
+    }
 
 
-	public function isNotified(& $event = null){
-		return (bool) $event = $this->notified;
-	}
-
-	public function reset(){
-		$this->notified = false;
-	}
+    public function isNotified(& $event = null)
+    {
+        return (bool) $event = $this->notified;
+    }
 
 
+    public function reset()
+    {
+        $this->notified = false;
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
  *
@@ -9,9 +10,10 @@
  *
  */
 
+namespace Neevo\Test\Mocks;
+
 use Neevo\BaseStatement;
 
-
-class DummyStmt extends BaseStatement {
-
+class DummyStmt extends BaseStatement
+{
 }

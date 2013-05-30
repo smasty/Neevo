@@ -15,47 +15,50 @@ use Neevo\Connection;
 use Neevo\Result;
 use Neevo\Row;
 
-
-class RowTest extends \PHPUnit_Framework_TestCase {
-
-
-	/** @var Result */
-	private $result;
-
-	/** @var Row */
-	private $row;
+class RowTest extends \PHPUnit_Framework_TestCase
+{
 
 
-	protected function setUp(){
-		$this->result = new Result(new Connection('driver=Dummy'), 'author');
-		$this->row = new Row($this->result->getConnection()->getDriver()->getRow(0));
-	}
+    /** @var Result */
+    private $result;
+
+    /** @var Row */
+    private $row;
 
 
-	protected function tearDown(){
-		unset($this->row, $this->result);
-	}
+    protected function setUp()
+    {
+        $this->result = new Result(new Connection('driver=Dummy'), 'author');
+        $this->row = new Row($this->result->getConnection()->getDriver()->getRow(0));
+    }
 
 
-	public function testArrayAccess(){
-		if(isset($this->row['mail'])){
-			$this->row['mail'] = $m = 'john.doe@email.tld';
-		}
-		$this->assertEquals($m, $this->row['mail']);
-
-		unset($this->row['mail']);
-		$this->assertNull($this->row['mail']);
-	}
+    protected function tearDown()
+    {
+        unset($this->row, $this->result);
+    }
 
 
-	public function testCount(){
-		$this->assertEquals(3, count($this->row));
-	}
+    public function testArrayAccess()
+    {
+        if (isset($this->row['mail'])) {
+            $this->row['mail'] = $m = 'john.doe@email.tld';
+        }
+        $this->assertEquals($m, $this->row['mail']);
+
+        unset($this->row['mail']);
+        $this->assertNull($this->row['mail']);
+    }
 
 
-	public function testGetIterator(){
-		$this->assertInstanceOf('ArrayIterator', $this->row->getIterator());
-	}
+    public function testCount()
+    {
+        $this->assertEquals(3, count($this->row));
+    }
 
 
+    public function testGetIterator()
+    {
+        $this->assertInstanceOf('ArrayIterator', $this->row->getIterator());
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Neevo - Tiny database layer for PHP. (http://neevo.smasty.net)
  *
@@ -9,13 +10,16 @@
  *
  */
 
+namespace Neevo\Test\Mocks;
 
-class DummyPDO extends PDO{
+use PDO;
+
+class DummyPDO extends PDO
+{
 
 
-	public function __construct(){
+    public function __construct()
+    {
 
-	}
-
-
+    }
 }

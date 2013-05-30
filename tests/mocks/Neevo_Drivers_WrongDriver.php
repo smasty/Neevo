@@ -11,9 +11,6 @@
 
 namespace Neevo\Drivers;
 
-
-class WrongDriver {
-
+class WrongDriver
+{
 }
-
-?>

@@ -323,7 +323,7 @@ class Manager implements ObservableInterface, ObserverInterface
     public static function highlightSql($sql)
     {
         $kw1 = 'SELECT|UPDATE|INSERT\s+INTO|DELETE|FROM|VALUES|SET'
-             . '|WHERE|HAVING|(?:GROUP|ORDER)\s+BY|LIMIT|OFFSET|(?:LEFT\s+|RIGHT\s+|INNER\s+)?JOIN';
+            . '|WHERE|HAVING|(?:GROUP|ORDER)\s+BY|LIMIT|OFFSET|(?:LEFT\s+|RIGHT\s+|INNER\s+)?JOIN';
         $kw2 = 'RAND|RANDOM|ASC|DESC|USING|AND|OR|ON|IN|IS|NOT|NULL|LIKE|TRUE|FALSE|AS';
 
         $sql = str_replace("\\'", '\\&#39;', $sql);

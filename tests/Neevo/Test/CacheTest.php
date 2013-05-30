@@ -18,55 +18,58 @@ use Neevo\Cache\MemoryStorage;
 use Neevo\Cache\SessionStorage;
 use Neevo\Cache\StorageInterface;
 
-
-class CacheTest extends \PHPUnit_Framework_TestCase {
-
-
-	private $filename = 'neevo.cache';
+class CacheTest extends \PHPUnit_Framework_TestCase
+{
 
 
-	public function getImplementations(){
-		return array(
-			array(new MemoryStorage),
-			array(new SessionStorage),
-			array(new FileStorage($this->filename))
-		);
-	}
+    private $filename = 'neevo.cache';
 
 
-	/**
-	 * @dataProvider getImplementations
-	 */
-	public function testBehaviour(StorageInterface $cache){
-		$cache->store($k = 'key', $v = 'value');
-		$this->assertEquals($v, $cache->fetch($k));
-
-		if(method_exists($cache, 'flush')){
-			$cache->flush();
-			$this->assertNull($cache->fetch($k));
-		}
-
-		if($cache instanceof FileStorage)
-			unlink($this->filename);
-	}
+    public function getImplementations()
+    {
+        return array(
+            array(new MemoryStorage),
+            array(new SessionStorage),
+            array(new FileStorage($this->filename))
+        );
+    }
 
 
-	public function testMemcache(){
-		if(!class_exists('Memcache'))
-			$this->markTestSkipped('Memcache extension not available.');
+    /**
+     * @dataProvider getImplementations
+     */
+    public function testBehaviour(StorageInterface $cache)
+    {
+        $cache->store($k = 'key', $v = 'value');
+        $this->assertEquals($v, $cache->fetch($k));
 
-		$memcache = new Memcache;
-		$memcache->connect('localhost');
-		$cache = new MemcacheStorage($memcache);
+        if (method_exists($cache, 'flush')) {
+            $cache->flush();
+            $this->assertNull($cache->fetch($k));
+        }
 
-		$cache->store($k = 'key', $v = 'value');
-		$this->assertEquals($v, $cache->fetch($k));
-
-		if(method_exists($cache, 'flush')){
-			$cache->flush();
-			$this->assertNull($cache->fetch($k));
-		}
-	}
+        if ($cache instanceof FileStorage) {
+            unlink($this->filename);
+        }
+    }
 
 
+    public function testMemcache()
+    {
+        if (!class_exists('Memcache')) {
+            $this->markTestSkipped('Memcache extension not available.');
+        }
+
+        $memcache = new Memcache;
+        $memcache->connect('localhost');
+        $cache = new MemcacheStorage($memcache);
+
+        $cache->store($k = 'key', $v = 'value');
+        $this->assertEquals($v, $cache->fetch($k));
+
+        if (method_exists($cache, 'flush')) {
+            $cache->flush();
+            $this->assertNull($cache->fetch($k));
+        }
+    }
 }

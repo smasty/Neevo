@@ -11,7 +11,7 @@
 
 namespace Neevo\Drivers;
 
-use DummyResult;
+use Neevo\Test\Mocks\DummyResult;
 use Neevo\BaseStatement;
 use Neevo\DriverException;
 use Neevo\DriverInterface;
@@ -21,183 +21,224 @@ use Neevo\Manager;
 /**
  * Dummy Neevo driver.
  */
-class DummyDriver implements DriverInterface {
-
-	private $unbuffered = false,
-			$connected = false,
-			$closed,
-			$transactions = array(),
-			$performed = array(),
-			$error = false;
+class DummyDriver implements DriverInterface
+{
 
 
+    private $unbuffered = false;
 
-	const TRANSACTION_OPEN = 1,
-		TRANSACTION_COMMIT = 2,
-		TRANSACTION_ROLLBACK = 4;
+    private $connected = false;
 
+    private $closed;
 
-	public function __construct(){
+    private $transactions = array();
 
-	}
+    private $performed = array();
 
-
-	public function connect(array $config){
-		$this->unbuffered = isset($config['unbuffered']) ? $config['unbuffered'] : false;
-		$this->connected = true;
-	}
+    private $error = false;
 
 
-	public function closeConnection(){
-		$this->connected = false;
-		return $this->closed = true;
-	}
+    const TRANSACTION_OPEN = 1;
+
+    const TRANSACTION_COMMIT = 2;
+
+    const TRANSACTION_ROLLBACK = 4;
 
 
-	public function freeResultSet($resultSet){
-		$resultSet = null;
-		return true;
-	}
+    public function __construct()
+    {
+    }
 
 
-	public function runQuery($queryString){
-		if($this->error == 'query')
-			throw new DriverException;
-		if($queryString){
-			$this->performed[] = $queryString;
-			return new DummyResult($queryString, $this);
-		}
-		return false;
-	}
+    public function connect(array $config)
+    {
+        $this->unbuffered = isset($config['unbuffered']) ? $config['unbuffered'] : false;
+        $this->connected = true;
+    }
 
 
-	public function beginTransaction($savepoint = null){
-		$this->transactions[$savepoint] = self::TRANSACTION_OPEN;
-	}
+    public function closeConnection()
+    {
+        $this->connected = false;
+        return $this->closed = true;
+    }
 
 
-	public function commit($savepoint = null){
-		if(isset($this->transactions[$savepoint]))
-			$this->transactions[$savepoint] = self::TRANSACTION_COMMIT;
-		elseif($savepoint === null)
-			$this->transactions[count($this->transactions)-1] = self::TRANSACTION_COMMIT;
-		else
-			throw new DriverException("Invalid savepoint '$savepoint'.");
-	}
+    public function freeResultSet($resultSet)
+    {
+        $resultSet = null;
+        return true;
+    }
 
 
-	public function rollback($savepoint = null){
-		if(isset($this->transactions[$savepoint]))
-			$this->transactions[$savepoint] = self::TRANSACTION_ROLLBACK;
-		elseif($savepoint === null)
-			$this->transactions[count($this->transactions)-1] = self::TRANSACTION_ROLLBACK;
-		else
-			throw new DriverException("Invalid savepoint '$savepoint'.");
-	}
+    public function runQuery($queryString)
+    {
+        if ($this->error == 'query') {
+            throw new DriverException;
+        }
+        if ($queryString) {
+            $this->performed[] = $queryString;
+            return new DummyResult($queryString, $this);
+        }
+        return false;
+    }
 
 
-	public function fetch($resultSet){
-		return $resultSet->fetch();
-	}
+    public function beginTransaction($savepoint = null)
+    {
+        $this->transactions[$savepoint] = self::TRANSACTION_OPEN;
+    }
 
 
-	public function seek($resultSet, $offset){
-		if($this->unbuffered)
-			throw new DriverException('Cannot seek on unbuffered result.');
-		return $resultSet->seek($offset);
-	}
+    public function commit($savepoint = null)
+    {
+        if (isset($this->transactions[$savepoint])) {
+            $this->transactions[$savepoint] = self::TRANSACTION_COMMIT;
+        } elseif ($savepoint === null) {
+            $this->transactions[count($this->transactions) - 1] = self::TRANSACTION_COMMIT;
+        } else {
+            throw new DriverException("Invalid savepoint '$savepoint'.");
+        }
+    }
 
 
-	public function getInsertId(){
-		if($this->error == 'insert-id')
-			throw new ImplementationException;
-		return 4;
-	}
+    public function rollback($savepoint = null)
+    {
+        if (isset($this->transactions[$savepoint])) {
+            $this->transactions[$savepoint] = self::TRANSACTION_ROLLBACK;
+        } elseif ($savepoint === null) {
+            $this->transactions[count($this->transactions) - 1] = self::TRANSACTION_ROLLBACK;
+        } else {
+            throw new DriverException("Invalid savepoint '$savepoint'.");
+        }
+    }
 
 
-	public function randomizeOrder(BaseStatement $statement){
-		$statement->order('RANDOM()');
-	}
+    public function fetch($resultSet)
+    {
+        return $resultSet->fetch();
+    }
 
 
-	public function getNumRows($resultSet){
-		if($this->unbuffered)
-			throw new DriverException('Cannot count rows on unbuffered result.');
-		return $resultSet ? 3 : false;
-	}
+    public function seek($resultSet, $offset)
+    {
+        if ($this->unbuffered) {
+            throw new DriverException('Cannot seek on unbuffered result.');
+        }
+        return $resultSet->seek($offset);
+    }
 
 
-	public function getAffectedRows(){
-		if($this->error == 'affected-rows')
-			throw new DriverException;
-		return 1;
-	}
+    public function getInsertId()
+    {
+        if ($this->error == 'insert-id') {
+            throw new ImplementationException;
+        }
+        return 4;
+    }
 
 
-	public function escape($value, $type){
-		return $value;
-	}
+    public function randomizeOrder(BaseStatement $statement)
+    {
+        $statement->order('RANDOM()');
+    }
 
 
-	public function unescape($value, $type){
-		if($type === Manager::BINARY)
-			return "bin:$value";
-	}
+    public function getNumRows($resultSet)
+    {
+        if ($this->unbuffered) {
+            throw new DriverException('Cannot count rows on unbuffered result.');
+        }
+        return $resultSet ? 3 : false;
+    }
 
 
-	public function getPrimaryKey($table){
-		if($this->error == 'primary-key')
-			throw new DriverException;
-		return 'id';
-	}
+    public function getAffectedRows()
+    {
+        if ($this->error == 'affected-rows') {
+            throw new DriverException;
+        }
+        return 1;
+    }
 
 
-	public function getColumnTypes($resultSet, $table){
-		if($this->error == 'column-types')
-			throw new DriverException;
-		return array(
-			'id' => 'int',
-			'name' => 'text',
-			'mail' => 'text'
-		);
-	}
+    public function escape($value, $type)
+    {
+        return $value;
+    }
 
 
-	public function getRow($i = null){
-		if($i === null)
-			return DummyResult::$data;
-		if(isset(DummyResult::$data[$i]))
-			return DummyResult::$data[$i];
-		return false;
-	}
+    public function unescape($value, $type)
+    {
+        if ($type === Manager::BINARY) {
+            return "bin:$value";
+        }
+    }
 
 
-	// =========== State methods
+    public function getPrimaryKey($table)
+    {
+        if ($this->error == 'primary-key') {
+            throw new DriverException;
+        }
+        return 'id';
+    }
 
 
-	public function isClosed(){
-		return (bool) $this->closed;
-	}
+    public function getColumnTypes($resultSet, $table)
+    {
+        if ($this->error == 'column-types') {
+            throw new DriverException;
+        }
+        return array(
+            'id' => 'int',
+            'name' => 'text',
+            'mail' => 'text'
+        );
+    }
 
 
-	public function isConnected(){
-		return (bool) $this->connected;
-	}
+    public function getRow($i = null)
+    {
+        if ($i === null) {
+            return DummyResult::$data;
+        }
+        if (isset(DummyResult::$data[$i])) {
+            return DummyResult::$data[$i];
+        }
+        return false;
+    }
 
 
-	public function transactionState(){
-		return end($this->transactions);
-	}
+    // =========== State methods
 
 
-	public function performed(){
-		return $this->performed;
-	}
+    public function isClosed()
+    {
+        return (bool) $this->closed;
+    }
 
 
-	public function setError($error){
-		$this->error = $error;
-	}
+    public function isConnected()
+    {
+        return (bool) $this->connected;
+    }
 
 
+    public function transactionState()
+    {
+        return end($this->transactions);
+    }
+
+
+    public function performed()
+    {
+        return $this->performed;
+    }
+
+
+    public function setError($error)
+    {
+        $this->error = $error;
+    }
 }
