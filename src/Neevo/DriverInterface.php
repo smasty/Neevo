@@ -30,145 +30,144 @@ namespace Neevo;
  *
  * @author Smasty
  */
-interface DriverInterface {
+interface DriverInterface
+{
 
 
-	/**
-	 * Checks for required PHP extension.
-	 * @throws DriverException
-	 */
-	public function __construct();
+    /**
+     * Checks for required PHP extension.
+     * @throws DriverException
+     */
+    public function __construct();
 
 
-	/**
-	 * Creates connection to database.
-	 * @param array $config Configuration options
-	 */
-	public function connect(array $config);
+    /**
+     * Creates connection to database.
+     * @param array $config Configuration options
+     */
+    public function connect(array $config);
 
 
-	/**
-	 * Closes the connection.
-	 */
-	public function closeConnection();
+    /**
+     * Closes the connection.
+     */
+    public function closeConnection();
 
 
-	/**
-	 * Frees memory used by given result.
-	 * @param resource $resultSet
-	 * @return bool
-	 */
-	public function freeResultSet($resultSet);
+    /**
+     * Frees memory used by given result.
+     * @param resource $resultSet
+     * @return bool
+     */
+    public function freeResultSet($resultSet);
 
 
-	/**
-	 * Executes given SQL statement.
-	 * @param string $queryString
-	 * @return resource|bool
-	 */
-	public function runQuery($queryString);
+    /**
+     * Executes given SQL statement.
+     * @param string $queryString
+     * @return resource|bool
+     */
+    public function runQuery($queryString);
 
 
-	/**
-	 * Begins a transaction if supported.
-	 * @param string $savepoint
-	 */
-	public function beginTransaction($savepoint = null);
+    /**
+     * Begins a transaction if supported.
+     * @param string $savepoint
+     */
+    public function beginTransaction($savepoint = null);
 
 
-	/**
-	 * Commits statements in a transaction.
-	 * @param string $avepoint
-	 */
-	public function commit($savepoint = null);
+    /**
+     * Commits statements in a transaction.
+     * @param string $avepoint
+     */
+    public function commit($savepoint = null);
 
 
-	/**
-	 * Rollbacks changes in a transaction.
-	 * @param string $savepoint
-	 */
-	public function rollback($savepoint = null);
+    /**
+     * Rollbacks changes in a transaction.
+     * @param string $savepoint
+     */
+    public function rollback($savepoint = null);
 
 
-	/**
-	 * Fetches row from given result set as an associative array.
-	 * @param resource $resultSet
-	 * @return array
-	 */
-	public function fetch($resultSet);
+    /**
+     * Fetches row from given result set as an associative array.
+     * @param resource $resultSet
+     * @return array
+     */
+    public function fetch($resultSet);
 
 
-	/**
-	 * Moves internal result pointer.
-	 * @param resource $resultSet
-	 * @param int $offset
-	 * @return bool
-	 */
-	public function seek($resultSet, $offset);
+    /**
+     * Moves internal result pointer.
+     * @param resource $resultSet
+     * @param int $offset
+     * @return bool
+     */
+    public function seek($resultSet, $offset);
 
 
-	/**
-	 * Returns the ID generated in the INSERT statement.
-	 * @return int
-	 */
-	public function getInsertId();
+    /**
+     * Returns the ID generated in the INSERT statement.
+     * @return int
+     */
+    public function getInsertId();
 
 
-	/**
-	 * Randomizes result order.
-	 * @param BaseStatement $statement
-	 */
-	public function randomizeOrder(BaseStatement $statement);
+    /**
+     * Randomizes result order.
+     * @param BaseStatement $statement
+     */
+    public function randomizeOrder(BaseStatement $statement);
 
 
-	/**
-	 * Returns the number of rows in the given result set.
-	 * @param resource $resultSet
-	 * @return int|bool
-	 */
-	public function getNumRows($resultSet);
+    /**
+     * Returns the number of rows in the given result set.
+     * @param resource $resultSet
+     * @return int|bool
+     */
+    public function getNumRows($resultSet);
 
 
-	/**
-	 * Returns the number of affected rows in previous operation.
-	 * @return int
-	 */
-	public function getAffectedRows();
+    /**
+     * Returns the number of affected rows in previous operation.
+     * @return int
+     */
+    public function getAffectedRows();
 
 
-	/**
-	 * Escapes given value.
-	 * @param mixed $value
-	 * @param string $type
-	 * @return mixed
-	 */
-	public function escape($value, $type);
+    /**
+     * Escapes given value.
+     * @param mixed $value
+     * @param string $type
+     * @return mixed
+     */
+    public function escape($value, $type);
 
 
-	/**
-	 * Decodes given value.
-	 * @param mixed $value
-	 * @param string $type
-	 * @return mixed
-	 */
-	public function unescape($value, $type);
+    /**
+     * Decodes given value.
+     * @param mixed $value
+     * @param string $type
+     * @return mixed
+     */
+    public function unescape($value, $type);
 
 
-	/**
-	 * Returns the PRIMARY KEY column for given table.
-	 * @param string $table
-	 * @return string|NULL
-	 */
-	public function getPrimaryKey($table);
+    /**
+     * Returns the PRIMARY KEY column for given table.
+     * @param string $table
+     * @return string|NULL
+     */
+    public function getPrimaryKey($table);
 
 
-	/**
-	 * Returns types of columns in given result set.
-	 * @param resource $resultSet
-	 * @param string $table
-	 * @return array
-	 */
-	public function getColumnTypes($resultSet, $table);
-
-
+    /**
+     * Returns types of columns in given result set.
+     * @param resource $resultSet
+     * @param string $table
+     * @return array
+     */
+    public function getColumnTypes($resultSet, $table);
 }

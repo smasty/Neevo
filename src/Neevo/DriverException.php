@@ -16,6 +16,6 @@ namespace Neevo;
  * Neevo driver exception.
  * @author Smasty
  */
-class DriverException extends NeevoException {
-
+class DriverException extends NeevoException
+{
 }

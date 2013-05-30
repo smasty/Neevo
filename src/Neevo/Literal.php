@@ -16,20 +16,20 @@ namespace Neevo;
  * Representation of SQL literal.
  * @author Smasty
  */
-class Literal {
+class Literal
+{
 
 
-	/** @var string */
-	public $value;
+    /** @var string */
+    public $value;
 
 
-	/**
-	 * Creates instance of SQL literal.
-	 * @param string $value
-	 */
-	public function __construct($value){
-		$this->value = $value;
-	}
-
-
+    /**
+     * Creates instance of SQL literal.
+     * @param string $value
+     */
+    public function __construct($value)
+    {
+        $this->value = $value;
+    }
 }

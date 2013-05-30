@@ -16,6 +16,6 @@ namespace Neevo;
  * Exception for features not implemented by the driver.
  * @author Smasty
  */
-class ImplementationException extends NeevoException {
-
+class ImplementationException extends NeevoException
+{
 }

@@ -13,37 +13,39 @@ namespace Neevo\Cache;
 
 use Memcache;
 
-
 /**
  * Memcache cache storage.
  * @author Smasty
  */
-class MemcacheStorage implements StorageInterface {
+class MemcacheStorage implements StorageInterface
+{
 
 
-	/** @var Memcache */
-	private $memcache;
+    /** @var Memcache */
+    private $memcache;
 
 
-	public function __construct(Memcache $memcache){
-		$this->memcache = $memcache;
-	}
+    public function __construct(Memcache $memcache)
+    {
+        $this->memcache = $memcache;
+    }
 
 
-	public function fetch($key){
-		$value = $this->memcache->get("NeevoCache.$key");
-		return $value !== false ? $value : null;
-	}
+    public function fetch($key)
+    {
+        $value = $this->memcache->get("NeevoCache.$key");
+        return $value !== false ? $value : null;
+    }
 
 
-	public function store($key, $value){
-		$this->memcache->set("NeevoCache.$key", $value);
-	}
+    public function store($key, $value)
+    {
+        $this->memcache->set("NeevoCache.$key", $value);
+    }
 
 
-	public function flush(){
-		return $this->memcache->flush();
-	}
-
-
+    public function flush()
+    {
+        return $this->memcache->flush();
+    }
 }

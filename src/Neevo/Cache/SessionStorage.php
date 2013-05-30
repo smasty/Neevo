@@ -16,22 +16,24 @@ namespace Neevo\Cache;
  * Session cache storage.
  * @author Smasty
  */
-class SessionStorage implements StorageInterface {
+class SessionStorage implements StorageInterface
+{
 
 
-	public function fetch($key){
-		return array_key_exists($key, $_SESSION['NeevoCache']) ? $_SESSION['NeevoCache'][$key] : null;
-	}
+    public function fetch($key)
+    {
+        return array_key_exists($key, $_SESSION['NeevoCache']) ? $_SESSION['NeevoCache'][$key] : null;
+    }
 
 
-	public function store($key, $value){
-		$_SESSION['NeevoCache'][$key] = $value;
-	}
+    public function store($key, $value)
+    {
+        $_SESSION['NeevoCache'][$key] = $value;
+    }
 
 
-	public function flush(){
-		return!$_SESSION['NeevoCache'] = array();
-	}
-
-
+    public function flush()
+    {
+        return !$_SESSION['NeevoCache'] = array();
+    }
 }

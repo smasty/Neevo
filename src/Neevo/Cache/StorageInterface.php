@@ -16,23 +16,22 @@ namespace Neevo\Cache;
  * Neevo cache storage interface.
  * @author Smasty
  */
-interface StorageInterface {
+interface StorageInterface
+{
 
 
-	/**
-	 * Fetches stored data.
-	 * @param string $key
-	 * @return mixed|null null if not found
-	 */
-	public function fetch($key);
+    /**
+     * Fetches stored data.
+     * @param string $key
+     * @return mixed|null null if not found
+     */
+    public function fetch($key);
 
 
-	/**
-	 * Stores data in cache.
-	 * @param string $key
-	 * @param mixed $value
-	 */
-	public function store($key, $value);
-
-
+    /**
+     * Stores data in cache.
+     * @param string $key
+     * @param mixed $value
+     */
+    public function store($key, $value);
 }

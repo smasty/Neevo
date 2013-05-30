@@ -17,27 +17,28 @@ namespace Neevo\Cache;
  * Default implementation of Neevo\ICache.
  * @author Smasty
  */
-class MemoryStorage implements StorageInterface {
+class MemoryStorage implements StorageInterface
+{
 
 
-	/** @var array */
-	private $data = array();
+    /** @var array */
+    private $data = array();
 
 
-	public function fetch($key){
-		return array_key_exists($key, $this->data) ? $this->data[$key] : null;
-	}
+    public function fetch($key)
+    {
+        return array_key_exists($key, $this->data) ? $this->data[$key] : null;
+    }
 
 
-	public function store($key, $value){
-		$this->data[$key] = $value;
-	}
+    public function store($key, $value)
+    {
+        $this->data[$key] = $value;
+    }
 
 
-	public function flush(){
-		return!$this->data = array();
-	}
-
-
+    public function flush()
+    {
+        return !$this->data = array();
+    }
 }
-
