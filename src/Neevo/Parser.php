@@ -336,6 +336,8 @@ class Parser {
 					return $this->escapeValue($value, Manager::DATETIME);
 				} elseif($value instanceof Literal){
 					return $value->value;
+				} elseif(is_bool($value)){
+					return $this->stmt->getConnection()->getDriver()->escape($value, Manager::BOOL);
 				} else{
 					return is_numeric($value)
 						? +$value
