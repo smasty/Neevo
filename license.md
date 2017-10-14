@@ -1,7 +1,7 @@
 The MIT License
 ===============
 
-Copyright (c) 2013 Smasty, http://smasty.net/
+Copyright (c) 2017 Smasty, hello@smasty.net
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
